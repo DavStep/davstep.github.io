@@ -5254,7 +5254,7 @@
         function rangesOverlap(a, b) {
           return a.right > b.left && a.left < b.right;
         }
-        const MAIN_CASTLE_APPROACH_PADDING = 160;
+        const MAIN_CASTLE_APPROACH_PADDING = 64;
         function mainCastleApproachBounds() {
           const maxCastleWidth = widthForUpgrade(STRUCTURE_UPGRADE_WIDTHS.castle, CASTLE_MAX_UPGRADE, KIND_WIDTHS.castle);
           const halfWidth = Math.min(W() * 0.34, maxCastleWidth / 2 + MAIN_CASTLE_APPROACH_PADDING);
