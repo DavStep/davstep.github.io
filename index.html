@@ -6516,7 +6516,7 @@
         }
 
         // Hand-drawn castle tiers. Early tiers widen the castle; later tiers add
-        // rear towers behind the foreground silhouette, without CSS scaling.
+        // a connected rear citadel and foreground wings, without CSS scaling.
         function castleSVG(palette, tier) {
           const t = Math.max(0, Math.min(CASTLE_MAX_UPGRADE, tier || 0));
           const w = CASTLE_UPGRADE_WIDTHS[t];
@@ -7042,6 +7042,66 @@
               </g>
             </g>`;
           };
+          const crenels = (x, y, width, count, fill = stoneD) => Array.from({ length: count }, (_, i) => {
+            const gap = width / count;
+            return `<rect x="${(x + i * gap + gap * 0.18).toFixed(1)}" y="${y}" width="${Math.max(4, gap * 0.46).toFixed(1)}" height="5" fill="${fill}"/>`;
+          }).join("");
+          const rearCurtain = ({ x, bottom, width, height, opacity = 0.64, rows = 1 }) => {
+            const y = bottom - height;
+            const merlons = Math.max(3, Math.round(width / 16));
+            return `<g class="castle-rear-curtain" opacity="${opacity}">
+              <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${stoneM}"/>
+              <rect x="${x}" y="${y}" width="${width}" height="3" fill="${stoneL}"/>
+              <rect x="${x}" y="${bottom - 3}" width="${width}" height="3" fill="${stoneD}"/>
+              ${stoneTexture(x, y, width, height, stoneD, stoneL, stoneM)}
+              <rect x="${x - 2}" y="${y - 5}" width="${width + 4}" height="5" fill="${stoneD}"/>
+              ${crenels(x - 1, y - 10, width + 2, merlons)}
+              ${rearWindows(x, y - 2, width, height + 2, rows)}
+              <g class="hs-windows-lit">
+                ${rearWindows(x, y - 2, width, height + 2, rows, true)}
+              </g>
+            </g>`;
+          };
+          const rearSkybridge = ({ x, y, width, opacity = 0.7 }) => {
+            const supports = Array.from({ length: Math.max(2, Math.floor(width / 36)) }, (_, i) => {
+              const sx = x + 12 + i * ((width - 24) / Math.max(1, Math.floor(width / 36) - 1));
+              return `<rect x="${sx.toFixed(1)}" y="${y + 11}" width="4" height="32" fill="${stoneD}" opacity="0.8"/>`;
+            }).join("");
+            const lamps = Array.from({ length: Math.max(2, Math.floor(width / 28)) }, (_, i) => {
+              const lx = x + 10 + i * ((width - 20) / Math.max(1, Math.floor(width / 28) - 1));
+              return `<rect x="${lx.toFixed(1)}" y="${y + 4}" width="3" height="7" fill="${shadow}"/>
+                <g class="hs-windows-lit"><rect x="${lx.toFixed(1)}" y="${y + 4}" width="3" height="7" fill="${gold}"/></g>`;
+            }).join("");
+            return `<g class="castle-rear-bridge" opacity="${opacity}">
+              ${supports}
+              <rect x="${x}" y="${y}" width="${width}" height="13" fill="${stoneM}"/>
+              <rect x="${x}" y="${y}" width="${width}" height="2" fill="${stoneL}"/>
+              <rect x="${x}" y="${y + 11}" width="${width}" height="2" fill="${stoneD}"/>
+              <rect x="${x - 2}" y="${y - 4}" width="${width + 4}" height="4" fill="${stoneD}"/>
+              ${crenels(x, y - 9, width, Math.max(3, Math.round(width / 18)))}
+              ${lamps}
+            </g>`;
+          };
+          const rearConnections = [
+            t >= 5 ? `<!-- Tier 5: connected rear curtain wall -->
+              ${rearCurtain({ x: 78, bottom: h - 48, width: 82, height: 44, opacity: 0.56, rows: 1 })}` : "",
+            t >= 6 ? `<!-- Tier 6: observatory wall link -->
+              ${rearCurtain({ x: 178, bottom: h - 50, width: 72, height: 52, opacity: 0.58, rows: 2 })}
+              ${rearSkybridge({ x: 178, y: h - 130, width: 74, opacity: 0.62 })}` : "",
+            t >= 7 ? `<!-- Tier 7: outer keep curtain links -->
+              ${rearCurtain({ x: 50, bottom: h - 42, width: 118, height: 58, opacity: 0.5, rows: 2 })}
+              ${rearCurtain({ x: 258, bottom: h - 42, width: 72, height: 58, opacity: 0.5, rows: 2 })}
+              ${rearSkybridge({ x: 132, y: h - 150, width: 210, opacity: 0.6 })}` : "",
+            t >= 8 ? `<!-- Tier 8: archive gallery stitching the skyline -->
+              ${rearCurtain({ x: 136, bottom: h - 56, width: 154, height: 66, opacity: 0.58, rows: 2 })}
+              ${rearSkybridge({ x: 104, y: h - 176, width: 222, opacity: 0.66 })}` : "",
+            t >= 9 ? `<!-- Tier 9: banner court ring wall -->
+              ${rearCurtain({ x: 246, bottom: h - 50, width: 126, height: 70, opacity: 0.6, rows: 2 })}
+              ${rearSkybridge({ x: 278, y: h - 190, width: 118, opacity: 0.66 })}` : "",
+            t >= 10 ? `<!-- Tier 10: celestial inner ring -->
+              ${rearCurtain({ x: 170, bottom: h - 44, width: 92, height: 78, opacity: 0.68, rows: 3 })}
+              ${rearSkybridge({ x: 154, y: h - 218, width: 126, opacity: 0.72 })}` : "",
+          ].join("");
           const rearTiers = [
             t >= 5 ? `<!-- Tier 5: rear curtain towers -->
               ${rearTower({ x: 54, bottom: h - 48, width: 28, height: 124, roofHeight: 22, roofFill: "#8a3a25", flagFill: "#3a6a8a", rows: 3 })}
@@ -7069,8 +7129,19 @@
 			          const tier3Shift = h - 168;
 			          const tier4Shift = h - 188;
 			          const shiftedPart = (markup, dy) => markup ? `<g transform="translate(0 ${dy})">${markup}</g>` : "";
+			          const lateDy = (level) => h - CASTLE_UPGRADE_HEIGHTS[level] - (level - 3) * 2;
+			          const shiftedLatePart = (markup, dx, dy) => markup ? `<g transform="translate(${dx} ${dy})">${markup}</g>` : "";
+			          const lateForegroundTiers = [
+			            shiftedLatePart(tier5, -72, lateDy(5)),
+			            shiftedLatePart(tier6, -212, lateDy(6)),
+			            shiftedLatePart(tier7, -312, lateDy(7)),
+			            shiftedLatePart(tier8, -528, lateDy(8)),
+			            shiftedLatePart(tier9, -682, lateDy(9)),
+			            shiftedLatePart(tier10, -596, lateDy(10)),
+			          ].join("");
 
 		          return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+		            ${rearConnections}
 		            ${rearTiers}
 		            <g transform="translate(0 ${coreShift})">
 	            <!-- foundation plinth + moat -->
@@ -7330,6 +7401,7 @@
 			            ${shiftedPart(tier2, tier2Shift)}
 			            ${shiftedPart(tier3, tier3Shift)}
 			            ${shiftedPart(tier4, tier4Shift)}
+			            ${lateForegroundTiers}
 			          </svg>`;
 			        }
 
@@ -9825,12 +9897,12 @@
               "raises new castle towers",
               "crowns the castle with banners",
               "transforms the castle into a mighty bastion",
-              "raises rear curtain towers",
-              "adds an observatory behind the keep",
-              "builds rear high keeps",
-              "raises a royal archive tower",
-              "adds rear banner towers",
-              "crowns the skyline with a celestial spire",
+              "links the rear curtain towers",
+              "adds an observatory wing to the keep",
+              "bridges the high keeps",
+              "raises a royal archive gallery",
+              "builds the banner court gatehouse",
+              "crowns the citadel with a celestial spire",
             ],
             tavern: ["adds a hearth to the tavern", "extends the tavern's common room", "builds an inn alongside the tavern", "makes the tavern the realm's grandest"],
             guildhall: ["reinforces the guildhall", "adds a guildmaster's wing", "raises a guildhall tower", "makes the guildhall renowned across the land"],
