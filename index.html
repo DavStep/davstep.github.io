@@ -3741,6 +3741,7 @@
 
           // After procession halts (8s), builders move to castle site & build
           setTimeout(() => {
+            makeRoomForMainCastle(0);
             // Raise castle at x
             const h = document.createElement("div");
             h.className = "house";
@@ -5251,23 +5252,133 @@
           }
           return { left: x, right: x + w };
         }
+        function structureVisualCenter(x, kind, palette, upgrade) {
+          const w = houseFootprintWidth(kind, palette, upgrade);
+          return usesCenteredStructureX(kind, upgrade) ? x : x + w / 2;
+        }
+        function anchorXForStructureCenter(center, kind, palette, upgrade) {
+          const w = houseFootprintWidth(kind, palette, upgrade);
+          return usesCenteredStructureX(kind, upgrade) ? center : center - w / 2;
+        }
+        function projectedStructureXForUpgrade(rec, upgrade) {
+          const center = structureVisualCenter(rec.x, rec.kind, rec.palette, rec.upgrade || 0);
+          return anchorXForStructureCenter(center, rec.kind, rec.palette, upgrade || 0);
+        }
+        function setStructureAnchorX(rec, x) {
+          rec.x = x;
+          rec.el.style.left = x + "px";
+        }
         function rangesOverlap(a, b) {
           return a.right > b.left && a.left < b.right;
         }
-        const MAIN_CASTLE_APPROACH_PADDING = 64;
-        function mainCastleApproachBounds() {
-          const maxCastleWidth = widthForUpgrade(STRUCTURE_UPGRADE_WIDTHS.castle, CASTLE_MAX_UPGRADE, KIND_WIDTHS.castle);
-          const halfWidth = Math.min(W() * 0.34, maxCastleWidth / 2 + MAIN_CASTLE_APPROACH_PADDING);
+        const MAIN_CASTLE_APPROACH_PADDING = 80;
+        function castleApproachWidth(upgradeOverride = null) {
+          const castle = houses.find((h) => h.kind === "castle" && h.el.isConnected);
+          const upgrade = upgradeOverride ?? (castle ? (castle.upgrade || 0) : 0);
+          return widthForUpgrade(STRUCTURE_UPGRADE_WIDTHS.castle, upgrade, KIND_WIDTHS.castle);
+        }
+        function mainCastleApproachBounds(upgradeOverride = null) {
+          const castleWidth = castleApproachWidth(upgradeOverride);
+          const halfWidth = Math.min(W() / 2 - 28, castleWidth / 2 + MAIN_CASTLE_APPROACH_PADDING);
           const center = W() / 2;
           return { left: center - halfWidth, right: center + halfWidth };
         }
-        function blocksMainCastleApproach(x, kind, palette, upgrade) {
+        function blocksMainCastleApproach(x, kind, palette, upgrade, castleUpgradeOverride = null) {
           if (!kind || kind === "castle" || !STRUCTURE_KINDS.includes(kind)) return false;
           if (kind === "lamppost") return false;
           return rangesOverlap(
             structureFootprintBounds(x, kind, palette, upgrade),
-            mainCastleApproachBounds()
+            mainCastleApproachBounds(castleUpgradeOverride)
           );
+        }
+        function expandedBounds(bounds, pad) {
+          return { left: bounds.left - pad, right: bounds.right + pad };
+        }
+        function structureClearance(kind) {
+          if (kind === "castle") return 28;
+          if (kind === "marketstall") return 22;
+          if (kind === "well" || kind === "signpost" || kind === "campfire" || kind === "garden" || kind === "statue" || kind === "lamppost") return 10;
+          return 20;
+        }
+        function structureTreeClearance(kind, palette, upgrade) {
+          return canUseRoadsideLane(kind, palette, upgrade) ? 42 : 70;
+        }
+        function hasStructureClearance(x, kind, palette, upgrade, currentRec = null) {
+          const a = expandedBounds(
+            structureFootprintBounds(x, kind, palette, upgrade),
+            structureClearance(kind)
+          );
+          return !houses.some((h) => {
+            if (h === currentRec || !h.el.isConnected) return false;
+            const hb = expandedBounds(
+              structureFootprintBounds(h.x, h.kind, h.palette, h.upgrade || 0),
+              structureClearance(h.kind)
+            );
+            return rangesOverlap(a, hb);
+          });
+        }
+        function structureFitsViewport(x, kind, palette, upgrade, margin) {
+          const b = structureFootprintBounds(x, kind, palette, upgrade);
+          return b.left >= margin && b.right <= W() - margin;
+        }
+        function structureSpotIsFree(x, kind, palette, upgrade, opts = {}) {
+          const margin = opts.margin ?? Math.max(32, Math.min(92, W() * 0.08));
+          if (!structureFitsViewport(x, kind, palette, upgrade, margin)) return false;
+          if (opts.avoidCastleApproach !== false && blocksMainCastleApproach(x, kind, palette, upgrade, opts.castleUpgradeOverride ?? null)) return false;
+          const treeGap = opts.treeGap ?? structureTreeClearance(kind, palette, upgrade);
+          if (trees.some((t) => Math.abs(t.x - x) < treeGap)) return false;
+          return hasStructureClearance(x, kind, palette, upgrade, opts.currentRec || null);
+        }
+        function structureRangeGap(a, b) {
+          if (rangesOverlap(a, b)) return 0;
+          return a.right <= b.left ? b.left - a.right : a.left - b.right;
+        }
+        function nearestStructureGap(x, kind, palette, upgrade, currentRec = null) {
+          const a = structureFootprintBounds(x, kind, palette, upgrade);
+          let nearest = W();
+          houses.forEach((h) => {
+            if (h === currentRec || !h.el.isConnected) return;
+            const hb = structureFootprintBounds(h.x, h.kind, h.palette, h.upgrade || 0);
+            nearest = Math.min(nearest, structureRangeGap(a, hb));
+          });
+          return nearest;
+        }
+        function substantialStructureCount(side) {
+          return houses.filter((h) => {
+            if (!h.el.isConnected) return false;
+            if (h.kind === "castle" || h.kind === "marketstall" || h.kind === "lamppost" || h.kind === "signpost" || h.kind === "campfire" || h.kind === "garden" || h.kind === "statue") return false;
+            return side === "left" ? h.x < W() / 2 : h.x >= W() / 2;
+          }).length;
+        }
+        function preferredOpenSide(kind) {
+          if (kind === "marketstall" || kind === "castle") return null;
+          const left = substantialStructureCount("left");
+          const right = substantialStructureCount("right");
+          if (Math.abs(left - right) < 2) return null;
+          return left < right ? "left" : "right";
+        }
+        function makeRoomForMainCastle(upgradeOverride = null) {
+          const approach = mainCastleApproachBounds(upgradeOverride);
+          houses
+            .filter((rec) => {
+              if (rec.kind === "castle" || rec.kind === "lamppost" || !rec.el.isConnected) return false;
+              const b = expandedBounds(
+                structureFootprintBounds(rec.x, rec.kind, rec.palette, rec.upgrade || 0),
+                structureClearance(rec.kind)
+              );
+              return rangesOverlap(b, approach);
+            })
+            .forEach((rec) => {
+              const preferredSide = rec.x < W() / 2 ? "left" : "right";
+              const x = findOpenSpot(rec.kind, rec.palette, rec.upgrade || 0, {
+                currentRec: rec,
+                preferredSide,
+                castleUpgradeOverride: upgradeOverride,
+              });
+              if (x == null) return;
+              setStructureAnchorX(rec, x);
+              applyLane(rec, pickLane(rec.x, rec.kind, rec.palette, rec.upgrade || 0, rec));
+            });
         }
         /* The road-adjacent band is only for light decorations and small market stalls.
            Houses and larger buildings stay in the back lane so the roadside stays open. */
@@ -5287,14 +5398,15 @@
         /* Pick a depth lane by size preference, then collision with existing buildings in the same lane. */
         function pickLane(x, kind, palette, upgrade, currentRec = null) {
           if (kind === "castle") return "back";
-          const pad = 6;
+          const pad = Math.max(8, Math.floor(structureClearance(kind) * 0.5));
           const a = structureFootprintBounds(x, kind, palette, upgrade);
           const aL = a.left - pad, aR = a.right + pad;
           const overlaps = (lane) => houses.some((h) => {
             if (h === currentRec) return false;
             if (h.lane !== lane) return false;
             const hb = structureFootprintBounds(h.x, h.kind, h.palette, h.upgrade);
-            return aR > hb.left && aL < hb.right;
+            const hPad = Math.max(8, Math.floor(structureClearance(h.kind) * 0.5));
+            return aR > hb.left - hPad && aL < hb.right + hPad;
           });
           const lanes = preferredLaneOrder(kind, palette, upgrade);
           for (const lane of lanes) {
@@ -9113,7 +9225,7 @@
           "blacksmith", "blacksmith",
         ];
         function canRepeatStructureKind(kind) {
-          return kind === "marketstall";
+          return kind === "house" || kind === "tower" || kind === "marketstall";
         }
         function structureKindExists(kind) {
           if (kind === "castle") return hasCastleOrPendingBuild();
@@ -9124,8 +9236,10 @@
           return !!kind && (canRepeatStructureKind(kind) || !structureKindExists(kind));
         }
         function pickBuilderKind() {
-          const buildable = BUILDER_KIND_WEIGHTS.filter(canBuildStructureKind);
-          return buildable.length > 0 ? pick(buildable) : null;
+          const missing = BUILDER_KIND_WEIGHTS.filter((kind) => !structureKindExists(kind) && canBuildStructureKind(kind));
+          if (missing.length > 0) return pick(missing);
+          const repeatable = BUILDER_KIND_WEIGHTS.filter((kind) => kind === "house" || kind === "tower");
+          return repeatable.length > 0 ? pick(repeatable) : null;
         }
 
         function spawnBuilder(targetX, kind, onDone) {
@@ -9143,7 +9257,9 @@
             : null;
           // Sole castle is always built dead-center
           if (kind === "castle") targetX = W() / 2;
-          if (blocksMainCastleApproach(targetX, kind, palette, 0)) {
+          if (kind === "castle") {
+            makeRoomForMainCastle(0);
+          } else if (!structureSpotIsFree(targetX, kind, palette, 0)) {
             const openX = findOpenSpot(kind, palette, 0);
             if (openX == null) {
               if (reservedCastleBuild) clearCastleBuildReservation();
@@ -9622,20 +9738,39 @@
           (tryDragon ? dragonAttack : horsemanAttack)(target);
         }
 
-        // Find any free spot on the grass with comfortable distance from
-        // existing trees/structures so buildings don't crowd each other.
-        const MIN_BUILD_SPACING = 130;
-        function findOpenSpot(kind = null, palette = null, upgrade = 0) {
-          const sideMargin = Math.max(42, Math.min(100, W() * 0.1));
+        // Find a free grass spot using real structure footprints, not just anchor points.
+        function findOpenSpot(kind = null, palette = null, upgrade = 0, opts = {}) {
+          const sideMargin = opts.margin ?? Math.max(42, Math.min(100, W() * 0.1));
+          const preferredSide = opts.preferredSide ?? preferredOpenSide(kind);
           const usableWidth = Math.max(1, W() - sideMargin * 2);
-          for (let i = 0; i < 90; i++) {
-            const x = sideMargin + Math.random() * usableWidth;
-            const free = !trees.some((t) => Math.abs(t.x - x) < MIN_BUILD_SPACING)
-                      && !houses.some((h) => Math.abs(h.x - x) < MIN_BUILD_SPACING)
-                      && !blocksMainCastleApproach(x, kind, palette, upgrade);
-            if (free) return x;
+          let bestX = null;
+          let bestScore = -Infinity;
+
+          for (let i = 0; i < 140; i++) {
+            let minX = sideMargin;
+            let maxX = W() - sideMargin;
+            if (preferredSide && i < 90) {
+              if (preferredSide === "left") maxX = Math.min(maxX, W() / 2 - 24);
+              else minX = Math.max(minX, W() / 2 + 24);
+            }
+            if (maxX <= minX) {
+              minX = sideMargin;
+              maxX = sideMargin + usableWidth;
+            }
+            const x = minX + Math.random() * Math.max(1, maxX - minX);
+            if (!structureSpotIsFree(x, kind, palette, upgrade, opts)) continue;
+
+            const side = x < W() / 2 ? "left" : "right";
+            const sideBonus = preferredSide && side === preferredSide ? W() * 0.35 : 0;
+            const gapScore = Math.min(180, nearestStructureGap(x, kind, palette, upgrade, opts.currentRec || null));
+            const score = sideBonus + gapScore + Math.random() * 8;
+            if (score > bestScore) {
+              bestScore = score;
+              bestX = x;
+            }
           }
-          return null;
+
+          return bestX;
         }
         function spawnLoneBuilder() {
           if (document.hidden || reduced) return;
@@ -9657,13 +9792,14 @@
           if (document.hidden || reduced) return;
           const upgradeable = houses.filter((h) => {
             const nextUpgrade = (h.upgrade || 0) + 1;
+            const nextX = projectedStructureXForUpgrade(h, nextUpgrade);
             return h.stage >= 2
               && h.el.dataset.upgrading !== "1"
               && (h.upgrade || 0) < maxUpgradeForStructure(h.kind)
               && (h.kind === "house" || h.kind === "tower" || h.kind === "castle"
                   || h.kind === "tavern" || h.kind === "guildhall" || h.kind === "mill"
                   || h.kind === "marketstall")
-              && !blocksMainCastleApproach(h.x, h.kind, h.palette, nextUpgrade);
+              && (h.kind === "castle" || structureSpotIsFree(nextX, h.kind, h.palette, nextUpgrade, { currentRec: h }));
           });
           if (upgradeable.length === 0) return;
           const target = upgradeable[Math.floor(Math.random() * upgradeable.length)];
@@ -9725,7 +9861,10 @@
                 return;
               }
               upgr.classList.remove("working");
+              const nextX = projectedStructureXForUpgrade(target, nextLevel);
+              if (target.kind === "castle") makeRoomForMainCastle(nextLevel);
               target.upgrade = nextLevel;
+              setStructureAnchorX(target, nextX);
               target.el.dataset.upgrade = String(nextLevel);
               // Per-tier full redraws — each upgrade swaps in a separately drawn,
               // more detailed asset (never CSS-scale). Buildings without a per-tier generator
@@ -9900,7 +10039,7 @@
         /* ============= MARKETSTALLS + MERCHANTS + CUSTOMERS ============= */
         const MARKET_ANCHORS = ["tavern", "well", "guildhall", "marketstall", "blacksmith"];
         const STALL_CAP = 14;
-        const ROAD_MARKET_POSITIONS = [0.22, 0.38, 0.62, 0.78, 0.30, 0.52, 0.70, 0.86];
+        const ROAD_MARKET_POSITIONS = [0.18, 0.82, 0.28, 0.72, 0.10, 0.90, 0.38, 0.62];
         const MARKET_TARGETS_BY_ROAD = [0, 1, 3, 5, 8, 11];
         function marketStallCount() {
           return houses.filter((h) => h.kind === "marketstall").length;
@@ -9909,30 +10048,36 @@
           return MARKET_TARGETS_BY_ROAD[Math.max(0, Math.min(tier, MARKET_TARGETS_BY_ROAD.length - 1))] || 0;
         }
         function isRoadsideMarketSpotFree(candidate) {
-          if (candidate < 48 || candidate > W() - 88) return false;
-          if (blocksMainCastleApproach(candidate, "marketstall", null, 0)) return false;
-          if (trees.some((t) => Math.abs(t.x - candidate) < 42)) return false;
-          return !houses.some((h) => {
-            const gap = h.kind === "marketstall" ? 76 : h.lane === "road" ? 46 : 28;
-            return Math.abs(h.x - candidate) < gap;
+          return structureSpotIsFree(candidate, "marketstall", null, 0, {
+            margin: 48,
+            treeGap: 42,
           });
         }
+        function marketPressureAt(x) {
+          return houses
+            .filter((h) => h.kind === "marketstall" && h.el.isConnected)
+            .reduce((sum, h) => sum + Math.max(0, 180 - Math.abs(h.x - x)), 0);
+        }
         function findRoadsideMarketSpot() {
-          const anchors = houses.filter((h) => MARKET_ANCHORS.includes(h.kind) && h.stage >= 2);
-          if (anchors.length > 0) {
-            for (let i = 0; i < 24; i++) {
-              const a = pick(anchors);
-              const candidate = a.x + (Math.random() < 0.5 ? -1 : 1) * (54 + Math.random() * 92);
-              if (isRoadsideMarketSpotFree(candidate)) return candidate;
-            }
-          }
-          const offset = Math.floor(Math.random() * ROAD_MARKET_POSITIONS.length);
-          for (let i = 0; i < ROAD_MARKET_POSITIONS.length; i++) {
-            const pos = ROAD_MARKET_POSITIONS[(i + offset) % ROAD_MARKET_POSITIONS.length];
-            const candidate = pos * W() + (Math.random() - 0.5) * 28;
+          const candidates = [];
+          ROAD_MARKET_POSITIONS.forEach((pos) => {
+            const base = pos * W();
+            [0, -22, 22, -42, 42].forEach((offset) => {
+              candidates.push(base + offset + (Math.random() - 0.5) * 10);
+            });
+          });
+          candidates.sort((a, b) => marketPressureAt(a) - marketPressureAt(b));
+          for (const candidate of candidates) {
             if (isRoadsideMarketSpotFree(candidate)) return candidate;
           }
-          return findOpenSpot("marketstall");
+
+          const anchors = houses.filter((h) => MARKET_ANCHORS.includes(h.kind) && h.stage >= 2);
+          for (let i = 0; i < 20 && anchors.length > 0; i++) {
+            const a = pick(anchors);
+            const candidate = a.x + (Math.random() < 0.5 ? -1 : 1) * (72 + Math.random() * 120);
+            if (isRoadsideMarketSpotFree(candidate)) return candidate;
+          }
+          return findOpenSpot("marketstall", null, 0, { margin: 48, treeGap: 42 });
         }
         function spawnStallBuilder() {
           if (document.hidden || reduced) return;
@@ -10089,9 +10234,7 @@
           for (let i = 0; i < 30 && x == null; i++) {
             const candidate = 80 + Math.random() * (W() - 160);
             const free = !houses.some((h) => h.kind === "guardpost" && Math.abs(h.x - candidate) < 200)
-                      && !houses.some((h) => Math.abs(h.x - candidate) < 80)
-                      && !trees.some((t) => Math.abs(t.x - candidate) < 80)
-                      && !blocksMainCastleApproach(candidate, "guardpost", null, 0);
+                      && structureSpotIsFree(candidate, "guardpost", null, 0, { treeGap: 80 });
             if (free) x = candidate;
           }
           if (x == null) x = findOpenSpot("guardpost");
@@ -10553,7 +10696,13 @@
           spawnBuilder(seed.pos * W(), seed.kind, (rec) => {
             const upgrade = seed.up || 0;
             if (!rec || upgrade <= 0) return;
+            let nextX = projectedStructureXForUpgrade(rec, upgrade);
+            if (!structureSpotIsFree(nextX, rec.kind, rec.palette, upgrade, { currentRec: rec })) {
+              const openX = findOpenSpot(rec.kind, rec.palette, upgrade, { currentRec: rec });
+              if (openX != null) nextX = openX;
+            }
             rec.upgrade = upgrade;
+            setStructureAnchorX(rec, nextX);
             rec.el.dataset.upgrade = String(upgrade);
             if (rec.kind === "marketstall") {
               rec.el.innerHTML = marketstallSVG(rec.palette, upgrade);
