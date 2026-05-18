@@ -1698,7 +1698,8 @@
         display: flex; gap: 6px;
         font-family: "Press Start 2P", monospace; font-size: 0.45rem;
       }
-      .hud span {
+      .hud span,
+      .hud button {
         color: var(--muted); background: var(--panel);
         border: 1px solid var(--frame);
         padding: 10px 12px; min-height: 32px;
@@ -1706,13 +1707,34 @@
         letter-spacing: 0.5px;
         cursor: pointer; user-select: none;
         touch-action: manipulation;
+        font: inherit;
+        line-height: 1;
+        border-radius: 0;
+        appearance: none;
+      }
+      .hud button {
+        min-width: 62px;
+        justify-content: center;
       }
       @media (hover: hover) and (pointer: fine) {
-        .hud span:hover { color: var(--gold); border-color: var(--gold); }
+        .hud span:hover,
+        .hud button:hover { color: var(--gold); border-color: var(--gold); }
       }
-      .hud span:active {
+      .hud span:active,
+      .hud button:active {
         color: var(--gold); border-color: var(--gold);
         transform: translate(1px, 1px);
+      }
+      body.ui-hidden .container,
+      body.ui-hidden .log,
+      body.ui-hidden .hud .hud-control {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .container,
+      .log,
+      .hud .hud-control {
+        transition: opacity 0.2s ease;
       }
 
       /* ACTIVITY LOG (top left) */
@@ -1770,7 +1792,8 @@
           right: calc(8px + env(safe-area-inset-right));
           gap: 4px;
         }
-        .hud span { padding: 8px 10px; font-size: 0.42rem; min-height: 30px; }
+        .hud span,
+        .hud button { padding: 8px 10px; font-size: 0.42rem; min-height: 30px; }
         .log {
           width: min(180px, 50vw); font-size: 0.85rem;
           top: calc(8px + env(safe-area-inset-top));
@@ -1780,7 +1803,8 @@
 
       @media (max-width: 380px) {
         .log { width: 140px; font-size: 0.75rem; }
-        .hud span { padding: 7px 9px; }
+        .hud span,
+        .hud button { padding: 7px 9px; }
       }
     </style>
   </head>
@@ -1858,10 +1882,11 @@
     </div>
 
     <div class="hud">
-      <span id="hud-season" title="Click to change season">SUMMER</span>
-      <span id="hud-time" title="Click to change time">DAY</span>
-      <span id="hud-weather" title="Click to change weather">CLEAR</span>
-      <span id="hud-speed" title="Click to speed up time">1×</span>
+      <span class="hud-control" id="hud-season" title="Click to change season">SUMMER</span>
+      <span class="hud-control" id="hud-time" title="Click to change time">DAY</span>
+      <span class="hud-control" id="hud-weather" title="Click to change weather">CLEAR</span>
+      <span class="hud-control" id="hud-speed" title="Click to speed up time">1×</span>
+      <button class="hud-ui-toggle" id="hud-ui" type="button" title="Hide UI" aria-pressed="false">HIDE</button>
     </div>
 
     <div class="log" id="log">
@@ -2011,6 +2036,7 @@
         const hudTime = document.getElementById("hud-time");
         const hudWeather = document.getElementById("hud-weather");
         const hudSeason = document.getElementById("hud-season");
+        const hudUi = document.getElementById("hud-ui");
         const logEl = document.getElementById("log");
         const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -2090,6 +2116,13 @@
           logEvent("Time flows at " + newSpeed + "× speed.", "time");
         }
         hudSpeed.addEventListener("click", cycleSpeed);
+        function setUiHidden(hidden) {
+          document.body.classList.toggle("ui-hidden", hidden);
+          hudUi.textContent = hidden ? "SHOW" : "HIDE";
+          hudUi.title = hidden ? "Show UI" : "Hide UI";
+          hudUi.setAttribute("aria-pressed", String(hidden));
+        }
+        hudUi.addEventListener("click", () => setUiHidden(!document.body.classList.contains("ui-hidden")));
 
         const hexRgb = (h) => { const v = parseInt(h.slice(1),16); return [(v>>16)&255,(v>>8)&255,v&255]; };
         const rgbStr = (c) => `rgb(${c[0]|0}, ${c[1]|0}, ${c[2]|0})`;
