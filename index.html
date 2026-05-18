@@ -9112,24 +9112,29 @@
           "statue",
           "blacksmith", "blacksmith",
         ];
+        function canRepeatStructureKind(kind) {
+          return kind === "marketstall";
+        }
         function structureKindExists(kind) {
           if (kind === "castle") return hasCastleOrPendingBuild();
           return pendingStructureKindCount(kind) > 0
               || houses.some((h) => h.kind === kind && h.el.isConnected);
         }
+        function canBuildStructureKind(kind) {
+          return !!kind && (canRepeatStructureKind(kind) || !structureKindExists(kind));
+        }
         function pickBuilderKind() {
-          const buildable = BUILDER_KIND_WEIGHTS.filter((kind) => kind !== "castle" || !hasCastleOrPendingBuild());
-          const missing = buildable.filter((kind) => !structureKindExists(kind));
-          const pool = missing.length > 0 ? missing : buildable;
-          return pick(pool.length > 0 ? pool : ["house"]);
+          const buildable = BUILDER_KIND_WEIGHTS.filter(canBuildStructureKind);
+          return buildable.length > 0 ? pick(buildable) : null;
         }
 
         function spawnBuilder(targetX, kind, onDone) {
-          if (reduced) { if (onDone) onDone(); return; }
+          if (reduced) { if (onDone) onDone(); return true; }
           // Pick a kind if not provided. Houses & towers more common than wells/signs/campfires.
           if (!kind) kind = pickBuilderKind();
+          if (!canBuildStructureKind(kind)) return false;
           const reservedCastleBuild = kind === "castle";
-          if (reservedCastleBuild && !reserveCastleBuild()) return;
+          if (reservedCastleBuild && !reserveCastleBuild()) return false;
           const reservedPendingKind = !reservedCastleBuild && reservePendingStructureKind(kind);
           const palette = kind === "house"
             ? { ...pick(HOUSE_PALETTES), variant: pick(HOUSE_VARIANTS) }
@@ -9143,7 +9148,7 @@
             if (openX == null) {
               if (reservedCastleBuild) clearCastleBuildReservation();
               if (reservedPendingKind) clearPendingStructureKind(kind);
-              return;
+              return false;
             }
             targetX = openX;
           }
@@ -9253,6 +9258,7 @@
               scheduleAmbientRefresh(140);
             }, doneDelay);
           }, walkTime * 1000 + 100);
+          return true;
         }
 
         function destroyHouse(rec) {
@@ -9403,14 +9409,14 @@
           return tier >= 3
             && countCompleted("castle") >= 1
             && countCompleted("marketstall") >= 4
-            && countCompleted("guardpost") >= 2;
+            && countCompleted("guardpost") >= 1;
         }
         function hugeDragonReady() {
           const tier = parseInt(world.dataset.road || "0", 10);
           return tier >= 5
             && houses.some((h) => h.kind === "castle" && (h.upgrade || 0) >= CASTLE_HUGE_DRAGON_TARGET_LEVEL)
             && countCompleted("marketstall") >= 6
-            && countCompleted("guardpost") >= 6;
+            && countCompleted("guardpost") >= 1;
         }
         function registerDragon(el, isHuge) {
           const rec = { el, hp: isHuge ? 14 : 4, isHuge };
@@ -9634,6 +9640,7 @@
         function spawnLoneBuilder() {
           if (document.hidden || reduced) return;
           const kind = pickBuilderKind();
+          if (!kind) return;
           const x = kind === "castle" ? W() / 2 : findOpenSpot(kind);
           if (x == null) return;
           spawnBuilder(x, kind);
@@ -10072,9 +10079,10 @@
         }
 
         /* ============= GUARD POSTS + ARROW VOLLEYS ============= */
-        const GUARDPOST_CAP = 8;
+        const GUARDPOST_CAP = 1;
         function spawnGuardpostBuilder() {
           if (document.hidden || reduced) return;
+          if (!canBuildStructureKind("guardpost")) return;
           if (houses.filter((h) => h.kind === "guardpost").length >= GUARDPOST_CAP) return;
           // Spread along the road — avoid spawning within 200px of another guardpost
           let x = null;
@@ -10192,7 +10200,8 @@
           return Math.max(0, Math.min(4, (tier | 0) - 1));
         }
         function targetStreetLightCountForRoad(tier) {
-          return tier <= 0 ? 0 : Math.min(ROAD_STREET_LIGHT_POSITIONS.length, tier + 1);
+          const target = tier <= 0 ? 0 : Math.min(ROAD_STREET_LIGHT_POSITIONS.length, tier + 1);
+          return canRepeatStructureKind("lamppost") ? target : Math.min(target, 1);
         }
         function streetLightGap() {
           return Math.max(42, Math.min(72, W() * 0.085));
@@ -10243,15 +10252,20 @@
           ROAD_STREET_LIGHT_POSITIONS.forEach((pos, i) => {
             if (plannedCount >= targetCount) return;
             setTimeout(() => {
+              if (!canBuildStructureKind("lamppost")) return;
               if (activeStreetLights().length + pendingStreetLights.length >= targetCount) return;
               const x = findStreetLightSpot(pos);
               if (x == null) return;
               pendingStreetLights.push(x);
-              spawnBuilder(x, "lamppost", (rec) => {
+              const started = spawnBuilder(x, "lamppost", (rec) => {
                 const idx = pendingStreetLights.findIndex((px) => Math.abs(px - x) < 1);
                 if (idx >= 0) pendingStreetLights.splice(idx, 1);
                 setStreetLightUpgrade(rec, targetUpgrade, true);
               });
+              if (!started) {
+                const idx = pendingStreetLights.findIndex((px) => Math.abs(px - x) < 1);
+                if (idx >= 0) pendingStreetLights.splice(idx, 1);
+              }
             }, i * 750);
             plannedCount++;
             added++;
