@@ -1803,8 +1803,17 @@
       body.ui-hidden .pan-reset { opacity: 0; pointer-events: none; }
 
       @media (max-width: 600px) {
-        html, body { overflow-x: auto; }
-        .container { width: 820px; }
+        html, body { overflow-x: hidden; touch-action: pan-y; }
+        body.is-panning { user-select: none; }
+        .world {
+          right: auto;
+          width: 1200px;
+          will-change: transform;
+        }
+        .container {
+          width: 820px;
+          will-change: transform;
+        }
         .hud {
           top: calc(8px + env(safe-area-inset-top));
           right: calc(8px + env(safe-area-inset-right));
@@ -10919,25 +10928,93 @@
     <script>
       (function () {
         const panReset = document.getElementById("pan-reset");
-        if (!panReset) return;
+        const container = document.querySelector(".container");
+        const world = document.querySelector(".world");
+        if (!panReset || !container || !world) return;
+
         const THRESHOLD = 24;
-        function getScrollX() {
-          return Math.max(window.scrollX, document.body.scrollLeft, document.documentElement.scrollLeft);
+        const mq = window.matchMedia("(max-width: 600px)");
+        let panX = 0;
+        let startX = 0, startY = 0, startPan = 0, axis = null, dragging = false;
+
+        function maxPan() {
+          return Math.max(0, container.offsetWidth - window.innerWidth);
         }
-        function update() {
-          if (getScrollX() > THRESHOLD) panReset.classList.add("visible");
+        function clamp(x) {
+          return Math.max(0, Math.min(maxPan(), x));
+        }
+        function apply() {
+          const t = `translateX(${-panX}px)`;
+          container.style.transform = t;
+          world.style.transform = t;
+          if (panX > THRESHOLD) panReset.classList.add("visible");
           else panReset.classList.remove("visible");
         }
-        window.addEventListener("scroll", update, { passive: true });
-        document.body.addEventListener("scroll", update, { passive: true });
-        window.addEventListener("resize", update);
-        panReset.addEventListener("click", () => {
-          window.scrollTo(0, window.scrollY);
-          document.body.scrollLeft = 0;
-          document.documentElement.scrollLeft = 0;
-          update();
+        function reset() {
+          panX = 0;
+          container.style.transform = "";
+          world.style.transform = "";
+          panReset.classList.remove("visible");
+        }
+        function active() { return mq.matches; }
+
+        function pointFromEvent(e) {
+          if (e.touches && e.touches.length) return e.touches[0];
+          if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0];
+          return e;
+        }
+        function onStart(e) {
+          if (!active() || maxPan() <= 0) return;
+          const p = pointFromEvent(e);
+          startX = p.clientX;
+          startY = p.clientY;
+          startPan = panX;
+          axis = null;
+          dragging = true;
+        }
+        function onMove(e) {
+          if (!dragging) return;
+          const p = pointFromEvent(e);
+          const dx = p.clientX - startX;
+          const dy = p.clientY - startY;
+          if (axis === null) {
+            if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+            axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+            if (axis === "x") document.body.classList.add("is-panning");
+          }
+          if (axis === "x") {
+            if (e.cancelable) e.preventDefault();
+            panX = clamp(startPan - dx);
+            apply();
+          } else {
+            dragging = false;
+          }
+        }
+        function onEnd() {
+          if (dragging && axis === "x") document.body.classList.remove("is-panning");
+          dragging = false;
+          axis = null;
+        }
+
+        document.addEventListener("touchstart", onStart, { passive: true });
+        document.addEventListener("touchmove", onMove, { passive: false });
+        document.addEventListener("touchend", onEnd, { passive: true });
+        document.addEventListener("touchcancel", onEnd, { passive: true });
+        // Allow mouse drag too (desktop emulators, small windows)
+        document.addEventListener("mousedown", (e) => {
+          if (e.target.closest(".hud, .pan-reset, a, button")) return;
+          onStart(e);
         });
-        update();
+        document.addEventListener("mousemove", (e) => { if (dragging) onMove(e); });
+        document.addEventListener("mouseup", onEnd);
+
+        mq.addEventListener("change", () => { if (!active()) reset(); else apply(); });
+        window.addEventListener("resize", () => {
+          if (!active()) reset();
+          else { panX = clamp(panX); apply(); }
+        });
+
+        panReset.addEventListener("click", reset);
       })();
     </script>
   </body>
