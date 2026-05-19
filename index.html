@@ -166,6 +166,14 @@
 
       /* ============= WORLD ============= */
       .world { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+      .world-dim {
+        position: fixed; inset: 0; z-index: 9;
+        background: rgba(0, 0, 0, 0.55);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      body.dim-world .world-dim { opacity: 1; }
 
       .sky {
         position: absolute; inset: 0; z-index: 0;
@@ -1560,7 +1568,7 @@
       }
       nav .brand { color: var(--gold); text-shadow: 2px 2px 0 #000; }
       nav .links { display: flex; gap: 16px; }
-      nav .links a { color: var(--muted); padding: 6px 4px; touch-action: manipulation; }
+      nav .links a { color: var(--muted); padding: 6px 4px; touch-action: manipulation; text-shadow: 1px 1px 0 #000; }
       @media (hover: hover) and (pointer: fine) {
         nav .links a:hover { color: var(--ink); }
       }
@@ -1571,7 +1579,7 @@
         font-family: "Press Start 2P", monospace;
         font-size: 0.5rem; color: var(--moss);
         letter-spacing: 1px; margin-bottom: 18px;
-        text-shadow: 1px 1px 0 #000;
+        text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
       }
       .lead {
         color: var(--ink); max-width: 600px; margin: 0 0 22px;
@@ -1877,11 +1885,14 @@
       </div>
     </div>
 
+    <div class="world-dim" aria-hidden="true"></div>
+
     <div class="hud">
       <span class="hud-control" id="hud-season" title="Click to change season">SUMMER</span>
       <span class="hud-control" id="hud-time" title="Click to change time">DAY</span>
       <span class="hud-control" id="hud-weather" title="Click to change weather">CLEAR</span>
       <span class="hud-control" id="hud-speed" title="Click to speed up time">1×</span>
+      <button class="hud-control" id="hud-dim" type="button" title="Dim the world" aria-pressed="false">DIM</button>
       <button class="hud-ui-toggle" id="hud-ui" type="button" title="Hide UI" aria-pressed="false">HIDE</button>
     </div>
 
@@ -2120,6 +2131,14 @@
           hudUi.setAttribute("aria-pressed", String(hidden));
         }
         hudUi.addEventListener("click", () => setUiHidden(!document.body.classList.contains("ui-hidden")));
+
+        const hudDim = document.getElementById("hud-dim");
+        if (hudDim) {
+          hudDim.addEventListener("click", () => {
+            const dimmed = document.body.classList.toggle("dim-world");
+            hudDim.setAttribute("aria-pressed", String(dimmed));
+          });
+        }
 
         const hexRgb = (h) => { const v = parseInt(h.slice(1),16); return [(v>>16)&255,(v>>8)&255,v&255]; };
         const rgbStr = (c) => `rgb(${c[0]|0}, ${c[1]|0}, ${c[2]|0})`;
