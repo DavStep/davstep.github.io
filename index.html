@@ -2073,7 +2073,7 @@
         // === Time-scaling: speed multiplier affects ALL entities ===
         // setTimeout/setInterval delays are divided by current speed at call time,
         // CSS transitions get playbackRate set via a polling interval.
-        const SPEED_OPTIONS = [1, 2];
+        const SPEED_OPTIONS = [1, 2, 3];
         let speedIdx = 0;
         function getSpeed() { return SPEED_OPTIONS[speedIdx]; }
         const _setTimeout  = window.setTimeout.bind(window);
@@ -2195,22 +2195,25 @@
 
         const worldPanReset = document.getElementById("world-pan-reset");
         if (world && worldPanReset) {
-          let worldPanX = 0;
-          let startX = 0, startY = 0, startPan = 0, axis = null, dragging = false;
           const THRESHOLD = 24;
-
           function maxPan() {
             return Math.max(0, world.offsetWidth - window.innerWidth);
           }
+          function centerPan() {
+            return maxPan() / 2;
+          }
+          let worldPanX = centerPan();
+          let startX = 0, startY = 0, startPan = 0, axis = null, dragging = false;
+
           function applyWorldPan() {
             world.style.transform = `translateX(${-worldPanX}px)`;
-            worldPanReset.classList.toggle("visible", worldPanX > THRESHOLD);
+            worldPanReset.classList.toggle("visible", Math.abs(worldPanX - centerPan()) > THRESHOLD);
           }
           function resetWorldPan() {
-            worldPanX = 0;
-            world.style.transform = "";
-            worldPanReset.classList.remove("visible");
+            worldPanX = centerPan();
+            applyWorldPan();
           }
+          applyWorldPan();
           function isOnBackground(target) {
             if (!target) return true;
             return !target.closest(".container, .hud, .world-pan-reset, .log");
@@ -2260,8 +2263,8 @@
           document.addEventListener("mouseup", onWorldDragEnd);
           worldPanReset.addEventListener("click", resetWorldPan);
           window.addEventListener("resize", () => {
-            const m = maxPan();
-            if (worldPanX > m) { worldPanX = m; applyWorldPan(); }
+            worldPanX = Math.max(0, Math.min(maxPan(), worldPanX));
+            applyWorldPan();
           });
         }
 
