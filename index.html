@@ -2112,7 +2112,7 @@
         }
         _setInterval(applySpeedToAnimations, 400);
 
-        const W = () => innerWidth;
+        const W = () => (world && world.offsetWidth) || innerWidth;
         const H = () => innerHeight;
 
         /* ============= LOG ============= */
@@ -2532,7 +2532,7 @@
         function resize() {
           isSmallViewport = innerWidth < 640;
           const dpr = Math.min(window.devicePixelRatio || 1, isSmallViewport ? 1.5 : 2);
-          CW = innerWidth; CH = innerHeight;
+          CW = W(); CH = innerHeight;
           canvas.width = CW * dpr; canvas.height = CH * dpr;
           canvas.style.width = CW + "px"; canvas.style.height = CH + "px";
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2541,10 +2541,10 @@
         addEventListener("resize", resize);
 
         /* ============= WORLD RESIZE / RESPONSIVE ============= */
-        let lastViewportW = innerWidth;
+        let lastViewportW = W();
         let resizeTimer = null;
         function repositionWorld() {
-          const newW = innerWidth;
+          const newW = W();
           if (lastViewportW === 0) lastViewportW = newW;
           const ratio = newW / lastViewportW;
           lastViewportW = newW;
@@ -10030,8 +10030,21 @@
           return 4;
         }
 
+        // Castle level-ups should not outpace village growth — each tier requires
+        // a growing population of mature houses before the upgrader will touch it.
+        function castleHouseGate(nextLevel) {
+          return nextLevel <= 4 ? nextLevel * 2 : 8 + (nextLevel - 4) * 3;
+        }
+        function matureHouseCount() {
+          let n = 0;
+          for (const h of houses) {
+            if (h.kind === "house" && h.stage >= 2 && h.el.isConnected) n++;
+          }
+          return n;
+        }
         function spawnUpgrader() {
           if (document.hidden || reduced) return;
+          const matureHouses = matureHouseCount();
           const upgradeable = houses.filter((h) => {
             const nextUpgrade = (h.upgrade || 0) + 1;
             const nextX = projectedStructureXForUpgrade(h, nextUpgrade);
@@ -10041,10 +10054,15 @@
               && (h.kind === "house" || h.kind === "tower" || h.kind === "castle"
                   || h.kind === "tavern" || h.kind === "guildhall" || h.kind === "mill"
                   || h.kind === "marketstall")
+              && (h.kind !== "castle" || matureHouses >= castleHouseGate(nextUpgrade))
               && (h.kind === "castle" || structureSpotIsFree(nextX, h.kind, h.palette, nextUpgrade, { currentRec: h }));
           });
           if (upgradeable.length === 0) return;
-          const target = upgradeable[Math.floor(Math.random() * upgradeable.length)];
+          // When non-castle structures are upgradeable, bias picks away from the castle so it
+          // doesn't dominate the pool once smaller buildings have capped out.
+          const nonCastle = upgradeable.filter((h) => h.kind !== "castle");
+          const pool = (nonCastle.length > 0 && Math.random() < 0.75) ? nonCastle : upgradeable;
+          const target = pool[Math.floor(Math.random() * pool.length)];
           const fromLeft = target.x > W() / 2;
           const startX = fromLeft ? -20 : (W() + 20);
           const stopX = target.x + (fromLeft ? -8 : 40);
