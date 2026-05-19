@@ -1778,7 +1778,7 @@
 
       @media (max-width: 600px) {
         body { font-size: 18px; }
-        nav { flex-direction: column; gap: 14px; padding: 18px 0 12px; }
+        nav { flex-direction: column; gap: 14px; padding: calc(50px + env(safe-area-inset-top)) 0 12px; }
         nav .links { flex-wrap: wrap; justify-content: center; }
         header.hero { padding: 16px 0 8px; }
         section { padding: 24px 0 14px; }
