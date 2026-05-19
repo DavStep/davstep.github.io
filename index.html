@@ -1441,7 +1441,7 @@
         position: absolute;
         left: 0; right: 0;
         bottom: 30px;
-        height: 75%;
+        aspect-ratio: 3 / 1;
         z-index: 3;
         pointer-events: none;
         opacity: 0;
@@ -1725,6 +1725,19 @@
         min-width: 62px;
         justify-content: center;
       }
+      .hud-settings { position: relative; }
+      .hud-settings-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        display: none;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 12;
+      }
+      .hud-settings.open .hud-settings-menu { display: flex; }
+      .hud-settings-menu .hud-control { min-width: 100px; justify-content: center; }
+      .hud-settings.open .hud-settings-toggle { color: var(--gold); border-color: var(--gold); }
       @media (hover: hover) and (pointer: fine) {
         .hud span:hover,
         .hud button:hover { color: var(--gold); border-color: var(--gold); }
@@ -1888,10 +1901,15 @@
     <div class="world-dim" aria-hidden="true"></div>
 
     <div class="hud">
-      <span class="hud-control" id="hud-season" title="Click to change season">SUMMER</span>
-      <span class="hud-control" id="hud-time" title="Click to change time">DAY</span>
-      <span class="hud-control" id="hud-weather" title="Click to change weather">CLEAR</span>
-      <span class="hud-control" id="hud-speed" title="Click to speed up time">1×</span>
+      <div class="hud-settings" id="hud-settings-wrap">
+        <button class="hud-control hud-settings-toggle" id="hud-settings" type="button" title="World settings" aria-expanded="false" aria-controls="hud-settings-menu">SETTINGS</button>
+        <div class="hud-settings-menu" id="hud-settings-menu" role="menu" aria-hidden="true">
+          <span class="hud-control" id="hud-season" title="Click to change season" role="menuitem" tabindex="0">SUMMER</span>
+          <span class="hud-control" id="hud-time" title="Click to change time" role="menuitem" tabindex="0">DAY</span>
+          <span class="hud-control" id="hud-weather" title="Click to change weather" role="menuitem" tabindex="0">CLEAR</span>
+          <span class="hud-control" id="hud-speed" title="Click to speed up time" role="menuitem" tabindex="0">1×</span>
+        </div>
+      </div>
       <button class="hud-control" id="hud-dim" type="button" title="Dim the world" aria-pressed="false">DIM</button>
       <button class="hud-ui-toggle" id="hud-ui" type="button" title="Hide UI" aria-pressed="false">HIDE</button>
     </div>
@@ -2137,6 +2155,32 @@
           hudDim.addEventListener("click", () => {
             const dimmed = document.body.classList.toggle("dim-world");
             hudDim.setAttribute("aria-pressed", String(dimmed));
+          });
+        }
+
+        const hudSettings = document.getElementById("hud-settings");
+        const hudSettingsWrap = document.getElementById("hud-settings-wrap");
+        const hudSettingsMenu = document.getElementById("hud-settings-menu");
+        if (hudSettings && hudSettingsWrap && hudSettingsMenu) {
+          function setSettingsOpen(open) {
+            hudSettingsWrap.classList.toggle("open", open);
+            hudSettings.setAttribute("aria-expanded", String(open));
+            hudSettingsMenu.setAttribute("aria-hidden", String(!open));
+          }
+          hudSettings.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setSettingsOpen(!hudSettingsWrap.classList.contains("open"));
+          });
+          document.addEventListener("click", (e) => {
+            if (!hudSettingsWrap.classList.contains("open")) return;
+            if (hudSettingsWrap.contains(e.target)) return;
+            setSettingsOpen(false);
+          });
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && hudSettingsWrap.classList.contains("open")) {
+              setSettingsOpen(false);
+              hudSettings.focus();
+            }
           });
         }
 
