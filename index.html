@@ -1776,18 +1776,35 @@
         to { opacity: 0; transform: translateX(-30px); max-height: 0; padding: 0; margin: 0; }
       }
 
+      /* SNAP-BACK BUTTON (mobile only — appears when page is panned away from origin) */
+      .pan-reset {
+        position: fixed;
+        bottom: calc(14px + env(safe-area-inset-bottom));
+        right: calc(14px + env(safe-area-inset-right));
+        z-index: 15;
+        display: none;
+        color: var(--muted); background: var(--panel);
+        border: 1px solid var(--frame);
+        padding: 10px 12px; min-height: 32px; min-width: 62px;
+        font-family: "Press Start 2P", monospace;
+        font-size: 0.45rem;
+        letter-spacing: 0.5px;
+        align-items: center; justify-content: center;
+        cursor: pointer; user-select: none;
+        touch-action: manipulation;
+        line-height: 1;
+        border-radius: 0;
+        appearance: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .pan-reset.visible { opacity: 1; }
+      .pan-reset:active { color: var(--gold); border-color: var(--gold); transform: translate(1px, 1px); }
+      body.ui-hidden .pan-reset { opacity: 0; pointer-events: none; }
+
       @media (max-width: 600px) {
-        body { font-size: 18px; }
-        nav { flex-direction: column; gap: 14px; padding: 18px 0 12px; }
-        nav .links { flex-wrap: wrap; justify-content: center; }
-        header.hero { padding: 16px 0 8px; }
-        section { padding: 24px 0 14px; }
-        .sheet .stat { border-right: none; border-bottom: 2px solid var(--frame); }
-        .sheet .stat:last-child { border-bottom: none; }
-        .cards { grid-template-columns: 1fr; }
-        .actions { gap: 10px; }
-        .actions .btn { flex: 1 1 100%; }
-        footer { padding: 24px 0 40px; }
+        html, body { overflow-x: auto; }
+        .container { width: 820px; }
         .hud {
           top: calc(8px + env(safe-area-inset-top));
           right: calc(8px + env(safe-area-inset-right));
@@ -1795,15 +1812,11 @@
         }
         .hud span,
         .hud button { padding: 8px 10px; font-size: 0.42rem; min-height: 30px; }
-        .log {
-          width: min(180px, 50vw); font-size: 0.85rem;
-          top: calc(8px + env(safe-area-inset-top));
-          left: calc(8px + env(safe-area-inset-left));
-        }
+        .log { display: none; }
+        .pan-reset { display: inline-flex; }
       }
 
       @media (max-width: 380px) {
-        .log { width: 140px; font-size: 0.75rem; }
         .hud span,
         .hud button { padding: 7px 9px; }
       }
@@ -1893,6 +1906,8 @@
     <div class="log" id="log">
       <div class="log-title">✦ chronicle</div>
     </div>
+
+    <button class="pan-reset" id="pan-reset" type="button" title="Snap back to start" aria-label="Snap back to start">RECENTER</button>
 
     <div class="container">
       <nav>
@@ -10899,6 +10914,30 @@
         const word = words[years] ? words[years].replace(/^./, c => c.toUpperCase()) : String(years);
         const yEl = document.getElementById("years-at-rockbite");
         if (yEl) yEl.textContent = word;
+      })();
+    </script>
+    <script>
+      (function () {
+        const panReset = document.getElementById("pan-reset");
+        if (!panReset) return;
+        const THRESHOLD = 24;
+        function getScrollX() {
+          return Math.max(window.scrollX, document.body.scrollLeft, document.documentElement.scrollLeft);
+        }
+        function update() {
+          if (getScrollX() > THRESHOLD) panReset.classList.add("visible");
+          else panReset.classList.remove("visible");
+        }
+        window.addEventListener("scroll", update, { passive: true });
+        document.body.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+        panReset.addEventListener("click", () => {
+          window.scrollTo(0, window.scrollY);
+          document.body.scrollLeft = 0;
+          document.documentElement.scrollLeft = 0;
+          update();
+        });
+        update();
       })();
     </script>
   </body>
