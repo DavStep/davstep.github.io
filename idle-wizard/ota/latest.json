@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "appId": "com.idlewizard.game",
-  "version": "0.3.113",
-  "deployVersion": "534e2087f1cc-2026-08-26T11:51:57.728Z",
+  "version": "0.3.114",
+  "deployVersion": "5382309eaf60-2026-08-26T13:46:35.361Z",
   "minimumNativeVersion": "0.3.49",
   "platforms": [
     "android"
   ],
-  "bundleUrl": "https://davstep.github.io/idle-wizard/ota/bundles/idle-wizard-0.3.113.zip",
-  "checksum": "73a863f8c45a676e4445db1cc87a380b12322e28c46bceb5fbc52d0f9baa65b7",
-  "size": 29600105
+  "bundleUrl": "https://davstep.github.io/idle-wizard/ota/bundles/idle-wizard-0.3.114.zip",
+  "checksum": "a15ef6b44aaeefa4a809a9c90a0f3494924af121696e3420acf41423a104c12e",
+  "size": 29599904
 }
