@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { TownScene } from './scene';
 import { Residents } from './residents';
+import { Player } from './player';
+import { buildColliders, isBlocked, type Collider } from './collision';
 import { MILESTONES, TOWN_SAVE_KEY, parseSave, milestoneRecap, townAt, MINUTE, type TownSnapshot } from './model';
 import { PROJECTS, PROJECT_BY_KEY, type ProjectKey } from './projects';
 import './style.css';
+import './style-2.css';
 
 const $ = <T extends HTMLElement>(selector:string) => document.querySelector(selector) as T;
 const canvas=$<HTMLCanvasElement>('#town-canvas');
@@ -40,9 +43,16 @@ const townNow=()=>Number.isFinite(previewAge)&&previewAge>=0?save.createdAt+prev
 const recap=milestoneRecap(save,Date.now());
 function persist(){save.lastSeenAt=Date.now();save.elapsedFloorMs=Math.max(save.elapsedFloorMs,save.lastSeenAt-save.createdAt);save.eventCursor=Math.floor(save.elapsedFloorMs/MINUTE);try{localStorage.setItem(TOWN_SAVE_KEY,JSON.stringify(save));}catch{}}
 let snapshot:TownSnapshot=townAt(save,townNow());
-let town:TownScene|null=null,residents:Residents|null=null;
+let town:TownScene|null=null,residents:Residents|null=null,player:Player|null=null;
+let colliders:Collider[]=[],walking=false;
+const heldKeys=new Set<string>();
+const walkButton=$<HTMLButtonElement>('#control-walk');
+const walkHint=$<HTMLDivElement>('#walk-hint');
+const joystick=$<HTMLDivElement>('#joystick');
+const joystickStick=$<HTMLDivElement>('#joystick-stick');
+let joystickInput={x:0,z:0};
 let target=new THREE.Vector3(0,0,0),desiredTarget=target.clone();
-let azimuth=.72,elevation=.88,distance=132,desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
+let azimuth=.72,elevation=1.05,distance=154,desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
 let pointerStart:{x:number;y:number;time:number}|null=null;
 let lastPointer:{x:number;y:number}|null=null;
 const pointers=new Map<number,{x:number;y:number}>();
@@ -59,22 +69,26 @@ function setIntroHidden(value:boolean){intro.classList.toggle('dismissed',value)
 $('#intro-hide').addEventListener('click',()=>setIntroHidden(true));
 $('#intro-work').addEventListener('click',()=>openPanel('work'));
 $('#open-work-mobile').addEventListener('click',()=>openPanel('work'));
-$('#brand').addEventListener('click',()=>{closePanel();recenter();setIntroHidden(false);});
+$('#brand').addEventListener('click',()=>{closePanel();if(walking)leaveWalk();else recenter();setIntroHidden(false);});
 for(const button of document.querySelectorAll<HTMLButtonElement>('[data-panel]'))button.addEventListener('click',()=>openPanel(button.dataset.panel!));
 
 function projectMarkup(key:ProjectKey):string{
   const p=PROJECT_BY_KEY[key];
-  return `<div class="project-panel"><div class="project-visual"><img src="${p.image}" alt="Art from ${p.title}" loading="eager" /></div><div class="panel-copy"><div class="landmark-name">${p.landmark}</div><h2 id="${panelTitleId}">${p.title}</h2><p class="lead">${p.description}</p><p class="contribution">${p.contribution}</p>${p.url?`<a class="panel-action" href="${p.url}" target="_blank" rel="noopener noreferrer">Explore ${p.title} <span>↗</span></a>`:'<span class="development-note">In development · more to show soon</span>'}</div></div>`;
+  return `<div class="project-panel"><div class="project-visual"><img src="${p.image}" alt="Art from ${p.title}" loading="eager" /><span class="visual-caption">✦ &nbsp; ${p.landmark.toUpperCase()}</span></div><div class="panel-copy"><div class="landmark-name">PROJECT LANDMARK / ${p.landmark}</div><h2 id="${panelTitleId}">${p.title}</h2><p class="lead">${p.description}</p><p class="contribution">${p.contribution}</p>${p.url?`<a class="panel-action" href="${p.url}" target="_blank" rel="noopener noreferrer">Explore ${p.title} <span>↗</span></a>`:'<span class="development-note">In development · more to show soon</span>'}<div class="panel-endmark">DAV STEPANYAN <span>✦</span> SELECTED WORK</div></div></div>`;
 }
-function workMarkup():string{return `<div class="panel-copy"><div class="landmark-name">SIX PLACES TO EXPLORE</div><h2 id="${panelTitleId}">Selected work</h2><p class="lead">Games, playful systems, and experiments. Each project has a place in the town.</p><div class="work-list">${PROJECTS.map((p,i)=>`<button type="button" data-project-link="${p.key}"><span class="work-index">0${i+1}</span><span><strong>${p.title}</strong><small>${p.kicker}</small></span><span class="work-arrow">↗</span></button>`).join('')}</div></div>`;}
-function aboutMarkup():string{return `<div class="panel-copy"><div class="landmark-name">THE PERSON BEHIND THE WORLD</div><h2 id="${panelTitleId}">Hi, I'm Dav.</h2><p class="lead">I make worlds that won't sit still.</p><p>I'm a game developer in Yerevan, Armenia. At Rockbite Games I've worked across gameplay, economies, progression, and the small details that make systems feel alive. I enjoy both writing the code and watching what players actually do with it.</p><p>After hours, I keep building: browser games, creative tools, and a co-op mining adventure. This town is another place to try ideas and let them grow.</p><div class="about-facts"><div><small>ROLE</small><strong>Lead Code Wizard</strong></div><div><small>BASE</small><strong>Yerevan, Armenia</strong></div><div><small>CURRENTLY BUILDING</small><strong>Drunk Dwarves</strong></div></div></div>`;}
-function contactMarkup():string{return `<div class="panel-copy"><div class="landmark-name">THE TOWN POST</div><h2 id="${panelTitleId}">Let's make something alive.</h2><p class="lead">Have a game idea, a system to untangle, or just want to compare notes?</p><a class="panel-action" href="mailto:davitstepanyan99@gmail.com">Send me an email <span>↗</span></a><div class="contact-links"><a href="https://github.com/DavStep" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://anilist.co/user/DevStep" target="_blank" rel="noopener noreferrer">AniList ↗</a><a href="https://steamcommunity.com/id/stepdev/" target="_blank" rel="noopener noreferrer">Steam ↗</a><button type="button" id="copy-discord">Copy Discord: step_dev ↗</button></div></div>`;}
+function editorialArt(symbol:string,heading:string,sub:string){return `<div class="editorial-art" aria-hidden="true"><div class="art-grid"></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-symbol">${symbol}</div><div class="art-caption"><span>✦ &nbsp; THE LIVING TOWN</span><strong>${heading}</strong><small>${sub}</small></div></div>`;}
+function workMarkup():string{return `<div class="editorial-panel">${editorialArt('⌂','THE ARCHIVE','01 — SIX PROJECTS')}<div class="panel-copy"><div class="landmark-name">SIX PLACES TO EXPLORE</div><h2 id="${panelTitleId}">Selected work</h2><p class="lead">Games, playful systems, and experiments. Each project has a place in the town.</p><div class="work-list">${PROJECTS.map((p,i)=>`<button type="button" data-project-link="${p.key}"><span class="work-index">0${i+1}</span><span><strong>${p.title}</strong><small>${p.kicker}</small></span><span class="work-arrow">↗</span></button>`).join('')}</div></div></div>`;}
+function aboutMarkup():string{return `<div class="editorial-panel">${editorialArt('✦','THE BUILDER','02 — ABOUT')}<div class="panel-copy"><div class="landmark-name">THE PERSON BEHIND THE WORLD</div><h2 id="${panelTitleId}">Hi, I'm Dav.</h2><p class="lead">I make worlds that won't sit still.</p><p>I'm a game developer in Yerevan, Armenia. At Rockbite Games I've worked across gameplay, economies, progression, and the small details that make systems feel alive. I enjoy both writing the code and watching what players actually do with it.</p><p>After hours, I keep building: browser games, creative tools, and a co-op mining adventure. This town is another place to try ideas and let them grow.</p><div class="about-facts"><div><small>ROLE</small><strong>Lead Code Wizard</strong></div><div><small>BASE</small><strong>Yerevan, Armenia</strong></div><div><small>CURRENTLY BUILDING</small><strong>Drunk Dwarves</strong></div></div></div></div>`;}
+function contactMarkup():string{return `<div class="editorial-panel">${editorialArt('✉','THE TOWN POST','03 — CONTACT')}<div class="panel-copy"><div class="landmark-name">THE TOWN POST</div><h2 id="${panelTitleId}">Let's make something alive.</h2><p class="lead">Have a game idea, a system to untangle, or just want to compare notes?</p><a class="panel-action" href="mailto:davitstepanyan99@gmail.com">Send me an email <span>↗</span></a><div class="contact-links"><a href="https://github.com/DavStep" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://anilist.co/user/DevStep" target="_blank" rel="noopener noreferrer">AniList ↗</a><a href="https://steamcommunity.com/id/stepdev/" target="_blank" rel="noopener noreferrer">Steam ↗</a><button type="button" id="copy-discord">Copy Discord: step_dev ↗</button></div></div></div>`;}
 function validPanel(id:string|null):string|null{return id&&(id==='work'||id==='about'||id==='contact'||id.startsWith('project-')&&PROJECTS.some(p=>`project-${p.key}`===id))?id:null;}
 function openPanel(id:string,updateHistory=true){
   const valid=validPanel(id);if(!valid)return;
   if(activePanel===valid)return;
+  if(walking)leaveWalk(false);
   if(!activePanel)lastFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   activePanel=valid;
+  panel.dataset.view=valid.startsWith('project-')?'project':valid;
+  panel.querySelectorAll<HTMLButtonElement>('.panel-tab').forEach(button=>button.setAttribute('aria-current',String(button.dataset.panel===valid)));
   panelKicker.textContent=valid.startsWith('project-')?PROJECT_BY_KEY[valid.slice(8) as ProjectKey].kicker:valid==='work'?'THE TOWN ARCHIVE':valid==='about'?'ABOUT DAV':'GET IN TOUCH';
   panelBody.innerHTML=valid.startsWith('project-')?projectMarkup(valid.slice(8) as ProjectKey):valid==='work'?workMarkup():valid==='about'?aboutMarkup():contactMarkup();
   panel.hidden=false;backdrop.hidden=false;$('.chrome').inert=true;$('.town-ui').inert=true;fallback.inert=true;
@@ -98,19 +112,47 @@ function closePanel(updateHistory=true){
 closeButton.addEventListener('click',()=>closePanel());backdrop.addEventListener('click',()=>closePanel());
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&activePanel){e.preventDefault();closePanel();return;}
+  if(e.key==='Escape'&&walking){e.preventDefault();leaveWalk();return;}
+  if(walking&&['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)&&!activePanel){e.preventDefault();heldKeys.add(e.code);}
   if(e.key==='Tab'&&activePanel){const items=[...panel.querySelectorAll<HTMLElement>('button,a[href]')].filter(el=>!el.hasAttribute('disabled'));if(!items.length)return;const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
   if(!activePanel&&e.key==='+'||!activePanel&&e.key==='=')zoom(-12);
   if(!activePanel&&e.key==='-')zoom(12);
 });
+document.addEventListener('keyup',e=>heldKeys.delete(e.code));
+window.addEventListener('blur',()=>heldKeys.clear());
 window.addEventListener('popstate',()=>{const id=validPanel(location.hash.slice(1));if(id)openPanel(id,false);else closePanel(false);});
 
-function recenter(){desiredTarget.set(0,0,0);desiredDistance=132;desiredAzimuth=.72;desiredElevation=.88;}
-function zoom(delta:number){desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,52,175);}
-$('#control-recenter').addEventListener('click',recenter);
+function recenter(){desiredTarget.set(0,0,0);desiredDistance=154;desiredAzimuth=.72;desiredElevation=1.05;}
+function enterWalk(){
+  if(!player)return;
+  const spawn=[{x:40,z:0},{x:41,z:6},{x:39,z:-7},{x:8,z:11}].find(p=>!isBlocked(p.x,p.z,colliders,1.1));
+  if(spawn){player.position.x=spawn.x;player.position.z=spawn.z;}
+  walking=true;player.setVisible(true);setIntroHidden(true);
+  desiredTarget.set(player.position.x-4,1.8,player.position.z);desiredDistance=town?.mobile?20:23;desiredElevation=town?.mobile?.58:.66;desiredAzimuth=0;
+  walkButton.textContent='Overview';walkButton.setAttribute('aria-label','Return to town overview');walkButton.setAttribute('aria-pressed','true');
+  walkHint.hidden=false;joystick.hidden=!town?.mobile;
+}
+function leaveWalk(recenterTown=true){
+  walking=false;player?.setVisible(false);heldKeys.clear();joystickInput={x:0,z:0};joystickStick.style.transform='translate(0,0)';
+  walkButton.textContent='Walk';walkButton.setAttribute('aria-label','Walk through town');walkButton.setAttribute('aria-pressed','false');
+  walkHint.hidden=true;joystick.hidden=true;if(recenterTown)recenter();
+}
+function zoom(delta:number){desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,walking?9:52,walking?27:220);}
+walkButton.addEventListener('click',()=>walking?leaveWalk():enterWalk());
+$('#control-recenter').addEventListener('click',()=>{if(walking)leaveWalk();else recenter();});
 $('#control-zoom-in').addEventListener('click',()=>zoom(-14));
 $('#control-zoom-out').addEventListener('click',()=>zoom(14));
 const settings=$<HTMLDivElement>('#settings-panel'),settingsButton=$<HTMLButtonElement>('#control-settings');
 settingsButton.addEventListener('click',()=>{settings.hidden=!settings.hidden;settingsButton.setAttribute('aria-expanded',String(!settings.hidden));});
+function moveStick(event:PointerEvent){
+  const rect=joystick.getBoundingClientRect(),radius=rect.width*.34;
+  const dx=event.clientX-(rect.left+rect.width/2),dy=event.clientY-(rect.top+rect.height/2),length=Math.max(1,Math.hypot(dx,dy));
+  const factor=Math.min(1,radius/length),x=dx*factor,z=dy*factor;
+  joystickInput={x:x/radius,z:-z/radius};joystickStick.style.transform=`translate(${x}px,${z}px)`;
+}
+joystick.addEventListener('pointerdown',e=>{joystick.setPointerCapture(e.pointerId);moveStick(e);});
+joystick.addEventListener('pointermove',e=>{if(joystick.hasPointerCapture(e.pointerId))moveStick(e);});
+for(const type of ['pointerup','pointercancel'] as const)joystick.addEventListener(type,()=>{joystickInput={x:0,z:0};joystickStick.style.transform='translate(0,0)';});
 canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY*.025);},{passive:false});
 canvas.addEventListener('pointerdown',e=>{if(activePanel)return;canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});pointerStart={x:e.clientX,y:e.clientY,time:performance.now()};lastPointer={x:e.clientX,y:e.clientY};dragged=false;});
 canvas.addEventListener('pointermove',e=>{
@@ -141,7 +183,8 @@ function positionLabels(){
     projected.set(p.x,Math.max(3.5,2.6+p.stage*.62),p.z).project(town.camera);
     const x=(projected.x*.5+.5)*innerWidth,y=(-projected.y*.5+.5)*innerHeight;
     const behindIntro=introRect&&x>introRect.left-80&&x<introRect.right+80&&y>introRect.top-32&&y<introRect.bottom+32;
-    const visible=!behindIntro&&projected.z<1&&projected.z>-1&&projected.x>-(town.mobile?.86:1.02)&&projected.x<(town.mobile?.86:1.02)&&projected.y>-1.08&&projected.y<1.08;
+    const nearby=!walking||!player||Math.hypot(player.position.x-p.x,player.position.z-p.z)<42;
+    const visible=nearby&&!behindIntro&&projected.z<1&&projected.z>-1&&projected.x>-(town.mobile?.86:1.02)&&projected.x<(town.mobile?.86:1.02)&&projected.y>-1.08&&projected.y<1.08;
     button.style.display=visible?'flex':'none';button.style.left=`${x}px`;button.style.top=`${y}px`;
   }
 }
@@ -157,15 +200,19 @@ function updateReadouts(){
 }
 function stepCamera(){if(!town)return;const k=reduced.matches?1:.09;target.lerp(desiredTarget,k);azimuth+=(desiredAzimuth-azimuth)*k;elevation+=(desiredElevation-elevation)*k;distance+=(desiredDistance-distance)*k;const horizontal=Math.sin(elevation)*distance;town.camera.position.set(target.x+Math.cos(azimuth)*horizontal,Math.cos(elevation)*distance,target.z+Math.sin(azimuth)*horizontal);town.camera.lookAt(target);}
 function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!town)return;const cap=town.mobile?30:60;if(now-lastFrame<1000/cap-1)return;const elapsed=lastFrame?now-lastFrame:1000/cap;lastFrame=now;
-  if(now-lastModel>750){lastModel=now;snapshot=townAt(save,townNow());town.update(snapshot);updateReadouts();}
+  if(now-lastModel>750){lastModel=now;snapshot=townAt(save,townNow());town.update(snapshot);colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();}
   snapshot.elapsed=Math.max(0,townNow()-save.createdAt,save.elapsedFloorMs);snapshot.dayFraction=(snapshot.elapsed%(12*MINUTE))/(12*MINUTE);
+  if(walking&&player){
+    const input={x:(heldKeys.has('KeyD')||heldKeys.has('ArrowRight')?1:0)-(heldKeys.has('KeyA')||heldKeys.has('ArrowLeft')?1:0)+joystickInput.x,z:(heldKeys.has('KeyW')||heldKeys.has('ArrowUp')?1:0)-(heldKeys.has('KeyS')||heldKeys.has('ArrowDown')?1:0)+joystickInput.z,sprint:heldKeys.has('ShiftLeft')||heldKeys.has('ShiftRight')};
+    player.update(elapsed/1000,input,azimuth,colliders);desiredTarget.set(player.position.x-Math.cos(azimuth)*4,1.8,player.position.z-Math.sin(azimuth)*4);
+  }
   stepCamera();residents?.update(snapshot);positionLabels();town.render();
   if(profile&&Math.floor(now/2000)!==Math.floor((now-elapsed)/2000)){document.body.dataset.drawCalls=String(town.renderer.info.render.calls);document.body.dataset.triangles=String(town.renderer.info.render.triangles);document.body.dataset.geometries=String(town.renderer.info.memory.geometries);document.body.dataset.textures=String(town.renderer.info.memory.textures);}
-  frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b),p90=sorted[Math.floor(sorted.length*.9)];frameSamples=[];if(profile){document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=p90.toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}const max=town.mobile?1.25:1.6;if(p90>(town.mobile?37:21)&&pixelRatio>0.85){pixelRatio=Math.max(.85,pixelRatio-.1);town.setPixelRatio(pixelRatio);}else if(p90<(town.mobile?28:15)&&pixelRatio<max){pixelRatio=Math.min(max,pixelRatio+.05);town.setPixelRatio(pixelRatio);}}
+  frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b),p90=sorted[Math.floor(sorted.length*.9)];frameSamples=[];if(profile){document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=p90.toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}const max=town.mobile?1.25:1.6;if(p90>(town.mobile?45:25)&&pixelRatio>0.85){pixelRatio=Math.max(.85,pixelRatio-.1);town.setPixelRatio(pixelRatio);}else if(p90<(town.mobile?36:19)&&pixelRatio<max){pixelRatio=Math.min(max,pixelRatio+.05);town.setPixelRatio(pixelRatio);}}
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas);pixelRatio=Math.min(devicePixelRatio,town.mobile?1.25:1.5);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);town.update(snapshot);updateReadouts();document.body.classList.add('town-ready');requestAnimationFrame(frame);
+  town=new TownScene(canvas);pixelRatio=Math.min(devicePixelRatio,town.mobile?1.25:1.5);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);player=new Player(town.scene);town.update(snapshot);colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,save,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();positionLabels();});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;labels.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}

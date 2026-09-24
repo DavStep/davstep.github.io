@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import * as THREE from 'three';
 import { createSave, milestoneRecap, parseSave, townAt, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
 import { routeBetween } from '../src/town/residents';
+import { buildColliders, isBlocked, moveWithCollisions } from '../src/town/collision';
+import { riverCenter } from '../src/town/environment';
+import { Player } from '../src/town/player';
 
 const t0=1_700_000_000_000;
 const save=createSave(t0,711);
@@ -59,4 +63,33 @@ test('road routing starts and ends at the requested locations',()=>{
   assert.ok(path.length>=3);
   assert.equal(path[0].x,a.x);assert.equal(path[0].z,a.z);
   assert.equal(path.at(-1)?.x,b.x);assert.equal(path.at(-1)?.z,b.z);
+});
+
+test('walk collision blocks buildings and water while sliding along their edges',()=>{
+  const town=townAt(save,t0+30*MINUTE),colliders=buildColliders(town);
+  assert.ok(isBlocked(0,0,colliders));
+  assert.ok(isBlocked(0,riverCenter(0),colliders));
+  const moved=moveWithCollisions({x:8,z:8},{x:-7,z:4},colliders);
+  assert.ok(!isBlocked(moved.x,moved.z,colliders));
+  assert.ok(moved.z>8);
+});
+
+test('a walker cannot pass through a wall segment but can use a gate',()=>{
+  const colliders=buildColliders(townAt(save,t0+30*MINUTE));
+  const wall=moveWithCollisions({x:23,z:23},{x:5,z:5},colliders);
+  assert.ok(Math.hypot(wall.x,wall.z)<34);
+  const gate=moveWithCollisions({x:30,z:3},{x:10,z:0},colliders);
+  assert.ok(gate.x>34);
+});
+
+test('walk controls advance the avatar toward the camera heading and animate its stride',()=>{
+  const player=new Player(new THREE.Scene());player.setVisible(true);
+  for(let i=0;i<30;i++)player.update(1/60,{x:0,z:1,sprint:false},0,[]);
+  assert.ok(player.position.x<5.5);
+  assert.ok(Math.abs(player.position.z-11)<.01);
+  assert.ok(Math.abs(player.group.rotation.y)>1);
+  const stoppedX=player.position.x;
+  for(let i=0;i<30;i++)player.update(1/60,{x:0,z:0,sprint:false},0,[]);
+  assert.ok(player.position.x<stoppedX);
+  assert.ok(player.position.x>stoppedX-1);
 });

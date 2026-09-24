@@ -3,27 +3,9 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
 import type { ProjectKey } from './projects';
-
-const C = {
-  grass: 0x71855b, grassDark: 0x556e4f, earth: 0x8d795f, path: 0xb39a74,
-  wood: 0x80604b, woodLight: 0x9b7759, woodDark: 0x674d3d,
-  stone: 0xa7a195, stoneDark: 0x777b78, plaster: 0xe5c9a1,
-  roof: 0xb56c58, roofDark: 0x76576b, roofBlue: 0x668193,
-  gold: 0xe9c06c, window: 0x50433d, lamp: 0xffd390,
-};
+import { C, MAT, type Mat } from './materials';
+import { Environment } from './environment';
 const MOBILE=matchMedia('(max-width: 700px)').matches;
-const makeMat = (color: number, roughness = 0.85, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness, flatShading: false });
-const MAT = {
-  grass: makeMat(C.grass), grassDark: makeMat(C.grassDark), earth: makeMat(C.earth), path: makeMat(C.path),
-  wood: makeMat(C.wood, .82), woodLight: makeMat(C.woodLight, .82), woodDark: makeMat(C.woodDark, .86),
-  stone: makeMat(C.stone, .94), stoneDark: makeMat(C.stoneDark, .96), plaster: makeMat(C.plaster),
-  roof: makeMat(C.roof), roofDark: makeMat(C.roofDark), roofBlue: makeMat(C.roofBlue),
-  gold: makeMat(C.gold, .52, .28), window: makeMat(C.window),
-  lamp: new THREE.MeshBasicMaterial({ color: C.lamp }),
-  white: makeMat(0xeae9dd), leaf: makeMat(0x52775a), leafLight: makeMat(0x709466), leafDark: makeMat(0x456b5a),
-  red: makeMat(0xbe7062), purple: makeMat(0x8d729e), blue: makeMat(0x668db0),
-} as const;
-type Mat = THREE.Material;
 const boxGeometry = new RoundedBoxGeometry(1,1,1,2,.08);
 const plainBoxGeometry = new THREE.BoxGeometry(1,1,1);
 const sphereGeometry = new THREE.IcosahedronGeometry(1,1);
@@ -46,6 +28,37 @@ function gableRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:numb
   ]);
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(vertices,3));geometry.computeVertexNormals();
   const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
+function hipRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:number,rise:number,material:Mat){
+  const a=w/2,b=d/2,flat=Math.min(w,d)*.18;
+  const vertices=new Float32Array([
+    -a,0,-b, -flat,rise,0, -a,0,b, -a,0,b, -flat,rise,0, flat,rise,0,
+    a,0,b, flat,rise,0, a,0,-b, a,0,-b, flat,rise,0, -flat,rise,0,
+    -a,0,-b, a,0,-b, -flat,rise,0, a,0,-b, flat,rise,0, -flat,rise,0,
+    -a,0,b, flat,rise,0, a,0,b,
+  ]);
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(vertices,3));geo.computeVertexNormals();
+  const mesh=new THREE.Mesh(geo,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
+}
+function roofDetail(parent:THREE.Group,w:number,d:number,h:number,rise:number,variant:number,material:Mat){
+  if(MOBILE)return;
+  // Broad courses give the roofs a hand-laid silhouette without a texture atlas.
+  for(const side of [-1,1])for(let i=1;i<=3;i++){
+    const x=side*w*(i/8), y=h+rise*(1-i/4)+.11;
+    box(parent,x,y,0,w*.23,.075,d+.42,material,0,false).rotation.z=-side*Math.atan2(rise,w*.5);
+  }
+  box(parent,0,h+rise+.08,0,.24,.17,d+.48,variant%2?MAT.woodDark:material,0,false);
+}
+function chimney(parent:THREE.Group,x:number,z:number,h:number){
+  box(parent,x,h+.7,z,.55,1.4,.55,MAT.stoneDark);
+  box(parent,x,h+1.46,z,.78,.21,.78,MAT.stone);
+}
+function porch(parent:THREE.Group,d:number,roofMat:Mat,variant:number){
+  box(parent,0,.28,d*.5+1.08,2.45,.22,1.85,MAT.stoneDark);
+  box(parent,0,.12,d*.5+2.08,1.65,.18,.57,MAT.stone);
+  for(const side of [-1,1])box(parent,side*1.08,1.31,d*.5+1.54,.15,1.94,.15,MAT.woodDark);
+  const roof=box(parent,0,2.3,d*.5+1.45,2.85,.24,2.05,variant%2?roofMat:MAT.woodDark);
+  roof.rotation.x=-.13;
 }
 function tower(parent:THREE.Group,x:number,z:number,height:number,material:Mat=MAT.stone) {
   box(parent,x,height/2,z,2.1,height,2.1,material);
@@ -88,8 +101,10 @@ function building(plot:PlotState): THREE.Group {
   }
   box(g,0,h*.5,0,w,h,d,wallMat);
   box(g,0,h+.13,0,w+.65,.28,d+.65,MAT.woodDark);
+  const roofRise=kind==='castle'?2.1:kind==='home'?(v%3===1?1.65:1.2):1.55;
   if(kind==='castle'&&stage>=5)box(g,0,h+.3,0,w+.9,.62,d+.9,MAT.stoneDark);
-  else gableRoof(g,0,h+.06,0,w+.85,d+.75,kind==='castle'?2.1:kind==='home'?1.2:1.55,roofMat);
+  else if(kind==='home'&&v%3===2)hipRoof(g,0,h+.06,0,w+.9,d+.83,roofRise,roofMat);
+  else {gableRoof(g,0,h+.06,0,w+.85,d+.75,roofRise,roofMat);if(kind==='home')roofDetail(g,w+.85,d+.75,h+.06,roofRise,v,roofMat);}
   // All later stages visibly add occupancy and architectural mass.
   if(stage>=3){
     box(g,0,.75,d*.505,1.1,1.5,.08,MAT.woodDark);
@@ -99,9 +114,26 @@ function building(plot:PlotState): THREE.Group {
     if(kind==='home'||kind==='project'){for(const sx of [-1,1])box(g,sx*w*.48,h*.48,d*.51,.17,h*.94,.19,MAT.woodDark);box(g,0,h*.68,d*.51,.14,h*.5,.17,MAT.woodLight);}
     box(g,w*.28,h*.55,d*.57,.13,.84,.12,MAT.woodLight);
     awning(g,0,1.85,d*.55,Math.min(2.3,w*.52),roofMat);
+    if(kind==='home'){
+      // Four facade families remain legible as individual cottages from the walk camera.
+      const accent=v%4===0?MAT.woodLight:v%4===1?MAT.woodDark:v%4===2?MAT.stoneDark:MAT.roof;
+      for(const side of [-1,1]){
+        box(g,side*(w*.5-.13),h*.48,d*.48,.16,h*.91,.18,accent);
+        box(g,side*w*.28,h*.55,d*.65,.15,.9,.16,accent);
+        box(g,side*w*.28,h*.96,d*.57,.87,.12,.17,accent);
+        if(v%2===0)box(g,side*w*.28,.51,d*.7,.8,.17,.32,MAT.stone);
+      }
+      box(g,0,h*.88,d*.53,w*.91,.12,.18,accent);
+      if(v%4===1){box(g,0,h*.63,-d*.5,.17,h*.65,.18,accent);box(g,0,h*.78,-d*.51,w*.9,.12,.18,accent);}
+      if(v%4===2)porch(g,d,roofMat,v);
+      if(v%4===3){
+        box(g,0,h*.72,d*.6,1.25,.48,.2,MAT.woodDark);
+        for(const side of [-1,1])box(g,side*.64,h*.49,d*.67,.13,.8,.15,MAT.woodDark);
+      }
+    }
   }
   if(stage>=5){
-    box(g,-w*.35,h+1.12,-d*.18,.55,1.3,.55,MAT.stoneDark);
+    chimney(g,-w*.35,-d*.18,h);
     box(g,w*.53,.75,-d*.17,1.65,1.4,2.1,MAT.woodLight);
     box(g,w*.53,1.5,-d*.17,1.9,.3,2.35,roofMat);
     flag(g,-w*.35,h+1.02,d*.08,roofMat);
@@ -113,6 +145,15 @@ function building(plot:PlotState): THREE.Group {
     if(kind==='home'){
       box(g,w*.65,.23,d*.16,2.15,.42,2.5,MAT.earth);
       for(let i=0;i<3;i++)ball(g,w*.45+i*.58,.52,d*.16,.23,.4,.23,i%2?MAT.red:MAT.leaf);
+    }
+  }
+  if(kind==='home'&&stage>=4){
+    const side=v%2?-1:1;
+    box(g,side*(w*.5+.59),.23,-d*.12,1.25,.28,1.7,MAT.earth);
+    for(let i=0;i<3;i++)ball(g,side*(w*.5+.38+i*.21),.48,-d*.39+i*.45,.2,.25,.2,i%2?MAT.red:MAT.leaf);
+    if(v%4===0&&stage>=5){
+      box(g,side*(w*.5+.38),h*.59,-d*.24,1.35,1.45,1.45,wallMat);
+      hipRoof(g,side*(w*.5+.38),h*1.12,-d*.24,1.7,1.75,.8,roofMat);
     }
   }
   if(kind==='castle'){
@@ -168,10 +209,13 @@ function building(plot:PlotState): THREE.Group {
 function hash(n:number){let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;}
 export class TownScene {
   readonly scene=new THREE.Scene();
-  readonly camera=new THREE.PerspectiveCamera(43,1,.1,450);
+  readonly camera=new THREE.PerspectiveCamera(43,1,.1,650);
   readonly renderer:THREE.WebGLRenderer;
   readonly pickBoxes=new Map<ProjectKey,THREE.Box3>();
+  readonly treeObstacles:{x:number;z:number;r:number}[]=[];
   private readonly land=new THREE.Group();
+  readonly environment:Environment;
+  private currentSeason='summer';
   private readonly structures=new THREE.Group();
   private readonly roads=new THREE.Group();
   private readonly walls=new THREE.Group();
@@ -190,15 +234,16 @@ export class TownScene {
     this.renderer.shadowMap.enabled=!this.mobile;
     this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     this.scene.background=new THREE.Color(0xbad6dc);
-    this.scene.fog=new THREE.Fog(0xbad6dc,110,280);
+    this.scene.fog=new THREE.Fog(0xbad6dc,200,500);
     this.sun.position.set(-32,63,28);this.sun.castShadow=!this.mobile;
     this.sun.shadow.mapSize.set(this.mobile?512:1024,this.mobile?512:1024);
     this.sun.shadow.camera.left=-76;this.sun.shadow.camera.right=76;this.sun.shadow.camera.top=76;this.sun.shadow.camera.bottom=-76;
     this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=180;
     this.sun.shadow.bias=-.00015;
     this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls);
+    this.environment=new Environment(this.scene,this.mobile);
     this.camera.position.set(95,106,108);this.camera.lookAt(0,0,0);
-    this.createLand();this.createDecor();this.resize();
+    this.createDecor();this.resize();
   }
   resize(){const w=innerWidth,h=innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
   setPixelRatio(r:number){this.renderer.setPixelRatio(r);this.resize();}
@@ -224,6 +269,7 @@ export class TownScene {
       const x=Math.cos(angle)*r,z=Math.sin(angle)*r;
       if(r>66||Math.abs(r-31.5)<3||Math.abs(r-55)<3.5||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5))||Math.abs(x)<2.2||Math.abs(z)<2.2)continue;
       trees.push({x,z,scale:.75+(hash(i*411)%75)/100,shape:i%3});
+      this.treeObstacles.push({x,z,r:.8});
     }
     const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.33,.45,1.8,5),MAT.woodDark,trees.length);
     const canopy=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.55,1),MAT.leaf,trees.length);
@@ -332,6 +378,7 @@ export class TownScene {
     }
   }
   update(snapshot:TownSnapshot){
+    this.currentSeason=snapshot.season;
     const structureSignature=snapshot.plots.map(p=>`${p.stage}${p.renovation}${p.complexId?'c':''}`).join('');
     const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}`;
     if(structureSignature!==this.structureSignature){this.structureSignature=structureSignature;this.buildStructures(snapshot.plots);}
@@ -349,6 +396,6 @@ export class TownScene {
     MAT.leaf.color.set(snapshot.season==='autumn'?0xa47a4d:snapshot.season==='winter'?0x758270:0x52775a);
     this.renderer.toneMappingExposure=1.35-.15*night;
   }
-  render(){this.renderer.render(this.scene,this.camera);}
+  render(){this.environment.update(performance.now()/1000,this.currentSeason);this.renderer.render(this.scene,this.camera);}
   dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.renderer.dispose();}
 }

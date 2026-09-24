@@ -35,9 +35,9 @@ const palettes={
 };
 const roles:Role[]=['builder','resident','merchant','resident','guard','mage','resident','warrior','resident','artist','resident','miner'];
 interface Resident { role:Role;home:{x:number;z:number};work:{x:number;z:number};id:number; }
-type Part='torso'|'head'|'leftLeg'|'rightLeg'|'leftArm'|'rightArm'|'hat'|'mageHat'|'apron'|'shield'|'parcel'|'food';
-const BOX=new RoundedBoxGeometry(1,1,1,2,.16),PLAIN_BOX=new THREE.BoxGeometry(1,1,1),HEAD=new THREE.IcosahedronGeometry(1,1),HAT=new THREE.ConeGeometry(1,1,7);
-const PARTS:Part[]=['torso','head','leftLeg','rightLeg','leftArm','rightArm','hat','mageHat','apron','shield','parcel','food'];
+type Part='torso'|'head'|'hair'|'leftEye'|'rightEye'|'nose'|'leftLeg'|'rightLeg'|'leftFoot'|'rightFoot'|'leftArm'|'rightArm'|'leftHand'|'rightHand'|'hat'|'mageHat'|'apron'|'shield'|'parcel'|'food';
+const BOX=new RoundedBoxGeometry(1,1,1,2,.16),PLAIN_BOX=new THREE.BoxGeometry(1,1,1),HEAD=new THREE.SphereGeometry(1,10,8),LOW_HEAD=new THREE.IcosahedronGeometry(1,1),HAT=new THREE.ConeGeometry(1,1,7);
+const PARTS:Part[]=['torso','head','hair','leftEye','rightEye','nose','leftLeg','rightLeg','leftFoot','rightFoot','leftArm','rightArm','leftHand','rightHand','hat','mageHat','apron','shield','parcel','food'];
 const COLOR={wood:0x5a514b,guard:0x8f9694,builder:0xe0bc71,mage:0x756594,merchant:0xd4bb8b,artist:0xb78180,miner:0xe4c38a,plain:0x6d5142,shield:0xa3a9a4};
 export class Residents {
   readonly group=new THREE.Group();
@@ -49,7 +49,7 @@ export class Residents {
   constructor(scene:THREE.Scene){
     const base=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.87});
     for(const part of PARTS){
-      const geo=part==='head'?HEAD:part==='mageHat'?HAT:this.mobile?PLAIN_BOX:BOX;
+      const geo=part==='mageHat'?HAT:['head','hair','leftEye','rightEye','nose','leftHand','rightHand','food'].includes(part)?this.mobile?LOW_HEAD:HEAD:this.mobile?PLAIN_BOX:BOX;
       const mesh=new THREE.InstancedMesh(geo,base,this.capacity);
       mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled=false;
@@ -65,7 +65,8 @@ export class Residents {
       this.residents.push({id,role,home:{x:home.x,z:home.z},work:{x:job.x,z:job.z}});
       const cloth=palettes.cloth[id%palettes.cloth.length],skin=palettes.skin[(id*7)%palettes.skin.length];
       const colors:Record<Part,number>={
-        torso:cloth,head:skin,leftLeg:COLOR.wood,rightLeg:COLOR.wood,leftArm:skin,rightArm:skin,
+        torso:cloth,head:skin,hair:[0x42382f,0x6c4a35,0x393942,0x8a6243][id%4],leftEye:0x263038,rightEye:0x263038,nose:skin,
+        leftLeg:COLOR.wood,rightLeg:COLOR.wood,leftFoot:COLOR.wood,rightFoot:COLOR.wood,leftArm:cloth,rightArm:cloth,leftHand:skin,rightHand:skin,
         hat:role==='builder'?COLOR.builder:role==='guard'||role==='warrior'?COLOR.guard:role==='merchant'?COLOR.merchant:role==='artist'?COLOR.artist:role==='miner'?COLOR.miner:COLOR.plain,
         mageHat:COLOR.mage,apron:COLOR.merchant,shield:COLOR.shield,parcel:role==='miner'?COLOR.wood:COLOR.builder,food:0xc47d53,
       };
@@ -95,18 +96,27 @@ export class Residents {
       const path=routeBetween(from,to),pos=moving?sampleRoute(path,progress):new THREE.Vector3(to.x,.58,to.z);
       const next=moving?sampleRoute(path,Math.min(1,progress+.01)):pos;
       const yaw=moving?Math.atan2(next.x-pos.x,next.z-pos.z):0;
-      const step=moving?Math.sin(snapshot.elapsed/145+id*2)*.38:0;
-      const bob=moving?Math.abs(Math.sin(snapshot.elapsed/145+id*2))*.06:0;
+      const step=moving?Math.sin(snapshot.elapsed/310+id*2)*.46:0;
+      const bob=moving?Math.abs(Math.sin(snapshot.elapsed/310+id*2))*.08:0;
       const size=.8+(id%4)*.07,yy=.58+bob;
-      const armSwing=moving?-step*.7:p.role==='builder'&&activeSite?Math.sin(snapshot.elapsed/180+id)*.5:Math.sin(snapshot.elapsed/1200+id)*.1;
+      const greeting=!moving&&shift>=.63&&shift<.74&&id%3===0;
+      const armSwing=moving?-step*.7:p.role==='builder'&&activeSite?Math.sin(snapshot.elapsed/230+id)*.75:greeting?Math.sin(snapshot.elapsed/260+id)*.6:Math.sin(snapshot.elapsed/1200+id)*.1;
       const dx=Math.cos(yaw),dz=-Math.sin(yaw);
       const local=(x:number,z:number):[number,number]=>[pos.x+x*dx+z*Math.sin(yaw),pos.z+z*Math.cos(yaw)+x*dz];
-      let q=local(0,0);this.put('torso',id,q[0],yy+1.43*size,q[1],.86*size,1.13*size,.58*size,yaw);
-      this.put('head',id,q[0],yy+2.35*size,q[1],.47*size,.5*size,.47*size,yaw);
+      let q=local(0,0);this.put('torso',id,q[0],yy+1.43*size,q[1],.87*size,1.2*size,.68*size,yaw);
+      this.put('head',id,q[0],yy+2.36*size,q[1],.49*size,.53*size,.48*size,yaw);
+      this.put('hair',id,q[0],yy+2.73*size,q[1]-.04,.51*size,.21*size,.49*size,yaw);
+      q=local(-.18*size,.44*size);this.put('leftEye',id,q[0],yy+2.43*size,q[1],.052*size,.072*size,.042*size,yaw);
+      q=local(.18*size,.44*size);this.put('rightEye',id,q[0],yy+2.43*size,q[1],.052*size,.072*size,.042*size,yaw);
+      q=local(0,.49*size);this.put('nose',id,q[0],yy+2.23*size,q[1],.1*size,.11*size,.12*size,yaw);
       q=local(-.25*size,0);this.put('leftLeg',id,q[0],yy+.55*size,q[1],.29*size,1.1*size,.35*size,yaw,step);
       q=local(.25*size,0);this.put('rightLeg',id,q[0],yy+.55*size,q[1],.29*size,1.1*size,.35*size,yaw,-step);
-      q=local(-.58*size,0);this.put('leftArm',id,q[0],yy+1.42*size,q[1],.28*size,.75*size,.3*size,yaw,-armSwing);
-      q=local(.58*size,0);this.put('rightArm',id,q[0],yy+1.42*size,q[1],.28*size,.75*size,.3*size,yaw,armSwing);
+      q=local(-.25*size,.14*size);this.put('leftFoot',id,q[0],yy+.11*size,q[1],.36*size,.24*size,.51*size,yaw);
+      q=local(.25*size,.14*size);this.put('rightFoot',id,q[0],yy+.11*size,q[1],.36*size,.24*size,.51*size,yaw);
+      q=local(-.58*size,0);this.put('leftArm',id,q[0],yy+1.53*size,q[1],.29*size,.8*size,.33*size,yaw,-armSwing);
+      q=local(.58*size,0);this.put('rightArm',id,q[0],yy+1.53*size,q[1],.29*size,.8*size,.33*size,yaw,armSwing);
+      q=local(-.61*size,.04*size);this.put('leftHand',id,q[0],yy+1.07*size,q[1],.18*size,.2*size,.18*size,yaw);
+      q=local(.61*size,.04*size);this.put('rightHand',id,q[0],yy+1.07*size,q[1],.18*size,.2*size,.18*size,yaw);
       this.put('hat',id,pos.x,yy+2.76*size,pos.z,.85*size,.28*size,.82*size,yaw);
       this.put('mageHat',id,pos.x,yy+2.98*size,pos.z,p.role==='mage'?.8*size:.0001, p.role==='mage'?1.05*size:.0001,p.role==='mage'?.8*size:.0001,yaw);
       q=local(0,.36*size);this.put('apron',id,q[0],yy+1.34*size,q[1],p.role==='merchant'?.75*size:.0001,p.role==='merchant'?.9*size:.0001,.12*size,yaw);
