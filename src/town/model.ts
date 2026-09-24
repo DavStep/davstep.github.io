@@ -13,6 +13,7 @@ export interface TownSnapshot {
   innerWood: number;
   innerStone: number;
   outerWood: number;
+  wallGates?: number;
   roads: number;
   outerRoad: number;
   phase: number;

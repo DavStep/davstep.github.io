@@ -22,7 +22,7 @@ export function buildColliders(snapshot:TownSnapshot,trees:readonly {x:number;z:
   }
   for(const [radius,count] of [[INFRASTRUCTURE.wall.innerRadius,snapshot.innerWood],[INFRASTRUCTURE.wall.outerRadius,snapshot.outerWood]]){
     for(let i=0;i<count;i++){
-      if(wallIsGate(i))continue;
+      if(wallIsGate(i,snapshot.wallGates))continue;
       const {start,end}=wallSection(radius,i);
       result.push({kind:'segment',ax:start.x,az:start.z,bx:end.x,bz:end.z,r:.58});
     }

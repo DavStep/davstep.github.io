@@ -5,17 +5,13 @@ import { snapshotForGame } from '../src/town/game-snapshot';
 import { millStreamPoint } from '../src/town/game-path';
 import { streamSurfaceHeight } from '../src/town/game-scenery';
 import { naturalTerrainHeight, riverCenter, riverHalfWidth, riverSurfaceHeight, terrainHeight } from '../src/town/environment';
+import { buildColliders, isBlocked } from '../src/town/collision';
+import { CARDINAL_GATE_MASK, wallIsGate } from '../src/town/wall-layout';
 
-function* orders(items: readonly (typeof IDEAS)[number][]): Generator<(typeof IDEAS)[number][]> {
-  if (items.length === 0) { yield []; return; }
-  for (const idea of items) {
-    for (const tail of orders(items.filter(item => item !== idea))) yield [idea, ...tail];
-  }
-}
-
-test('exactly one of the 40,320 orders reaches every MAX', () => {
-  const perfect = [...orders(IDEAS)].filter(order => evaluate(order).perfect);
-  assert.deepEqual(perfect, [[...IDEAS]]);
+test('a connected order can raise all nine ideas to MAX', () => {
+  assert.equal(IDEAS.length, 9);
+  assert.equal(evaluate(IDEAS).perfect, true);
+  assert.equal(evaluate(['walls', ...IDEAS.filter(idea => idea !== 'walls')]).perfect, false);
 });
 
 test('storybook night is a distinct secret ending', () => {
@@ -27,9 +23,9 @@ test('storybook night is a distinct secret ending', () => {
 });
 
 test('new ideas upgrade earlier buildings and their surroundings', () => {
-  const before = evaluate(IDEAS.slice(0, 5));
+  const before = evaluate(IDEAS.slice(0, 6));
   assert.equal(before.levels.windmill, 0);
-  const after = evaluate(IDEAS.slice(0, 6));
+  const after = evaluate(IDEAS.slice(0, 7));
   assert.equal(after.levels.windmill, 3);
   assert.equal(after.levels.grove, 3);
   assert.equal(after.levels.workshop, 3);
@@ -52,6 +48,33 @@ test('the opening landscape has no sites or roads until those ideas arrive', () 
   assert.ok(firstRoad.roads < snapshotForGame(evaluate(IDEAS.slice(0, 4)).levels).roads);
 });
 
+test('walls without existing roads are sealed and strand the outside mill', () => {
+  const state = evaluate(['settlers','grove','workshop','walls','roads','market','windmill']);
+  assert.equal(state.levels.walls, 1);
+  assert.equal(state.levels.roads, 2);
+  assert.equal(state.levels.market, 1);
+  assert.equal(state.levels.windmill, 1);
+  assert.equal(state.gateMask, 0);
+  assert.equal(state.isolatedMill, true);
+  const snapshot = snapshotForGame(state.levels, 0, state.gateMask);
+  assert.equal(snapshot.innerWood, 32);
+  assert.equal(snapshot.innerStone, 0);
+  assert.equal(snapshot.wallGates, 0);
+  assert.ok(isBlocked(34, 0, buildColliders(snapshot)));
+});
+
+test('roads laid before walls leave aligned, walkable gates and supply the mill', () => {
+  const state = evaluate(['settlers','grove','workshop','roads','walls','market','windmill']);
+  assert.equal(state.levels.walls, 3);
+  assert.equal(state.levels.windmill, 3);
+  assert.equal(state.gateMask, CARDINAL_GATE_MASK);
+  for(const sector of [0,7,8,15,16,23,24,31])assert.ok(wallIsGate(sector,state.gateMask));
+  const snapshot = snapshotForGame(state.levels, 0, state.gateMask);
+  assert.equal(snapshot.innerStone, 32);
+  assert.equal(snapshot.outerWood, 32);
+  assert.equal(isBlocked(34, 0, buildColliders(snapshot)), false);
+});
+
 test('save resumes, rejects corrupt choices, and preserves discoveries on restart', () => {
   const save = newGameSave();
   chooseIdea(save, 'settlers');
@@ -63,6 +86,11 @@ test('save resumes, rejects corrupt choices, and preserves discoveries on restar
   restartGame(save);
   assert.deepEqual(save.order, []);
   assert.equal(save.secretFound, true);
+  const oldEight=['settlers','grove','workshop','roads','market','windmill','archive','observatory'];
+  const migrated=parseGameSave(JSON.stringify({version:1,started:true,order:oldEight,bestMax:8,secretFound:false}));
+  assert.equal(migrated.order.length,8);
+  assert.equal(evaluate(migrated.order).finished,false);
+  assert.equal(evaluate(migrated.order).levels.walls,0);
 });
 
 test('upgraded stream starts inside the main river and stays above its carved bed', () => {

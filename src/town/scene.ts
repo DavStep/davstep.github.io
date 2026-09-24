@@ -404,7 +404,8 @@ export class TownScene {
     const roadTier=this.gameMode?snapshot.roads===0?0:snapshot.roads<20?1:snapshot.roads<INFRASTRUCTURE.road.ringSegments?2:3:3;
     if(roadTier===0)return;
     const dirt:THREE.BufferGeometry[]=[];
-    const reach=roadTier===1?INFRASTRUCTURE.road.ringRadius:INFRASTRUCTURE.road.spokeLength;
+    const sealed=this.gameMode&&snapshot.innerWood>0&&snapshot.wallGates===0;
+    const reach=roadTier===1?INFRASTRUCTURE.road.ringRadius:sealed?INFRASTRUCTURE.wall.innerRadius-1.4:INFRASTRUCTURE.road.spokeLength;
     for(const [x,z] of [[-reach,0],[reach,0],[0,-reach],[0,reach]])
       dirt.push(pathRibbon(linePoints({x:0,z:0},{x,z}),roadTier===1?1.75:2.8));
     if(roadTier>=2)dirt.push(pathRibbon(ringPoints(INFRASTRUCTURE.road.ringRadius,INFRASTRUCTURE.road.ringSegments,this.gameMode?snapshot.roads/INFRASTRUCTURE.road.ringSegments:1),2.35));
@@ -413,6 +414,15 @@ export class TownScene {
     for(const plot of roadTier>=2?snapshot.plots:[]){
       if(plot.stage===0)continue;
       const access=accessPathFor(plot);if(!access)continue;
+      // The older mill plot sits just beyond the inner wall. Its farm lane
+      // approaches the east crossing from outside, where a sealed wall can
+      // visibly leave it disconnected from the town road.
+      if(this.gameMode&&plot.kind==='mill'&&snapshot.outerRoad===0&&Math.hypot(plot.x,plot.z)<40){
+        const radius=INFRASTRUCTURE.wall.innerRadius+2.5,angle=Math.atan2(plot.z,plot.x);
+        const farmLane=[{x:plot.x,z:plot.z},...Array.from({length:15},(_,i)=>({x:Math.cos(angle*(1-i/14))*radius,z:Math.sin(angle*(1-i/14))*radius}))];
+        if(!sealed)farmLane.push({x:INFRASTRUCTURE.road.spokeLength,z:0});
+        dirt.push(pathRibbon(farmLane,1.2));
+      }
       accessPaths.push(access);
       dirt.push(pathRibbon(linePoints({x:access.x1,z:access.z1},{x:access.x2,z:access.z2}),1.2));
     }
@@ -462,7 +472,7 @@ export class TownScene {
       let hasWall=false;
       for(const material of [MAT.woodDark,MAT.stone]){
         const indices:number[]=[];
-        for(let i=0;i<WALL_SEGMENTS;i++)if(!wallIsGate(i)&&i<ring.wood&&(material===MAT.stone?i<ring.stone:i>=ring.stone))indices.push(i);
+        for(let i=0;i<WALL_SEGMENTS;i++)if(!wallIsGate(i,this.gameMode?snapshot.wallGates:undefined)&&i<ring.wood&&(material===MAT.stone?i<ring.stone:i>=ring.stone))indices.push(i);
         if(!indices.length)continue;
         if(material===MAT.woodDark){
           placeFenceSections(this.walls,indices.map(i=>wallSection(ring.radius,i)),this.mobile);
@@ -496,7 +506,7 @@ export class TownScene {
       }
       const facing:NaturePlacement[]=[];
       for(let i=0;i<ring.stone;i++){
-        if(wallIsGate(i))continue;
+        if(wallIsGate(i,this.gameMode?snapshot.wallGates:undefined))continue;
         const section=wallSection(ring.radius,i);
         for(let row=0;row<(this.mobile?2:4);row++)for(let col=0;col<4;col++){
           if((i+row+col)%3===0)continue;
@@ -511,13 +521,17 @@ export class TownScene {
       if(!hasWall)sectorGeometry.dispose();
       if(ring.wood>0){
         const gates=new THREE.Group();
-        for(let i=0;i<WALL_SEGMENTS;i+=INFRASTRUCTURE.wall.gateInterval){
-          if(i+1>=ring.wood)continue;
+        for(let i=0;i<WALL_SEGMENTS;i++){
+          if(i+1>=ring.wood||!wallIsGate(i,this.gameMode?snapshot.wallGates:undefined))continue;
+          if(this.gameMode&&i%INFRASTRUCTURE.wall.gateInterval!==0)continue;
           const section=wallSection(ring.radius,i),gate=new THREE.Group(),stone=i<ring.stone;
-          gate.position.set(section.center.x,0,section.center.z);gate.rotation.y=section.rotation;
+          const angle=i*Math.PI*2/WALL_SEGMENTS;
+          gate.position.set(this.gameMode?Math.cos(angle)*ring.radius:section.center.x,0,this.gameMode?Math.sin(angle)*ring.radius:section.center.z);
+          gate.rotation.y=this.gameMode?-angle-Math.PI/2:section.rotation;
+          const gateWidth=this.gameMode?section.length*2:section.length;
           const post=stone?MAT.stoneDark:MAT.woodDark;
-          for(const side of [-1,1])box(gate,side*section.length*.5,stone?2.2:1.9,0,.9,stone?4.4:3.8,1.05,post,0,false);
-          box(gate,0,stone?4.5:3.9,0,section.length+.9,.62,1.1,stone?MAT.stone:MAT.woodDark,0,false);
+          for(const side of [-1,1])box(gate,side*gateWidth*.5,stone?2.2:1.9,0,.9,stone?4.4:3.8,1.05,post,0,false);
+          box(gate,0,stone?4.5:3.9,0,gateWidth+.9,.62,1.1,stone?MAT.stone:MAT.woodDark,0,false);
           gates.add(gate);
         }
         gates.updateMatrixWorld(true);this.walls.add(gates);
@@ -583,7 +597,7 @@ export class TownScene {
     if(!animate)this.finishTransitions();
     if(!this.roadTransition)this.environment.setRoadCenterProgress(snapshot.roads>0?1:0);
     const structureSignature=snapshot.plots.map(p=>`${p.stage}${p.renovation}${p.complexId?'c':''}`).join('');
-    const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}`;
+    const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}/${snapshot.wallGates??'auto'}`;
     if(structureSignature!==this.structureSignature){
       this.finishStructureTransition();this.structureSignature=structureSignature;
       if(animate&&this.gameMode&&this.lastPlots.length){

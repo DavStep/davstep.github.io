@@ -1,7 +1,9 @@
+import { CARDINAL_GATE_MASK } from './wall-layout';
+
 export const GAME_SAVE_KEY = 'davstep.choice-town.v1';
 
 export const IDEAS = [
-  'settlers', 'grove', 'workshop', 'roads', 'market', 'windmill', 'archive', 'observatory',
+  'settlers', 'grove', 'workshop', 'roads', 'walls', 'market', 'windmill', 'archive', 'observatory',
 ] as const;
 export type Idea = typeof IDEAS[number];
 export type Levels = Record<Idea, number>;
@@ -11,6 +13,7 @@ export const IDEA_INFO: Record<Idea, { name: string; icon: string; place: string
   grove: { name: 'Grove', icon: '✿', place: 'Gardens', hint: 'The workshop needs living timber.' },
   workshop: { name: 'Workshop', icon: '⚒', place: 'Forge', hint: 'A bridge needs a forged gear.' },
   roads: { name: 'Roads', icon: '⌁', place: 'Bridge', hint: 'A caravan needs a crossing.' },
+  walls: { name: 'Walls', icon: '▥', place: 'Town Wall', hint: 'Build Roads first to leave gates for people and supplies.' },
   market: { name: 'Market', icon: '◈', place: 'Trading Hall', hint: 'The windmill needs a part from the caravan.' },
   windmill: { name: 'Windmill', icon: '✳', place: 'River Mill', hint: 'The Archive needs the mill working.' },
   archive: { name: 'Archive', icon: '▤', place: 'Town Post', hint: 'The Observatory needs the town’s plans.' },
@@ -18,12 +21,12 @@ export const IDEA_INFO: Record<Idea, { name: string; icon: string; place: string
 };
 
 const predecessor: Partial<Record<Idea, Idea>> = {
-  grove: 'settlers', workshop: 'grove', roads: 'workshop', market: 'roads',
+  grove: 'settlers', workshop: 'grove', roads: 'workshop', walls: 'roads', market: 'roads',
   windmill: 'market', archive: 'windmill', observatory: 'archive',
 };
 
 export const SECRET_ORDER: readonly Idea[] = [
-  'settlers', 'grove', 'workshop', 'roads', 'market', 'archive', 'windmill', 'observatory',
+  'settlers', 'grove', 'workshop', 'roads', 'market', 'archive', 'walls', 'windmill', 'observatory',
 ];
 
 export interface GameSave {
@@ -37,6 +40,8 @@ export interface GameSave {
 export interface GameState {
   order: readonly Idea[];
   levels: Levels;
+  gateMask: number;
+  isolatedMill: boolean;
   missed: readonly Idea[];
   maxCount: number;
   finished: boolean;
@@ -71,24 +76,31 @@ function emptyLevels(): Levels {
 export function evaluate(order: readonly Idea[]): GameState {
   const levels = emptyLevels();
   const missed: Idea[] = [];
+  let gateMask = 0;
   for (const idea of order) {
     if (!IDEAS.includes(idea) || levels[idea] !== 0) throw new Error(`Invalid idea sequence: ${idea}`);
     levels[idea] = 1;
     const needed = predecessor[idea];
     if (needed) {
-      if (levels[needed] >= (idea === 'grove' ? 1 : 2)) levels[idea] = 2;
+      const routeOpen = levels.walls === 0 || gateMask !== 0;
+      const supplied = (idea !== 'market' && idea !== 'windmill') || routeOpen;
+      if (levels[needed] >= (idea === 'grove' ? 1 : 2) && supplied) levels[idea] = 2;
       else missed.push(idea);
     }
+    // A wall only has openings for routes that existed when its foundations
+    // were laid. Later road construction cannot silently cut a new gate.
+    if (idea === 'walls' && levels.walls >= 2) gateMask = CARDINAL_GATE_MASK;
     // Each new arrival can change buildings that were already in the world.
     // Iterate until every causal reaction for this turn has settled.
     let changed = true;
     while (changed) {
       const before = IDEAS.map(key => levels[key]).join('');
       if (levels.settlers && levels.roads >= 2) levels.settlers = Math.max(levels.settlers, 2);
-      if (levels.settlers >= 2 && levels.market >= 2) levels.settlers = 3;
+      if (levels.settlers >= 2 && levels.market >= 2 && levels.walls >= 2) levels.settlers = 3;
       if (levels.grove >= 2 && levels.windmill >= 2) levels.grove = 3;
       if (levels.workshop >= 2 && levels.roads >= 2 && levels.windmill >= 2) levels.workshop = 3;
       if (levels.roads >= 2 && levels.market >= 2) levels.roads = 3;
+      if (levels.walls >= 2 && gateMask && levels.market >= 2 && levels.windmill >= 2) levels.walls = 3;
       if (levels.market >= 2 && levels.archive >= 2) levels.market = 3;
       if (levels.windmill >= 2 && levels.workshop >= 2 && levels.grove >= 2) levels.windmill = 3;
       if (levels.archive >= 2 && levels.settlers >= 2 && levels.market >= 2) levels.archive = 3;
@@ -99,7 +111,9 @@ export function evaluate(order: readonly Idea[]): GameState {
   const maxCount = IDEAS.filter(idea => levels[idea] === 3).length;
   const finished = order.length === IDEAS.length;
   return {
-    order: [...order], levels, missed, maxCount, finished,
+    order: [...order], levels, gateMask,
+    isolatedMill: levels.walls > 0 && gateMask === 0 && levels.windmill > 0,
+    missed, maxCount, finished,
     perfect: finished && maxCount === IDEAS.length,
     secret: finished && SECRET_ORDER.every((idea, index) => order[index] === idea),
   };

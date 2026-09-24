@@ -48,7 +48,7 @@ let gameState=evaluate(gameSave.order);
 let shownLevels:Levels={...gameState.levels};
 const sessionStart=performance.now();
 function persist(){try{localStorage.setItem(GAME_SAVE_KEY,JSON.stringify(gameSave));}catch{}}
-let snapshot:TownSnapshot=snapshotForGame(shownLevels);
+let snapshot:TownSnapshot=snapshotForGame(shownLevels,0,gameState.gateMask);
 let rainPreview=false;
 const weatherSnapshot=():TownSnapshot=>rainPreview?{...snapshot,weather:'rain'}:snapshot;
 let town:TownScene|null=null,residents:Residents|null=null,scenery:GameScenery|null=null;
@@ -178,7 +178,7 @@ const gameCards=$<HTMLDivElement>('#game-cards');
 const gameEvent=$<HTMLParagraphElement>('#game-event');
 const gameResult=$<HTMLDivElement>('#game-result');
 const gameSkip=$<HTMLButtonElement>('#game-skip');
-const CARD_ORDER:readonly Idea[]=['windmill','archive','market','settlers','observatory','roads','grove','workshop'];
+const CARD_ORDER:readonly Idea[]=['windmill','archive','market','settlers','observatory','roads','walls','grove','workshop'];
 let animating=false,animationToken=0;
 let eventMessage='Choose what enters the town. Watch earlier ideas change.';
 const descriptions:Record<Idea,[string,string,string]>={
@@ -186,6 +186,7 @@ const descriptions:Record<Idea,[string,string,string]>={
   grove:['Saplings take root beyond the square.','Gardens spread and the workshop gets timber.','The irrigated grove bursts into bloom.'],
   workshop:['A little forge opens its doors.','The smiths make a gear for the bridge.','The Machine Yard and forge start working together.'],
   roads:['Surveyors mark a route through town.','The geared bridge opens a crossing.','Stone roads and minecart tracks connect the town.'],
+  walls:['A timber wall rises around the town. Without a road, it has no gates.','Road gates and a stone wall secure the crossings.','A second line of walls protects the outer mill.'],
   market:['Stalls appear in the square.','A caravan crosses the bridge with supplies.','The Trading Hall fills with goods and visitors.'],
   windmill:['A small mill rises beside dry fields.','The sails turn; a stream branches from the river to the mill.','Water feeds the fields and golden wheat grows.'],
   archive:['The post begins collecting the town’s stories.','Plans travel between the guild and the post.','The Archive maps every part of the town.'],
@@ -196,19 +197,20 @@ const approaches:Record<Idea,string>={
   grove:'A gardener brings a sapling to the edge of town…',
   workshop:'A smith hurries over with a hammer…',
   roads:'A surveyor carries the first stone to the crossing…',
+  walls:'A mason measures the edge of town for the new wall…',
   market:'A trader brings a crate of supplies…',
   windmill:'A builder carries a gear to the river mill…',
   archive:'A messenger brings a letter to the post…',
   observatory:'An astronomer carries a bright lens to the tower…',
 };
-const focalPlot:Record<Idea,string>={settlers:'castle',grove:'project-wizard',workshop:'forge',roads:'project-dwarves',market:'market',windmill:'mill',archive:'post',observatory:'project-wizard'};
+const focalPlot:Record<Idea,string>={settlers:'castle',grove:'project-wizard',workshop:'forge',roads:'project-dwarves',walls:'',market:'market',windmill:'mill',archive:'post',observatory:'project-wizard'};
 
 function renderGameHud(){
   gameHud.hidden=!gameSave.started;
   $('#fallback-start').hidden=gameSave.started;
   document.body.classList.toggle('game-running',gameSave.started);
   $('#game-turn').textContent=`TURN ${gameSave.order.length} / ${IDEAS.length}`;
-  $('#game-summary').textContent=animating?'The town is changing…':gameState.finished?`${gameState.maxCount} of 8 ideas reached MAX`:'Choose the next idea.';
+  $('#game-summary').textContent=animating?'The town is changing…':gameState.finished?`${gameState.maxCount} of ${IDEAS.length} ideas reached MAX`:'Choose the next idea.';
   gameSkip.hidden=!animating;
   gameEvent.textContent=eventMessage;
   gameCards.innerHTML=CARD_ORDER.map(idea=>{
@@ -218,13 +220,13 @@ function renderGameHud(){
   }).join('');
   gameResult.hidden=!gameState.finished||animating;
   if(!gameResult.hidden){
-    const title=gameState.perfect?'A town in harmony':gameState.secret?'Storybook Night discovered':`A town with ${gameState.maxCount} of 8 ideas at MAX`;
-    const detail=gameState.perfect?'Every building and its surroundings reached their fullest form.':gameState.secret?'The Archive’s sketches turned into glowing paper birds.':gameState.missed.length?`Look again at ${IDEA_INFO[gameState.missed[0]].place.toLowerCase()}. ${IDEA_INFO[gameState.missed[0]].hint}`:'Watch which buildings were waiting for each other.';
+    const title=gameState.perfect?'A town in harmony':gameState.secret?'Storybook Night discovered':`A town with ${gameState.maxCount} of ${IDEAS.length} ideas at MAX`;
+    const detail=gameState.perfect?'Every building and its surroundings reached their fullest form.':gameState.isolatedMill?'The wall was built before a road reached it. No gate connects the outside mill, so its supplies and water system cannot develop.':gameState.secret?'The Archive’s sketches turned into glowing paper birds.':gameState.missed.length?`Look again at ${IDEA_INFO[gameState.missed[0]].place.toLowerCase()}. ${IDEA_INFO[gameState.missed[0]].hint}`:'Watch which buildings were waiting for each other.';
     gameResult.innerHTML=`<strong>${title}</strong>${detail}<br><button type="button" data-replay>Try another order</button>`;
   }
 }
 function refreshGameWorld(instant=false){
-  snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart);
+  snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart,gameState.gateMask);
   town?.update(weatherSnapshot(),!instant&&animating&&!reduced.matches);
   scenery?.setLevels(shownLevels,gameState.secret&&gameState.finished&&!animating,instant);
   if(town){
@@ -248,7 +250,7 @@ function skipAnimation(){
   if(!animating)return;
   animationToken++;animating=false;shownLevels={...gameState.levels};
   residents?.finishCue();scenery?.endBeat();
-  eventMessage=gameState.finished?'The town remembers your choices.':'The town is ready for its next idea.';
+  eventMessage=gameState.finished?'The town remembers your choices.':gameState.levels.walls>0&&gameState.gateMask===0?'The sealed wall blocks the road to the outside mill.':'The town is ready for its next idea.';
   refreshGameWorld(true);renderGameHud();recenter();
 }
 const delay=(ms:number)=>new Promise<void>(resolve=>window.setTimeout(resolve,ms));
@@ -260,7 +262,7 @@ async function playChoice(idea:Idea){
   for(const key of changed){
     for(let level=before[key]+1;level<=gameState.levels[key];level++){
       if(token!==animationToken)return;
-      const focus=snapshot.plots.find(plot=>plot.id===focalPlot[key]);
+      const focus=key==='walls'?{x:34,z:0}:snapshot.plots.find(plot=>plot.id===focalPlot[key]);
       if(focus&&town){desiredTarget.set(focus.x,0,focus.z);desiredDistance=key==='windmill'?94:89;}
       const failed=key===idea&&level===1&&gameState.missed.includes(key);
       eventMessage=key===idea?approaches[key]:`${IDEA_INFO[key].name} responds to the new idea…`;
@@ -271,6 +273,8 @@ async function playChoice(idea:Idea){
       shownLevels[key]=level;
       eventMessage=descriptions[key][level-1];
       if(failed)eventMessage+=` ${IDEA_INFO[key].hint}`;
+      if(key==='roads'&&level>=2&&shownLevels.walls>0&&gameState.gateMask===0)eventMessage='The road reaches the sealed wall and stops. The outside mill remains cut off.';
+      if(key==='windmill'&&level===1&&gameState.isolatedMill)eventMessage='The mill stands outside the wall. Without a gate, its waterworks cannot be built.';
       refreshGameWorld();renderGameHud();
       if(focus)scenery?.beginBeat(key,focus,failed);
       if(key==='windmill'&&level===2&&!reduced.matches){
@@ -293,7 +297,7 @@ async function playChoice(idea:Idea){
   }
   if(token!==animationToken)return;
   animating=false;shownLevels={...gameState.levels};
-  eventMessage=gameState.finished?'The eight choices are complete. Inspect the town, then try another order.':'What should arrive next?';
+  eventMessage=gameState.finished?'The nine choices are complete. Inspect the town, then try another order.':gameState.levels.walls>0&&gameState.gateMask===0?'The wall has no gate. Roads cannot connect the outside mill.':'What should arrive next?';
   refreshGameWorld(true);renderGameHud();recenter();
 }
 gameCards.addEventListener('click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');if(button)void playChoice(button.dataset.idea as Idea);});

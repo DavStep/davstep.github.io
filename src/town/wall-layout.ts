@@ -3,7 +3,9 @@ import { INFRASTRUCTURE } from './town-plan';
 
 export interface WallPoint {x:number;z:number}
 export const WALL_GATE_INTERVAL=INFRASTRUCTURE.wall.gateInterval;
-export const wallIsGate=(index:number)=>index%WALL_GATE_INTERVAL===0;
+// A crossing straddles two sectors so the road centerline has real clearance.
+export const CARDINAL_GATE_MASK=[0,7,8,15,16,23,24,31].reduce((mask,index)=>mask|(1<<index),0);
+export const wallIsGate=(index:number,mask?:number)=>mask===undefined?index%WALL_GATE_INTERVAL===0:(mask&(1<<index))!==0;
 
 export function wallSection(radius:number,index:number){
   const step=Math.PI*2/WALL_SEGMENTS;

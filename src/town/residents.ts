@@ -49,6 +49,9 @@ const makeProp = (idea: Idea): THREE.Group => {
       add(new THREE.CylinderGeometry(.045, .045, .5, 6), [0, 0, 0]);
       add(new THREE.BoxGeometry(.35, .14, .15), [0, .23, 0]); break;
     case 'roads': add(new THREE.DodecahedronGeometry(.22, 0), [0, 0, 0]); break;
+    case 'walls':
+      add(new THREE.BoxGeometry(.42, .2, .16), [0, -.08, 0]);
+      add(new THREE.BoxGeometry(.2, .2, .16), [0, .13, 0]); break;
     case 'market': add(new THREE.BoxGeometry(.4, .3, .34), [0, 0, 0]); break;
     case 'windmill':
       add(new THREE.TorusGeometry(.22, .07, 5, 8), [0, 0, 0]);
@@ -61,7 +64,7 @@ const makeProp = (idea: Idea): THREE.Group => {
   return group;
 };
 const markerColors: Record<Idea, number> = {
-  settlers: 0x8bbf80, grove: 0x66ad78, workshop: 0xe6aa68, roads: 0x9baabc,
+  settlers: 0x8bbf80, grove: 0x66ad78, workshop: 0xe6aa68, roads: 0x9baabc, walls: 0x9d8c78,
   market: 0xe0bb70, windmill: 0x72bdbd, archive: 0xa593c3, observatory: 0xe4ca80,
 };
 const ease = (n: number) => { const x = THREE.MathUtils.clamp(n, 0, 1); return x * x * (3 - 2 * x); };

@@ -212,7 +212,7 @@ export class GameScenery {
     this.celebration.traverse(object => { if (object instanceof THREE.Mesh) { object.geometry.dispose(); if (Array.isArray(object.material)) object.material.forEach(material => oldMaterials.add(material)); else oldMaterials.add(object.material); } });
     oldMaterials.forEach(material => material.dispose());
     this.celebration.clear();
-    const color = failed ? 0xbca993 : ({ settlers: 0xa9d184, grove: 0x84c58c, workshop: 0xe5aa67, roads: 0xc4b791, market: 0xe5c070, windmill: 0x78c6c4, archive: 0xb2a2d4, observatory: 0xffdc91 } satisfies Record<Idea, number>)[idea];
+    const color = failed ? 0xbca993 : ({ settlers: 0xa9d184, grove: 0x84c58c, workshop: 0xe5aa67, roads: 0xc4b791, walls: 0xc0ad8e, market: 0xe5c070, windmill: 0x78c6c4, archive: 0xb2a2d4, observatory: 0xffdc91 } satisfies Record<Idea, number>)[idea];
     const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .85, side: THREE.DoubleSide, depthWrite: false });
     const ring = new THREE.Mesh(new THREE.RingGeometry(1.5, 1.7, 32), material);
     ring.rotation.x = -Math.PI / 2; ring.position.set(position.x, terrainHeight(position.x, position.z) + .14, position.z);
