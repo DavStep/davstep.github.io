@@ -128,7 +128,7 @@ function enterWalk(){
   const spawn=[{x:40,z:0},{x:41,z:6},{x:39,z:-7},{x:8,z:11}].find(p=>!isBlocked(p.x,p.z,colliders,1.1));
   if(spawn){player.position.x=spawn.x;player.position.z=spawn.z;}
   walking=true;player.setVisible(true);setIntroHidden(true);
-  desiredTarget.set(player.position.x-4,1.8,player.position.z);desiredDistance=town?.mobile?20:23;desiredElevation=town?.mobile?.58:.66;desiredAzimuth=0;
+  desiredTarget.set(player.position.x-4,1.8,player.position.z);desiredDistance=town?.mobile?20:23;desiredElevation=town?.mobile?1.23:1.28;desiredAzimuth=0;
   walkButton.textContent='Overview';walkButton.setAttribute('aria-label','Return to town overview');walkButton.setAttribute('aria-pressed','true');
   walkHint.hidden=false;joystick.hidden=!town?.mobile;
 }
@@ -162,7 +162,7 @@ canvas.addEventListener('pointermove',e=>{
   if(!lastPointer)return;
   const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;
   if(pointerStart&&Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>5)dragged=true;
-  if(dragged){desiredAzimuth-=dx*.006;desiredElevation=THREE.MathUtils.clamp(desiredElevation+dy*.005,.38,1.24);setIntroHidden(true);}
+  if(dragged){desiredAzimuth-=dx*.006;desiredElevation=THREE.MathUtils.clamp(desiredElevation+dy*.005,.38,1.42);setIntroHidden(true);}
   lastPointer={x:e.clientX,y:e.clientY};
 });
 canvas.addEventListener('pointerup',e=>{

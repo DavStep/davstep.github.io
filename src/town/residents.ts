@@ -35,9 +35,9 @@ const palettes={
 };
 const roles:Role[]=['builder','resident','merchant','resident','guard','mage','resident','warrior','resident','artist','resident','miner'];
 interface Resident { role:Role;home:{x:number;z:number};work:{x:number;z:number};id:number; }
-type Part='torso'|'head'|'hair'|'leftEye'|'rightEye'|'nose'|'leftLeg'|'rightLeg'|'leftFoot'|'rightFoot'|'leftArm'|'rightArm'|'leftHand'|'rightHand'|'hat'|'mageHat'|'apron'|'shield'|'parcel'|'food';
+type Part='torso'|'head'|'hair'|'fringe'|'leftEye'|'rightEye'|'nose'|'mouth'|'leftEar'|'rightEar'|'collar'|'belt'|'buckle'|'leftLeg'|'rightLeg'|'leftFoot'|'rightFoot'|'leftArm'|'rightArm'|'leftHand'|'rightHand'|'hat'|'mageHat'|'apron'|'shield'|'parcel'|'food';
 const BOX=new RoundedBoxGeometry(1,1,1,2,.16),PLAIN_BOX=new THREE.BoxGeometry(1,1,1),HEAD=new THREE.SphereGeometry(1,10,8),LOW_HEAD=new THREE.IcosahedronGeometry(1,1),HAT=new THREE.ConeGeometry(1,1,7);
-const PARTS:Part[]=['torso','head','hair','leftEye','rightEye','nose','leftLeg','rightLeg','leftFoot','rightFoot','leftArm','rightArm','leftHand','rightHand','hat','mageHat','apron','shield','parcel','food'];
+const PARTS:Part[]=['torso','head','hair','fringe','leftEye','rightEye','nose','mouth','leftEar','rightEar','collar','belt','buckle','leftLeg','rightLeg','leftFoot','rightFoot','leftArm','rightArm','leftHand','rightHand','hat','mageHat','apron','shield','parcel','food'];
 const COLOR={wood:0x5a514b,guard:0x8f9694,builder:0xe0bc71,mage:0x756594,merchant:0xd4bb8b,artist:0xb78180,miner:0xe4c38a,plain:0x6d5142,shield:0xa3a9a4};
 export class Residents {
   readonly group=new THREE.Group();
@@ -49,7 +49,7 @@ export class Residents {
   constructor(scene:THREE.Scene){
     const base=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.87});
     for(const part of PARTS){
-      const geo=part==='mageHat'?HAT:['head','hair','leftEye','rightEye','nose','leftHand','rightHand','food'].includes(part)?this.mobile?LOW_HEAD:HEAD:this.mobile?PLAIN_BOX:BOX;
+      const geo=part==='mageHat'?HAT:['head','hair','fringe','leftEye','rightEye','nose','leftEar','rightEar','leftHand','rightHand','food'].includes(part)?this.mobile?LOW_HEAD:HEAD:this.mobile?PLAIN_BOX:BOX;
       const mesh=new THREE.InstancedMesh(geo,base,this.capacity);
       mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled=false;
@@ -65,7 +65,8 @@ export class Residents {
       this.residents.push({id,role,home:{x:home.x,z:home.z},work:{x:job.x,z:job.z}});
       const cloth=palettes.cloth[id%palettes.cloth.length],skin=palettes.skin[(id*7)%palettes.skin.length];
       const colors:Record<Part,number>={
-        torso:cloth,head:skin,hair:[0x42382f,0x6c4a35,0x393942,0x8a6243][id%4],leftEye:0x263038,rightEye:0x263038,nose:skin,
+        torso:cloth,head:skin,hair:[0x42382f,0x6c4a35,0x393942,0x8a6243][id%4],fringe:[0x42382f,0x6c4a35,0x393942,0x8a6243][id%4],leftEye:0x263038,rightEye:0x263038,nose:skin,mouth:0x5b463d,leftEar:skin,rightEar:skin,
+        collar:role==='mage'?0xb9a7ce:role==='guard'?0xd4ddda:0xd6c7a9,belt:0x51483e,buckle:0xd4af70,
         leftLeg:COLOR.wood,rightLeg:COLOR.wood,leftFoot:COLOR.wood,rightFoot:COLOR.wood,leftArm:cloth,rightArm:cloth,leftHand:skin,rightHand:skin,
         hat:role==='builder'?COLOR.builder:role==='guard'||role==='warrior'?COLOR.guard:role==='merchant'?COLOR.merchant:role==='artist'?COLOR.artist:role==='miner'?COLOR.miner:COLOR.plain,
         mageHat:COLOR.mage,apron:COLOR.merchant,shield:COLOR.shield,parcel:role==='miner'?COLOR.wood:COLOR.builder,food:0xc47d53,
@@ -106,9 +107,16 @@ export class Residents {
       let q=local(0,0);this.put('torso',id,q[0],yy+1.43*size,q[1],.87*size,1.2*size,.68*size,yaw);
       this.put('head',id,q[0],yy+2.36*size,q[1],.49*size,.53*size,.48*size,yaw);
       this.put('hair',id,q[0],yy+2.73*size,q[1]-.04,.51*size,.21*size,.49*size,yaw);
+      q=local(-.14*size,.35*size);this.put('fringe',id,q[0],yy+2.65*size,q[1],.27*size,.19*size,.22*size,yaw);
       q=local(-.18*size,.44*size);this.put('leftEye',id,q[0],yy+2.43*size,q[1],.052*size,.072*size,.042*size,yaw);
       q=local(.18*size,.44*size);this.put('rightEye',id,q[0],yy+2.43*size,q[1],.052*size,.072*size,.042*size,yaw);
       q=local(0,.49*size);this.put('nose',id,q[0],yy+2.23*size,q[1],.1*size,.11*size,.12*size,yaw);
+      q=local(0,.47*size);this.put('mouth',id,q[0],yy+2.08*size,q[1],.13*size,.026*size,.025*size,yaw);
+      q=local(-.47*size,0);this.put('leftEar',id,q[0],yy+2.31*size,q[1],.12*size,.17*size,.13*size,yaw);
+      q=local(.47*size,0);this.put('rightEar',id,q[0],yy+2.31*size,q[1],.12*size,.17*size,.13*size,yaw);
+      q=local(0,.21*size);this.put('collar',id,q[0],yy+2.01*size,q[1],.61*size,.19*size,.31*size,yaw);
+      q=local(0,.36*size);this.put('belt',id,q[0],yy+1.13*size,q[1],.9*size,.13*size,.12*size,yaw);
+      q=local(0,.43*size);this.put('buckle',id,q[0],yy+1.13*size,q[1],.18*size,.17*size,.055*size,yaw);
       q=local(-.25*size,0);this.put('leftLeg',id,q[0],yy+.55*size,q[1],.29*size,1.1*size,.35*size,yaw,step);
       q=local(.25*size,0);this.put('rightLeg',id,q[0],yy+.55*size,q[1],.29*size,1.1*size,.35*size,yaw,-step);
       q=local(-.25*size,.14*size);this.put('leftFoot',id,q[0],yy+.11*size,q[1],.36*size,.24*size,.51*size,yaw);

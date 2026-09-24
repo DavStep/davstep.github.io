@@ -14,7 +14,7 @@ export const C = {
 export type Mat = THREE.Material;
 const make = (color:number, roughness=.9, metalness=0) => new THREE.MeshStandardMaterial({color,roughness,metalness});
 
-function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'){
+function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'roof'|'plaster'){
   const previous=material.onBeforeCompile;
   material.onBeforeCompile=(shader,renderer)=>{
     previous.call(material,shader,renderer);
@@ -34,11 +34,24 @@ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'){
                    mix(mix(townHash(i+vec3(0,0,1)),townHash(i+vec3(1,0,1)),f.x),
                        mix(townHash(i+vec3(0,1,1)),townHash(i+vec3(1,1,1)),f.x),f.y),f.z);}
     `+shader.fragmentShader;
-    shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-      ${surface==='timber'
-        ? 'float grain=townNoise(vTownSurface*vec3(1.8,.24,1.8)); diffuseColor.rgb*=mix(.90,1.06,grain);'
-        : 'float fleck=townNoise(vTownSurface*vec3(.65,.8,.65)); diffuseColor.rgb*=mix(.91,1.055,fleck);'}
-    `);
+    const treatment={
+      timber:`float grain=townNoise(vTownSurface*vec3(3.8,.18,3.8));
+        float grainLine=smoothstep(.68,.82,grain);
+        diffuseColor.rgb*=.79+grain*.31-grainLine*.055;`,
+      stone:`vec3 stagger=vTownSurface+vec3(mod(floor(vTownSurface.y*1.25),2.0)*.36,0.0,0.0);
+        float fleck=townNoise(floor(stagger*vec3(1.3,1.25,1.3))*.8);
+        float joint=1.0-smoothstep(.025,.065,fract(vTownSurface.y*1.25));
+        diffuseColor.rgb*=.81+fleck*.25-joint*.07;`,
+      roof:`vec2 tile=vTownSurface.xz*vec2(1.7,1.95);
+        tile.y+=mod(floor(tile.x),2.0)*.5;
+        float seamX=1.0-smoothstep(.015,.07,fract(tile.x));
+        float seamZ=1.0-smoothstep(.025,.09,fract(tile.y));
+        float tileTint=townNoise(floor(vec3(tile.x,tile.y,0.0))*.77);
+        diffuseColor.rgb*=.83+tileTint*.25-max(seamX,seamZ)*.13;`,
+      plaster:`float wash=townNoise(vTownSurface*vec3(1.4,1.1,1.4));
+        diffuseColor.rgb*=.94+wash*.10;`,
+    }[surface];
+    shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n${treatment}`);
   };
   material.customProgramCacheKey=()=>`town-painted-${surface}-v1`;
   return material;
@@ -47,9 +60,10 @@ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'){
 export const MAT = {
   grass:make(C.grass,1),grassDark:make(C.grassDark,1),earth:make(C.earth,1),path:make(C.path,1),
   wood:painted(make(C.wood,.88),'timber'),woodLight:painted(make(C.woodLight,.88),'timber'),woodDark:painted(make(C.woodDark,.92),'timber'),
-  stone:painted(make(C.stone,1),'stone'),stoneDark:painted(make(C.stoneDark,1),'stone'),plaster:make(C.plaster,1),
-  roof:make(C.roof,.92),roofDark:make(C.roofDark,.92),roofBlue:make(C.roofBlue,.92),
-  gold:make(C.gold,.68,.1),window:make(C.window,.88),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
-  white:make(0xeae9dd),leaf:make(0x52775a,1),leafLight:make(0x709466,1),leafDark:make(0x456b5a,1),
+  stone:painted(make(C.stone,1),'stone'),stoneDark:painted(make(C.stoneDark,1),'stone'),
+  plaster:painted(make(C.plaster,1),'plaster'),plasterIvory:painted(make(0xe1d2b4,1),'plaster'),plasterRose:painted(make(0xdab8a5,1),'plaster'),plasterSage:painted(make(0xbfc9af,1),'plaster'),
+  roof:painted(make(C.roof,.92),'roof'),roofDark:painted(make(C.roofDark,.92),'roof'),roofBlue:painted(make(C.roofBlue,.92),'roof'),
+  gold:make(C.gold,.68,.1),window:make(C.window,.88),glass:new THREE.MeshStandardMaterial({color:0x8db3ab,roughness:.25,metalness:.12,emissive:0x193633,emissiveIntensity:.22}),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
+  white:make(0xeae9dd),leaf:make(0x52775a,1),leafLight:make(0x709466,1),leafDark:make(0x456b5a,1),pine:make(0xffffff,1),
   red:make(0xbe7062),purple:make(0x8d729e),blue:make(0x668db0),
 } as const;

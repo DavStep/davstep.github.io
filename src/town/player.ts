@@ -16,6 +16,8 @@ const paint={
   eyes:new THREE.MeshStandardMaterial({color:0x242d30,roughness:1}),
   bag:new THREE.MeshStandardMaterial({color:0x9b704d,roughness:.95}),
   gold:new THREE.MeshStandardMaterial({color:0xd8ad62,roughness:.8}),
+  scarf:new THREE.MeshStandardMaterial({color:0xc78668,roughness:.95}),
+  seam:new THREE.MeshStandardMaterial({color:0x254d52,roughness:1}),
 };
 
 function piece(parent:THREE.Object3D,geo:THREE.BufferGeometry,mat:THREE.Material,x:number,y:number,z:number,sx:number,sy:number,sz:number){
@@ -32,22 +34,33 @@ export class Player {
   private leftArm=new THREE.Group();
   private rightArm=new THREE.Group();
   private head=new THREE.Group();
+  private scarfTail=new THREE.Group();
   constructor(scene:THREE.Scene){
     this.group.name='Town walker';this.group.visible=false;
     piece(this.group,bodyGeo,paint.coat,0,1.65,0,.87,1.18,.59);
     piece(this.group,bodyGeo,paint.shirt,0,1.93,.32,.58,.44,.11);
+    piece(this.group,bodyGeo,paint.coat,0,1.06,0,.98,.36,.66);
+    piece(this.group,bodyGeo,paint.seam,0,1.1,.39,.91,.07,.055);
+    piece(this.group,bodyGeo,paint.bag,0,1.26,.38,.87,.19,.095);
+    piece(this.group,bodyGeo,paint.gold,0,1.27,.44,.19,.22,.1);
     piece(this.group,bodyGeo,paint.bag,0,1.47,-.44,.65,.81,.32);
     piece(this.group,bodyGeo,paint.gold,0,1.6,-.62,.25,.19,.07);
+    piece(this.group,bodyGeo,paint.scarf,0,2.21,.14,.7,.2,.55);
+    this.scarfTail.position.set(.3,2.2,-.38);this.group.add(this.scarfTail);
+    piece(this.scarfTail,bodyGeo,paint.scarf,0,-.32,0,.25,.74,.12);
     this.head.position.set(0,2.46,0);this.group.add(this.head);
     piece(this.head,roundGeo,paint.skin,0,.16,0,.49,.55,.47);
     piece(this.head,roundGeo,paint.hair,0,.52,-.06,.53,.22,.49);
     piece(this.head,roundGeo,paint.hair,-.43,.36,0,.18,.27,.34);
     piece(this.head,roundGeo,paint.hair,.43,.36,0,.18,.27,.34);
+    piece(this.head,roundGeo,paint.hair,-.12,.51,.32,.3,.22,.29);
     for(const side of [-1,1]){
       piece(this.head,roundGeo,paint.eyes,side*.19,.19,.448,.055,.074,.035);
+      piece(this.head,bodyGeo,paint.hair,side*.19,.34,.448,.14,.035,.045);
       piece(this.head,roundGeo,paint.skin,side*.49,.12,0,.12,.17,.16);
     }
     piece(this.head,roundGeo,paint.skin,0,-.06,.49,.11,.1,.12);
+    piece(this.head,bodyGeo,paint.hair,0,-.19,.458,.15,.026,.04);
     for(const [pivot,side] of [[this.leftLeg,-1],[this.rightLeg,1]] as const){
       pivot.position.set(side*.25,1.08,0);this.group.add(pivot);
       piece(pivot,bootGeo,paint.pants,0,-.49,0,.32,1.03,.34);
@@ -86,6 +99,7 @@ export class Player {
     this.leftLeg.rotation.x=stride;this.rightLeg.rotation.x=-stride;
     this.leftArm.rotation.x=-stride*.75;this.rightArm.rotation.x=stride*.75;
     this.head.rotation.y=moving?Math.sin(this.time*1.8)*.035:Math.sin(this.time*.7)*.1;
+    this.scarfTail.rotation.x=moving?Math.sin(this.time*11+1)*.19:-.07+Math.sin(this.time*1.4)*.045;
     this.group.position.y+=moving?Math.abs(Math.sin(this.time*11))*.09:Math.sin(this.time*1.8)*.028;
   }
 }
