@@ -27,7 +27,7 @@ const projectPlots: Plot[] = [
   { id: 'project-sandship', kind: 'project', project: 'sandship', x: 22, z: 9, start: 0, step: 4.2 * MINUTE, variant: 1 },
   { id: 'project-battle', kind: 'project', project: 'battle', x: 8, z: -23, start: 0, step: 4.4 * MINUTE, variant: 2 },
   { id: 'project-wizard', kind: 'project', project: 'wizard', x: -8, z: 23, start: 0, step: 4 * MINUTE, variant: 3 },
-  { id: 'project-shmixel', kind: 'project', project: 'shmixel', x: 24, z: -13, start: 0, step: 4.3 * MINUTE, variant: 4 },
+  { id: 'home-east-square', kind: 'home', x: 24, z: -13, start: 0, step: 4.3 * MINUTE, variant: 4 },
   { id: 'project-dwarves', kind: 'project', project: 'dwarves', x: -25, z: -14, start: 0, step: 4.5 * MINUTE, variant: 5 },
 ];
 const civicPlots: Plot[] = [

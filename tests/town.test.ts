@@ -12,7 +12,7 @@ const save=createSave(t0,711);
 
 test('same seed and elapsed time produce the same town',()=>{
   assert.deepEqual(townAt(save,t0+15*MINUTE),townAt({...save},t0+15*MINUTE));
-  assert.equal(townAt(save,t0).plots.filter(p=>p.project).length,6);
+  assert.equal(townAt(save,t0).plots.filter(p=>p.project).length,5);
 });
 
 test('progression makes inner and outer walls in order and keeps the castle growing',()=>{

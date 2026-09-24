@@ -209,42 +209,6 @@ function wizard(g:THREE.Group,stage:number){
   }
 }
 
-function shmixel(g:THREE.Group,stage:number){
-  base(g,MAT.ink);
-  // A giant pixel canvas displays a potion made from raised color tiles.
-  block(g,0,4.04,-1.25,6.5,6.7,.66,MAT.woodDark);
-  block(g,0,4.05,-.85,5.95,6.15,.12,MAT.ink);
-  const sprite=[
-    '...YY...','..YPYY..','..PPP...','.PPWPP..','PPPPPPPP','PVPPPPVP','PPPPPPPP','.PPPPPP.','..BBBB..',
-  ];
-  const palette:Record<string,Mat>={Y:MAT.gold,P:MAT.violet,V:MAT.purple,W:MAT.white,B:MAT.blue};
-  for(let row=0;row<sprite.length;row++)for(let column=0;column<8;column++){
-    const symbol=sprite[row]?.[column]??'.';if(symbol==='.'||stage===3&&row>4||stage===4&&row>6)continue;
-    block(g,(column-3.5)*.62,6.47-row*.59,-.68,.57,.55,.2,palette[symbol]);
-  }
-  for(const x of [-2.8,2.8])block(g,x,7.65,-1.2,.35,1.15,.42,MAT.woodLight);
-  block(g,0,7.94,-1.2,6.75,.28,.75,MAT.roofBlue);
-  for(const x of [-3.7,3.7]){
-    block(g,x,1.8,1.8,.34,3.1,.34,MAT.woodDark);
-    block(g,x,3.42,1.8,1.1,.24,1.1,MAT.gold);
-  }
-  if(stage>=4){
-    block(g,-2.15,.9,2.75,1.8,.32,1.5,MAT.woodLight);
-    for(let i=0;i<5;i++)block(g,-2.75+i*.31,1.16,2.8,.25,.23,.25,[MAT.blue,MAT.purple,MAT.red,MAT.gold,MAT.emerald][i]);
-  }
-  if(stage>=5){
-    rod(g,[2.25,.82,3.25],[3.53,5.13,3.25],.19,MAT.woodLight);
-    gem(g,3.53,5.35,3.25,.34,.53,.34,MAT.violet);
-    for(const [i,x] of [-1.3,0,1.3].entries())block(g,x,.62,3.2,.9,.78,.88,[MAT.blue,MAT.gold,MAT.purple][i]);
-  }
-  if(stage>=6){
-    for(let i=0;i<6;i++){
-      const a=i*2.399;gem(g,Math.cos(a)*4.1,1.08+(i%3)*.52,Math.sin(a)*3.6,.32,.42,.32,[MAT.blue,MAT.purple,MAT.gold][i%3]);
-    }
-    block(g,0,8.85,-1.2,3.1,.37,.55,MAT.gold);
-  }
-}
-
 function dwarves(g:THREE.Group,stage:number){
   base(g,MAT.earth);
   for(const [x,y,z,s] of [[-3,2.3,-1.2,2.7],[3,2.1,-1.4,2.6],[0,3.2,-3,3.4],[-4,.7,1.1,1.15],[4,.7,1.1,1.1]] as const)stone(g,x,y,z,s,s*.9,s*.85,MAT.stoneDark);
@@ -287,7 +251,6 @@ export function landmarkBuilding(plot:PlotState):THREE.Group{
     case 'sandship':sandship(g,plot.stage);break;
     case 'battle':battle(g,plot.stage);break;
     case 'wizard':wizard(g,plot.stage);break;
-    case 'shmixel':shmixel(g,plot.stage);break;
     case 'dwarves':dwarves(g,plot.stage);break;
   }
   return g;

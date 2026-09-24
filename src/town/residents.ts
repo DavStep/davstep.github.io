@@ -61,7 +61,7 @@ export class Residents {
     const landmark=(key:string)=>PLOTS.find(p=>p.project===key)!;
     for(let id=0;id<this.capacity;id++){
       const role=roles[id%roles.length],home=homes[(id*5)%homes.length];
-      const job=role==='merchant'?PLOTS.find(p=>p.id==='market')!:role==='mage'?landmark('wizard'):role==='artist'?landmark('shmixel'):role==='miner'?landmark('dwarves'):role==='guard'?{x:32,z:0}:role==='warrior'?{x:-32,z:0}:jobs[(id*3+2)%jobs.length];
+      const job=role==='merchant'?PLOTS.find(p=>p.id==='market')!:role==='mage'?landmark('wizard'):role==='artist'?PLOTS.find(p=>p.id==='workshop')!:role==='miner'?landmark('dwarves'):role==='guard'?{x:32,z:0}:role==='warrior'?{x:-32,z:0}:jobs[(id*3+2)%jobs.length];
       this.residents.push({id,role,home:{x:home.x,z:home.z},work:{x:job.x,z:job.z}});
       const cloth=palettes.cloth[id%palettes.cloth.length],skin=palettes.skin[(id*7)%palettes.skin.length];
       const colors:Record<Part,number>={

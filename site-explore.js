@@ -31,14 +31,6 @@
       image: "assets/games/idle-wizard.webp",
       url: "https://idlewizard.pages.dev/",
       section: ".wizard-card"
-    },
-    shmixel: {
-      kicker: "05 / CREATIVE TOOL / LIVE",
-      title: "Shmixel",
-      description: "A pixel art editor for making little worlds of your own, right in the browser.",
-      image: "assets/games/shmixel-art.webp",
-      url: "https://davstep.github.io/shmixel/",
-      section: ".shmixel-card"
     }
   };
 
