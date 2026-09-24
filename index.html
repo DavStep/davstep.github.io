@@ -1,222 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dav Stepanyan — Game Developer & World Builder</title>
-    <meta name="description" content="Dav Stepanyan builds playful systems and living worlds. Explore his work on Idle Outpost, Sandship, Battle Cards, Idle Wizard, and Shmixel." />
-    <meta name="theme-color" content="#080d18" />
-    <meta property="og:title" content="Dav Stepanyan — Game Developer & World Builder" />
-    <meta property="og:description" content="Games, systems, and a tiny kingdom that keeps itself busy." />
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="preload" as="image" href="assets/world/twilight-valley-illustrated.webp" type="image/webp" />
-    <link rel="stylesheet" href="world.css?v=6" />
-    <link rel="stylesheet" href="site.css?v=6" />
-  </head>
-  <body>
-    <div class="world" data-weather="clear" data-time="day" data-season="summer" data-road="0" aria-hidden="true">
-      <div class="sky"></div>
-      <div class="stars"></div>
-      <div class="sun"></div>
-      <div class="moon"></div>
-      <div class="clouds-layer"></div>
-      <div class="sky-life-layer"></div>
-      <div class="weather-veil"></div>
-      <div class="dragons-layer"></div>
-      <div class="mountains">
-        <svg class="mountains-far" viewBox="0 0 1200 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="m-back" d="M0 220V140C80 138 122 100 177 110L243 69 301 104 363 70 423 116 490 88 546 120 626 65 694 105 766 72 835 112 904 52 963 106 1039 64 1119 113 1200 78V220Z"/>
-          <path class="m-fill" d="M0 220V155L68 132 120 143 191 78 229 100 280 49 327 92 403 28 455 89 502 70 564 127 623 66 684 111 749 82 812 135 890 48 948 102 1018 20 1080 103 1141 74 1200 119V220Z"/>
-          <path class="m-facet-light" d="M191 78 229 100 217 161 143 220Z M280 49 327 92 305 149 261 220Z M403 28 455 89 432 169 378 220Z M623 66 684 111 664 176 594 220Z M890 48 948 102 924 175 853 220Z M1018 20 1080 103 1054 172 987 220Z"/>
-          <path class="m-facet-shadow" d="M280 49 261 220 329 167Z M403 28 378 220 472 145Z M502 70 564 127 548 220Z M623 66 594 220 699 172Z M749 82 812 135 795 220Z M890 48 853 220 965 162Z M1018 20 987 220 1091 167Z M1141 74 1200 119 1200 220Z"/>
-          <path class="m-ridge-detail" d="M191 78 216 112 204 133M280 49 300 91 289 122M403 28 428 78 415 118M623 66 650 108 641 140M890 48 918 99 903 137M1018 20 1041 76 1031 118M1141 74 1162 115"/>
-          <path class="mountains-snow-fill" d="m170 101 21-23 27 24-17-7-10-12-9 17Zm87-28 23-24 26 29-17-13-9-9-11 17Zm115-15 31-30 32 39-18-15-14-14-12 16Zm226 32 25-24 26 29-17-13-9-9-9 18Zm269-18 23-24 28 34-17-15-11-10-11 17Zm120-24 31-28 35 40-22-16-13-13-14 20Z"/>
-          <path class="mountains-snow" d="M170 101 191 78 218 102M257 73 280 49 306 78M372 58 403 28 435 67M598 90 623 66 649 95M867 72 890 48 918 82M987 48 1018 20 1053 60"/>
-        </svg>
-      </div>
-      <div class="hills">
-        <svg class="hills-far" viewBox="0 0 1200 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="h-far-fill" d="M0 100V64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31V100Z"/>
-          <path class="h-far-highlight" d="M0 64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31-64 23-112-7-176-13-72-8-107 35-174 37-82 1-106-42-166-40-75 2-114 52-188 42-72-10-101-52-164-44-59 7-89 52-163 37C105 77 59 52 0 81Z"/>
-          <path class="hills-snow-fill hills-snow-fill-far" d="M0 64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31v10c-63 12-110-22-178-25-74-3-108 39-174 40-70 1-107-43-168-40-72 3-109 45-184 39-69-5-108-47-170-39-63 8-92 49-166 36C107 80 59 56 0 77Z"/>
-          <path class="hills-snow-far" d="M0 64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31"/>
-        </svg>
-        <div class="hill-trees-layer hill-trees-far"></div>
-        <svg class="hills-near" viewBox="0 0 1200 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="h-near-fill" d="M0 80V44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13V80Z"/>
-          <path class="h-near-highlight" d="M0 44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13v17c-76 30-139 40-222 8-68-27-125-39-194-9-76 33-137 42-198 14-66-29-120-40-187-18-75 25-139 49-211 20C128 43 78 34 0 60Z"/>
-          <path class="hills-snow-fill hills-snow-fill-near" d="M0 44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13v12c-79 29-140 35-223 5-66-25-123-36-191-8-75 31-135 39-195 12-67-28-120-36-185-15-77 25-138 43-210 14C130 37 79 25 0 55Z"/>
-          <path class="hills-snow-near" d="M0 44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13"/>
-        </svg>
-        <div class="hill-trees-layer hill-trees-near"></div>
-      </div>
-      <div class="back-trees-layer"></div>
-      <div class="grass"></div>
-      <div class="road-strip">
-        <div class="road-tier t-dirt"></div>
-        <div class="road-tier t-packed"></div>
-        <div class="road-tier t-stone"></div>
-        <div class="road-tier t-cobble"></div>
-        <div class="road-tier t-flagstone"></div>
-      </div>
-      <div class="grass-back"></div>
-      <div class="tracks-layer"></div>
-      <div class="ground-decor-layer">
-        <div class="wet-shine"></div>
-      </div>
-      <div class="trees-layer"></div>
-      <div class="crops-layer"></div>
-      <div class="people-layer"></div>
-      <div class="ambient-particle-layer"></div>
-      <canvas class="rain-canvas"></canvas>
-      <div class="lightning"></div>
-      <div class="rainbow">
-        <svg viewBox="0 0 1200 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 200 400 A 400 400 0 0 1 1000 400" stroke="#e04030" stroke-width="7" fill="none" opacity="0.7"/>
-          <path d="M 207 400 A 393 393 0 0 1 993 400"  stroke="#f08830" stroke-width="7" fill="none" opacity="0.7"/>
-          <path d="M 214 400 A 386 386 0 0 1 986 400"  stroke="#f0d040" stroke-width="7" fill="none" opacity="0.7"/>
-          <path d="M 221 400 A 379 379 0 0 1 979 400"  stroke="#60c050" stroke-width="7" fill="none" opacity="0.7"/>
-          <path d="M 228 400 A 372 372 0 0 1 972 400"  stroke="#4080d0" stroke-width="7" fill="none" opacity="0.7"/>
-          <path d="M 235 400 A 365 365 0 0 1 965 400"  stroke="#8040b0" stroke-width="7" fill="none" opacity="0.7"/>
-        </svg>
-      </div>
-      <div class="solar-halo">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="36" stroke="#e04030" stroke-width="0.8" fill="none" opacity="0.85"/>
-          <circle cx="50" cy="50" r="37" stroke="#f08830" stroke-width="0.8" fill="none" opacity="0.85"/>
-          <circle cx="50" cy="50" r="38" stroke="#f0d040" stroke-width="0.8" fill="none" opacity="0.85"/>
-          <circle cx="50" cy="50" r="39" stroke="#60c050" stroke-width="0.8" fill="none" opacity="0.7"/>
-          <circle cx="50" cy="50" r="40" stroke="#4080d0" stroke-width="0.8" fill="none" opacity="0.7"/>
-          <circle cx="50" cy="50" r="41" stroke="#8040b0" stroke-width="0.8" fill="none" opacity="0.6"/>
-        </svg>
-      </div>
-    </div>
-
-    <div class="world-dim" aria-hidden="true"></div>
-
-    <nav class="world-portals" id="world-portals" aria-label="Discover Dav's projects in the world" aria-hidden="true" inert>
-      <button class="world-portal" type="button" data-project="outpost" style="--portal-x: 680px; --portal-y: 210px" aria-label="Discover Idle Outpost"><small>01 / DISCOVER</small><strong>Idle Outpost</strong></button>
-      <button class="world-portal" type="button" data-project="sandship" style="--portal-x: 950px; --portal-y: 365px" aria-label="Discover Sandship"><small>02 / DISCOVER</small><strong>Sandship</strong></button>
-      <button class="world-portal" type="button" data-project="battle" style="--portal-x: 1230px; --portal-y: 215px" aria-label="Discover Battle Cards"><small>03 / DISCOVER</small><strong>Battle Cards</strong></button>
-      <button class="world-portal" type="button" data-project="wizard" style="--portal-x: 1500px; --portal-y: 265px" aria-label="Discover Idle Wizard"><small>04 / PLAY NOW</small><strong>Idle Wizard</strong></button>
-      <button class="world-portal" type="button" data-project="shmixel" style="--portal-x: 1780px; --portal-y: 220px" aria-label="Discover Shmixel"><small>05 / CREATE</small><strong>Shmixel</strong></button>
-    </nav>
-    <div class="world-guide" aria-hidden="true"><span>THE VALLEY IS YOURS</span><strong>Drag to roam <b>← →</b></strong></div>
-    <section class="discovery-panel" id="discovery-panel" role="dialog" aria-modal="false" aria-labelledby="discovery-title" hidden>
-      <button class="discovery-close" id="discovery-close" type="button" aria-label="Close project details">×</button>
-      <img id="discovery-image" alt="" width="1400" height="788" />
-      <div class="discovery-copy"><span id="discovery-kicker"></span><h2 id="discovery-title"></h2><p id="discovery-description"></p><div class="discovery-actions"><a id="discovery-link" target="_blank" rel="noopener noreferrer">Open project ↗</a><button id="discovery-page" type="button">See on page ↗</button></div></div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#d9e3d6" />
+  <meta name="description" content="Dav Stepanyan builds playful systems and living worlds. Explore a growing 3D town and discover his games and projects." />
+  <title>Dav Stepanyan — A Town That Keeps Building</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="app" class="app">
+    <div class="world-poster" aria-hidden="true"><div class="poster-hill back"></div><div class="poster-hill front"></div><div class="poster-castle">♜</div></div>
+    <canvas id="town-canvas" aria-hidden="true"></canvas>
+    <div id="weather-overlay" aria-hidden="true"></div>
+    <header class="chrome">
+      <button id="brand" class="brand" type="button" aria-label="Return to town overview"><span class="brand-icon">D<span>S</span></span><span class="brand-name">DAV STEPANYAN<small>GAME DEVELOPER · WORLD BUILDER</small></span></button>
+      <nav aria-label="Main navigation"><button data-panel="work" type="button">Work</button><button data-panel="about" type="button">About</button><button data-panel="contact" type="button">Contact</button></nav>
+    </header>
+    <main class="town-ui">
+      <section class="intro" id="intro" aria-label="Introduction"><div class="intro-kicker"><span class="pulse"></span> THE TOWN IS GROWING</div><h1>A little world<br>with <em>big plans.</em></h1><p>I'm Dav. I build games and curious systems. Wander around, meet the town, and find the work hidden inside it.</p><div class="intro-actions"><button id="intro-work" type="button">Explore my work <span>↗</span></button><button id="intro-hide" type="button">Watch the town <span>↓</span></button></div></section>
+      <div class="world-labels" id="world-labels" aria-label="Project landmarks"></div>
+      <div class="status" aria-live="off"><span class="status-mark">✦</span><span id="status-text">The settlement is waking up.</span></div>
+      <div class="controls"><button id="control-recenter" type="button" title="Recenter town" aria-label="Recenter town">⌖</button><button id="control-zoom-in" type="button" aria-label="Zoom in">+</button><button id="control-zoom-out" type="button" aria-label="Zoom out">−</button><button id="control-settings" type="button" aria-label="World settings" aria-expanded="false" aria-controls="settings-panel">⚙</button></div>
+      <div class="settings-panel" id="settings-panel" hidden><strong>Town conditions</strong><div><span>Season</span><b id="season-readout">SUMMER</b></div><div><span>Weather</span><b id="weather-readout">CLEAR</b></div><div><span>Town age</span><b id="age-readout">0 MIN</b></div><div><span>Buildings</span><b id="building-readout">0</b></div><p>Drag to orbit · scroll or pinch to zoom · click a landmark to explore.</p></div>
+      <button id="open-work-mobile" class="mobile-work" type="button">Explore work <span>↗</span></button>
+    </main>
+    <div class="panel-backdrop" id="panel-backdrop" hidden></div>
+    <section id="content-panel" class="content-panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+      <div class="panel-head"><span id="panel-kicker"></span><button id="panel-close" type="button" aria-label="Close panel">×</button></div>
+      <div id="panel-body"></div>
     </section>
-
-    <button class="world-pan-reset" id="world-pan-reset" type="button" title="Recenter the world" aria-label="Recenter the world">↺ Recenter</button>
-
-    <div class="hud" aria-label="World controls">
-      <div class="hud-settings" id="hud-settings-wrap">
-        <button class="hud-control hud-settings-toggle" id="hud-settings" type="button" aria-label="Open world controls" aria-expanded="false" aria-controls="hud-settings-menu">⚙ <span>World controls</span></button>
-        <div class="hud-settings-menu" id="hud-settings-menu" aria-hidden="true">
-          <p class="hud-menu-title">Change the world</p>
-          <div class="world-setting"><span>Season</span><button class="hud-control" id="hud-season" type="button" aria-label="Change season">SUMMER</button></div>
-          <div class="world-setting"><span>Time</span><button class="hud-control" id="hud-time" type="button" aria-label="Change time of day">DAY</button></div>
-          <div class="world-setting"><span>Weather</span><button class="hud-control" id="hud-weather" type="button" aria-label="Change weather">CLEAR</button></div>
-          <div class="world-setting"><span>Speed</span><button class="hud-control" id="hud-speed" type="button" aria-label="Change simulation speed">1×</button></div>
-        </div>
-      </div>
-      <button class="hud-control" id="hud-dim" type="button" title="Dim the world" aria-pressed="false">◐ <span>Focus</span></button>
-      <button class="hud-ui-toggle" id="hud-ui" type="button" title="Explore the world" aria-pressed="false">↗ <span>Explore</span></button>
-    </div>
-
-    <div class="log" id="log" aria-label="Realm chronicle" aria-hidden="true">
-      <div class="log-title"><span class="live-dot"></span> Live from the realm</div>
-    </div>
-
-    <div class="site-shell container">
-      <nav class="topbar" aria-label="Main navigation">
-        <a class="brand" href="#top" aria-label="Dav Stepanyan, back to top"><span class="brand-mark">D<span>S</span></span><span class="brand-copy">DAV STEPANYAN<small>GAME DEVELOPER / WORLD BUILDER</small></span></a>
-        <div class="links">
-          <a href="#work">Work</a>
-          <a href="#lab">The lab</a>
-          <a href="#about">About</a>
-          <a class="nav-contact" href="#contact">Let's talk <span aria-hidden="true">↗</span></a>
-        </div>
-      </nav>
-      <nav class="mobile-nav" aria-label="Section navigation"><a href="#work">01 Work</a><a href="#lab">02 Lab</a><a href="#about">03 About</a><button id="mobile-world-enter" type="button">World ↗</button></nav>
-
-      <main id="top">
-        <header class="hero">
-          <div class="hero-main">
-            <div class="eyebrow"><span class="status-dot"></span> DAV STEPANYAN <span class="eyebrow-line"></span> GAME DEVELOPER IN YEREVAN</div>
-            <h1>I make worlds<br>that won't <em>sit still.</em></h1>
-            <p class="hero-lead">I build games full of curious systems and tiny surprises. The village behind this page is one of them. Give it a moment; it has plans of its own.</p>
-            <div class="hero-actions">
-              <button class="button button-primary" id="explore-world" type="button">Enter the world <span aria-hidden="true">↗</span></button>
-              <a class="button button-quiet" href="#work">Browse my work <span aria-hidden="true">↓</span></a>
-            </div>
-          </div>
-          <aside class="hero-world-note" aria-label="Live world status">
-            <div class="note-heading"><span class="live-dot"></span> THE WORLD IS RUNNING <span class="note-live">LIVE</span></div>
-            <p class="world-whisper" id="hero-world-events" aria-live="off">Homes appear. People wander. The weather has its own plans.</p>
-            <div class="world-readouts"><span><small>SEASON</small><b id="hero-season">SUMMER</b></span><span><small>SKY</small><b id="hero-weather">CLEAR</b></span><span><small>HOUR</small><b id="hero-time">DAY</b></span></div>
-            <button class="text-action" id="explore-world-note" type="button">Find the projects <span aria-hidden="true">↗</span></button>
-          </aside>
-        </header>
-
-        <div class="hero-footnote"><span>SCROLL TO EXPLORE <span aria-hidden="true">↓</span></span><span>EVERYTHING BEHIND THIS TEXT IS ALIVE</span></div>
-
-        <section id="work" class="content-section">
-          <div class="section-heading"><div><span class="section-index">01 / SELECTED WORK</span><h2>Games with <em>something to say.</em></h2></div><p>Games I've helped take from early ideas to worlds people spend time in.</p></div>
-          <div class="project-grid">
-            <a class="project-card project-outpost" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer">
-              <div class="project-art art-outpost" aria-hidden="true"><img src="assets/games/idle-outpost.webp" alt="" width="1400" height="788" loading="lazy" decoding="async" /><b>FROM THE GAME</b></div>
-              <div class="project-body"><div class="project-meta"><span>ROCKBITE GAMES · CURRENT</span><span>01 ↗</span></div><h3>Idle Outpost</h3><p>A business at the end of the world. Trade with survivors, recruit heroes, and build something worth defending. I've been there since the first prototype.</p><div class="project-tags"><span>Systems</span><span>Economy</span><span>Progression</span></div></div>
-            </a>
-            <a class="project-card project-sandship" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer">
-              <div class="project-art art-sandship" aria-hidden="true"><img src="assets/games/sandship.webp" alt="" width="1400" height="788" loading="lazy" decoding="async" /><b>FROM THE GAME</b></div>
-              <div class="project-body"><div class="project-meta"><span>ROCKBITE GAMES · SHIPPED</span><span>02 ↗</span></div><h3>Sandship</h3><p>A moving factory in a strange desert. I joined during development and helped bring its crafting and automation systems to players.</p><div class="project-tags"><span>Automation</span><span>Crafting</span><span>Live operations</span></div></div>
-            </a>
-            <a class="project-card project-battle" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer">
-              <div class="project-art art-battle" aria-hidden="true"><img src="assets/games/battle-cards.webp" alt="" width="1242" height="690" loading="lazy" decoding="async" /><b>FROM THE GAME</b></div>
-              <div class="project-body"><div class="project-meta"><span>ROCKBITE GAMES · SHIPPED</span><span>03 ↗</span></div><h3>Battle Cards</h3><p>A fast PvP card battler starring heroic ducks. What began as a game jam prototype became a full game; I worked on it from day one to launch.</p><div class="project-tags"><span>PvP</span><span>Strategy</span><span>Deck building</span></div></div>
-            </a>
-          </div>
-        </section>
-
-        <div class="world-interlude"><span><b>MEANWHILE, BACK IN THE VILLAGE...</b></span><p>It kept moving while you were reading.</p></div>
-
-        <section id="lab" class="content-section lab-section">
-          <div class="section-heading"><div><span class="section-index">02 / AFTER HOURS</span><h2>Experiments from <em>the lab.</em></h2></div><p>Side projects where I follow an idea until it gets interesting.</p></div>
-          <div class="lab-grid">
-            <a class="lab-card wizard-card" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer">
-              <div class="lab-visual wizard-art" aria-hidden="true"><img src="assets/games/idle-wizard.webp" alt="" width="768" height="256" loading="lazy" decoding="async" /></div>
-              <div class="lab-copy"><div class="project-meta"><span>PLAYABLE NOW · BROWSER GAME</span><span>↗</span></div><h3>Idle Wizard</h3><p>A magical idle game I'm working on right now. Meet Elara Starbrew and start a new adventure.</p><span class="lab-link">Play the game <span aria-hidden="true">↗</span></span></div>
-            </a>
-            <a class="lab-card shmixel-card" href="https://davstep.github.io/shmixel/" target="_blank" rel="noopener noreferrer">
-              <div class="lab-visual shmixel-visual" aria-hidden="true"><img src="assets/games/shmixel-art.webp" alt="" width="880" height="670" loading="lazy" decoding="async" /></div>
-              <div class="lab-copy"><div class="project-meta"><span>CREATIVE TOOL · LIVE</span><span>↗</span></div><h3>Shmixel</h3><p>A pixel art editor for turning little ideas into sprites right in your browser.</p><span class="lab-link">Make something <span aria-hidden="true">↗</span></span></div>
-            </a>
-          </div>
-        </section>
-
-        <section id="about" class="content-section about-section">
-          <div class="about-label"><span class="section-index">03 / THE PERSON BEHIND THE SYSTEMS</span></div>
-          <div class="about-copy"><h2>Curious about the <em>small stuff.</em><br>Obsessed with the big picture.</h2><p>For <span id="years-at-rockbite">six</span> years at Rockbite Games, I've worked across gameplay, economy, progression, and all the invisible details that make a game feel good to play. I like writing the code, tuning the systems, and watching what real players actually do.</p><p>Off the clock: games, board games, anime, and time with my fiancée.</p><div class="about-facts"><div><span>ROLE</span><strong>Lead Code Wizard</strong></div><div><span>BASE</span><strong>Yerevan, Armenia</strong></div><div><span>LEVEL</span><strong id="player-level">24</strong></div></div></div>
-        </section>
-
-        <section class="realm-section" aria-labelledby="realm-title">
-          <div><span class="section-index">BONUS / THIS PAGE IS ALIVE</span><h2 id="realm-title">Watch a world<br><em>make itself.</em></h2><p>The village builds, trades, travels, and changes with the weather. Step into it and discover the projects scattered across the landscape.</p><div class="realm-stats"><span><b id="realm-buildings">0</b> buildings</span><span><b id="realm-trees">0</b> trees</span><span><b id="realm-road">wild</b> road</span></div><button class="button button-primary" id="realm-enter" type="button">Explore the simulation <span aria-hidden="true">↗</span></button></div>
-          <div class="realm-window" aria-hidden="true"><span>WINDOW INTO THE WORLD <b>● LIVE</b></span></div>
-        </section>
-
-        <section id="contact" class="contact-section">
-          <span class="section-index">04 / SAY HELLO</span><h2>Let's make <em>something alive.</em></h2><p>Have a game idea, a system to untangle, or just want to compare notes?</p><a class="button button-primary contact-button" href="mailto:davitstepanyan99@gmail.com">Send me an email <span aria-hidden="true">↗</span></a><div class="social-links"><a href="https://github.com/DavStep" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://anilist.co/user/DevStep" target="_blank" rel="noopener noreferrer">AniList ↗</a><a href="https://steamcommunity.com/id/stepdev/" target="_blank" rel="noopener noreferrer">Steam ↗</a><button id="discord-btn" type="button">Copy Discord: step_dev ↗</button></div>
-        </section>
-      </main>
-      <footer class="site-footer"><span>© <span id="footer-year">2026</span> DAV STEPANYAN</span><span>MADE WITH CURIOSITY & A FEW TOO MANY SIMULATION LOOPS</span><a href="#top">BACK TO TOP ↑</a></footer>
-    </div>
-
-    <script src="world.js?v=6" defer></script>
-    <script src="site-explore.js?v=6" defer></script>
-  </body>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <div id="fallback" class="fallback" hidden><h2>The town is resting.</h2><p>You can still explore every project below.</p><button type="button" data-panel="work">Explore work ↗</button></div>
+  </div>
+  <script type="module" src="/src/town/main.ts"></script>
+</body>
 </html>

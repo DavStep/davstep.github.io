@@ -1,0 +1,20 @@
+{
+  "name": "davstep-living-town",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && node scripts/stage-site.mjs",
+    "check": "tsc --noEmit && tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.0"
+  }
+}

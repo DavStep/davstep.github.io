@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { createSave, milestoneRecap, parseSave, townAt, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
+import { routeBetween } from '../src/town/residents';
+
+const t0=1_700_000_000_000;
+const save=createSave(t0,711);
+
+test('same seed and elapsed time produce the same town',()=>{
+  assert.deepEqual(townAt(save,t0+15*MINUTE),townAt({...save},t0+15*MINUTE));
+  assert.equal(townAt(save,t0).plots.filter(p=>p.project).length,6);
+});
+
+test('progression makes inner and outer walls in order and keeps the castle growing',()=>{
+  const early=townAt(save,t0+5*MINUTE),middle=townAt(save,t0+16*MINUTE),late=townAt(save,t0+29*MINUTE);
+  assert.ok(early.innerWood>0);
+  assert.equal(early.innerStone,0);
+  assert.equal(early.outerWood,0);
+  assert.equal(middle.innerStone,WALL_SEGMENTS);
+  assert.equal(middle.outerWood,0);
+  assert.equal(late.outerWood,WALL_SEGMENTS);
+  assert.equal(late.plots.find(p=>p.kind==='castle')?.stage,6);
+  assert.ok(late.buildings>early.buildings);
+});
+
+test('offline elapsed time reaches the same state without replay and recap is bounded',()=>{
+  const returnTime=t0+32*MINUTE;
+  const before={...save,lastSeenAt:t0+2*MINUTE};
+  assert.deepEqual(townAt(before,returnTime),townAt(save,returnTime));
+  const recap=milestoneRecap(before,returnTime);
+  assert.equal(recap.length,3);
+  assert.match(recap[2],/castle/);
+});
+
+test('mature mergers retain children and most small homes',()=>{
+  const mature=townAt(save,t0+60*MINUTE);
+  const homes=mature.plots.filter(p=>p.kind==='home');
+  assert.ok(homes.filter(p=>!p.complexId).length/homes.length>=.75);
+  assert.equal(mature.plots.length,PLOTS.length);
+  assert.ok(mature.plots.filter(p=>p.complexId).every(p=>!p.project));
+  assert.ok(mature.plots.filter(p=>p.complexId).length>0);
+  const complexes=new Map<string,typeof mature.plots>();
+  for(const plot of mature.plots)if(plot.complexId)complexes.set(plot.complexId,[...(complexes.get(plot.complexId)??[]),plot]);
+  for(const pair of complexes.values()){
+    assert.equal(pair.length,2);
+    assert.ok(Math.hypot(pair[0].x-pair[1].x,pair[0].z-pair[1].z)<12,'merged plots must be neighbors');
+  }
+});
+
+test('save parsing tolerates corrupt input and protects progressed time from clock rollback',()=>{
+  assert.equal(parseSave('{',t0).version,2);
+  const progressed={...save,elapsedFloorMs:25*MINUTE};
+  assert.equal(townAt(progressed,t0+MINUTE).elapsed,25*MINUTE);
+});
+
+test('road routing starts and ends at the requested locations',()=>{
+  const a={x:-41,z:3},b={x:19,z:22};
+  const path=routeBetween(a,b);
+  assert.ok(path.length>=3);
+  assert.equal(path[0].x,a.x);assert.equal(path[0].z,a.z);
+  assert.equal(path.at(-1)?.x,b.x);assert.equal(path.at(-1)?.z,b.z);
+});
