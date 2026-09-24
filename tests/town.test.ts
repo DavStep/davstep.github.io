@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as THREE from 'three';
 import { createSave, milestoneRecap, parseSave, townAt, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
 import { routeBetween } from '../src/town/residents';
 import { buildColliders, isBlocked, moveWithCollisions } from '../src/town/collision';
 import { riverCenter } from '../src/town/environment';
-import { Player } from '../src/town/player';
+import { RoamController } from '../src/town/navigation';
 
 const t0=1_700_000_000_000;
 const save=createSave(t0,711);
@@ -82,14 +81,16 @@ test('a walker cannot pass through a wall segment but can use a gate',()=>{
   assert.ok(gate.x>34);
 });
 
-test('walk controls advance the avatar toward the camera heading and animate its stride',()=>{
-  const player=new Player(new THREE.Scene());player.setVisible(true);
-  for(let i=0;i<30;i++)player.update(1/60,{x:0,z:1,sprint:false},0,[]);
-  assert.ok(player.position.x<5.5);
-  assert.ok(Math.abs(player.position.z-11)<.01);
-  assert.ok(Math.abs(player.group.rotation.y)>1);
-  const stoppedX=player.position.x;
-  for(let i=0;i<30;i++)player.update(1/60,{x:0,z:0,sprint:false},0,[]);
-  assert.ok(player.position.x<stoppedX);
-  assert.ok(player.position.x>stoppedX-1);
+test('keyboard and touch directions move the camera without an avatar',()=>{
+  const roam=new RoamController();roam.setPosition({x:8,z:11});
+  for(let i=0;i<30;i++)roam.update(1/60,{x:0,z:1,sprint:false},0,[]);
+  assert.ok(roam.position.x<5.5);
+  assert.ok(Math.abs(roam.position.z-11)<.01);
+  const forwardX=roam.position.x;
+  for(let i=0;i<30;i++)roam.update(1/60,{x:0,z:0,sprint:false},0,[]);
+  assert.ok(roam.position.x<forwardX);
+  assert.ok(roam.position.x>forwardX-1);
+  const beforeStrafe=roam.position.z;
+  for(let i=0;i<30;i++)roam.update(1/60,{x:1,z:0,sprint:false},0,[]);
+  assert.ok(roam.position.z<beforeStrafe-2);
 });

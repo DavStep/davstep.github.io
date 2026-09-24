@@ -29,6 +29,7 @@
 .settings-panel{color:#f1f1e9;clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%);border-radius:0}.settings-panel strong{color:#f4f0e9}.settings-panel div{border-color:#ffffff2a}.settings-panel b{color:#e6bb82}.settings-panel p{color:#b4ceca}
 .walk-hint{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);padding:10px 18px;color:#e6efea;font-size:10px;letter-spacing:.03em;white-space:nowrap}.walk-hint span{color:#e2b676;padding:0 5px}.walk-hint[hidden],.joystick[hidden]{display:none}
 .joystick{position:absolute;bottom:90px;left:24px;width:112px;height:112px;border-radius:50%;touch-action:none;display:grid;place-items:center}#joystick-stick{width:45px;height:45px;border-radius:50%;background:#e8b980;border:2px solid #fce0af;box-shadow:0 5px 22px #152b2b80}
+.roaming .mobile-work{display:none}
 .panel-backdrop{background:#09151ac4;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .content-panel{top:50%;left:50%;right:auto;bottom:auto;width:min(1080px,calc(100vw - 80px));max-height:min(720px,calc(100svh - 96px));background:linear-gradient(135deg,rgba(24,33,44,.97),rgba(19,32,39,.96));color:#f8f4eb;border:1px solid #d7c9ad7a;border-radius:0;box-shadow:0 30px 90px #081719d9,inset 0 1px #ffffff36;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px));transform:translate(-50%,-47%) scale(.96);opacity:0;overflow:hidden}
 .content-panel.open{transform:translate(-50%,-50%) scale(1);opacity:1}
