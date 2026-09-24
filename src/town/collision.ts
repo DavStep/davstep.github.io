@@ -11,12 +11,12 @@ export function buildColliders(snapshot:TownSnapshot,trees:readonly {x:number;z:
   const result:Collider[]=[];
   for(const plot of snapshot.plots){
     if(plot.stage<2)continue;
-    const hx=plot.kind==='castle'?5.9:plot.kind==='project'?3.7:plot.kind==='home'?2.3:3;
-    const hz=plot.kind==='castle'?5.5:plot.kind==='project'?3.45:plot.kind==='home'?2.15:2.75;
+    const hx=plot.kind==='castle'?5.9:plot.kind==='project'?4.85:plot.kind==='home'?2.3:3;
+    const hz=plot.kind==='castle'?5.5:plot.kind==='project'?4.35:plot.kind==='home'?2.15:2.75;
     result.push({kind:'box',x:plot.x,z:plot.z,hx,hz});
     if(plot.kind==='home'&&plot.stage>=3&&(plot.variant??0)%4===2)result.push({kind:'box',x:plot.x,z:plot.z+hz+1.05,hx:1.45,hz:1.05});
-    if(plot.stage>=5)result.push({kind:'box',x:plot.x+hx*.9,z:plot.z-.17,hx:1.1,hz:1.25});
-    if(plot.stage>=6)result.push({kind:'box',x:plot.x-hx*1.17,z:plot.z-.8,hx:1.45,hz:1.65});
+    if(plot.kind!=='project'&&plot.stage>=5)result.push({kind:'box',x:plot.x+hx*.9,z:plot.z-.17,hx:1.1,hz:1.25});
+    if(plot.kind!=='project'&&plot.stage>=6)result.push({kind:'box',x:plot.x-hx*1.17,z:plot.z-.8,hx:1.45,hz:1.65});
   }
   for(const [radius,count] of [[34,snapshot.innerWood],[55,snapshot.outerWood]]){
     for(let i=0;i<count;i++){

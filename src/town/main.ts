@@ -128,7 +128,7 @@ function enterWalk(){
   const spawn=[{x:40,z:0},{x:41,z:6},{x:39,z:-7},{x:8,z:11}].find(p=>!isBlocked(p.x,p.z,colliders,1.1));
   if(spawn){player.position.x=spawn.x;player.position.z=spawn.z;}
   walking=true;player.setVisible(true);setIntroHidden(true);
-  desiredTarget.set(player.position.x-4,1.8,player.position.z);desiredDistance=town?.mobile?20:23;desiredElevation=town?.mobile?1.23:1.28;desiredAzimuth=0;
+  desiredTarget.set(player.position.x-2.5,1.9,player.position.z);desiredDistance=town?.mobile?15:17;desiredElevation=town?.mobile?1.23:1.28;desiredAzimuth=0;
   walkButton.textContent='Overview';walkButton.setAttribute('aria-label','Return to town overview');walkButton.setAttribute('aria-pressed','true');
   walkHint.hidden=false;joystick.hidden=!town?.mobile;
 }
@@ -204,7 +204,7 @@ function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!tow
   snapshot.elapsed=Math.max(0,townNow()-save.createdAt,save.elapsedFloorMs);snapshot.dayFraction=(snapshot.elapsed%(12*MINUTE))/(12*MINUTE);
   if(walking&&player){
     const input={x:(heldKeys.has('KeyD')||heldKeys.has('ArrowRight')?1:0)-(heldKeys.has('KeyA')||heldKeys.has('ArrowLeft')?1:0)+joystickInput.x,z:(heldKeys.has('KeyW')||heldKeys.has('ArrowUp')?1:0)-(heldKeys.has('KeyS')||heldKeys.has('ArrowDown')?1:0)+joystickInput.z,sprint:heldKeys.has('ShiftLeft')||heldKeys.has('ShiftRight')};
-    player.update(elapsed/1000,input,azimuth,colliders);desiredTarget.set(player.position.x-Math.cos(azimuth)*4,1.8,player.position.z-Math.sin(azimuth)*4);
+    player.update(elapsed/1000,input,azimuth,colliders);desiredTarget.set(player.position.x-Math.cos(azimuth)*2.5,1.9,player.position.z-Math.sin(azimuth)*2.5);
   }
   stepCamera();residents?.update(snapshot);positionLabels();town.render();
   if(profile&&Math.floor(now/2000)!==Math.floor((now-elapsed)/2000)){document.body.dataset.drawCalls=String(town.renderer.info.render.calls);document.body.dataset.triangles=String(town.renderer.info.render.triangles);document.body.dataset.geometries=String(town.renderer.info.memory.geometries);document.body.dataset.textures=String(town.renderer.info.memory.textures);}

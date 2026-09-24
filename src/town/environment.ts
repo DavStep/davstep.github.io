@@ -29,7 +29,7 @@ function ribbon(width:number,color:number,opacity=1):THREE.Mesh{
 export class Environment {
   readonly group=new THREE.Group();
   readonly trees:{x:number;z:number;r:number}[]=[];
-  private readonly grassPaint=new THREE.MeshStandardMaterial({color:0xe0e9bd,roughness:1,side:THREE.DoubleSide});
+  private readonly grassPaint=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,toneMapped:true});
   private readonly wind={value:0};
   private readonly water:THREE.Mesh[]=[];
   private currentSeason='';
@@ -40,7 +40,7 @@ export class Environment {
   private buildTerrain(){
     const g=new THREE.PlaneGeometry(700,700,88,88);g.rotateX(-Math.PI/2);
     const positions=g.getAttribute('position'),colors:number[]=[];
-    const low=new THREE.Color(0x789667),high=new THREE.Color(0x617b65),sand=new THREE.Color(0x9da17a);
+    const low=new THREE.Color(0x789667),high=new THREE.Color(0x678566),sand=new THREE.Color(0x91a378);
     for(let i=0;i<positions.count;i++){
       const x=positions.getX(i),z=positions.getZ(i),r=Math.hypot(x,z);
       positions.setY(i,terrainHeight(x,z));
@@ -48,7 +48,7 @@ export class Environment {
       colors.push(c.r,c.g,c.b);
     }
     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.computeVertexNormals();
-    const terrain=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,side:THREE.DoubleSide}));
+    const terrain=new THREE.Mesh(g,MAT.terrain);
     terrain.receiveShadow=true;this.group.add(terrain);
     const square=new THREE.Mesh(new THREE.CylinderGeometry(7.8,7.8,.08,32),MAT.path);square.position.y=.55;square.receiveShadow=true;this.group.add(square);
   }
@@ -94,8 +94,8 @@ export class Environment {
     }
     const n=this.trees.length,d=new THREE.Object3D();
     const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.32,.47,1.8,6),MAT.woodDark,n);
-    const canopy=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.45,1),MAT.leaf,n);
-    const crown=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.1,1),MAT.leafLight,n);
+    const canopy=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.45,1),MAT.foliage,n);
+    const crown=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.1,1),MAT.foliage,n);
     const pineGeo=new THREE.ConeGeometry(1,1,7,1),pineTiers=[0,1,2].map(()=>new THREE.InstancedMesh(pineGeo,MAT.pine,n));
     this.trees.forEach((t,i)=>{
       const s=.86+rand(i*83)*.9,y=terrainHeight(t.x,t.z);
@@ -122,37 +122,50 @@ export class Environment {
     rocks.instanceMatrix.needsUpdate=true;rocks.receiveShadow=true;this.group.add(rocks);
   }
   private buildGrass(){
-    const geometry=new THREE.BufferGeometry();
-    geometry.setAttribute('position',new THREE.Float32BufferAttribute([
-      -.17,0,0, .17,0,0, .025,1,0,
-      0,0,-.17, 0,0,.17, 0,1,.025,
-    ],3));geometry.computeVertexNormals();
+    // Each instance is a small tuft. Five tapered leaves share a root and
+    // sway at their tips, so grass reads as continuous ground cover up close.
+    const vertices:number[]=[],colors:number[]=[];
+    const root=new THREE.Color(0x77935b),middle=new THREE.Color(0x93ad68),tip=new THREE.Color(0xa9bf7a);
+    const add=(x:number,y:number,z:number,c:THREE.Color)=>{vertices.push(x,y,z);colors.push(c.r,c.g,c.b);};
+    for(let blade=0;blade<5;blade++){
+      const a=blade*2.399,dx=Math.cos(a),dz=Math.sin(a),sideX=-dz,sideZ=dx;
+      const height=[.54,.76,.62,.69,.48][blade],width=.1+(blade%2)*.025,spread=.1+(blade%3)*.045;
+      const bx=dx*.055,bz=dz*.055,mx=bx+dx*spread*.58,mz=bz+dz*spread*.58,tx=bx+dx*spread*1.2,tz=bz+dz*spread*1.2;
+      add(bx-sideX*width,0,bz-sideZ*width,root);add(bx+sideX*width,0,bz+sideZ*width,root);add(mx,height*.58,mz,middle);
+      add(bx+sideX*width,0,bz+sideZ*width,root);add(tx,height,tz,tip);add(mx,height*.58,mz,middle);
+    }
+    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+    const normals:number[]=[];for(let i=0;i<vertices.length;i+=3)normals.push(0,1,0);
+    geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
     this.grassPaint.onBeforeCompile=shader=>{
       shader.uniforms.townWind=this.wind;
       shader.vertexShader='uniform float townWind;\n'+shader.vertexShader;
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
         #ifdef USE_INSTANCING
-          transformed.x+=sin(townWind*1.8+instanceMatrix[3].x*.13+instanceMatrix[3].z*.19)*transformed.y*.22;
-          transformed.z+=cos(townWind*1.25+instanceMatrix[3].z*.11)*transformed.y*.11;
+          float tipWeight=smoothstep(.08,.72,transformed.y);
+          transformed.x+=sin(townWind*1.45+instanceMatrix[3].x*.13+instanceMatrix[3].z*.19)*tipWeight*.11;
+          transformed.z+=cos(townWind*1.1+instanceMatrix[3].z*.11)*tipWeight*.065;
         #endif
       `);
     };
-    this.grassPaint.customProgramCacheKey=()=> 'town-wind-grass-v1';
+    this.grassPaint.customProgramCacheKey=()=> 'town-wind-grass-v2';
     const positions:{x:number;z:number;s:number;a:number;color:number}[]=[];
-    const attempts=this.mobile?6200:18000;
+    const attempts=this.mobile?6500:17000;
     for(let i=0;i<attempts;i++){
       const a=rand(i*167+2)*Math.PI*2,r=i%2===0?Math.sqrt(rand(i*911+9))*71:71+Math.sqrt(rand(i*911+9))*75,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      if(isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?7:4.3))||r<67&&(Math.abs(x)<3.1||Math.abs(z)<3.1||Math.abs(r-31.5)<2.6||Math.abs(r-55)<2.8))continue;
-      positions.push({x,z,s:.45+rand(i*13)*1.05,a:rand(i*27)*6.28,color:i%5});
+      const meadow=Math.sin(x*.045)*Math.sin(z*.059);
+      if(rand(i*631+5)>.72+meadow*.24||isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-31.5)<2.3||Math.abs(r-55)<2.5))continue;
+      positions.push({x,z,s:.68+rand(i*13)*.72,a:rand(i*27)*6.28,color:i%5});
     }
     const grass=new THREE.InstancedMesh(geometry,this.grassPaint,positions.length),d=new THREE.Object3D();
-    positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.03,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0x98ad66,0x7eaa68,0xb5a768,0x6d9961,0x91ad75][p.color]));});
+    positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.015,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0xe1e8c7,0xd7e2bc,0xe5eccb,0xcddcb4,0xe0e6bf][p.color]));});
     grass.instanceMatrix.needsUpdate=true;if(grass.instanceColor)grass.instanceColor.needsUpdate=true;grass.frustumCulled=false;
     this.group.add(grass);
   }
-  update(seconds:number,season:string){
+  update(seconds:number,season:string,night:number){
     this.wind.value=seconds;
-    if(season!==this.currentSeason){this.currentSeason=season;this.grassPaint.color.set(season==='winter'?0xd8ddcb:season==='autumn'?0xe9c690:0xe0e9bd);}
+    if(season!==this.currentSeason)this.currentSeason=season;
+    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff).multiplyScalar(1-night*.42);
     for(const water of this.water)water.material instanceof THREE.MeshStandardMaterial&&(water.material.emissive.setHex(0x102b36),water.material.emissiveIntensity=.16+.06*Math.sin(seconds*.7));
   }
 }

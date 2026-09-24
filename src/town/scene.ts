@@ -5,6 +5,8 @@ import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model
 import type { ProjectKey } from './projects';
 import { C, MAT, type Mat } from './materials';
 import { Environment } from './environment';
+import { TownSky } from './sky';
+import { LANDMARK_SHARED_GEOMETRIES, landmarkBuilding } from './landmarks';
 const MOBILE=matchMedia('(max-width: 700px)').matches;
 const boxGeometry = new RoundedBoxGeometry(1,1,1,2,.08);
 const plainBoxGeometry = new THREE.BoxGeometry(1,1,1);
@@ -112,21 +114,17 @@ function flag(parent:THREE.Group,x:number,y:number,z:number,material:Mat) {
   box(parent,x,y+.75,z,.09,1.5,.09,MAT.woodDark);
   box(parent,x+.42,y+1.25,z,.8,.42,.06,material);
 }
-function ringBox(parent:THREE.Group,x:number,z:number,r:number,w:number,h:number,d:number,mat:Mat) {
-  const mesh=box(parent,x,h/2,z,w,h,d,mat);mesh.rotation.y=r;return mesh;
-}
 function building(plot:PlotState): THREE.Group {
   const g=new THREE.Group(); g.position.set(plot.x,0,plot.z);
   const stage=plot.stage, kind=plot.kind, v=plot.variant??0;
   if(stage<=0)return g;
-  const isProject=kind==='project';
-  const big=isProject||kind==='castle';
-  const w=kind==='castle'?11:isProject?6.4:kind==='home'?3.8:5;
-  const d=kind==='castle'?10:isProject?5.9:kind==='home'?3.5:4.5;
-  const h=kind==='castle'?3.4+Math.max(0,stage-2)*.95:isProject?2.8+Math.max(0,stage-3)*.35:kind==='home'?2.2+(v===1?.8:0)+(stage>=5?.55:0):2.6+(stage>=5?.45:0);
+  if(kind==='project')return landmarkBuilding(plot);
+  const w=kind==='castle'?11:kind==='home'?3.8:5;
+  const d=kind==='castle'?10:kind==='home'?3.5:4.5;
+  const h=kind==='castle'?3.4+Math.max(0,stage-2)*.95:kind==='home'?2.2+(v===1?.8:0)+(stage>=5?.55:0):2.6+(stage>=5?.45:0);
   const homeWalls=[MAT.plaster,MAT.plasterIvory,MAT.plasterRose,MAT.plasterSage];
-  const wallMat=kind==='castle'?MAT.stone:kind==='forge'||kind==='guild'?MAT.stone:kind==='project'&&plot.project==='dwarves'?MAT.stone:stage>=6&&v%3===0?MAT.stone:kind==='home'?homeWalls[v%homeWalls.length]:MAT.plaster;
-  const roofMat=isProject ? ({outpost:MAT.roof, sandship:MAT.roofBlue, battle:MAT.red, wizard:MAT.purple, shmixel:MAT.blue, dwarves:MAT.roofDark} as Record<ProjectKey,Mat>)[plot.project!] : [MAT.roof,MAT.roofDark,MAT.roofBlue][v%3];
+  const wallMat=kind==='castle'?MAT.stone:kind==='forge'||kind==='guild'?MAT.stone:stage>=6&&v%3===0?MAT.stone:kind==='home'?homeWalls[v%homeWalls.length]:MAT.plaster;
+  const roofMat=[MAT.roof,MAT.roofDark,MAT.roofBlue][v%3];
   // Construction always starts with a visible footprint and tools beside it.
   box(g,0,.16,0,w+.35,.32,d+.35,MAT.stoneDark);
   if(stage===1){
@@ -156,7 +154,7 @@ function building(plot:PlotState): THREE.Group {
     box(g,-.69,.88,d*.59,.19,1.77,.22,MAT.stone,0,false);
     box(g,.69,.88,d*.59,.19,1.77,.22,MAT.stone,0,false);
     box(g,0,1.78,d*.59,1.56,.2,.22,MAT.stone,0,false);
-    if(kind==='home'||kind==='project'){for(const sx of [-1,1])box(g,sx*w*.48,h*.48,d*.51,.17,h*.94,.19,MAT.woodDark);box(g,0,h*.68,d*.51,.14,h*.5,.17,MAT.woodLight);}
+    if(kind==='home'){for(const sx of [-1,1])box(g,sx*w*.48,h*.48,d*.51,.17,h*.94,.19,MAT.woodDark);box(g,0,h*.68,d*.51,.14,h*.5,.17,MAT.woodLight);}
     awning(g,0,1.85,d*.55,Math.min(2.3,w*.52),roofMat);
     if(kind==='home'){
       // Four facade families remain legible as individual cottages from the walk camera.
@@ -245,67 +243,6 @@ function building(plot:PlotState): THREE.Group {
       for(let i=-3;i<=3;i++)for(const side of [-1,1])box(g,side*w*.52,h+1.04,i*1.3,.72,.9,.72,MAT.stone);
     }
   }
-  if(kind==='project'){
-    const key=plot.project!;
-    if(key==='outpost'){
-      for(const sx of [-1,1])box(g,sx*3.7,stage>=5?2.4:1.55,0,.55,stage>=5?4.8:3.1,.55,MAT.woodDark);
-      if(stage>=3)for(const z of [-1.4,1.4])box(g,3.7,.65,z,1,1.3,1,MAT.woodLight);
-      if(stage>=4){
-        for(const sx of [-1,1]){
-          const top=stage>=5?4.9:3.25;
-          box(g,sx*3.7,top,0,2.1,.28,2.1,MAT.woodDark,0,false);
-          for(const dz of [-.83,.83])box(g,sx*3.7,top+.54,dz,2.2,.12,.13,MAT.woodLight,0,false);
-        }
-      }
-      if(stage>=6)flag(g,0,h+2,0,MAT.gold);
-    } else if(key==='sandship'){
-      if(stage>=3)for(let i=0;i<3;i++)box(g,3.6,.58,-2+i*1.8,1.5,.65,1.25,i%2?MAT.stoneDark:MAT.woodDark);
-      if(stage>=5)ringBox(g,3.5,-1,0,1.8,.15,5,MAT.gold);
-      if(stage>=5){
-        const hull=ball(g,0,h+1.06,0,2.75,.52,1.14,MAT.woodDark);hull.rotation.z=.08;
-        box(g,0,h+2.16,0,.14,2.1,.14,MAT.woodLight,0,false);
-        const sail=new THREE.Mesh(new THREE.ConeGeometry(1.2,2.2,3),MAT.plasterIvory);sail.position.set(.61,h+2.94,0);sail.rotation.z=-.38;sail.castShadow=true;g.add(sail);
-        box(g,0,h+1.57,0,3.7,.13,.16,MAT.woodLight,0,false);
-      }
-    } else if(key==='battle'){
-      if(stage>=3)for(const x of [-2.8,2.8])box(g,x,.5,4,.45,1.1,5,MAT.woodDark);
-      if(stage>=5)for(const x of [-3,3])flag(g,x,h+.3,2,MAT.red);
-      if(stage>=5){
-        const crest=ball(g,0,h+1.3,d*.52,1.08,1.16,.18,MAT.gold);
-        crest.rotation.z=Math.PI/4;
-        beam(g,-.67,h+.67,d*.64,.67,h+1.95,.15,.16,MAT.stoneDark);
-        beam(g,.67,h+.67,d*.64,-.67,h+1.95,.15,.16,MAT.stoneDark);
-      }
-    } else if(key==='wizard'){
-      if(stage>=3)tower(g,-1,-1,h+Math.max(0,stage-3)*1.1,MAT.stone);
-      if(stage>=5)ball(g,-1,h+4.7,-1,.55,.55,.55,MAT.purple);
-      if(stage>=5){
-        const spire=new THREE.Mesh(new THREE.ConeGeometry(1.4,3.1,7),MAT.purple);spire.position.set(-1,h+5.4,-1);spire.castShadow=true;g.add(spire);
-        for(const side of [-1,1])ball(g,-1+side*.95,h+4.2,-1,.15,.15,.15,MAT.gold);
-      }
-      if(stage>=6)for(const x of [-3,3])tower(g,x,2,h+1,MAT.stone);
-    } else if(key==='shmixel'){
-      if(stage>=3)for(let i=0;i<5;i++)box(g,-2.2+i*1.1,h*.58,d*.52,.8,.8,.1,[MAT.red,MAT.gold,MAT.leaf,MAT.blue,MAT.purple][i]);
-      if(stage>=5){
-        for(let i=0;i<9;i++){
-          const px=(i%3-1)*.78,py=Math.floor(i/3)*.78;
-          box(g,px,h+1.12+py,0,.68,.68,.68,[MAT.blue,MAT.purple,MAT.gold,MAT.red,MAT.leaf][(i+2)%5],0,false);
-        }
-      }
-      if(stage>=6)for(let i=0;i<4;i++)box(g,3.6,.9,-2+i*1.25,.9,1.8,.9,[MAT.red,MAT.gold,MAT.blue,MAT.purple][i]);
-    } else if(key==='dwarves'){
-      if(stage>=3){box(g,-3,.85,-2,2.8,1.7,.35,MAT.woodDark);box(g,-3,2,-2,3.2,.38,.75,MAT.stoneDark);}
-      if(stage>=5)for(let i=0;i<3;i++){const wheel=ball(g,2.7+i*.3,.35,2.4,.3,.3,.3,MAT.stoneDark);wheel.rotation.z=Math.PI/2;}
-      if(stage>=5){
-        for(const sx of [-1,1])box(g,sx*2.05,1.45,d*.63,.34,2.55,.4,MAT.woodDark,0,false);
-        beam(g,-2.25,2.72,d*.63,0,3.8,.32,.42,MAT.woodDark);
-        beam(g,0,3.8,d*.63,2.25,2.72,.32,.42,MAT.woodDark);
-        box(g,0,1.34,d*.65,3.4,2.13,.12,MAT.window,0,false);
-        for(const sx of [-1,1])ball(g,sx*2.12,2.86,d*.87,.33,.33,.33,MAT.gold);
-      }
-      if(stage>=6)tower(g,-2,-2,h+2,MAT.stoneDark);
-    }
-  }
   if(kind==='mill'&&stage>=4){box(g,0,h+2,0,.35,3,.35,MAT.woodDark);for(let i=0;i<4;i++){const blade=box(g,0,h+2,0,.6,4,.12,MAT.woodLight);blade.rotation.z=i*Math.PI/2;}}
   if(kind==='forge'&&stage>=4)box(g,2,.5,2,1.4,.8,1.4,MAT.stoneDark);
   if(kind==='post'&&stage>=4)flag(g,0,h+.3,d*.4,MAT.gold);
@@ -324,12 +261,14 @@ export class TownScene {
   readonly treeObstacles:{x:number;z:number;r:number}[]=[];
   private readonly land=new THREE.Group();
   readonly environment:Environment;
+  private readonly sky:TownSky;
   private currentSeason='summer';
+  private currentNight=0;
   private readonly structures=new THREE.Group();
   private readonly roads=new THREE.Group();
   private readonly walls=new THREE.Group();
-  private readonly sun=new THREE.DirectionalLight(0xffecd0,2.25);
-  private readonly fill=new THREE.HemisphereLight(0xe4edf7,0x6d7655,1.65);
+  private readonly sun=new THREE.DirectionalLight(0xffe3c0,2.65);
+  private readonly fill=new THREE.HemisphereLight(0xc7e3f2,0x867963,1);
   private readonly materials=new Set<Mat>();
   private structureSignature='';
   private wallSignature='';
@@ -339,18 +278,19 @@ export class TownScene {
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:!this.mobile,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure=1.35;
+    this.renderer.toneMappingExposure=1.12;
     this.renderer.shadowMap.enabled=!this.mobile;
     this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     this.scene.background=new THREE.Color(0xbad6dc);
     this.scene.fog=new THREE.Fog(0xbad6dc,200,500);
     this.sun.position.set(-32,63,28);this.sun.castShadow=!this.mobile;
-    this.sun.shadow.mapSize.set(this.mobile?512:1024,this.mobile?512:1024);
+    this.sun.shadow.mapSize.set(this.mobile?512:2048,this.mobile?512:2048);
     this.sun.shadow.camera.left=-76;this.sun.shadow.camera.right=76;this.sun.shadow.camera.top=76;this.sun.shadow.camera.bottom=-76;
     this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=180;
     this.sun.shadow.bias=-.00015;
     this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls);
     this.environment=new Environment(this.scene,this.mobile);
+    this.sky=new TownSky(this.scene);
     this.camera.position.set(95,106,108);this.camera.lookAt(0,0,0);
     this.createDecor();this.resize();
   }
@@ -381,7 +321,7 @@ export class TownScene {
       this.treeObstacles.push({x,z,r:.8});
     }
     const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.33,.45,1.8,5),MAT.woodDark,trees.length);
-    const canopy=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.55,1),MAT.leaf,trees.length);
+    const canopy=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.55,1),MAT.foliage,trees.length);
     const pineTiers=[0,1,2].map(()=>new THREE.InstancedMesh(coneGeometry,MAT.pine,trees.length));
     trunk.castShadow=canopy.castShadow=!this.mobile;trunk.receiveShadow=canopy.receiveShadow=true;
     const dummy=new THREE.Object3D();
@@ -406,7 +346,7 @@ export class TownScene {
     }
     const props:[typeof stones,THREE.BufferGeometry,Mat,number[]][]=[
       [stones,new THREE.IcosahedronGeometry(1,0),MAT.stone,[0xd2c8b6,0xb3b4aa,0xe2d9c8]],
-      [shrubs,new THREE.IcosahedronGeometry(1,1),MAT.leaf,[0x667e52,0x73885d,0x536f56]],
+      [shrubs,new THREE.IcosahedronGeometry(1,1),MAT.foliage,[0x667e52,0x73885d,0x536f56]],
     ];
     for(const [positions,geometry,material,palette] of props){
       const mesh=new THREE.InstancedMesh(geometry,material,positions.length);
@@ -423,6 +363,7 @@ export class TownScene {
   private buildStructures(plots:PlotState[]){
     this.clear(this.structures);this.pickBoxes.clear();
     const buckets=new Map<Mat,THREE.BufferGeometry[]>();
+    const reusableGeometries=new Set<THREE.BufferGeometry>([boxGeometry,plainBoxGeometry,sphereGeometry,coneGeometry,towerBodyGeometry,towerRingGeometry,...LANDMARK_SHARED_GEOMETRIES]);
     const collect=(g:THREE.Group)=>{
       g.updateMatrixWorld(true);
       g.traverse(o=>{if(!(o instanceof THREE.Mesh))return;
@@ -431,12 +372,13 @@ export class TownScene {
         for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal')geometry.deleteAttribute(name);
         geometry.applyMatrix4(o.matrixWorld);
         const bucket=buckets.get(o.material as Mat)??[];bucket.push(geometry);buckets.set(o.material as Mat,bucket);
+        if(!reusableGeometries.has(o.geometry))o.geometry.dispose();
       });
     };
     for(const p of plots){
       if(p.stage===0)continue;
       const g=building(p);collect(g);
-      if(p.project)this.pickBoxes.set(p.project,new THREE.Box3(new THREE.Vector3(p.x-5,0,p.z-5),new THREE.Vector3(p.x+5,16,p.z+5)));
+      if(p.project)this.pickBoxes.set(p.project,new THREE.Box3(new THREE.Vector3(p.x-5.3,0,p.z-5),new THREE.Vector3(p.x+5.3,20,p.z+5)));
     }
     const complexes=new Map<string,PlotState[]>();
     for(const p of plots)if(p.complexId){const group=complexes.get(p.complexId)??[];group.push(p);complexes.set(p.complexId,group);}
@@ -547,17 +489,18 @@ export class TownScene {
     if(wallSignature!==this.wallSignature){this.wallSignature=wallSignature;this.buildWalls(snapshot);}
     if(snapshot.roads!==this.roadSignature){this.roadSignature=snapshot.roads;this.buildRoads(snapshot.roads);}
     const t=snapshot.dayFraction,night=Math.max(0,Math.sin((t-.55)*Math.PI*2));
-    const brightness=1-.38*night;
-    this.sun.intensity=2.25*brightness;
-    this.fill.intensity=1.65*(1-.28*night);
+    this.currentNight=night;
+    const brightness=1-.59*night;
+    this.sun.intensity=(snapshot.weather==='rain'?2.1:2.65)*brightness;
+    this.fill.intensity=(snapshot.weather==='rain'?1.08:1)*(1-.32*night);
     this.sun.position.set(Math.cos(t*Math.PI*2)*55,Math.max(14,Math.sin(t*Math.PI*2)*65+25),28);
-    const sky=new THREE.Color().setHSL(snapshot.weather==='rain'?.58:.55,snapshot.weather==='rain'?.20:.38,night?.43:.79);
-    if(snapshot.season==='winter')sky.lerp(new THREE.Color(0xdbe1e4),.24);
-    this.scene.background=sky;this.scene.fog?.color.copy(sky);
+    const fogColor=new THREE.Color(snapshot.weather==='rain'?0xbac5c0:0xd1d8cc).lerp(new THREE.Color(0x57687b),night*.64);
+    this.scene.background=fogColor;this.scene.fog?.color.copy(fogColor);
     MAT.grass.color.set(snapshot.season==='winter'?0xa7b4aa:snapshot.season==='autumn'?0x89845b:snapshot.season==='spring'?0x7a9a63:C.grass);
     MAT.leaf.color.set(snapshot.season==='autumn'?0xa47a4d:snapshot.season==='winter'?0x758270:0x52775a);
-    this.renderer.toneMappingExposure=1.35-.15*night;
+    this.renderer.toneMappingExposure=1.12-.09*night;
+    this.sky.update(snapshot,night,this.sun.position,this.camera.position);
   }
-  render(){this.environment.update(performance.now()/1000,this.currentSeason);this.renderer.render(this.scene,this.camera);}
+  render(){this.environment.update(performance.now()/1000,this.currentSeason,this.currentNight);this.sky.updatePosition(this.camera.position);this.renderer.render(this.scene,this.camera);}
   dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.renderer.dispose();}
 }

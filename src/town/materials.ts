@@ -14,7 +14,7 @@ export const C = {
 export type Mat = THREE.Material;
 const make = (color:number, roughness=.9, metalness=0) => new THREE.MeshStandardMaterial({color,roughness,metalness});
 
-function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'roof'|'plaster'){
+function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'roof'|'plaster'|'ground'){
   const previous=material.onBeforeCompile;
   material.onBeforeCompile=(shader,renderer)=>{
     previous.call(material,shader,renderer);
@@ -50,20 +50,28 @@ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'
         diffuseColor.rgb*=.83+tileTint*.25-max(seamX,seamZ)*.13;`,
       plaster:`float wash=townNoise(vTownSurface*vec3(1.4,1.1,1.4));
         diffuseColor.rgb*=.94+wash*.10;`,
+      ground:`float groundPatch=townNoise(vTownSurface*vec3(.075,.01,.075));
+        float fleck=townNoise(vTownSurface*vec3(.46,.02,.46));
+        float meadow=sin(vTownSurface.x*.045)*sin(vTownSurface.z*.059);
+        diffuseColor.rgb*=.94+groundPatch*.12+fleck*.035+meadow*.045;`,
     }[surface];
     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n${treatment}`);
   };
-  material.customProgramCacheKey=()=>`town-painted-${surface}-v1`;
+  material.customProgramCacheKey=()=>`town-painted-${surface}-v2`;
   return material;
 }
 
 export const MAT = {
-  grass:make(C.grass,1),grassDark:make(C.grassDark,1),earth:make(C.earth,1),path:make(C.path,1),
+  grass:painted(make(C.grass,1),'ground'),terrain:painted(new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1}),'ground'),grassDark:make(C.grassDark,1),earth:make(C.earth,1),path:make(C.path,1),
   wood:painted(make(C.wood,.88),'timber'),woodLight:painted(make(C.woodLight,.88),'timber'),woodDark:painted(make(C.woodDark,.92),'timber'),
   stone:painted(make(C.stone,1),'stone'),stoneDark:painted(make(C.stoneDark,1),'stone'),
   plaster:painted(make(C.plaster,1),'plaster'),plasterIvory:painted(make(0xe1d2b4,1),'plaster'),plasterRose:painted(make(0xdab8a5,1),'plaster'),plasterSage:painted(make(0xbfc9af,1),'plaster'),
   roof:painted(make(C.roof,.92),'roof'),roofDark:painted(make(C.roofDark,.92),'roof'),roofBlue:painted(make(C.roofBlue,.92),'roof'),
   gold:make(C.gold,.68,.1),window:make(C.window,.88),glass:new THREE.MeshStandardMaterial({color:0x8db3ab,roughness:.25,metalness:.12,emissive:0x193633,emissiveIntensity:.22}),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
-  white:make(0xeae9dd),leaf:make(0x52775a,1),leafLight:make(0x709466,1),leafDark:make(0x456b5a,1),pine:make(0xffffff,1),
+  white:make(0xeae9dd),leaf:make(0x52775a,1),leafLight:make(0x709466,1),leafDark:make(0x456b5a,1),foliage:make(0xffffff,1),pine:make(0xffffff,1),
   red:make(0xbe7062),purple:make(0x8d729e),blue:make(0x668db0),
+  iron:make(0x576a72,.7,.28),copper:make(0xb8775d,.76,.22),olive:make(0x748568,.95),sand:make(0xc6a97e,1),
+  cyan:new THREE.MeshStandardMaterial({color:0x62c4cc,roughness:.3,metalness:.18,emissive:0x249aab,emissiveIntensity:.65}),
+  magic:new THREE.MeshStandardMaterial({color:0x9bc5ed,roughness:.25,metalness:.08,emissive:0x5575de,emissiveIntensity:.62}),
+  violet:make(0x664b89,.83),ink:make(0x34384b,.95),emerald:make(0x5aab85,.87),
 } as const;
