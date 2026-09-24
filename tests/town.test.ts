@@ -3,8 +3,9 @@ import test from 'node:test';
 import { createSave, milestoneRecap, parseSave, townAt, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
 import { routeBetween } from '../src/town/residents';
 import { buildColliders, isBlocked, moveWithCollisions } from '../src/town/collision';
-import { riverCenter } from '../src/town/environment';
+import { isWater, riverCenter, riverHalfWidth, terrainHeight } from '../src/town/environment';
 import { RoamController } from '../src/town/navigation';
+import { wallIsGate, wallSection } from '../src/town/wall-layout';
 
 const t0=1_700_000_000_000;
 const save=createSave(t0,711);
@@ -79,6 +80,31 @@ test('a walker cannot pass through a wall segment but can use a gate',()=>{
   assert.ok(Math.hypot(wall.x,wall.z)<34);
   const gate=moveWithCollisions({x:30,z:3},{x:10,z:0},colliders);
   assert.ok(gate.x>34);
+});
+
+test('wall sections meet at shared corners and gates align with their openings',()=>{
+  const colliders=buildColliders(townAt(save,t0+30*MINUTE));
+  for(const radius of [34,55]){
+    const wallSegments=colliders.filter(c=>c.kind==='segment'&&Math.hypot(c.ax,c.az)>radius-1&&Math.hypot(c.ax,c.az)<radius+1);
+    assert.equal(wallSegments.length,WALL_SEGMENTS-4);
+    for(let i=0;i<WALL_SEGMENTS;i++){
+      const section=wallSection(radius,i),next=wallSection(radius,(i+1)%WALL_SEGMENTS);
+      assert.ok(Math.hypot(section.end.x-next.start.x,section.end.z-next.start.z)<1e-10);
+      if(!wallIsGate(i))assert.ok(wallSegments.some(c=>c.kind==='segment'&&Math.hypot(c.ax-section.start.x,c.az-section.start.z)<1e-10));
+      else assert.ok(section.length>5&&section.length<12);
+    }
+  }
+});
+
+test('river and ponds sit inside carved terrain with dry banks',()=>{
+  for(const x of [-100,0,100]){
+    const center=riverCenter(x),width=riverHalfWidth(x);
+    assert.ok(isWater(x,center));
+    assert.ok(!isWater(x,center+width+3));
+    assert.ok(Math.max(terrainHeight(x,center+width+3),terrainHeight(x,center-width-3))-terrainHeight(x,center)>1);
+  }
+  assert.ok(isWater(-82,-27));
+  assert.ok(terrainHeight(-82,-16)>terrainHeight(-82,-27)+1);
 });
 
 test('keyboard and touch directions move the camera without an avatar',()=>{

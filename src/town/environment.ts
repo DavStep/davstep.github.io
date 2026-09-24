@@ -5,25 +5,45 @@ import { MAT } from './materials';
 const hash=(n:number)=>{let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;};
 const rand=(seed:number)=>hash(seed)/0xffffffff;
 
-export function terrainHeight(x:number,z:number):number{
+function baseTerrainHeight(x:number,z:number):number{
   const r=Math.hypot(x,z),outer=Math.max(0,r-68);
   return .48+outer*.048+outer*outer*.00055*(.72+.28*Math.sin(x*.075+z*.034));
 }
 export const riverCenter=(x:number)=>-86+7*Math.sin(x*.027)+3*Math.sin(x*.071+1.3);
+export const riverHalfWidth=(x:number)=>4.35+.42*Math.sin(x*.037)+.18*Math.sin(x*.11+1);
 export const PONDS=([{x:-82,z:-27,r:8},{x:83,z:-34,r:6.5}] as const);
+const smoothstep=(min:number,max:number,value:number)=>{const t=THREE.MathUtils.clamp((value-min)/(max-min),0,1);return t*t*(3-2*t);};
+export function terrainHeight(x:number,z:number):number{
+  const riverDepth=1.5*(1-smoothstep(riverHalfWidth(x)-.3,riverHalfWidth(x)+2.5,Math.abs(z-riverCenter(x))));
+  let pondDepth=0;
+  for(const p of PONDS)pondDepth=Math.max(pondDepth,1.35*(1-smoothstep(p.r-.35,p.r+2.1,Math.hypot(x-p.x,z-p.z))));
+  return baseTerrainHeight(x,z)-Math.max(riverDepth,pondDepth);
+}
 export function isWater(x:number,z:number,clearance=0):boolean{
-  return Math.abs(z-riverCenter(x))<4.6+clearance||PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r+clearance);
+  return Math.abs(z-riverCenter(x))<riverHalfWidth(x)+clearance||PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r+clearance);
 }
 
-function ribbon(width:number,color:number,opacity=1):THREE.Mesh{
-  const positions:number[]=[],indices:number[]=[];
-  for(let i=0;i<=100;i++){
-    const x=-220+i*4.4,z=riverCenter(x),y=terrainHeight(x,z)+.14;
-    positions.push(x,y,z-width/2,x,y,z+width/2);
-    if(i<100){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}
-  }
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();
-  return new THREE.Mesh(g,new THREE.MeshStandardMaterial({color,roughness:.48,transparent:opacity<1,opacity,side:THREE.DoubleSide,depthWrite:opacity===1}));
+function waterMaterial(time:{value:number},light:{value:number},pond=false):THREE.MeshBasicMaterial{
+  const material=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide});
+  material.onBeforeCompile=shader=>{
+    shader.uniforms.townWaterTime=time;shader.uniforms.townWaterLight=light;
+    shader.vertexShader='varying vec2 vTownWaterUv;\n'+shader.vertexShader;
+    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTownWaterUv=uv;');
+    shader.fragmentShader='uniform float townWaterTime; uniform float townWaterLight; varying vec2 vTownWaterUv;\n'+shader.fragmentShader;
+    shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+      float edge=${pond?'smoothstep(.63,.98,length((vTownWaterUv-.5)*2.0))':'smoothstep(.45,1.0,abs(vTownWaterUv.x))'};
+      float flow=${pond?'length((vTownWaterUv-.5)*2.0)*16.0-townWaterTime*.8':'vTownWaterUv.y*.82-townWaterTime*.55'};
+      float ripple=sin(flow+sin(vTownWaterUv.x*8.0+vTownWaterUv.y*.24)*.5);
+      float broken=smoothstep(.1,.7,sin(vTownWaterUv.y*1.7+vTownWaterUv.x*13.0));
+      float glint=smoothstep(.975,.999,ripple)*broken;
+      float foam=smoothstep(.92,.99,edge)*(.25+.15*sin(flow*1.3));
+      vec3 deep=vec3(.035,.23,.25),shallow=vec3(.16,.43,.37);
+      diffuseColor.rgb=(mix(deep,shallow,edge)+ripple*.012)*(townWaterLight);
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.60,.76,.66)*townWaterLight,glint*.4+foam*.55);
+    `);
+  };
+  material.customProgramCacheKey=()=>pond?'town-pond-v1':'town-river-v1';
+  return material;
 }
 
 export class Environment {
@@ -31,20 +51,24 @@ export class Environment {
   readonly trees:{x:number;z:number;r:number}[]=[];
   private readonly grassPaint=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,toneMapped:true});
   private readonly wind={value:0};
-  private readonly water:THREE.Mesh[]=[];
+  private readonly waterTime={value:0};
+  private readonly waterLight={value:1};
+  private readonly reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   private currentSeason='';
   constructor(scene:THREE.Scene,private mobile:boolean){
     this.buildTerrain();this.buildWater();this.buildMountains();this.buildForest();this.buildGrass();
     scene.add(this.group);
   }
   private buildTerrain(){
-    const g=new THREE.PlaneGeometry(700,700,88,88);g.rotateX(-Math.PI/2);
+    const divisions=this.mobile?144:200;
+    const g=new THREE.PlaneGeometry(700,700,divisions,divisions);g.rotateX(-Math.PI/2);
     const positions=g.getAttribute('position'),colors:number[]=[];
-    const low=new THREE.Color(0x789667),high=new THREE.Color(0x678566),sand=new THREE.Color(0x91a378);
+    const low=new THREE.Color(0x789667),high=new THREE.Color(0x678566),sand=new THREE.Color(0x91a378),shoreColor=new THREE.Color(0x615f4e);
     for(let i=0;i<positions.count;i++){
       const x=positions.getX(i),z=positions.getZ(i),r=Math.hypot(x,z);
       positions.setY(i,terrainHeight(x,z));
       const c=low.clone().lerp(high,THREE.MathUtils.smoothstep(r,70,220)*.8).lerp(sand,rand(i*741)*.13);
+      if(isWater(x,z,2.5))c.lerp(shoreColor,.2);
       colors.push(c.r,c.g,c.b);
     }
     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.computeVertexNormals();
@@ -53,15 +77,53 @@ export class Environment {
     const square=new THREE.Mesh(new THREE.CylinderGeometry(7.8,7.8,.08,32),MAT.path);square.position.y=.55;square.receiveShadow=true;this.group.add(square);
   }
   private buildWater(){
-    const bank=ribbon(15,0xbab597),stream=ribbon(9.4,0x578d9e,.96);
-    bank.position.y=.015;stream.position.y=.045;(stream.material as THREE.Material).depthWrite=false;
-    this.group.add(bank,stream);this.water.push(stream);
-    for(const p of PONDS){
-      const y=terrainHeight(p.x,p.z)+.15;
-      const shore=new THREE.Mesh(new THREE.CircleGeometry(p.r+1.6,32),MAT.path);shore.rotation.x=-Math.PI/2;shore.position.set(p.x,y,p.z);
-      const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,32),stream.material);pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y+.035,p.z);this.group.add(shore,pond);this.water.push(pond);
-      for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(p.x+Math.cos(a)*rr,y+.75,p.z+Math.sin(a)*rr);this.group.add(reed);}
+    const water:number[]=[],waterUv:number[]=[],banks:number[]=[];
+    const steps=140,first=-225,last=225,bankWidth=2.6;
+    const frame=(i:number,side:number,margin=0)=>{
+      const x=first+(last-first)*i/steps,z=riverCenter(x)+side*(riverHalfWidth(x)+margin);
+      return {x,z};
+    };
+    const waterY=(x:number)=>baseTerrainHeight(x,riverCenter(x))-.78;
+    const quad=(target:number[],a:[number,number,number],b:[number,number,number],c:[number,number,number],d:[number,number,number])=>{
+      for(const p of [a,b,c,b,d,c])target.push(...p);
+    };
+    for(let i=0;i<steps;i++){
+      const x0=first+(last-first)*i/steps,x1=first+(last-first)*(i+1)/steps;
+      const a=frame(i,-1),b=frame(i,1),c=frame(i+1,-1),d=frame(i+1,1);
+      quad(water,[a.x,waterY(x0),a.z],[b.x,waterY(x0),b.z],[c.x,waterY(x1),c.z],[d.x,waterY(x1),d.z]);
+      for(const [side,j] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])waterUv.push(side,(first+(last-first)*j/steps)*.7);
+      for(const side of [-1,1]){
+        const inner0=frame(i,side),outer0=frame(i,side,bankWidth),inner1=frame(i+1,side),outer1=frame(i+1,side,bankWidth);
+        quad(banks,[inner0.x,waterY(x0)-.025,inner0.z],[outer0.x,baseTerrainHeight(outer0.x,outer0.z)+.04,outer0.z],
+          [inner1.x,waterY(x1)-.025,inner1.z],[outer1.x,baseTerrainHeight(outer1.x,outer1.z)+.04,outer1.z]);
+      }
     }
+    const bankGeometry=new THREE.BufferGeometry();bankGeometry.setAttribute('position',new THREE.Float32BufferAttribute(banks,3));bankGeometry.computeVertexNormals();
+    const bankMaterial=new THREE.MeshStandardMaterial({color:0x827e68,roughness:1,side:THREE.DoubleSide});
+    const riverBanks=new THREE.Mesh(bankGeometry,bankMaterial);riverBanks.receiveShadow=true;
+    const waterGeometry=new THREE.BufferGeometry();waterGeometry.setAttribute('position',new THREE.Float32BufferAttribute(water,3));waterGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(waterUv,2));waterGeometry.computeVertexNormals();
+    const river=new THREE.Mesh(waterGeometry,waterMaterial(this.waterTime,this.waterLight));
+    this.group.add(riverBanks,river);
+    for(const p of PONDS){
+      const y=baseTerrainHeight(p.x,p.z)-.72,slope:number[]=[];
+      for(let j=0;j<40;j++){
+        const a=j*Math.PI*2/40,b=(j+1)*Math.PI*2/40;
+        const inner=(t:number):[number,number,number]=>[p.x+Math.cos(t)*p.r,y-.025,p.z+Math.sin(t)*p.r];
+        const outer=(t:number):[number,number,number]=>{const x=p.x+Math.cos(t)*(p.r+2.2),z=p.z+Math.sin(t)*(p.r+2.2);return [x,baseTerrainHeight(x,z)+.04,z];};
+        quad(slope,inner(a),outer(a),inner(b),outer(b));
+      }
+      const shoreGeometry=new THREE.BufferGeometry();shoreGeometry.setAttribute('position',new THREE.Float32BufferAttribute(slope,3));shoreGeometry.computeVertexNormals();
+      const shore=new THREE.Mesh(shoreGeometry,bankMaterial);shore.receiveShadow=true;
+      const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,40),waterMaterial(this.waterTime,this.waterLight,true));pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y,p.z);
+      this.group.add(shore,pond);
+      for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45,x=p.x+Math.cos(a)*rr,z=p.z+Math.sin(a)*rr;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(x,terrainHeight(x,z)+.75,z);this.group.add(reed);}
+    }
+    const stones=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),MAT.stone,this.mobile?28:52),d=new THREE.Object3D();
+    for(let i=0;i<stones.count;i++){
+      const x=-205+i*410/stones.count+rand(i*43)*3,side=i%2?1:-1,z=riverCenter(x)+side*(riverHalfWidth(x)+2.7+rand(i*19)*1.8);
+      d.position.set(x,terrainHeight(x,z)+.16,z);d.rotation.set(0,i*2.4,0);d.scale.set(.36+rand(i*17)*.52,.25+rand(i*29)*.26,.34+rand(i*13)*.4);d.updateMatrix();stones.setMatrixAt(i,d.matrix);
+    }
+    stones.instanceMatrix.needsUpdate=true;stones.receiveShadow=true;this.group.add(stones);
   }
   private buildMountains(){
     // A connected ridge replaces the detached boulders. Its spine wanders in
@@ -188,8 +250,9 @@ export class Environment {
   }
   update(seconds:number,season:string,night:number){
     this.wind.value=seconds;
+    this.waterTime.value=this.reducedMotion.matches?0:seconds;
+    this.waterLight.value=1-night*.38;
     if(season!==this.currentSeason)this.currentSeason=season;
     this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff).multiplyScalar(1-night*.42);
-    for(const water of this.water)water.material instanceof THREE.MeshStandardMaterial&&(water.material.emissive.setHex(0x102b36),water.material.emissiveIntensity=.16+.06*Math.sin(seconds*.7));
   }
 }

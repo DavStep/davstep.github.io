@@ -1,5 +1,6 @@
-import { WALL_SEGMENTS, type TownSnapshot } from './model';
+import type { TownSnapshot } from './model';
 import { isWater } from './environment';
+import { wallIsGate, wallSection } from './wall-layout';
 
 export type Collider =
   | {kind:'box';x:number;z:number;hx:number;hz:number}
@@ -20,12 +21,9 @@ export function buildColliders(snapshot:TownSnapshot,trees:readonly {x:number;z:
   }
   for(const [radius,count] of [[34,snapshot.innerWood],[55,snapshot.outerWood]]){
     for(let i=0;i<count;i++){
-      if(i%8===0)continue; // Four open gates on each ring.
-      const angle=(i+.5)*Math.PI*2/WALL_SEGMENTS;
-      const length=radius*Math.PI*2/WALL_SEGMENTS*.94;
-      const x=Math.cos(angle)*radius,z=Math.sin(angle)*radius;
-      const tx=-Math.sin(angle)*length*.5,tz=Math.cos(angle)*length*.5;
-      result.push({kind:'segment',ax:x-tx,az:z-tz,bx:x+tx,bz:z+tz,r:.58});
+      if(wallIsGate(i))continue;
+      const {start,end}=wallSection(radius,i);
+      result.push({kind:'segment',ax:start.x,az:start.z,bx:end.x,bz:end.z,r:.58});
     }
   }
   for(const tree of trees)result.push({kind:'circle',x:tree.x,z:tree.z,r:tree.r*.65});

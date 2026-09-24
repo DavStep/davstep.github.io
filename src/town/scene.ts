@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
 import type { ProjectKey } from './projects';
@@ -7,6 +8,7 @@ import { C, MAT, type Mat } from './materials';
 import { Environment } from './environment';
 import { TownSky } from './sky';
 import { LANDMARK_SHARED_GEOMETRIES, landmarkBuilding } from './landmarks';
+import { wallIsGate, wallSection } from './wall-layout';
 const MOBILE=matchMedia('(max-width: 700px)').matches;
 const boxGeometry = new RoundedBoxGeometry(1,1,1,2,.08);
 const plainBoxGeometry = new THREE.BoxGeometry(1,1,1);
@@ -253,6 +255,19 @@ function building(plot:PlotState): THREE.Group {
   return g;
 }
 function hash(n:number){let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;}
+function wallSectorGeometry(radius:number):THREE.BufferGeometry{
+  const step=Math.PI*2/WALL_SEGMENTS,inner=radius-.4,outer=radius+.4;
+  const point=(r:number,a:number,y:number):[number,number,number]=>[Math.cos(a)*r,y,Math.sin(a)*r];
+  const ib0=point(inner,0,-.5),it0=point(inner,0,.5),ob0=point(outer,0,-.5),ot0=point(outer,0,.5);
+  const ib1=point(inner,step,-.5),it1=point(inner,step,.5),ob1=point(outer,step,-.5),ot1=point(outer,step,.5);
+  const positions:number[]=[];
+  const face=(a:number[],b:number[],c:number[],d:number[])=>{for(const p of [a,b,c,b,d,c])positions.push(...p);};
+  face(ob0,ot0,ob1,ot1);face(ib0,ib1,it0,it1);
+  face(it0,it1,ot0,ot1);face(ib0,ob0,ib1,ob1);
+  face(ib0,it0,ob0,ot0);face(ib1,ob1,it1,ot1);
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.computeVertexNormals();
+  return geometry;
+}
 export class TownScene {
   readonly scene=new THREE.Scene();
   readonly camera=new THREE.PerspectiveCamera(43,1,.1,650);
@@ -267,8 +282,9 @@ export class TownScene {
   private readonly structures=new THREE.Group();
   private readonly roads=new THREE.Group();
   private readonly walls=new THREE.Group();
-  private readonly sun=new THREE.DirectionalLight(0xffe3c0,2.65);
-  private readonly fill=new THREE.HemisphereLight(0xc7e3f2,0x867963,1);
+  private readonly sun=new THREE.DirectionalLight(0xffebca,2.45);
+  private readonly fill=new THREE.HemisphereLight(0xe4e5ed,0xc3a383,1.05);
+  private readonly environmentMap:THREE.WebGLRenderTarget;
   private readonly materials=new Set<Mat>();
   private structureSignature='';
   private wallSignature='';
@@ -278,16 +294,21 @@ export class TownScene {
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:!this.mobile,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure=1.12;
+    this.renderer.toneMappingExposure=1.08;
     this.renderer.shadowMap.enabled=!this.mobile;
-    this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type=THREE.PCFShadowMap;
+    const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(this.renderer);
+    this.environmentMap=pmrem.fromScene(room,.02);
+    this.scene.environment=this.environmentMap.texture;this.scene.environmentIntensity=.18;
+    room.dispose();pmrem.dispose();
     this.scene.background=new THREE.Color(0xbad6dc);
     this.scene.fog=new THREE.Fog(0xbad6dc,200,500);
     this.sun.position.set(-32,63,28);this.sun.castShadow=!this.mobile;
-    this.sun.shadow.mapSize.set(this.mobile?512:2048,this.mobile?512:2048);
+    this.sun.shadow.mapSize.set(2048,2048);
     this.sun.shadow.camera.left=-76;this.sun.shadow.camera.right=76;this.sun.shadow.camera.top=76;this.sun.shadow.camera.bottom=-76;
     this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=180;
     this.sun.shadow.bias=-.00015;
+    this.sun.shadow.normalBias=.018;this.sun.shadow.radius=2;
     this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls);
     this.environment=new Environment(this.scene,this.mobile);
     this.sky=new TownSky(this.scene);
@@ -447,23 +468,28 @@ export class TownScene {
     this.clear(this.walls);
     const lists:{radius:number;wood:number;stone:number}[]=[{radius:34,wood:snapshot.innerWood,stone:snapshot.innerStone},{radius:55,wood:snapshot.outerWood,stone:0}];
     for(const ring of lists){
+      const sectorGeometry=wallSectorGeometry(ring.radius);
+      let hasWall=false;
       for(const material of [MAT.woodDark,MAT.stone]){
         const indices:number[]=[];
-        for(let i=0;i<WALL_SEGMENTS;i++)if(i%8!==0&&i<ring.wood&&(material===MAT.stone?i<ring.stone:i>=ring.stone))indices.push(i);
-        const wall=new THREE.InstancedMesh(this.mobile?plainBoxGeometry:boxGeometry,material,indices.length);
+        for(let i=0;i<WALL_SEGMENTS;i++)if(!wallIsGate(i)&&i<ring.wood&&(material===MAT.stone?i<ring.stone:i>=ring.stone))indices.push(i);
+        if(!indices.length)continue;
+        hasWall=true;
+        const wall=new THREE.InstancedMesh(sectorGeometry,material,indices.length);
         const dummy=new THREE.Object3D();
-        indices.forEach((i,j)=>{const angle=(i+.5)*Math.PI*2/WALL_SEGMENTS;dummy.position.set(Math.cos(angle)*ring.radius,material===MAT.stone?2.2:1.65,Math.sin(angle)*ring.radius);dummy.rotation.y=-angle-Math.PI/2;dummy.scale.set(ring.radius*Math.PI*2/WALL_SEGMENTS*.94,material===MAT.stone?4.4:3.3,.8);dummy.updateMatrix();wall.setMatrixAt(j,dummy.matrix);});
+        indices.forEach((i,j)=>{dummy.position.set(0,material===MAT.stone?2.2:1.65,0);dummy.rotation.y=-i*Math.PI*2/WALL_SEGMENTS;dummy.scale.set(1,material===MAT.stone?4.4:3.3,1);dummy.updateMatrix();wall.setMatrixAt(j,dummy.matrix);});
         wall.instanceMatrix.needsUpdate=true;wall.castShadow=!this.mobile;wall.receiveShadow=true;this.walls.add(wall);
         if(indices.length){
           const stone=material===MAT.stone;
-          const details=new THREE.InstancedMesh(plainBoxGeometry,stone?MAT.stoneDark:MAT.wood,indices.length*(stone?3:2));
+          const details=new THREE.InstancedMesh(plainBoxGeometry,stone?MAT.stoneDark:MAT.wood,indices.length*(stone?3:1));
           let detailIndex=0;
           for(const i of indices){
             const angle=(i+.5)*Math.PI*2/WALL_SEGMENTS;
             const along=new THREE.Vector3(-Math.sin(angle),0,Math.cos(angle));
             const center=new THREE.Vector3(Math.cos(angle)*ring.radius,0,Math.sin(angle)*ring.radius);
-            for(const offset of (stone?[-2.05,0,2.05]:[-2.75,2.75])){
-              dummy.position.copy(center).addScaledVector(along,offset);
+            for(const offset of (stone?[-2.05,0,2.05]:[0])){
+              if(stone)dummy.position.copy(center).addScaledVector(along,offset);
+              else{const joint=wallSection(ring.radius,i);dummy.position.set(joint.start.x,0,joint.start.z);}
               dummy.position.y=stone?4.72:2;
               dummy.rotation.y=-angle-Math.PI/2;
               dummy.scale.set(stone?1.02:.38,stone?.72:4.1,stone?1.02:1.04);
@@ -474,9 +500,18 @@ export class TownScene {
           details.castShadow=!this.mobile;details.receiveShadow=true;this.walls.add(details);
         }
       }
+      if(!hasWall)sectorGeometry.dispose();
       if(ring.wood>0){
         const gates=new THREE.Group();
-        for(let i=0;i<4;i++){const a=i*Math.PI/2,gate=new THREE.Group();gate.position.set(Math.cos(a)*ring.radius,0,Math.sin(a)*ring.radius);gate.rotation.y=-a;box(gate,-2,2,0,.75,4,.9,MAT.stoneDark);box(gate,2,2,0,.75,4,.9,MAT.stoneDark);box(gate,0,4,0,5,.7,1.3,MAT.woodDark);gates.add(gate);}
+        for(let i=0;i<WALL_SEGMENTS;i+=8){
+          if(i+1>=ring.wood)continue;
+          const section=wallSection(ring.radius,i),gate=new THREE.Group(),stone=i<ring.stone;
+          gate.position.set(section.center.x,0,section.center.z);gate.rotation.y=section.rotation;
+          const post=stone?MAT.stoneDark:MAT.woodDark;
+          for(const side of [-1,1])box(gate,side*section.length*.5,stone?2.2:1.9,0,.9,stone?4.4:3.8,1.05,post,0,false);
+          box(gate,0,stone?4.5:3.9,0,section.length+.9,.62,1.1,stone?MAT.stone:MAT.woodDark,0,false);
+          gates.add(gate);
+        }
         gates.updateMatrixWorld(true);this.walls.add(gates);
       }
     }
@@ -490,17 +525,21 @@ export class TownScene {
     if(snapshot.roads!==this.roadSignature){this.roadSignature=snapshot.roads;this.buildRoads(snapshot.roads);}
     const t=snapshot.dayFraction,night=Math.max(0,Math.sin((t-.55)*Math.PI*2));
     this.currentNight=night;
-    const brightness=1-.59*night;
-    this.sun.intensity=(snapshot.weather==='rain'?2.1:2.65)*brightness;
-    this.fill.intensity=(snapshot.weather==='rain'?1.08:1)*(1-.32*night);
+    const rainy=snapshot.weather==='rain';
+    this.scene.environmentIntensity=.18*(1-.55*night);
+    this.sun.color.set(rainy?0xdce5eb:0xffebca).lerp(new THREE.Color(0x97afd3),night*.78);
+    this.sun.intensity=(rainy?1.85:2.45)*(1-.65*night);
+    this.fill.color.set(0xe4e5ed).lerp(new THREE.Color(0x8198b5),night*.7);
+    this.fill.groundColor.set(0xc3a383).lerp(new THREE.Color(0x5f6b7a),night*.67);
+    this.fill.intensity=(rainy?1.17:1.05)*(1-.22*night);
     this.sun.position.set(Math.cos(t*Math.PI*2)*55,Math.max(14,Math.sin(t*Math.PI*2)*65+25),28);
     const fogColor=new THREE.Color(snapshot.weather==='rain'?0xbac5c0:0xd1d8cc).lerp(new THREE.Color(0x57687b),night*.64);
     this.scene.background=fogColor;this.scene.fog?.color.copy(fogColor);
     MAT.grass.color.set(snapshot.season==='winter'?0xa7b4aa:snapshot.season==='autumn'?0x89845b:snapshot.season==='spring'?0x7a9a63:C.grass);
     MAT.leaf.color.set(snapshot.season==='autumn'?0xa47a4d:snapshot.season==='winter'?0x758270:0x52775a);
-    this.renderer.toneMappingExposure=1.12-.09*night;
+    this.renderer.toneMappingExposure=1.08-.1*night;
     this.sky.update(snapshot,night,this.sun.position,this.camera.position);
   }
   render(){this.environment.update(performance.now()/1000,this.currentSeason,this.currentNight);this.sky.updatePosition(this.camera.position);this.renderer.render(this.scene,this.camera);}
-  dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.renderer.dispose();}
+  dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.environmentMap.dispose();this.renderer.dispose();}
 }
