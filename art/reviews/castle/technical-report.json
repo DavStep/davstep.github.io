@@ -1,0 +1,21 @@
+{
+  "triangles": {
+    "LOD0_stage1": 120,
+    "LOD0_stage2": 144,
+    "LOD0_stage3": 1699,
+    "LOD0_stage4": 3277,
+    "LOD0_stage5": 8105,
+    "LOD0_stage6": 8585,
+    "LOD1_stage1": 120,
+    "LOD1_stage2": 144,
+    "LOD1_stage3": 679,
+    "LOD1_stage4": 1291,
+    "LOD1_stage5": 3519,
+    "LOD1_stage6": 3831
+  },
+  "roundTripPolygons": {
+    "LOD0": 8585,
+    "LOD1": 3831
+  },
+  "parts": 65
+}

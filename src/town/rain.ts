@@ -15,7 +15,7 @@ export class Rain {
   private readonly rainTime={value:0};
   private readonly rainCenter={value:new THREE.Vector3()};
   private readonly rainExtent={value:130};
-  private readonly rainHeight={value:130};
+  private readonly rainHeight={value:260};
   private readonly splashTime={value:0};
   private readonly direction=new THREE.Vector3();
   private visible=false;
@@ -55,13 +55,17 @@ export class Rain {
         varying float vOpacity;
         void main(){
           float head=mod(position.y*uHeight-uTime*aTraits.x,uHeight);
-          vec3 world=vec3(uCenter.x+position.x*uExtent,head+.6,uCenter.z+position.z*uExtent);
-          world.x+=(uHeight-head)*.10-aCorner.y*aTraits.y*.10;
-          world.z+=(uHeight-head)*.035;
+          // Wrap fixed world-space drops into the view volume. Moving the camera
+          // only changes which drops are visible, not their positions.
+          vec2 span=vec2(2.0*uExtent);
+          vec2 fixedXZ=position.xz*uExtent+vec2((uHeight-head)*.10,(uHeight-head)*.035);
+          vec2 worldXZ=uCenter.xz+mod(fixedXZ-uCenter.xz+uExtent,span)-uExtent;
+          vec3 world=vec3(worldXZ.x,head+.6,worldXZ.y);
+          world.x-=aCorner.y*aTraits.y*.10;
           world+=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0])*aCorner.x*aTraits.z;
           world.y+=aCorner.y*aTraits.y;
           float distanceToCenter=length(world.xz-uCenter.xz)/uExtent;
-          vOpacity=aTraits.w*(1.0-smoothstep(.55,1.15,distanceToCenter))*smoothstep(0.0,3.0,head);
+          vOpacity=aTraits.w*(1.0-smoothstep(.55,1.0,distanceToCenter))*smoothstep(0.0,3.0,head);
           gl_Position=projectionMatrix*viewMatrix*vec4(world,1.0);
         }`,
       fragmentShader:`
@@ -123,18 +127,16 @@ export class Rain {
     if(!this.visible)this.lastTime=0;
   }
 
-  update(camera:THREE.Camera,now:number){
+  update(camera:THREE.Camera,now:number,roaming:boolean){
     if(!this.visible)return;
     const dt=this.lastTime?Math.min((now-this.lastTime)/1000,.08):0;
     this.lastTime=now;
     this.rainTime.value+=dt;
     this.splashTime.value+=dt;
     camera.getWorldDirection(this.direction);
-    const roaming=camera.position.y<12;
     const reach=roaming?13:Math.min(80,camera.position.y*.7);
     this.rainCenter.value.copy(camera.position).addScaledVector(this.direction,reach);
     this.rainExtent.value=roaming?48:130;
-    this.rainHeight.value=Math.max(24,camera.position.y+22);
   }
 
   dispose(){

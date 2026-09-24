@@ -1,0 +1,45 @@
+{
+  "meshes": 179,
+  "triangles": 21484,
+  "degenerateTriangles": 0,
+  "invalidTransforms": [],
+  "nonManifoldEdges": 0,
+  "roundTrip": {
+    "A_LOD0": {
+      "triangles": 4680,
+      "objects": 28,
+      "unexpectedObjects": [],
+      "bytes": 281748
+    },
+    "B_LOD0": {
+      "triangles": 4668,
+      "objects": 28,
+      "unexpectedObjects": [],
+      "bytes": 280900
+    },
+    "C_LOD0": {
+      "triangles": 4680,
+      "objects": 28,
+      "unexpectedObjects": [],
+      "bytes": 281756
+    },
+    "A_LOD1": {
+      "triangles": 2020,
+      "objects": 25,
+      "unexpectedObjects": [],
+      "bytes": 132376
+    },
+    "B_LOD1": {
+      "triangles": 2032,
+      "objects": 25,
+      "unexpectedObjects": [],
+      "bytes": 132624
+    },
+    "C_LOD1": {
+      "triangles": 1900,
+      "objects": 25,
+      "unexpectedObjects": [],
+      "bytes": 125896
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Proposed GPT-6 Sol High production assignments
 
-These are dispatch-ready briefs, not active agents or completed work. Model: **GPT-6 Sol**; reasoning: **high**. Blender MCP is mandatory under the current brief. It is unavailable in the current session; do not dispatch modeling agents until access is confirmed, or the user explicitly changes the workflow.
+These are the original family-production briefs. Model: **GPT-6 Sol**; reasoning: **high**. Blender MCP is installed and verified. First batch: the parent serialized Blender cottage production and review while a bounded GPT-6 Sol High agent implemented the runtime adapter and tests. The subsequent batch dispatched castle/props, civic, and nature/landmark production to three GPT-6 Sol High agents. The parent serialized Blender access and handled integration and combined review. See world-production.md for delivered scope; the briefs below remain the original planning record.
 
 All agents must read `art-direction.md`, `modeling-standards.md`, their inventory rows, both supplied references, and the original generated geometry. Use the supplied references as appearance constraints. None may establish an independent palette, change plot positions, alter collision envelopes, remove growth states, or expand scope into UI/gameplay.
 

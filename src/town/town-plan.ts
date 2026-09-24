@@ -9,7 +9,7 @@ const projectPlots: Plot[] = [
   { id: 'project-sandship', kind: 'project', project: 'sandship', x: 22, z: 9, start: 0, step: 4.2 * MINUTE, variant: 1 },
   { id: 'project-battle', kind: 'project', project: 'battle', x: 8, z: -23, start: 0, step: 4.4 * MINUTE, variant: 2 },
   { id: 'project-wizard', kind: 'project', project: 'wizard', x: -8, z: 23, start: 0, step: 4 * MINUTE, variant: 3 },
-  { id: 'home-east-square', kind: 'home', x: 24, z: -13, start: 0, step: 4.3 * MINUTE, variant: 4 },
+  { id: 'home-east-square', kind: 'home', x: 22, z: -13, start: 0, step: 4.3 * MINUTE, variant: 4 },
   { id: 'project-dwarves', kind: 'project', project: 'dwarves', x: -25, z: -14, start: 0, step: 4.5 * MINUTE, variant: 5 },
 ];
 
@@ -26,10 +26,10 @@ const civicPlots: Plot[] = [
   { id: 'post', kind: 'post', x: 10, z: -8, start: 4 * MINUTE, step: 75_000 },
 ];
 
-const innerHomes: [number, number][] = [[-16,16],[-17,-2],[-14,4],[-5,-14],[1,-15],[15,-5],[15,2],[15,10],[2,17],[-18,-17]];
+const innerHomes: [number, number][] = [[-17,15],[-23,-5],[-12,7],[-6,-15],[7,-15],[18,-5.5],[13,5],[7,13],[5.8,21],[-14,-17]];
 const outerHomes: [number, number][] = [
-  [-42,0],[-40,11],[-39,-11],[-34,24],[-33,-24],[-27,34],[-24,-35],[-13,39],[-11,-42],
-  [1,41],[3,-42],[15,38],[15,-40],[28,32],[28,-33],[39,17],[40,-16],[43,2],
+  [-39,5],[-40,12],[-39,-11],[-34,24],[-33,-24],[-27,34],[-24,-35],[-13,39],[-11,-42],
+  [7,41],[7,-42],[15,38],[15,-40],[28,32],[28,-33],[39,17],[40,-16],[43,7],
 ];
 const homes: Plot[] = [...innerHomes, ...outerHomes].map(([x,z], i) => ({
   id: `home-${i}`, kind: 'home', x, z,
@@ -90,6 +90,7 @@ export function accessPathFor(plot: Plot): { x1: number; z1: number; x2: number;
   const { x, z } = plot;
   const radius = Math.hypot(x, z);
   // These closely spaced homes use the other approach to keep paths clear.
+  if (plot.id === 'home-1') return { x1: x, z1: z, x2: x * INFRASTRUCTURE.road.ringRadius / radius, z2: z * INFRASTRUCTURE.road.ringRadius / radius };
   if (plot.id === 'home-3') return { x1: x, z1: z, x2: x, z2: 0 };
   if (plot.id === 'home-5') return { x1: x, z1: z, x2: x * INFRASTRUCTURE.road.ringRadius / radius, z2: z * INFRASTRUCTURE.road.ringRadius / radius };
   if (plot.id === 'home-7') return { x1: x, z1: z, x2: 0, z2: z };

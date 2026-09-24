@@ -1,4 +1,4 @@
-// Run with: node --import tsx scripts/audit-town-assets.mjs [--mobile]
+// Run with: node --import tsx scripts/audit-town-assets.mjs [--mobile] [--production]
 // Inspects existing procedural geometry without a renderer or changing source files.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -9,8 +9,9 @@ import * as THREE from 'three';
 const mobile = process.argv.includes('--mobile');
 globalThis.matchMedia = query => ({ matches: query.includes('max-width') && mobile, addEventListener() {}, removeEventListener() {} });
 const root = new URL('../', import.meta.url);
-const inputs = ['scene', 'landmarks', 'environment', 'materials', 'residents', 'town-plan', 'model', 'wall-layout', 'contact-shadows', 'sky', 'rain'];
+const inputs = ['scene', 'landmarks', 'environment', 'materials', 'residents', 'town-plan', 'model', 'wall-layout', 'contact-shadows', 'sky', 'rain', 'cottages', 'castle', 'civic', 'nature', 'props', 'authored-landmarks', 'nature-placement', 'prop-placement', 'paths'];
 const sourceFiles = new Map(await Promise.all(inputs.map(async name => [name, await readFile(new URL(`src/town/${name}.ts`, root), 'utf8')])));
+const generatedFiles = new Map(await Promise.all(['cottages','castle','civic','nature','props','landmarks'].map(async name => [name, await readFile(new URL(`src/town/generated/${name}.json`, root), 'utf8')])));
 const sceneUrl = new URL('src/town/scene.ts', root);
 const source = sourceFiles.get('scene');
 // Export the private factory only in an in-memory audit copy. Resolve imports
@@ -81,13 +82,17 @@ for (const [name, original] of sourceFiles) {
   if (await readFile(new URL(`src/town/${name}.ts`, root), 'utf8') !== original) throw new Error(`${name}.ts changed during the audit; rerun against a stable source snapshot.`);
 }
 const hashes = Object.fromEntries([...sourceFiles].map(([name, text]) => [name + '.ts', createHash('sha256').update(text).digest('hex')]));
+for (const [name, original] of generatedFiles) {
+  if (await readFile(new URL(`src/town/generated/${name}.json`, root), 'utf8') !== original) throw new Error(`${name}.json changed during the audit`);
+  hashes[`generated/${name}.json`] = createHash('sha256').update(original).digest('hex');
+}
 const report = {
-  scope: 'Living Town procedural assets; source geometry only, no shader displacement, GPU, shadow-pass, culling, or artistic validation',
+  scope: 'Living Town authored and procedural assets; source geometry only, no shader displacement, GPU, shadow-pass, culling, or artistic validation',
   mobile, sourceHashes: hashes, plots: PLOTS.length, assets,
   matureScene: { ageMinutes: 50, seed: 12345, structures: inspect(town.structures), roads: inspect(town.roads), walls: inspect(town.walls), environment: inspect(environment.group), decor: inspect(decor.land), residents: inspect(residents.group), contactShadows: inspect(contactsScene), forestTrees: environment.trees.length, townTrees: decor.treeObstacles.length },
   renderSupport: { sky: inspect(skyScene), rainWhenEnabled: inspect(rainScene) },
 };
-const output = new URL(`docs/art-direction/geometry-audit-${mobile ? 'mobile' : 'desktop'}.json`, root);
+const output = new URL(`docs/art-direction/geometry-${process.argv.includes('--production') ? 'production' : 'audit'}-${mobile ? 'mobile' : 'desktop'}.json`, root);
 await mkdir(new URL('docs/art-direction/', root), { recursive: true });
 await writeFile(output, JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ output: fileURLToPath(output), plots: report.plots, matureScene: report.matureScene }, null, 2));

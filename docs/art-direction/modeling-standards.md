@@ -65,9 +65,9 @@ No dynamic LOD system exists today. Deliver a desktop and simplified mobile/dist
 
 ## Deliverables and integration
 
-Working source: `art/blender/<family>.blend`. Approved runtime exports: `public/assets/town/<family>/<asset>.glb` (Vite copies `public/` to `dist/`; verify final URLs in the actual build). These locations are proposed; no fictional files are represented as present.
+Working source: `art/blender/<family>.blend`. Interchange exports: `art/blender/<asset>.glb`. The cottage batch exports baked geometry to `src/town/generated/cottages.json` for synchronous import. Vite has `publicDir: false`; any future fetched GLB must use an explicit Vite asset import or staging copy, not an assumed public-folder copy.
 
-Each delivery includes editable `.blend`, GLB, material mapping, triangle and bounds report, desktop/mobile variants, stage mapping if relevant, and inspection renders. Use glTF 2.0 binary with applied modifiers, normals, UVs/colors as needed. Test a round-trip import before integration. The app currently has no GLTFLoader or asynchronous model-loading path: the integration owner must add loading, caching, disposal, fallback, stage switching, and picking support before substituting exported assets.
+Each delivery includes editable `.blend`, GLB, material mapping, triangle and bounds report, desktop/mobile variants, stage mapping if relevant, and inspection renders. Use glTF 2.0 binary with applied modifiers, normals, UVs/colors as needed. Test a round-trip import before integration. The cottage adapter loads baked geometry synchronously. The app still has no GLTFLoader or asynchronous model-loading path: the integration owner must add loading, caching, disposal, fallback, stage switching, and picking support before substituting exported assets.
 
 Keep a copy of original procedural geometry in the Blender review scene alongside the replacement for scale/bounds comparison. For an approved procedural workflow alternative, retain these same shape and budget rules, and change the factories instead of falsely labeling them Blender-authored.
 

@@ -45,4 +45,4 @@ After pilot review, send concrete revisions such as “increase spire rise while
 - Existing automated checks and production build pass; baseline/final profiling recorded at the same camera, viewport, age, weather, and pixel ratio.
 - Remaining deviations recorded precisely. No APPROVED or INTEGRATED status based solely on code inspection.
 
-Current state: audit, direction, standards and proposed assignments prepared. Modeling, delegated production, Blender review and final integration await the production dependency; they have not been performed.
+Current state: Blender MCP connected; the first cottage family is authored, exported, technically reviewed, and wired into the runtime. See cottage-production.md for evidence and remaining live visual approval. Other planned families remain queued. Inconsistencies above describe the pre-production baseline.

@@ -1,11 +1,16 @@
 import * as THREE from 'three';
 import type { TownSnapshot } from './model';
 
+const winterZenith=new THREE.Color(0xb8ccd6),winterHorizon=new THREE.Color(0xdce1dc);
+const nightZenith=new THREE.Color(0x16283c),nightHorizon=new THREE.Color(0x46546b);
+
 // One unlit dome supplies a soft horizon and sun glow without post processing.
 export class TownSky {
   private readonly zenith={value:new THREE.Color()};
   private readonly horizon={value:new THREE.Color()};
   private readonly sunDirection={value:new THREE.Vector3()};
+  private readonly top=new THREE.Color();
+  private readonly low=new THREE.Color();
   private readonly mesh:THREE.Mesh;
   constructor(scene:THREE.Scene){
     const material=new THREE.ShaderMaterial({
@@ -30,11 +35,11 @@ export class TownSky {
   }
   update(snapshot:TownSnapshot,night:number,sun:THREE.Vector3,camera:THREE.Vector3){
     const rainy=snapshot.weather==='rain',cloudy=snapshot.weather==='cloudy';
-    const top=new THREE.Color(rainy?0x839aa9:cloudy?0x91adbb:0x72a9d1);
-    const low=new THREE.Color(rainy?0xc1c1b7:cloudy?0xddd5c5:0xf1ddbd);
-    if(snapshot.season==='winter'){top.lerp(new THREE.Color(0xb8ccd6),.18);low.lerp(new THREE.Color(0xdce1dc),.22);}
-    this.zenith.value.copy(top).lerp(new THREE.Color(0x16283c),night*.83);
-    this.horizon.value.copy(low).lerp(new THREE.Color(0x46546b),night*.72);
+    this.top.set(rainy?0x839aa9:cloudy?0x91adbb:0x72a9d1);
+    this.low.set(rainy?0xc1c1b7:cloudy?0xddd5c5:0xf1ddbd);
+    if(snapshot.season==='winter'){this.top.lerp(winterZenith,.18);this.low.lerp(winterHorizon,.22);}
+    this.zenith.value.copy(this.top).lerp(nightZenith,night*.83);
+    this.horizon.value.copy(this.low).lerp(nightHorizon,night*.72);
     this.sunDirection.value.copy(sun).normalize();
     this.mesh.position.copy(camera);
   }

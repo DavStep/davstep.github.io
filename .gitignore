@@ -2,3 +2,8 @@
 .claude/
 node_modules/
 dist/
+
+# Reproducible Blender review intermediates and editor backups
+art/blender/*.blend1
+art/reviews/world/runtime-geometry.json
+art/blender/__pycache__/

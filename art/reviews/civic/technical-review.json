@@ -1,0 +1,81 @@
+{
+  "meshes": 349,
+  "triangles": 38524,
+  "degenerateTriangles": 0,
+  "invalidTransforms": [],
+  "nonManifoldEdges": 0,
+  "roundTrip": {
+    "market_LOD0": {
+      "triangles": 4420,
+      "objects": 27,
+      "unexpectedObjects": [],
+      "bytes": 267076
+    },
+    "market_LOD1": {
+      "triangles": 1948,
+      "objects": 26,
+      "unexpectedObjects": [],
+      "bytes": 128268
+    },
+    "tavern_LOD0": {
+      "triangles": 4372,
+      "objects": 31,
+      "unexpectedObjects": [],
+      "bytes": 265860
+    },
+    "tavern_LOD1": {
+      "triangles": 1864,
+      "objects": 29,
+      "unexpectedObjects": [],
+      "bytes": 124252
+    },
+    "forge_LOD0": {
+      "triangles": 4072,
+      "objects": 26,
+      "unexpectedObjects": [],
+      "bytes": 246912
+    },
+    "forge_LOD1": {
+      "triangles": 1792,
+      "objects": 25,
+      "unexpectedObjects": [],
+      "bytes": 119200
+    },
+    "mill_LOD0": {
+      "triangles": 4372,
+      "objects": 27,
+      "unexpectedObjects": [],
+      "bytes": 265388
+    },
+    "mill_LOD1": {
+      "triangles": 1852,
+      "objects": 26,
+      "unexpectedObjects": [],
+      "bytes": 123764
+    },
+    "guild_LOD0": {
+      "triangles": 4408,
+      "objects": 27,
+      "unexpectedObjects": [],
+      "bytes": 266972
+    },
+    "guild_LOD1": {
+      "triangles": 1912,
+      "objects": 26,
+      "unexpectedObjects": [],
+      "bytes": 126112
+    },
+    "post_LOD0": {
+      "triangles": 4712,
+      "objects": 28,
+      "unexpectedObjects": [],
+      "bytes": 283472
+    },
+    "post_LOD1": {
+      "triangles": 2080,
+      "objects": 27,
+      "unexpectedObjects": [],
+      "bytes": 137964
+    }
+  }
+}

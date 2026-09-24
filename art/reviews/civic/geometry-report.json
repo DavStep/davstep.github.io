@@ -1,0 +1,337 @@
+{
+  "market_LOD0": {
+    "triangles": 4420,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        4.575,
+        2.73
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "plaster",
+      "plasterIvory",
+      "red",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "market_LOD1": {
+    "triangles": 1948,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        4.575,
+        2.73
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "plaster",
+      "plasterIvory",
+      "red",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "tavern_LOD0": {
+    "triangles": 4372,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.195,
+        2.71
+      ]
+    },
+    "materials": [
+      "glass",
+      "gold",
+      "iron",
+      "plasterIvory",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "tavern_LOD1": {
+    "triangles": 1864,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.195,
+        2.71
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "plasterIvory",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "forge_LOD0": {
+    "triangles": 4072,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.065,
+        2.72
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "forge_LOD1": {
+    "triangles": 1792,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.065,
+        2.72
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "mill_LOD0": {
+    "triangles": 4372,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.49304,
+        2.74
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "plaster",
+      "plasterIvory",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "mill_LOD1": {
+    "triangles": 1852,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.49304,
+        2.74
+      ]
+    },
+    "materials": [
+      "glass",
+      "iron",
+      "plaster",
+      "plasterIvory",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "guild_LOD0": {
+    "triangles": 4408,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.065,
+        2.71
+      ]
+    },
+    "materials": [
+      "glass",
+      "gold",
+      "iron",
+      "plasterIvory",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "guild_LOD1": {
+    "triangles": 1912,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.065,
+        2.71
+      ]
+    },
+    "materials": [
+      "glass",
+      "gold",
+      "iron",
+      "plasterIvory",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "post_LOD0": {
+    "triangles": 4712,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.685,
+        2.71
+      ]
+    },
+    "materials": [
+      "glass",
+      "gold",
+      "iron",
+      "plaster",
+      "red",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "post_LOD1": {
+    "triangles": 2080,
+    "bounds": {
+      "min": [
+        -4.96656,
+        0.0,
+        -2.50563
+      ],
+      "max": [
+        3.79705,
+        5.685,
+        2.71
+      ]
+    },
+    "materials": [
+      "glass",
+      "gold",
+      "iron",
+      "plaster",
+      "red",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import * as THREE from 'three';
 import { createSave, milestoneRecap, parseSave, townAt, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
 import { routeBetween } from '../src/town/residents';
 import { buildColliders, isBlocked, moveWithCollisions } from '../src/town/collision';
@@ -7,6 +8,7 @@ import { isWater, riverCenter, riverHalfWidth, terrainHeight } from '../src/town
 import { RoamController } from '../src/town/navigation';
 import { wallIsGate, wallSection } from '../src/town/wall-layout';
 import { INFRASTRUCTURE, accessPathFor } from '../src/town/town-plan';
+import { cottageBuilding } from '../src/town/cottages';
 
 const t0=1_700_000_000_000;
 const save=createSave(t0,711);
@@ -83,6 +85,23 @@ test('road routing starts and ends at the requested locations',()=>{
   assert.ok(path.length>=3);
   assert.equal(path[0].x,a.x);assert.equal(path[0].z,a.z);
   assert.equal(path.at(-1)?.x,b.x);assert.equal(path.at(-1)?.z,b.z);
+});
+
+test('fully grown houses leave the main roads clear',()=>{
+  const homes=townAt(save,t0+60*MINUTE).plots.filter(plot=>plot.kind==='home');
+  for(const plot of homes){
+    const bounds=new THREE.Box3().setFromObject(cottageBuilding(plot,false));
+    const {min,max}=bounds;
+    assert.ok(min.z>1.4||max.z< -1.4,`${plot.id} overlaps the east-west road`);
+    assert.ok(min.x>1.4||max.x< -1.4,`${plot.id} overlaps the north-south road`);
+    const nearestX=min.x<=0&&max.x>=0?0:Math.min(Math.abs(min.x),Math.abs(max.x));
+    const nearestZ=min.z<=0&&max.z>=0?0:Math.min(Math.abs(min.z),Math.abs(max.z));
+    const minRadius=Math.hypot(nearestX,nearestZ);
+    const maxRadius=Math.max(...[min.x,max.x].flatMap(x=>[min.z,max.z].map(z=>Math.hypot(x,z))));
+    for(const [radius,halfWidth] of [[INFRASTRUCTURE.road.ringRadius,1.175],[INFRASTRUCTURE.road.outerRingRadius,1.075]]){
+      assert.ok(maxRadius<radius-halfWidth||minRadius>radius+halfWidth,`${plot.id} overlaps the ring road at ${radius}`);
+    }
+  }
 });
 
 test('walk collision blocks buildings and water while sliding along their edges',()=>{

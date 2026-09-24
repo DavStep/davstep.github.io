@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { PLOTS } from './model';
 import { INFRASTRUCTURE } from './town-plan';
 import { MAT } from './materials';
+import { addNatureInstances, type NaturePlacement } from './nature-placement';
 
 const hash=(n:number)=>{let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;};
 const rand=(seed:number)=>hash(seed)/0xffffffff;
@@ -119,12 +120,14 @@ export class Environment {
       this.group.add(shore,pond);
       for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45,x=p.x+Math.cos(a)*rr,z=p.z+Math.sin(a)*rr;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(x,terrainHeight(x,z)+.75,z);this.group.add(reed);}
     }
-    const stones=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),MAT.stone,this.mobile?28:52),d=new THREE.Object3D();
-    for(let i=0;i<stones.count;i++){
-      const x=-205+i*410/stones.count+rand(i*43)*3,side=i%2?1:-1,z=riverCenter(x)+side*(riverHalfWidth(x)+2.7+rand(i*19)*1.8);
-      d.position.set(x,terrainHeight(x,z)+.16,z);d.rotation.set(0,i*2.4,0);d.scale.set(.36+rand(i*17)*.52,.25+rand(i*29)*.26,.34+rand(i*13)*.4);d.updateMatrix();stones.setMatrixAt(i,d.matrix);
+    const stones:NaturePlacement[]=[];
+    const count=this.mobile?28:52;
+    for(let i=0;i<count;i++){
+      const x=-205+i*410/count+rand(i*43)*3,side=i%2?1:-1,z=riverCenter(x)+side*(riverHalfWidth(x)+2.7+rand(i*19)*1.8);
+      stones.push({family:i%2?'Rock_A':'Rock_B',x,y:terrainHeight(x,z)-.045,z,rotation:i*2.4,
+        sx:.72+rand(i*17)*1.04,sy:.45+rand(i*29)*.52,sz:.68+rand(i*13)*.8});
     }
-    stones.instanceMatrix.needsUpdate=true;stones.receiveShadow=true;this.group.add(stones);
+    addNatureInstances(this.group,stones,this.mobile,false);
   }
   private buildMountains(){
     // A connected ridge replaces the detached boulders. Its spine wanders in
@@ -179,34 +182,20 @@ export class Environment {
       if(isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3.8||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3.5||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<4))continue;
       this.trees.push({x,z,r:.7+rand(i*27)*.5});
     }
-    const n=this.trees.length,d=new THREE.Object3D();
-    const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.32,.47,1.8,6),MAT.woodDark,n);
-    const canopy=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.45,1),MAT.foliage,n);
-    const crown=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.1,1),MAT.foliage,n);
-    const pineGeo=new THREE.ConeGeometry(1,1,7,1),pineTiers=[0,1,2].map(()=>new THREE.InstancedMesh(pineGeo,MAT.pine,n));
-    this.trees.forEach((t,i)=>{
-      const s=.86+rand(i*83)*.9,y=terrainHeight(t.x,t.z);
-      d.position.set(t.x,y+.85*s,t.z);d.rotation.set(0,rand(i*5)*6.28,0);d.scale.setScalar(s);d.updateMatrix();trunk.setMatrixAt(i,d.matrix);
-      const pine=i%5!==0;
-      d.position.y=y+2.1*s;d.scale.set(pine?.0001:1.15*s,pine?.0001:(1.2+rand(i*59)*.45)*s,pine?.0001:1.05*s);d.updateMatrix();canopy.setMatrixAt(i,d.matrix);
-      d.position.y=y+3.15*s;d.scale.setScalar(pine?.0001:.85*s);d.updateMatrix();crown.setMatrixAt(i,d.matrix);
-      const tint=new THREE.Color([0x628a6c,0x567c68,0x779268,0x6f8660][i%4]);canopy.setColorAt(i,tint);crown.setColorAt(i,tint.clone().multiplyScalar(1.13));
-      for(let tier=0;tier<3;tier++){
-        d.position.y=y+(2.05+tier*1.02)*s;
-        d.scale.set(pine?(1.68-tier*.29)*s:.0001,pine?(2.15-tier*.24)*s:.0001,pine?(1.68-tier*.29)*s:.0001);
-        d.updateMatrix();pineTiers[tier].setMatrixAt(i,d.matrix);
-        pineTiers[tier].setColorAt(i,new THREE.Color([0x5a7050,0x627a4f,0x6d8159,0x536b55][(i+tier)%4]).multiplyScalar(1+tier*.055));
-      }
-    });
-    for(const mesh of [trunk,canopy,crown,...pineTiers]){mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!this.mobile;mesh.receiveShadow=true;this.group.add(mesh);}
-    if(canopy.instanceColor)canopy.instanceColor.needsUpdate=true;if(crown.instanceColor)crown.instanceColor.needsUpdate=true;
-    for(const tier of pineTiers)if(tier.instanceColor)tier.instanceColor.needsUpdate=true;
-    const rocks=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),MAT.stone,this.mobile?50:95);
-    for(let i=0;i<rocks.count;i++){
+    const pineFamilies=['Pine_A','Pine_B','Pine_C'] as const;
+    addNatureInstances(this.group,this.trees.map((t,i)=>{
+      const scale=.86+rand(i*83)*.9;
+      return {family:pineFamilies[i%3],x:t.x,y:terrainHeight(t.x,t.z)-.03,z:t.z,
+        sx:3.6*scale,sy:5.1*scale,sz:3.6*scale,rotation:rand(i*5)*Math.PI*2};
+    }),this.mobile);
+    const rocks:NaturePlacement[]=[];
+    const rockFamilies=['Rock_A','Rock_B','Rock_C'] as const;
+    for(let i=0;i<(this.mobile?50:95);i++){
       const a=i*2.399,r=70+rand(i*313)*92,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      d.position.set(x,terrainHeight(x,z)+.38,z);d.rotation.set(rand(i*7),a,rand(i*11));d.scale.set(.5+rand(i*13)*1.2,.35+rand(i*19)*.8,.6+rand(i*23)*1.1);d.updateMatrix();rocks.setMatrixAt(i,d.matrix);
+      rocks.push({family:rockFamilies[i%3],x,y:terrainHeight(x,z)-.06,z,rotation:a,
+        sx:1+rand(i*13)*2.4,sy:.5+rand(i*19)*1.2,sz:1.2+rand(i*23)*2.2});
     }
-    rocks.instanceMatrix.needsUpdate=true;rocks.receiveShadow=true;this.group.add(rocks);
+    addNatureInstances(this.group,rocks,this.mobile);
   }
   private buildGrass(){
     // Each instance is a small tuft. Five tapered leaves share a root and

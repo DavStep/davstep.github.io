@@ -222,14 +222,16 @@ function positionLabels(){
   }
 }
 function updateReadouts(){
-  $<HTMLElement>('#season-readout').textContent=snapshot.season.toUpperCase();
-  $<HTMLElement>('#weather-readout').textContent=rainPreview?'RAIN · PREVIEW':snapshot.weather.toUpperCase();
-  $<HTMLElement>('#age-readout').textContent=snapshot.elapsed<MINUTE?'< 1 MIN':`${Math.floor(snapshot.elapsed/MINUTE)} MIN`;
-  $<HTMLElement>('#building-readout').textContent=String(snapshot.buildings);
+  const setText=(selector:string,value:string)=>{const element=$<HTMLElement>(selector);if(element.textContent!==value)element.textContent=value;};
+  setText('#season-readout',snapshot.season.toUpperCase());
+  setText('#weather-readout',rainPreview?'RAIN · PREVIEW':snapshot.weather.toUpperCase());
+  setText('#age-readout',snapshot.elapsed<MINUTE?'< 1 MIN':`${Math.floor(snapshot.elapsed/MINUTE)} MIN`);
+  setText('#building-readout',String(snapshot.buildings));
   const event=[...MILESTONES].reverse().find(m=>snapshot.elapsed>=m.at);
-  $<HTMLElement>('#status-text').textContent=event?.label??'The settlement is waking up.';
-  document.body.dataset.weather=rainPreview?'rain':snapshot.weather;
-  document.body.dataset.season=snapshot.season;
+  setText('#status-text',event?.label??'The settlement is waking up.');
+  const weather=rainPreview?'rain':snapshot.weather;
+  if(document.body.dataset.weather!==weather)document.body.dataset.weather=weather;
+  if(document.body.dataset.season!==snapshot.season)document.body.dataset.season=snapshot.season;
 }
 function stepCamera(dt:number){
   if(!town)return;
@@ -259,13 +261,13 @@ function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!tow
     const input={x:(heldKeys.has('KeyD')||heldKeys.has('ArrowRight')?1:0)-(heldKeys.has('KeyA')||heldKeys.has('ArrowLeft')?1:0)+joystickInput.x,z:(heldKeys.has('KeyW')||heldKeys.has('ArrowUp')?1:0)-(heldKeys.has('KeyS')||heldKeys.has('ArrowDown')?1:0)+joystickInput.z,sprint:heldKeys.has('ShiftLeft')||heldKeys.has('ShiftRight')};
     roam.update(elapsed/1000,input,azimuth,colliders);
   }
-  stepCamera(elapsed/1000);residents?.update(snapshot);positionLabels();town.render();
+  stepCamera(elapsed/1000);residents?.update(snapshot);positionLabels();town.render(weatherSnapshot(),roaming);
   if(profile&&Math.floor(now/2000)!==Math.floor((now-elapsed)/2000)){document.body.dataset.drawCalls=String(town.renderer.info.render.calls);document.body.dataset.triangles=String(town.renderer.info.render.triangles);document.body.dataset.geometries=String(town.renderer.info.memory.geometries);document.body.dataset.textures=String(town.renderer.info.memory.textures);}
-  frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b),p90=sorted[Math.floor(sorted.length*.9)];frameSamples=[];if(profile){document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=p90.toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}const max=town.mobile?1.25:1.6;if(p90>(town.mobile?45:25)&&pixelRatio>0.85){pixelRatio=Math.max(.85,pixelRatio-.1);town.setPixelRatio(pixelRatio);}else if(p90<(town.mobile?36:19)&&pixelRatio<max){pixelRatio=Math.min(max,pixelRatio+.05);town.setPixelRatio(pixelRatio);}}
+  if(profile){frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b);frameSamples=[];document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=sorted[Math.floor(sorted.length*.9)].toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}}
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas);pixelRatio=Math.min(devicePixelRatio,town.mobile?1.25:1.5);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);town.update(weatherSnapshot());colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();document.body.classList.add('town-ready');requestAnimationFrame(frame);
+  town=new TownScene(canvas);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.25);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);town.update(weatherSnapshot());colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,save,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();positionLabels();});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;labels.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}
