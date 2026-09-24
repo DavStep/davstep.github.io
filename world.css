@@ -12,66 +12,79 @@
         --epic: #a060c0;
 
         /* Seasonal palette — defaults are SUMMER. Per-season overrides on .world[data-season=...]. */
-        --grass: #3a5a28;
-        --grass-dark: #25401a;
-        --grass-blade: #4a6a30;
-        --grass-blade-2: #5a7a36;
-        --grass-rim: #4a6a30;
-        --grass-rim-dark: #2f4a20;
-        --grass-back: #4d6c2c;
-        --grass-back-dark: #36511e;
-        --grass-back-rim: #3a5520;
-        --grass-back-shadow: #233814;
-        --leaf-light: #4a6a36;
-        --leaf-mid: #3a5a26;
-        --leaf-dark: #2a4a1a;
-        --leaf-shadow: #1a3010;
-        --leaf-canopy-1: #3a5a26; /* oak outer */
-        --leaf-canopy-2: #2a4a1a; /* oak mid */
-        --leaf-canopy-3: #1a3010; /* oak inner */
-        --leaf-pine-light: #345a2c;
-        --leaf-pine-mid: #284a22;
-        --leaf-pine-dark: #1a3818;
-        --bark: #3a2410;
-        --bark-light: #5a3818;
+        --grass: #427870;
+        --grass-dark: #29565e;
+        --grass-blade: #57938a;
+        --grass-blade-2: #78a99a;
+        --grass-rim: #5f988a;
+        --grass-rim-dark: #2b635e;
+        --grass-back: #5b8580;
+        --grass-back-dark: #38616a;
+        --grass-back-rim: #6f9991;
+        --grass-back-shadow: #163b46;
+        --leaf-light: #a2c8a5;
+        --leaf-mid: #679b83;
+        --leaf-dark: #315e62;
+        --leaf-shadow: #183d48;
+        --leaf-canopy-1: #78af91; /* lit crown */
+        --leaf-canopy-2: #467d72;
+        --leaf-canopy-3: #24535c;
+        --leaf-pine-light: #7eb6a3;
+        --leaf-pine-mid: #457e79;
+        --leaf-pine-dark: #23515c;
+        --bark: #33434b;
+        --bark-light: #826d64;
         --fruit-show: 1;
-        --hill-far-fill: #1a1208;
-        --hill-near-fill: #2a2018;
-        --mountain-fill: #5a6878;
+        --hill-far-fill: #385c70;
+        --hill-near-fill: #274d5b;
+        --mountain-fill: #567a94;
+        --ridge-far: #7999aa;
+        --ridge-near: #2d5873;
+        --ridge-shadow: #18394f;
         --snow-top: #f7fbff;
         --snow-mid: #dce8f3;
         --snow-low: #b9cadb;
         --snow-shadow: rgba(65, 82, 102, 0.38);
         --snow-opacity: 0;
         --bare-show: 0;
-        --field-near: #31553a;
+        --field-near: #214650;
+        --field-glow-a: rgba(151, 205, 169, .17);
+        --field-glow-b: rgba(125, 193, 172, .14);
+        --field-cover: 74%;
+        --field-art: url("assets/world/twilight-valley-illustrated.webp");
       }
 
       /* ============= SEASON PALETTES ============= */
       .world[data-season="spring"] {
-        --grass: #4d7a30;
-        --grass-dark: #356018;
-        --grass-blade: #5e8c3a;
-        --grass-blade-2: #74a448;
-        --grass-rim: #5f8a36;
-        --grass-rim-dark: #3c641f;
-        --grass-back: #5b7d36;
-        --grass-back-dark: #3f6124;
-        --grass-back-rim: #486d28;
-        --grass-back-shadow: #263d16;
-        --leaf-canopy-1: #6aa040;
-        --leaf-canopy-2: #4a8030;
-        --leaf-canopy-3: #2e6420;
-        --leaf-pine-light: #4a7a3a;
-        --leaf-pine-mid: #386030;
-        --leaf-pine-dark: #1e4824;
-        --hill-far-fill: #1c2208;
-        --hill-near-fill: #2c3018;
-        --mountain-fill: #5e7080;
+        --grass: #4d8476;
+        --grass-dark: #28565c;
+        --grass-blade: #80bb95;
+        --grass-blade-2: #a3d2a8;
+        --grass-rim: #80b59b;
+        --grass-rim-dark: #477d79;
+        --grass-back: #65988a;
+        --grass-back-dark: #447678;
+        --grass-back-rim: #a0c4a7;
+        --grass-back-shadow: #315b62;
+        --leaf-light: #c9e2af;
+        --leaf-canopy-1: #a3cf9a;
+        --leaf-canopy-2: #6da986;
+        --leaf-canopy-3: #397a73;
+        --leaf-pine-light: #a3cfaa;
+        --leaf-pine-mid: #6ca28d;
+        --leaf-pine-dark: #387373;
+        --hill-far-fill: #608b91;
+        --hill-near-fill: #3d6e75;
+        --mountain-fill: #7da0ab;
+        --ridge-far: #a1b8b9;
+        --ridge-near: #527e91;
+        --ridge-shadow: #315b72;
         --snow-opacity: 0;
         --bare-show: 0;
         --fruit-show: 1;
-        --field-near: #416c43;
+        --field-near: #315d62;
+        --field-glow-a: rgba(204, 226, 167, .24);
+        --field-glow-b: rgba(149, 218, 178, .18);
       }
       .world[data-season="summer"] {
         /* defaults — same as :root */
@@ -80,39 +93,45 @@
         --fruit-show: 1;
       }
       .world[data-season="autumn"] {
-        --grass: #7a6228;
-        --grass-dark: #5a4818;
-        --grass-blade: #8a7030;
-        --grass-blade-2: #a87836;
-        --grass-rim: #9a7a34;
-        --grass-rim-dark: #6a531e;
-        --grass-back: #80682e;
-        --grass-back-dark: #604b1e;
-        --grass-back-rim: #6f5624;
-        --grass-back-shadow: #3b2c12;
-        --leaf-canopy-1: #e08838;
-        --leaf-canopy-2: #c86028;
-        --leaf-canopy-3: #8a3818;
-        --leaf-pine-light: #386030;
-        --leaf-pine-mid: #2a4a22;
-        --leaf-pine-dark: #1a3818;
-        --hill-far-fill: #2a2010;
-        --hill-near-fill: #3a2818;
-        --mountain-fill: #6a6a68;
+        --grass: #806558;
+        --grass-dark: #453e50;
+        --grass-blade: #b78a64;
+        --grass-blade-2: #d8a97a;
+        --grass-rim: #b78b70;
+        --grass-rim-dark: #785767;
+        --grass-back: #947667;
+        --grass-back-dark: #625a67;
+        --grass-back-rim: #c29a79;
+        --grass-back-shadow: #3d3d53;
+        --leaf-light: #edbf86;
+        --leaf-canopy-1: #d99766;
+        --leaf-canopy-2: #aa6472;
+        --leaf-canopy-3: #684c68;
+        --leaf-pine-light: #a29a7c;
+        --leaf-pine-mid: #657b78;
+        --leaf-pine-dark: #385663;
+        --hill-far-fill: #826c80;
+        --hill-near-fill: #685b72;
+        --mountain-fill: #9b8995;
+        --ridge-far: #c0a7ac;
+        --ridge-near: #786d85;
+        --ridge-shadow: #4d506c;
         --snow-opacity: 0;
         --bare-show: 0;
         --fruit-show: 0;
-        --field-near: #665036;
+        --field-near: #4d4858;
+        --field-glow-a: rgba(235, 170, 121, .18);
+        --field-glow-b: rgba(202, 144, 147, .15);
       }
       .world[data-season="winter"] {
-        --grass: #c7ced6;
-        --grass-dark: #8a92a0;
+        --grass: #c2d3dc;
+        --grass-dark: #7a94a7;
         --grass-blade: #d8dee6;
         --grass-blade-2: #e4e8ee;
         --grass-rim: #eef4fb;
         --grass-rim-dark: #b7c4d2;
-        --grass-back: #d5dde6;
-        --grass-back-dark: #aeb8c5;
+        --grass-back: #d5e2e9;
+        --grass-back-dark: #a1b6c6;
         --grass-back-rim: #eff6ff;
         --grass-back-shadow: #7d8b9c;
         --leaf-canopy-1: #3a5a26;
@@ -123,9 +142,12 @@
         --leaf-pine-dark: #142a14;
         --bark: #2a1a08;
         --bark-light: #3a2410;
-        --hill-far-fill: #3a4248;
-        --hill-near-fill: #586068;
-        --mountain-fill: #8a98a8;
+        --hill-far-fill: #7693a5;
+        --hill-near-fill: #5b7b8f;
+        --mountain-fill: #a8bdcc;
+        --ridge-far: #ced9e0;
+        --ridge-near: #91acbe;
+        --ridge-shadow: #5e7f99;
         --snow-top: #f8fcff;
         --snow-mid: #dce8f4;
         --snow-low: #b8c9da;
@@ -134,6 +156,10 @@
         --bare-show: 1;
         --fruit-show: 0;
         --field-near: #aebbc8;
+        --field-glow-a: rgba(255, 255, 255, .26);
+        --field-glow-b: rgba(225, 241, 252, .2);
+        --field-cover: 84%;
+        --field-art: url("assets/world/winter-valley-illustrated.webp");
       }
       /* Smooth fade when season changes */
       .grass, .grass::before, .grass::after,
@@ -144,7 +170,8 @@
         transition: fill 3s ease, stroke 3s ease, background 3s ease, opacity 3s ease, color 3s ease, box-shadow 3s ease;
       }
 
-      * { box-sizing: border-box; image-rendering: pixelated; }
+      /* SVG landscapes and sprites render at their native vector quality. */
+      * { box-sizing: border-box; }
       html, body { overflow-x: hidden; }
       body {
         margin: 0;
@@ -210,21 +237,46 @@
 
       .sky {
         position: absolute; inset: 0; z-index: 0;
-        background: linear-gradient(180deg,
-          var(--sky-top, #4e6287) 0%,
-          var(--sky-mid, #9299ad) 64%,
-          var(--sky-bot, #c48d94) 100%);
+        background:
+          radial-gradient(ellipse 32% 29% at var(--sun-x, 62%) var(--sun-y, 23%), rgba(255, 222, 178, .32), transparent 82%),
+          radial-gradient(ellipse 60% 32% at 78% 82%, rgba(250, 151, 151, .19), transparent 90%),
+          linear-gradient(180deg,
+            var(--sky-top, #4e6287) 0%,
+            var(--sky-mid, #9299ad) 52%,
+            var(--sky-bot, #c48d94) 100%);
       }
-      /* A little warm light hangs over the village. Its slow phase changes make
-         the world feel atmospheric without another animated canvas or DOM loop. */
+      /* Haze and fine light bands soften the handoff from sky to mountain. */
       .sky::before {
-        content: ""; position: absolute; inset: 40% 0 0;
-        background: linear-gradient(180deg, transparent, rgba(224, 188, 197, .055) 45%, rgba(206, 131, 150, .19));
+        content: ""; position: absolute; inset: 0;
+        background:
+          linear-gradient(180deg, transparent 42%, rgba(247, 218, 203, .04) 55%, rgba(255, 220, 212, .19) 76%, transparent 91%),
+          repeating-linear-gradient(0deg, transparent 0 28px, rgba(255, 234, 225, .017) 29px 30px, transparent 31px 63px);
         opacity: 1; transition: opacity 3s ease;
       }
-      .world[data-time="night"] .sky::before { opacity: .12; }
+      .world[data-time="night"] .sky::before { opacity: .19; }
       .world[data-time="dawn"] .sky::before,
-      .world[data-time="dusk"] .sky::before { opacity: .86; }
+      .world[data-time="dusk"] .sky::before { opacity: 1; }
+      .sky::after {
+        content: ""; position: absolute; inset: 0;
+        background: url("assets/world/twilight-valley-illustrated.webp") center bottom / cover no-repeat;
+        opacity: .34;
+        -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 74%, transparent 100%);
+        mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 74%, transparent 100%);
+        transition: opacity 6s ease, filter 6s ease;
+        pointer-events: none;
+      }
+      .world[data-time="dawn"] .sky::after,
+      .world[data-time="dusk"] .sky::after { opacity: .72; }
+      .world[data-time="night"] .sky::after { opacity: .18; filter: saturate(.35) brightness(.55); }
+      .world[data-time="day"] .sky::after { filter: saturate(.7) brightness(1.12); }
+      .world[data-season="autumn"] .sky::after { filter: hue-rotate(-12deg) saturate(.76); }
+      .world[data-season="autumn"][data-time="night"] .sky::after { filter: hue-rotate(-12deg) saturate(.35) brightness(.55); }
+      .world[data-season="winter"] .sky::after {
+        background-image: url("assets/world/winter-valley-illustrated.webp");
+        opacity: .65;
+        filter: saturate(.72) brightness(1.03);
+      }
+      .world[data-season="winter"][data-time="night"] .sky::after { opacity: .18; filter: saturate(.3) brightness(.55); }
 
       .weather-veil {
         position: absolute; inset: 0; z-index: 3;
@@ -262,38 +314,40 @@
       .sun {
         position: absolute;
         left: var(--sun-x, 18%); top: var(--sun-y, 8%);
-        width: 43px; height: 43px;
+        width: 52px; height: 52px;
         background: var(--sun-color, #f0d060);
-        border-radius: 50%; border: 3px solid rgba(255, 228, 227, .4);
-        box-shadow: 0 0 0 7px rgba(236, 190, 205, .11), 0 0 55px 17px var(--sun-glow, rgba(220, 151, 156, .38));
+        border-radius: 50%; border: 2px solid rgba(255, 245, 226, .62);
+        box-shadow: 0 0 0 9px rgba(255, 226, 204, .08), 0 0 0 23px rgba(252, 198, 188, .06), 0 0 90px 32px var(--sun-glow, rgba(220, 151, 156, .38));
         opacity: var(--sun-opacity, 0);
         transform: translate(-50%, -50%); z-index: 1;
         transition: left 0.55s linear, top 0.55s linear;
       }
       .sun::after {
-        content: ""; position: absolute; inset: -20px; border-radius: 50%;
-        border: 1px solid rgba(255, 225, 231, .25);
+        content: ""; position: absolute; inset: -31px; border-radius: 50%;
+        border: 1px solid rgba(255, 232, 224, .19);
       }
 
       .moon {
         position: absolute;
         left: var(--moon-x, 82%); top: var(--moon-y, 12%);
-        width: 33px; height: 33px;
-        background: #e0d4a8; border-radius: 50%;
-        box-shadow: 0 0 16px 3px rgba(224, 212, 168, 0.35), inset -6px -3px 0 -2px #b4a684;
+        width: 37px; height: 37px;
+        background: #f0e8cf; border-radius: 50%;
+        box-shadow: 0 0 0 6px rgba(222, 234, 246, .06), 0 0 35px 12px rgba(213, 226, 245, .22), inset -7px -4px 0 -2px #b2bed0;
         opacity: var(--moon-opacity, 0);
         transform: translate(-50%, -50%); z-index: 1;
         transition: left 0.55s linear, top 0.55s linear;
       }
 
-      /* CLOUDS — SVG puffs */
+      /* Cloud sprites inherit atmosphere from the current sky phase. */
       .clouds-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
       .cloud {
         position: absolute;
-        width: 64px; height: 24px;
+        width: 108px; height: 40px;
         transition: transform 90s linear, filter 6s ease, opacity 6s ease;
         will-change: transform;
         color: var(--cloud-light, #f0e4c0);
+        opacity: .7;
+        filter: blur(.55px) drop-shadow(0 10px 13px rgba(38, 48, 77, .16));
       }
       .cloud svg { width: 100%; height: 100%; display: block; }
       .cloud .cl-light { fill: var(--cloud-light, #f0e4c0); }
@@ -414,41 +468,55 @@
         100% { opacity: 0; }
       }
 
-      /* MOUNTAINS — distant atmospheric ridge behind the hills */
+      /* Three tones give the new faceted ridgeline distance and a lit face. */
       .mountains {
         position: absolute; bottom: 56px; left: 0;
-        width: 100%; height: 220px;
+        width: 100%; height: 290px;
         z-index: 1;
         pointer-events: none;
-        filter: brightness(var(--world-brightness, 1)) saturate(0.55);
+        filter: brightness(var(--world-brightness, 1)) saturate(.72);
       }
-      .mountains svg { width: 100%; height: 100%; display: block; }
+      /* The illustrated seasonal panoramas supply the distant peaks. */
+      .mountains { opacity: 0; }
+      .mountains svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 14px 16px rgba(18, 38, 58, .16)); }
       .mountains::after {
-        content: ""; position: absolute; inset: 42% 0 0;
-        background: linear-gradient(180deg, transparent 0%, rgba(186, 143, 165, .12) 100%);
+        content: ""; position: absolute; inset: 46% 0 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(217, 220, 226, .08) 39%, rgba(224, 224, 223, .29) 78%, rgba(237, 222, 218, .39) 100%);
         pointer-events: none;
       }
       .world[data-time="night"] .mountains::after {
-        background: linear-gradient(180deg, transparent 0%, rgba(92, 96, 157, .12) 100%);
+        background: linear-gradient(180deg, transparent 0%, rgba(120, 145, 193, .06) 60%, rgba(87, 116, 164, .22) 100%);
       }
 
       /* HILLS — rolling rounded silhouette */
       .hills {
         position: absolute; bottom: 56px; left: 0;
-        width: 100%; height: 130px;
+        width: 100%; height: 156px;
         z-index: 5;
-        filter: brightness(var(--world-brightness, 1));
+        filter: brightness(var(--world-brightness, 1)) saturate(.9);
       }
+      .hills::after {
+        content: ""; position: absolute; left: 0; right: 0; bottom: 16px; height: 70px;
+        z-index: 2; pointer-events: none;
+        background: linear-gradient(180deg, transparent, rgba(196, 215, 216, .06) 45%, rgba(212, 215, 215, .19) 78%, transparent);
+      }
+      .world[data-time="night"] .hills::after { opacity: .4; }
       .hills .hills-far, .hills .hills-near {
         position: absolute; left: 0; right: 0;
         width: 100%; pointer-events: none;
       }
-      .hills .hills-far  { bottom: 30px; height: 100px; z-index: 1; }
-      .hills .hills-near { bottom: 0;    height: 80px;  z-index: 3; }
+      .hills .hills-far  { bottom: 31px; height: 125px; z-index: 1; }
+      .hills .hills-near { bottom: 0;    height: 95px;  z-index: 3; }
       .hills svg { width: 100%; height: 100%; display: block; }
       .hills .h-far-fill  { fill: var(--hill-far-fill); }
       .hills .h-near-fill { fill: var(--hill-near-fill); }
-      .mountains .m-fill  { fill: var(--mountain-fill); }
+      .hills .h-far-highlight { fill: color-mix(in srgb, var(--hill-far-fill), #d8e0d7 25%); opacity: .5; }
+      .hills .h-near-highlight { fill: color-mix(in srgb, var(--hill-near-fill), #a9c3bd 22%); opacity: .52; }
+      .mountains .m-back { fill: var(--ridge-far); opacity: .45; }
+      .mountains .m-fill { fill: var(--ridge-near); }
+      .mountains .m-facet-light { fill: color-mix(in srgb, var(--mountain-fill), #d8d8d5 12%); opacity: .34; }
+      .mountains .m-facet-shadow { fill: var(--ridge-shadow); opacity: .3; }
+      .mountains .m-ridge-detail { fill: none; stroke: rgba(234, 235, 232, .2); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
       /* Snow blankets: filled caps plus a small bright ridge, instead of flat white strokes. */
       .hills-snow-fill, .mountains-snow-fill {
         fill: var(--snow-mid);
@@ -480,21 +548,21 @@
          instead of one per element. Saves a lot of repaint when --world-brightness changes. */
       .back-trees-layer {
         position: absolute; inset: 0; z-index: 5; pointer-events: none;
-        filter: brightness(calc(var(--world-brightness, 1) * 0.82)) saturate(0.72);
+        filter: brightness(calc(var(--world-brightness, 1) * .88)) saturate(.78);
       }
       .hill-trees-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
       .hill-trees-far {
         z-index: 2;
-        filter: brightness(calc(var(--world-brightness, 1) * 0.78)) saturate(0.68);
+        filter: brightness(calc(var(--world-brightness, 1) * .72)) saturate(.68);
       }
       .hill-trees-near {
         z-index: 4;
-        filter: brightness(calc(var(--world-brightness, 1) * 0.84)) saturate(0.74);
+        filter: brightness(calc(var(--world-brightness, 1) * .84)) saturate(.8);
       }
       .tree {
         position: absolute;
         bottom: 48px;
-        width: 24px; height: 48px;
+        width: 32px; height: 64px;
         z-index: 2;
         transform: scale(var(--g, 0));
         transform-origin: bottom center;
@@ -502,19 +570,24 @@
       }
       .back-trees-layer .tree {
         bottom: 68px;
-        width: 18px; height: 36px;
-        opacity: 0.72;
+        width: 24px; height: 48px;
+        opacity: .85;
       }
       .hill-trees-layer .tree {
         bottom: var(--hill-bottom, 40px);
-        width: var(--hill-tree-w, 14px);
-        height: var(--hill-tree-h, 28px);
-        opacity: 0.62;
+        width: calc(var(--hill-tree-w, 14px) * 1.2);
+        height: calc(var(--hill-tree-h, 28px) * 1.2);
+        opacity: .72;
       }
       .hill-trees-near .tree {
-        opacity: 0.7;
+        opacity: .82;
       }
-      .tree svg { width: 100%; height: 100%; display: block; }
+      .tree svg { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
+      .trees-layer .tree::before,
+      .back-trees-layer .tree::before {
+        content: ""; position: absolute; left: -20%; right: -20%; bottom: -4px; height: 10px;
+        border-radius: 50%; background: radial-gradient(ellipse, rgba(8, 35, 45, .35), transparent 72%);
+      }
       .tree.falling { animation: fall 1.4s cubic-bezier(.45, 0, .85, .55) forwards; }
       @keyframes fall {
         0%   { transform: scale(var(--g, 1)) rotate(0deg); }
@@ -959,7 +1032,7 @@
       .people-layer { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
       .person {
         position: absolute;
-        width: 12px; height: 22px;
+        width: 16px; height: 29px;
       }
       .person svg { width: 100%; height: 100%; display: block; overflow: visible; }
       .person .p-tool { transform-origin: 9px 8px; }
@@ -999,19 +1072,19 @@
       }
 
       /* HORSEMAN / HORSE / CART / SOLDIER / KING */
-      .horseman { position: absolute; bottom: 4px; width: 28px; height: 26px; }
+      .horseman { position: absolute; bottom: 4px; width: 35px; height: 33px; }
       .horseman svg { width: 100%; height: 100%; display: block; }
       .horseman.attacking .hr-sword { animation: slash 0.4s steps(2) infinite; transform-origin: 0 100%; }
       @keyframes slash { 0%,100% { transform: rotate(-45deg); } 50% { transform: rotate(35deg); } }
 
-      .cart { position: absolute; bottom: 2px; width: 32px; height: 22px; }
+      .cart { position: absolute; bottom: 2px; width: 40px; height: 27px; }
       .cart svg { width: 100%; height: 100%; display: block; }
 
-      .soldier { position: absolute; bottom: 4px; width: 12px; height: 18px; }
+      .soldier { position: absolute; bottom: 4px; width: 16px; height: 24px; }
       .soldier svg { width: 100%; height: 100%; display: block; overflow: visible; }
-      .soldier.banner { width: 14px; height: 22px; }
+      .soldier.banner { width: 18px; height: 29px; }
 
-      .king { position: absolute; bottom: 4px; width: 18px; height: 22px; }
+      .king { position: absolute; bottom: 4px; width: 23px; height: 29px; }
       .king svg { width: 100%; height: 100%; display: block; }
 
       .person.legionary {
@@ -1051,8 +1124,14 @@
       .grass {
         position: absolute; left: 0; right: 0; bottom: 0;
         height: 60px; z-index: 5;
-        background: linear-gradient(180deg, var(--grass) 0%, var(--grass-dark) 100%);
-        box-shadow: inset 0 6px 0 var(--grass-rim), inset 0 12px 0 var(--grass-rim-dark);
+        background:
+          radial-gradient(ellipse 24% 80% at 14% 1%, var(--field-glow-a), transparent 78%),
+          radial-gradient(ellipse 30% 90% at 80% 7%, var(--field-glow-b), transparent 84%),
+          radial-gradient(circle 2px at 11px 15px, rgba(228, 238, 197, .2) 0 1px, transparent 2px) 0 0 / 37px 29px repeat,
+          radial-gradient(ellipse 18px 4px at 28px 21px, rgba(6, 37, 48, .18) 0 70%, transparent 76%) 0 0 / 103px 36px repeat,
+          linear-gradient(180deg, color-mix(in srgb, var(--grass) var(--field-cover), transparent) 0%, color-mix(in srgb, var(--grass-dark) var(--field-cover), transparent) 70%, color-mix(in srgb, var(--field-near) var(--field-cover), transparent) 100%),
+          var(--field-art) center bottom / auto 100svh no-repeat;
+        box-shadow: inset 0 3px 0 var(--grass-rim), inset 0 8px 0 rgba(255, 255, 255, .08), inset 0 15px 0 rgba(8, 33, 46, .17);
         filter: brightness(var(--world-brightness, 1));
       }
       .grass::before {
@@ -1073,10 +1152,13 @@
         bottom: 49px;       /* sits flush with the top edge of the road-strip (road = bottom 7, height 42 -> top at 49) */
         height: 22px;
         z-index: 5;
-        background: linear-gradient(180deg, var(--grass-back) 0%, var(--grass-back-dark) 100%);
+        background:
+          radial-gradient(circle 1px at 8px 8px, rgba(236, 243, 211, .2) 0 1px, transparent 2px) 0 0 / 26px 15px repeat,
+          linear-gradient(180deg, var(--grass-back) 0%, var(--grass-back-dark) 100%);
         box-shadow:
-          inset 0 4px 0 var(--grass-back-rim),
-          inset 0 -2px 0 var(--grass-back-shadow);
+          inset 0 3px 0 var(--grass-back-rim),
+          inset 0 7px 0 rgba(255, 255, 255, .06),
+          inset 0 -4px 0 var(--grass-back-shadow);
         filter: brightness(calc(var(--world-brightness, 1) * 0.92)) saturate(0.88);
         pointer-events: none;
       }
@@ -1374,10 +1456,10 @@
       .rain-canvas { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
 
       /* SHEEP */
-      .sheep { position: absolute; width: 14px; height: 10px; bottom: 4px; }
+      .sheep { position: absolute; width: 18px; height: 13px; bottom: 4px; }
       .sheep svg { width: 100%; height: 100%; display: block; }
       .sheep { animation: walk-bob 0.5s steps(2) infinite; }
-      .sheep.lamb { width: 10px; height: 7px; }
+      .sheep.lamb { width: 13px; height: 9px; }
       .sheep.hopping {
         animation: sheep-hop 0.75s ease-in-out infinite;
       }
@@ -1393,7 +1475,7 @@
       }
 
       /* DOGS */
-      .dog { position: absolute; width: 12px; height: 8px; bottom: 4px; }
+      .dog { position: absolute; width: 16px; height: 11px; bottom: 4px; }
       .dog svg { width: 100%; height: 100%; display: block; overflow: visible; }
       .dog { animation: dog-bob 0.25s steps(2) infinite; }
       @keyframes dog-bob {
@@ -1595,6 +1677,13 @@
          move by bottom offset, so sprites retain their own transforms and the
          world remains cheap to paint. Explore mode uses the full-screen camera. */
       body:not(.ui-hidden) .world { --page-ground-lift: clamp(64px, 9svh, 110px); }
+      .world .house { scale: 1.08; }
+      .world .house[data-kind="castle"] { scale: 1.17; }
+      body:not(.ui-hidden) .world .house { scale: 1.16; }
+      body:not(.ui-hidden) .world .house[data-kind="castle"] { scale: 1.27; }
+      @media (min-width: 1050px) {
+        body:not(.ui-hidden) .world .house[data-kind="castle"] { scale: 1.48; }
+      }
       body:not(.ui-hidden) .world .mountains,
       body:not(.ui-hidden) .world .hills { bottom: calc(56px + var(--page-ground-lift)); }
       body:not(.ui-hidden) .world .back-trees-layer,
@@ -1608,17 +1697,39 @@
         bottom: 0;
         height: calc(60px + var(--page-ground-lift));
         background:
-          radial-gradient(circle 2px at 11px 12px, rgba(208, 230, 169, .16) 0 2px, transparent 3px) 0 66px / 47px 37px repeat,
-          radial-gradient(ellipse 20px 5px at 25px 18px, rgba(8, 24, 24, .12) 0 70%, transparent 75%) 0 68px / 113px 40px repeat,
-          linear-gradient(180deg, var(--grass) 0, var(--grass-dark) 60px, var(--field-near) 100%);
+          radial-gradient(ellipse 28% 65% at 23% 6%, var(--field-glow-a), transparent 80%),
+          radial-gradient(ellipse 35% 74% at 78% 9%, var(--field-glow-b), transparent 82%),
+          radial-gradient(circle 2px at 11px 12px, rgba(232, 239, 202, .2) 0 1px, transparent 2px) 0 64px / 41px 34px repeat,
+          radial-gradient(ellipse 22px 5px at 25px 18px, rgba(7, 35, 47, .2) 0 70%, transparent 75%) 0 68px / 107px 44px repeat,
+          linear-gradient(180deg, color-mix(in srgb, var(--grass) var(--field-cover), transparent) 0, color-mix(in srgb, var(--grass-dark) var(--field-cover), transparent) 75px, color-mix(in srgb, var(--field-near) var(--field-cover), transparent) 100%),
+          var(--field-art) center bottom / auto 100svh no-repeat;
       }
       body:not(.ui-hidden) .world .grass-back { bottom: calc(49px + var(--page-ground-lift)); }
       body:not(.ui-hidden) .world .road-strip { bottom: calc(7px + var(--page-ground-lift)); }
       body:not(.ui-hidden) .world .rainbow { bottom: calc(30px + var(--page-ground-lift)); }
+      /* Immersive mode keeps more of the inhabited shelf in frame, especially
+         on phones where the original horizon left most of the screen empty. */
+      body.ui-hidden .world { --explore-ground-lift: clamp(46px, 7svh, 70px); }
+      body.ui-hidden .world .hills { bottom: calc(56px + var(--explore-ground-lift)); }
+      body.ui-hidden .world .back-trees-layer,
+      body.ui-hidden .world .trees-layer,
+      body.ui-hidden .world .crops-layer,
+      body.ui-hidden .world .people-layer,
+      body.ui-hidden .world .tracks-layer,
+      body.ui-hidden .world .ground-decor-layer,
+      body.ui-hidden .world .ambient-particle-layer { bottom: var(--explore-ground-lift); }
+      body.ui-hidden .world .grass { height: calc(60px + var(--explore-ground-lift)); }
+      body.ui-hidden .world .grass-back { bottom: calc(49px + var(--explore-ground-lift)); }
+      body.ui-hidden .world .road-strip { bottom: calc(7px + var(--explore-ground-lift)); }
+      body.ui-hidden .world .rainbow { bottom: calc(30px + var(--explore-ground-lift)); }
+      @media (min-width: 1050px) {
+        body.ui-hidden .world .house[data-kind="castle"] { scale: 1.42; }
+      }
       @media (max-width: 600px) {
         body:not(.ui-hidden) .world { --page-ground-lift: clamp(64px, 15svh, 138px); }
         body:not(.ui-hidden) .world .trees-layer > .tree { scale: 1.3; }
         body:not(.ui-hidden) .world .back-trees-layer > .tree { scale: 1.14; }
         body:not(.ui-hidden) .world .house { scale: 1.28; }
+        body:not(.ui-hidden) .world .house[data-kind="castle"] { scale: 1.34; }
         body:not(.ui-hidden) .world .people-layer > :is(.person, .horseman, .dog, .sheep, .cart, .camel) { scale: 1.3; }
       }

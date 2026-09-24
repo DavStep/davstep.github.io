@@ -157,7 +157,9 @@
             return Math.max(0, world.offsetWidth - window.innerWidth);
           }
           function centerPan() {
-            return maxPan() / 2;
+            // Put the first castle beside the desktop introduction so the
+            // living village reads as a destination, not a footer decoration.
+            return maxPan() * (window.innerWidth >= 1050 ? 0.2 : 0.5);
           }
           let panCenter = centerPan();
           let worldPanX = panCenter;
@@ -748,33 +750,16 @@
           ensureRainRaf();
         }).observe(world, { attributes: true, attributeFilter: ["data-weather"] });
 
-        /* ============= CLOUDS (SVG puffs) ============= */
-        // Each cloud is a stack of overlapping pixel rectangles forming a fluffy silhouette.
+        /* ============= CLOUDS ============= */
+        // Soft illustrated silhouettes sit in the same visual world as the
+        // painted valley, while remaining lightweight animated SVG elements.
         function cloudSVG() {
-          // Random number of "puffs" along the cloud body
-          const W_ = 64, H_ = 24;
-          const puffs = 3 + Math.floor(Math.random() * 3); // 3-5
-          const cells = [];
-          let cursor = 4;
-          for (let i = 0; i < puffs; i++) {
-            const w = 14 + Math.floor(Math.random() * 8);
-            const h = 10 + Math.floor(Math.random() * 6);
-            const y = 8 + Math.floor((Math.random() - 0.5) * 6);
-            cells.push({ x: cursor, y, w, h });
-            cursor += Math.floor(w * 0.55);
-          }
-          // dark underside slab
-          const minY = Math.max(...cells.map((c) => c.y + c.h)) - 4;
-          const minX = Math.min(...cells.map((c) => c.x));
-          const maxX = Math.max(...cells.map((c) => c.x + c.w));
-          const undersideRects = `
-            <rect x="${minX + 3}" y="${minY}" width="${maxX - minX - 6}" height="4" class="cl-dark"/>
-          `;
-          // light puffs
-          const puffRects = cells.map((c) => `<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" class="cl-light"/>`).join("");
-          // tiny highlight band on the top of each puff
-          const highlightRects = cells.map((c) => `<rect x="${c.x + 2}" y="${c.y}" width="${c.w - 4}" height="2" class="cl-light" opacity="0.8"/>`).join("");
-          return `<svg viewBox="0 0 ${W_} ${H_}" xmlns="http://www.w3.org/2000/svg">${undersideRects}${puffRects}${highlightRects}</svg>`;
+          const crest = Math.random() > 0.48 ? 14 : 18;
+          return `<svg viewBox="0 0 120 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path class="cl-dark" d="M7 35c5-9 14-11 22-9 4-11 16-17 27-14 6-8 20-10 29-3 9-1 20 5 22 15 9 2 14 7 14 15-15 4-31 4-48 4H22C14 43 9 40 7 35Z"/>
+            <path class="cl-light" d="M5 32c4-8 15-11 23-8 4-10 15-16 26-13 8-${crest} 23-12 31-3 10-1 18 4 21 14 9 0 15 5 15 12-13 4-28 4-43 4H21C13 38 8 36 5 32Z"/>
+            <path d="M16 29c7-5 15-4 21-2 4-9 12-13 22-12m9-1c9-6 19-2 23 7" fill="none" stroke="#fff" stroke-opacity=".24" stroke-width="2" stroke-linecap="round"/>
+          </svg>`;
         }
 
         function randomCloud(initialProgress = 0) {
@@ -864,25 +849,24 @@
         /* ============= ANIMALS ============= */
         function sheepSVG() {
           return `<svg viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="10" height="6" fill="#f0ecdc"/>
-            <rect x="2" y="2" width="10" height="1" fill="#ffffff"/>
-            <rect x="2" y="8" width="10" height="1" fill="#c8c4b4"/>
-            <rect x="0" y="4" width="2" height="2" fill="#3a2a1a"/>
-            <rect x="3" y="8" width="2" height="2" fill="#1a1208"/>
-            <rect x="9" y="8" width="2" height="2" fill="#1a1208"/>
-            <rect x="1" y="3" width="1" height="1" fill="#000"/>
+            <path d="M2 4 1 3l1-2h2L5 0h3l1 1h2l2 2-1 2 1 2-2 2H4L2 8z" fill="#eee9d8"/>
+            <path d="M3 2h2l1-1h2l1 1h2M4 5l2-1h3m-4 3h5" fill="none" stroke="#fffdf1" stroke-width="1.1" stroke-linecap="round"/>
+            <path d="M4 8h2v2H4zm5 0h2v2H9z" fill="#473a31"/>
+            <path d="M1 3 0 4v3l2 1 2-1V4L2 3z" fill="#59463b"/>
+            <path d="M0 4 1 3h2" fill="none" stroke="#806758" stroke-width=".7"/>
+            <path d="M1 5h1" stroke="#181717" stroke-width=".8"/>
+            <path d="M12 5h2" stroke="#eee9d8" stroke-width="1"/>
           </svg>`;
         }
         function dogSVG() {
           return `<svg viewBox="0 0 12 8" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="3" width="8" height="3" fill="#8a5828"/>
-            <rect x="2" y="3" width="8" height="1" fill="#a87838"/>
-            <rect x="0" y="4" width="2" height="2" fill="#1a1208"/>
-            <rect x="9" y="2" width="3" height="3" fill="#8a5828"/>
-            <rect x="11" y="3" width="1" height="1" fill="#000"/>
-            <rect x="3" y="6" width="1" height="2" fill="#3a2410"/>
-            <rect x="8" y="6" width="1" height="2" fill="#3a2410"/>
-            <rect x="9" y="0" width="1" height="2" fill="#5a3818"/>
+            <path d="M2 3 1 2 0 1v3l2 1 1 2h7l1-3-2-2H5z" fill="#9c633b"/>
+            <path d="M2 3h5l2 1H3z" fill="#c58b55"/>
+            <path d="M3 6h2v2H3zm5 0h2v2H8z" fill="#4c332a"/>
+            <path d="M8 3V1l1-1 1 2 2 1v3l-2 1-2-1z" fill="#a66b42"/>
+            <path d="M8 1 9 0v3H8z" fill="#594032"/>
+            <path d="M11 4h1" stroke="#242020" stroke-width=".8"/>
+            <path d="M9 6h2" stroke="#e5bf89" stroke-width=".7"/>
           </svg>`;
         }
 
@@ -2090,9 +2074,9 @@
         };
 
         // Skin tones — randomized per sprite so the realm isn't all the same person
-        const SKIN = ["#d4a888", "#c89878", "#a87858", "#8a5838", "#e8c8a0", "#7a4828"];
-        const HAIR = ["#3a2410", "#1a0a04", "#7a3818", "#c89858", "#a8a8a8", "#d4a017"];
-        const TUNIC = ["#6b4a30", "#3a6a48", "#8a4828", "#4a587a", "#7a4a6a", "#5a5a3a"];
+        const SKIN = ["#e3b797", "#d2a07e", "#b77e5b", "#8b563e", "#f0cfaa", "#6f4434"];
+        const HAIR = ["#392519", "#24171a", "#8f4e2b", "#c9934e", "#b2aaa0", "#d4a451"];
+        const TUNIC = ["#9a6846", "#4d876b", "#b55b42", "#587d9b", "#956783", "#8b854c"];
 
         function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -2154,29 +2138,27 @@
                       : tunic;
           // Common body parts
           const head = `
+            <path d="M4 1h4l1 2v3L7 8H5L3 6V3z" fill="#2a2021"/>
             <rect x="4" y="2" width="4" height="4" fill="${skin}"/>
-            <rect x="4" y="5" width="1" height="1" fill="#1a0a0a"/>
-            <rect x="7" y="5" width="1" height="1" fill="#1a0a0a"/>
-            <rect x="5" y="6" width="2" height="1" fill="#4a1818" opacity="0.85"/>
-            <rect x="4" y="1" width="4" height="2" fill="${hair}"/>
-            <rect x="3" y="1" width="1" height="3" fill="${hair}"/>
-            <rect x="8" y="1" width="1" height="3" fill="${hair}"/>
-            <rect x="4" y="3" width="1" height="1" fill="#ffffff" opacity="0.2"/>
+            <path d="M4 2h1v3H4zm3 1h1v2H7z" fill="#fff2d6" opacity=".24"/>
+            <path d="M4 5h1m2 0h1" stroke="#312226" stroke-width=".8"/>
+            <path d="M5 6h2" stroke="#8c574a" stroke-width=".6"/>
+            <path d="M3 3V1h2V0h3l1 2v2H8V3H5v1H3z" fill="${hair}"/>
+            <path d="M4 1h4" stroke="#fff0cc" stroke-opacity=".18" stroke-width=".7"/>
           `;
           const torso = `
-            <rect x="3" y="7" width="6" height="5" fill="${tunic}"/>
-            <rect x="3" y="7" width="6" height="1" fill="${tunicLight}"/>
-            <rect x="2" y="8" width="1" height="4" fill="${tunic}"/>
-            <rect x="9" y="8" width="1" height="4" fill="${tunic}"/>
-            <rect x="2" y="11" width="1" height="1" fill="${skin}"/>
-            <rect x="9" y="11" width="1" height="1" fill="${skin}"/>
+            <path d="M3 7h6l1 2v4H2V9z" fill="#292632"/>
+            <path d="M3 7h6v5H3zM2 9h1v3H2zm7 0h1v3H9z" fill="${tunic}"/>
+            <path d="M3 7h6v1H3z" fill="${tunicLight}"/>
+            <path d="M4 8h1v4H4z" fill="#fff0d4" opacity=".13"/>
+            <path d="M2 12h1m6 0h1" stroke="${skin}" stroke-width="1"/>
           `;
-          const belt = `<rect x="3" y="12" width="6" height="1" fill="#2a1f15"/>`;
+          const belt = `<path d="M3 12h6v1H3z" fill="#3d3029"/><path d="M6 12h1v1H6z" fill="#c6a269"/>`;
           const legs = `
-            <rect x="3" y="13" width="2" height="8" fill="#2a1f15"/>
-            <rect x="7" y="13" width="2" height="8" fill="#2a1f15"/>
-            <rect x="3" y="20" width="2" height="1" fill="#1a0a0a"/>
-            <rect x="7" y="20" width="2" height="1" fill="#1a0a0a"/>
+            <path d="M3 13h2v7H3zm4 0h2v7H7z" fill="#3b3534"/>
+            <path d="M3 14h1v5H3zm4 0h1v5H7z" fill="#82796d" opacity=".3"/>
+            <path d="M2 20h3v2H2zm5 0h3v2H7z" fill="#251e20"/>
+            <path d="M2 20h3m2 0h3" stroke="#66534b" stroke-width=".5"/>
           `;
 
           let extras = "";
@@ -3053,118 +3035,75 @@
 
         function makeTreeSVG(species) {
           if (species === "oak") {
-            // Oak — round layered canopy (original look, the staple)
+            // Broad, asymmetric crown with a visible branching structure.
             return `<svg viewBox="0 0 24 48" xmlns="http://www.w3.org/2000/svg">
               <g class="bark">
-                <rect x="10" y="34" width="4" height="14" fill="var(--bark)"/>
-                <rect x="11" y="34" width="2" height="14" fill="var(--bark-light)"/>
+                <path d="M9 48l1-16 2-10 2 10 1 16z" fill="var(--bark)"/>
+                <path d="M11 47l1-18 1 19z" fill="var(--bark-light)"/>
+                <path d="M10 43l-3 5h2l3-4m2-2 3 6h-2l-3-4" fill="var(--bark)"/>
               </g>
               <g class="bare-branches" opacity="var(--bare-show)">
-                <rect x="11" y="20" width="2" height="14" fill="var(--bark)"/>
-                <rect x="8"  y="22" width="3" height="1"  fill="var(--bark)"/>
-                <rect x="13" y="20" width="3" height="1"  fill="var(--bark)"/>
-                <rect x="6"  y="18" width="2" height="1"  fill="var(--bark)"/>
-                <rect x="15" y="16" width="2" height="1"  fill="var(--bark)"/>
-                <rect x="10" y="14" width="1" height="6"  fill="var(--bark)"/>
-                <rect x="13" y="12" width="1" height="6"  fill="var(--bark)"/>
+                <path d="M12 34V13m0 12L5 18m7 2 6-8M9 23l-2-9m8 3 2-9M12 15 9 8m3 6 2-8M5 18l-2-5m2 5-3 1m16-7 3-4m-3 4 3 2" fill="none" stroke="var(--bark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 31V16m0 7-5-5m5 3 5-8" fill="none" stroke="var(--bark-light)" stroke-width=".6"/>
               </g>
               <g class="canopy" style="opacity: calc(1 - var(--bare-show));">
-                <rect x="3" y="22" width="18" height="10" fill="var(--leaf-canopy-3)"/>
-                <rect x="5" y="14" width="14" height="10" fill="var(--leaf-canopy-2)"/>
-                <rect x="7" y="6"  width="10" height="10" fill="var(--leaf-canopy-1)"/>
-                <rect x="9" y="0"  width="6"  height="6"  fill="var(--leaf-light)"/>
-                <rect x="6"  y="20" width="2" height="2" fill="var(--leaf-shadow)"/>
-                <rect x="16" y="22" width="2" height="2" fill="var(--leaf-shadow)"/>
-                <rect x="8"  y="12" width="2" height="2" fill="var(--leaf-shadow)"/>
-                <rect x="14" y="10" width="2" height="2" fill="var(--leaf-shadow)"/>
-                </g>
-                <g class="snow-cap" style="opacity: var(--snow-opacity);">
-                  <rect x="10" y="14" width="2" height="1" fill="var(--snow-top)"/>
-                  <rect x="13" y="12" width="2" height="1" fill="var(--snow-top)"/>
-                  <rect x="7"  y="21" width="5" height="1" fill="var(--snow-top)"/>
-                  <rect x="13" y="19" width="5" height="1" fill="var(--snow-top)"/>
-                  <rect x="5"  y="17" width="4" height="1" fill="var(--snow-top)"/>
-                  <rect x="15" y="15" width="3" height="1" fill="var(--snow-top)"/>
-                  <rect x="10" y="33" width="4" height="2" fill="var(--snow-mid)"/>
-                </g>
-              </svg>`;
+                <path d="M3 28 1 25l1-5 3-2-1-4 4-4 3 1 2-5 5 2 1 5 3 2-1 5 2 3-2 5-4 3-6 1-5-2z" fill="var(--leaf-canopy-3)"/>
+                <path d="M3 19 5 13l5-3 4 2 2-5 4 4-1 5 3 3-2 4-5 1-4-3-5 2z" fill="var(--leaf-canopy-2)"/>
+                <path d="M4 17 6 12l4-1 2-6 5 1 2 4-2 4-5 1-2 4z" fill="var(--leaf-canopy-1)"/>
+                <path d="M7 12 9 9l3 1 2-5 2 2-1 4-4 2-2 3z" fill="var(--leaf-light)" opacity=".8"/>
+                <path d="M5 25h5m4 3h4M3 20h2m12-8h2" fill="none" stroke="var(--leaf-shadow)" stroke-width="1.3" opacity=".7"/>
+              </g>
+              <g class="snow-cap" style="opacity: var(--snow-opacity);">
+                <path d="M3 18l2-3 2 1 2-3m7-3 2-2 2 3M4 23l-2 2 2 2m12-3 2 1 3-2M9 7l3-2 3 1" fill="none" stroke="var(--snow-top)" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M9 45h6v2H9z" fill="var(--snow-mid)"/>
+              </g>
+            </svg>`;
           } else if (species === "pine") {
-            // Pine — tall triangular evergreen
+            // Drooping boughs break the repeated triangle silhouette.
             return `<svg viewBox="0 0 24 48" xmlns="http://www.w3.org/2000/svg">
               <g class="bark">
-                <rect x="10" y="38" width="4" height="10" fill="var(--bark)"/>
-                <rect x="11" y="38" width="2" height="10" fill="var(--bark-light)"/>
+                <path d="M10 34h4v14h-4z" fill="var(--bark)"/>
+                <path d="M11 36h1v12h-1z" fill="var(--bark-light)"/>
               </g>
               <g class="canopy">
-                <!-- bottom skirt -->
-                <polygon points="2,38 22,38 12,28" fill="var(--leaf-pine-dark)"/>
-                <polygon points="3,37 21,37 12,29" fill="var(--leaf-pine-mid)"/>
-                <!-- middle layer -->
-                <polygon points="4,30 20,30 12,18" fill="var(--leaf-pine-dark)"/>
-                <polygon points="5,29 19,29 12,19" fill="var(--leaf-pine-mid)"/>
-                <!-- top layer -->
-                <polygon points="6,22 18,22 12,10" fill="var(--leaf-pine-dark)"/>
-                <polygon points="7,21 17,21 12,11" fill="var(--leaf-pine-light)"/>
-                <!-- crown -->
-                <polygon points="8,14 16,14 12,2" fill="var(--leaf-pine-mid)"/>
-                <polygon points="9,13 15,13 12,4" fill="var(--leaf-pine-light)"/>
-                <!-- tip highlight -->
-                <rect x="11" y="2" width="2" height="2" fill="var(--leaf-pine-light)"/>
-                </g>
-                <g class="snow-cap" style="opacity: var(--snow-opacity);">
-                  <polygon points="9,13 15,13 12,8" fill="var(--snow-top)"/>
-                  <polygon points="7,21 17,21 12,16" fill="var(--snow-top)"/>
-                  <polygon points="5,29 19,29 12,24" fill="var(--snow-top)"/>
-                  <polygon points="3,37 21,37 12,32" fill="var(--snow-top)"/>
-                  <rect x="5" y="37" width="14" height="1" fill="var(--snow-low)" opacity="0.7"/>
-                </g>
-              </svg>`;
+                <path d="M12 1 9 12l-4 9 2 1-5 12 5-1-4 8 9-2 8 2-3-8 5 1-5-12 2-1-4-9z" fill="var(--leaf-pine-dark)"/>
+                <path d="m12 3-2 10-3 8 4-2-5 12 5-3-5 10 6-2 4 2-3-11 5 3-5-12 3 2-3-8z" fill="var(--leaf-pine-mid)"/>
+                <path d="m12 4-1 9-2 5 3-2-3 10 3-3-2 9 3-5V8z" fill="var(--leaf-pine-light)" opacity=".9"/>
+                <path d="M4 34h5m7 0h4M6 25h4m5 0h4M9 16h6" fill="none" stroke="var(--leaf-pine-dark)" stroke-width="1.2" opacity=".75"/>
+              </g>
+              <g class="snow-cap" style="opacity: var(--snow-opacity);">
+                <path d="m12 2-2 9 2-2 2 2zm-3 14-2 5 4-2m4-3 2 5-4-2M6 26l-3 8 6-3m9-5 3 8-6-3M5 35l-2 6 9-2 8 2-2-6" fill="var(--snow-top)"/>
+                <path d="M5 41h14" stroke="var(--snow-low)" stroke-width="1"/>
+              </g>
+            </svg>`;
           } else {
-            // Fruit tree — round canopy dotted with little red fruits
+            // Orchard tree, lower and more open than the oak.
             return `<svg viewBox="0 0 24 48" xmlns="http://www.w3.org/2000/svg">
               <g class="bark">
-                <rect x="10" y="34" width="4" height="14" fill="var(--bark)"/>
-                <rect x="11" y="34" width="2" height="14" fill="var(--bark-light)"/>
-                <rect x="9"  y="40" width="2" height="2"  fill="#2a1408"/>
+                <path d="M10 48V31l2-6 2 6v17z" fill="var(--bark)"/>
+                <path d="M11 47V32l1-5v20z" fill="var(--bark-light)"/>
               </g>
               <g class="bare-branches" opacity="var(--bare-show)">
-                <rect x="11" y="18" width="2" height="16" fill="var(--bark)"/>
-                <rect x="7"  y="22" width="4" height="1"  fill="var(--bark)"/>
-                <rect x="13" y="20" width="4" height="1"  fill="var(--bark)"/>
-                <rect x="6"  y="16" width="2" height="1"  fill="var(--bark)"/>
-                <rect x="16" y="14" width="2" height="1"  fill="var(--bark)"/>
-                <rect x="9"  y="10" width="1" height="8"  fill="var(--bark)"/>
-                <rect x="14" y="8"  width="1" height="8"  fill="var(--bark)"/>
+                <path d="M12 33V15m0 14L5 21m7 5 7-8M8 24l1-12m7 10-1-13M5 21l-2-5m2 5-3 2m17-5 2-5m-2 5 3 2" fill="none" stroke="var(--bark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
               <g class="canopy" style="opacity: calc(1 - var(--bare-show));">
-                <rect x="4" y="22" width="16" height="10" fill="var(--leaf-canopy-3)"/>
-                <rect x="3" y="14" width="18" height="10" fill="var(--leaf-canopy-2)"/>
-                <rect x="5" y="8"  width="14" height="8"  fill="var(--leaf-canopy-1)"/>
-                <rect x="7" y="2"  width="10" height="8"  fill="var(--leaf-light)"/>
-                <rect x="6"  y="20" width="2" height="2" fill="var(--leaf-shadow)"/>
-                <rect x="16" y="20" width="2" height="2" fill="var(--leaf-shadow)"/>
-                <rect x="9"  y="12" width="2" height="2" fill="var(--leaf-shadow)"/>
+                <path d="M2 26 1 21l3-4-1-5 4-3 5 1 2-4 5 2 1 5 3 3-1 6 1 4-4 4-7-1-5 2z" fill="var(--leaf-canopy-3)"/>
+                <path d="M3 19 5 12l5-2 3 2 3-4 4 3-1 5 3 3-3 5-5-2-5 3-5-2z" fill="var(--leaf-canopy-2)"/>
+                <path d="M4 17 7 11l5 1 3-5 4 3-1 5-4 3-5-2-3 4z" fill="var(--leaf-canopy-1)"/>
+                <path d="M6 14 9 11l3 2 3-5 3 2-2 4-4 1-3 4z" fill="var(--leaf-light)" opacity=".7"/>
+                <path d="M4 24h4m7 2h4M18 17h3" fill="none" stroke="var(--leaf-shadow)" stroke-width="1.2"/>
               </g>
               <g class="fruits" style="opacity: var(--fruit-show);">
-                <rect x="6"  y="16" width="2" height="2" fill="#c84a35"/>
-                <rect x="14" y="14" width="2" height="2" fill="#c84a35"/>
-                <rect x="10" y="20" width="2" height="2" fill="#c84a35"/>
-                <rect x="17" y="18" width="2" height="2" fill="#c84a35"/>
-                <rect x="8"  y="22" width="2" height="2" fill="#c84a35"/>
-                <rect x="6"  y="16" width="1" height="1" fill="#f06850"/>
-                <rect x="14" y="14" width="1" height="1" fill="#f06850"/>
-                <rect x="10" y="20" width="1" height="1" fill="#f06850"/>
-                </g>
-                <g class="snow-cap" style="opacity: var(--snow-opacity);">
-                  <rect x="9"  y="10" width="2" height="1" fill="var(--snow-top)"/>
-                  <rect x="14" y="8"  width="2" height="1" fill="var(--snow-top)"/>
-                  <rect x="6"  y="15" width="4" height="1" fill="var(--snow-top)"/>
-                  <rect x="15" y="13" width="4" height="1" fill="var(--snow-top)"/>
-                  <rect x="6"  y="21" width="5" height="1" fill="var(--snow-top)"/>
-                  <rect x="13" y="19" width="5" height="1" fill="var(--snow-top)"/>
-                  <rect x="10" y="33" width="4" height="2" fill="var(--snow-mid)"/>
-                </g>
-              </svg>`;
+                <circle cx="7" cy="18" r="1.4" fill="#d85b3f"/>
+                <circle cx="16" cy="16" r="1.5" fill="#e66b43"/>
+                <circle cx="10" cy="23" r="1.3" fill="#c94339"/>
+                <circle cx="19" cy="22" r="1.2" fill="#c94339"/>
+                <circle cx="5" cy="26" r="1.2" fill="#e66b43"/>
+              </g>
+              <g class="snow-cap" style="opacity: var(--snow-opacity);">
+                <path d="M4 17l3-4 3 1m4-5 2-2 3 2M2 24l3 1 2-2m9-5 4-2 2 2M10 45h4" fill="none" stroke="var(--snow-top)" stroke-width="1.7" stroke-linecap="round"/>
+              </g>
+            </svg>`;
           }
         }
         function pickTreeSpecies() {
@@ -5395,6 +5334,13 @@
               <rect x="30" y="86" width="140" height="56" fill="#a8a098"/>
               <rect x="30" y="86" width="140" height="3" fill="#c8c0b0"/>
               <rect x="30" y="139" width="140" height="3" fill="#80786a"/>
+              <!-- quiet masonry courses and sunlit stone faces -->
+              <path d="M32 99h35m52 0h49M32 112h39m58 0h39M32 126h37m62 0h37" fill="none" stroke="#716c68" stroke-width=".8" opacity=".55"/>
+              <path d="M38 89v10m23 0v13m-16 0v14m15 0v13m83-50v10m-18 0v13m25 0v14m-18 0v13" fill="none" stroke="#f0e3cd" stroke-width=".8" opacity=".34"/>
+              <path d="M30 89h3v50h-3m137-50h3v50h-3" fill="#675f58" opacity=".58"/>
+              <path d="M33 90h2v48h-2m131-48h2v48h-2" fill="#dfd0b8" opacity=".5"/>
+              <path d="M67 92h3v47h-3m63-47h3v47h-3" fill="#696159" opacity=".48"/>
+              <path d="M70 92h2v47h-2m59-47h2v47h-2" fill="#e4d7c2" opacity=".48"/>
               <rect x="36" y="94" width="4" height="2" fill="#80786a"/>
               <rect x="52" y="94" width="4" height="2" fill="#80786a"/>
               <rect x="68" y="94" width="4" height="2" fill="#9a9088"/>
@@ -5418,6 +5364,8 @@
               <rect x="4" y="60" width="28" height="82" fill="#a8a098"/>
               <rect x="4" y="60" width="28" height="3" fill="#c8c0b0"/>
               <rect x="4" y="139" width="28" height="3" fill="#80786a"/>
+              <path d="M5 64h3v75H5m24-75h3v75h-3" fill="#6c655e" opacity=".55"/>
+              <path d="M8 83h20M8 104h20M8 129h20" fill="none" stroke="#e2d4bd" stroke-width=".8" opacity=".4"/>
               <rect x="8" y="68" width="4" height="2" fill="#80786a"/>
               <rect x="22" y="68" width="4" height="2" fill="#80786a"/>
               <rect x="10" y="78" width="4" height="2" fill="#80786a"/>
@@ -5437,6 +5385,8 @@
               <rect x="168" y="60" width="28" height="82" fill="#a8a098"/>
               <rect x="168" y="60" width="28" height="3" fill="#c8c0b0"/>
               <rect x="168" y="139" width="28" height="3" fill="#80786a"/>
+              <path d="M169 64h3v75h-3m24-75h3v75h-3" fill="#6c655e" opacity=".55"/>
+              <path d="M172 83h20m-20 21h20m-20 25h20" fill="none" stroke="#e2d4bd" stroke-width=".8" opacity=".4"/>
               <rect x="172" y="68" width="4" height="2" fill="#80786a"/>
               <rect x="186" y="68" width="4" height="2" fill="#80786a"/>
               <rect x="174" y="78" width="4" height="2" fill="#80786a"/>
@@ -5471,6 +5421,9 @@
               <rect x="128" y="100" width="2" height="6" fill="#1a1208"/>
               <rect x="82" y="100" width="36" height="42" fill="#3a2410"/>
               <rect x="82" y="100" width="36" height="3" fill="#5a3820"/>
+              <path d="M79 141v-37q0-21 21-21t21 21v37" fill="none" stroke="#6b6258" stroke-width="3"/>
+              <path d="M81 141v-37q0-19 19-19t19 19v37" fill="none" stroke="#e0d1b9" stroke-width="1.3"/>
+              <path d="M98 82h4v5h-4z" fill="#ead8bb"/>
               <rect x="82" y="100" width="3" height="3" fill="#5a4030"/>
               <rect x="115" y="100" width="3" height="3" fill="#5a4030"/>
               <rect x="86" y="104" width="1.5" height="36" fill="#7a5828"/>
@@ -5520,6 +5473,8 @@
               <polygon points="0,52 36,52 18,28" fill="#6a2818"/>
               <polygon points="3,52 33,52 18,32" fill="#8a3a25"/>
               <polygon points="6,52 30,52 18,36" fill="#a8442a"/>
+              <path d="M5 49h26m-22-5h18m-14-5h10" fill="none" stroke="#d07448" stroke-width=".9" opacity=".55"/>
+              <path d="M18 30 4 51h3l11-17z" fill="#f39a68" opacity=".26"/>
               <rect x="2" y="48" width="32" height="0.6" fill="#5a1810" opacity="0.6"/>
               <rect x="5" y="42" width="26" height="0.6" fill="#5a1810" opacity="0.6"/>
               <rect x="17.5" y="20" width="1" height="10" fill="#3a2410"/>
@@ -5535,6 +5490,8 @@
               <polygon points="164,52 200,52 182,28" fill="#6a2818"/>
               <polygon points="167,52 197,52 182,32" fill="#8a3a25"/>
               <polygon points="170,52 194,52 182,36" fill="#a8442a"/>
+              <path d="M169 49h26m-22-5h18m-14-5h10" fill="none" stroke="#d07448" stroke-width=".9" opacity=".55"/>
+              <path d="m182 30-14 21h3l11-17z" fill="#f39a68" opacity=".26"/>
               <rect x="166" y="48" width="32" height="0.6" fill="#5a1810" opacity="0.6"/>
               <rect x="169" y="42" width="26" height="0.6" fill="#5a1810" opacity="0.6"/>
               <rect x="181.5" y="20" width="1" height="10" fill="#3a2410"/>
@@ -5579,6 +5536,8 @@
               <polygon points="78,34 122,34 100,4" fill="#6a2818"/>
               <polygon points="81,34 119,34 100,9" fill="#8a3a25"/>
               <polygon points="84,34 116,34 100,14" fill="#a8442a"/>
+              <path d="M83 31h34m-29-6h24m-20-6h16m-11-6h6" fill="none" stroke="#d07448" stroke-width="1" opacity=".6"/>
+              <path d="M100 7 81 34h4l15-22z" fill="#f39a68" opacity=".3"/>
               <rect x="82" y="28" width="36" height="0.6" fill="#5a1810" opacity="0.6"/>
               <rect x="86" y="22" width="28" height="0.6" fill="#5a1810" opacity="0.6"/>
               <rect x="90" y="16" width="20" height="0.6" fill="#5a1810" opacity="0.6"/>

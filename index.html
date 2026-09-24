@@ -12,8 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="world.css?v=5" />
-    <link rel="stylesheet" href="site.css?v=5" />
+    <link rel="preload" as="image" href="assets/world/twilight-valley-illustrated.webp" type="image/webp" />
+    <link rel="stylesheet" href="world.css?v=6" />
+    <link rel="stylesheet" href="site.css?v=6" />
   </head>
   <body>
     <div class="world" data-weather="clear" data-time="day" data-season="summer" data-road="0" aria-hidden="true">
@@ -27,22 +28,28 @@
       <div class="dragons-layer"></div>
       <div class="mountains">
         <svg class="mountains-far" viewBox="0 0 1200 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="m-fill" d="M0,220 L0,140 L80,90 L150,120 L220,60 L300,100 L380,40 L460,95 L540,55 L620,110 L700,50 L780,105 L860,70 L940,30 L1020,95 L1100,60 L1180,110 L1200,90 L1200,220 Z"/>
-          <path class="mountains-snow-fill" d="M48,110 L80,90 L118,110 L102,110 L90,101 L80,96 L68,110 Z M184,78 L220,60 L258,80 L242,83 L229,72 L220,68 L208,82 Z M340,63 L380,40 L426,66 L404,69 L392,53 L380,48 L365,68 Z M510,70 L540,55 L572,76 L558,78 L548,64 L540,61 L530,76 Z M660,72 L700,50 L742,77 L724,80 L711,62 L700,58 L686,80 Z M918,55 L940,30 L986,64 L963,66 L952,45 L940,38 L930,63 Z M1072,76 L1100,60 L1138,82 L1120,84 L1110,70 L1100,66 L1088,82 Z"/>
-          <path class="mountains-snow" d="M0,140 L80,90 L150,120 L220,60 L300,100 L380,40 L460,95 L540,55 L620,110 L700,50 L780,105 L860,70 L940,30 L1020,95 L1100,60 L1180,110 L1200,90"/>
+          <path class="m-back" d="M0 220V140C80 138 122 100 177 110L243 69 301 104 363 70 423 116 490 88 546 120 626 65 694 105 766 72 835 112 904 52 963 106 1039 64 1119 113 1200 78V220Z"/>
+          <path class="m-fill" d="M0 220V155L68 132 120 143 191 78 229 100 280 49 327 92 403 28 455 89 502 70 564 127 623 66 684 111 749 82 812 135 890 48 948 102 1018 20 1080 103 1141 74 1200 119V220Z"/>
+          <path class="m-facet-light" d="M191 78 229 100 217 161 143 220Z M280 49 327 92 305 149 261 220Z M403 28 455 89 432 169 378 220Z M623 66 684 111 664 176 594 220Z M890 48 948 102 924 175 853 220Z M1018 20 1080 103 1054 172 987 220Z"/>
+          <path class="m-facet-shadow" d="M280 49 261 220 329 167Z M403 28 378 220 472 145Z M502 70 564 127 548 220Z M623 66 594 220 699 172Z M749 82 812 135 795 220Z M890 48 853 220 965 162Z M1018 20 987 220 1091 167Z M1141 74 1200 119 1200 220Z"/>
+          <path class="m-ridge-detail" d="M191 78 216 112 204 133M280 49 300 91 289 122M403 28 428 78 415 118M623 66 650 108 641 140M890 48 918 99 903 137M1018 20 1041 76 1031 118M1141 74 1162 115"/>
+          <path class="mountains-snow-fill" d="m170 101 21-23 27 24-17-7-10-12-9 17Zm87-28 23-24 26 29-17-13-9-9-11 17Zm115-15 31-30 32 39-18-15-14-14-12 16Zm226 32 25-24 26 29-17-13-9-9-9 18Zm269-18 23-24 28 34-17-15-11-10-11 17Zm120-24 31-28 35 40-22-16-13-13-14 20Z"/>
+          <path class="mountains-snow" d="M170 101 191 78 218 102M257 73 280 49 306 78M372 58 403 28 435 67M598 90 623 66 649 95M867 72 890 48 918 82M987 48 1018 20 1053 60"/>
         </svg>
       </div>
       <div class="hills">
         <svg class="hills-far" viewBox="0 0 1200 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="h-far-fill" d="M0,100 L0,60 Q70,30 140,55 Q210,80 280,50 Q350,25 420,55 Q490,80 560,55 Q630,30 700,55 Q770,80 840,55 Q910,30 980,55 Q1050,80 1120,55 Q1170,40 1200,60 L1200,100 Z"/>
-          <path class="hills-snow-fill hills-snow-fill-far" d="M0,60 Q70,30 140,55 Q210,80 280,50 Q350,25 420,55 Q490,80 560,55 Q630,30 700,55 Q770,80 840,55 Q910,30 980,55 Q1050,80 1120,55 Q1170,40 1200,60 L1200,75 Q1165,69 1120,70 Q1060,88 995,68 Q930,45 858,68 Q790,90 718,70 Q650,45 585,70 Q515,88 450,68 Q385,44 315,68 Q250,88 184,68 Q110,48 45,74 Q20,78 0,76 Z"/>
-          <path class="hills-snow-far" d="M0,60 Q70,30 140,55 Q210,80 280,50 Q350,25 420,55 Q490,80 560,55 Q630,30 700,55 Q770,80 840,55 Q910,30 980,55 Q1050,80 1120,55 Q1170,40 1200,60"/>
+          <path class="h-far-fill" d="M0 100V64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31V100Z"/>
+          <path class="h-far-highlight" d="M0 64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31-64 23-112-7-176-13-72-8-107 35-174 37-82 1-106-42-166-40-75 2-114 52-188 42-72-10-101-52-164-44-59 7-89 52-163 37C105 77 59 52 0 81Z"/>
+          <path class="hills-snow-fill hills-snow-fill-far" d="M0 64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31v10c-63 12-110-22-178-25-74-3-108 39-174 40-70 1-107-43-168-40-72 3-109 45-184 39-69-5-108-47-170-39-63 8-92 49-166 36C107 80 59 56 0 77Z"/>
+          <path class="hills-snow-far" d="M0 64C70 33 121 52 178 65c68 18 102-25 166-37 72-14 104 38 174 43 73 6 119-44 183-41 72 3 99 49 172 44 71-5 118-42 178-37 77 6 99 42 149 31"/>
         </svg>
         <div class="hill-trees-layer hill-trees-far"></div>
         <svg class="hills-near" viewBox="0 0 1200 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="h-near-fill" d="M0,80 L0,40 Q100,5 200,35 Q310,60 410,30 Q510,5 600,30 Q700,60 810,30 Q920,5 1020,35 Q1110,60 1200,40 L1200,80 Z"/>
-          <path class="hills-snow-fill hills-snow-fill-near" d="M0,40 Q100,5 200,35 Q310,60 410,30 Q510,5 600,30 Q700,60 810,30 Q920,5 1020,35 Q1110,60 1200,40 L1200,60 Q1120,74 1035,52 Q930,22 825,52 Q715,76 610,49 Q505,24 410,52 Q305,74 205,56 Q102,24 0,58 Z"/>
-          <path class="hills-snow-near" d="M0,40 Q100,5 200,35 Q310,60 410,30 Q510,5 600,30 Q700,60 810,30 Q920,5 1020,35 Q1110,60 1200,40"/>
+          <path class="h-near-fill" d="M0 80V44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13V80Z"/>
+          <path class="h-near-highlight" d="M0 44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13v17c-76 30-139 40-222 8-68-27-125-39-194-9-76 33-137 42-198 14-66-29-120-40-187-18-75 25-139 49-211 20C128 43 78 34 0 60Z"/>
+          <path class="hills-snow-fill hills-snow-fill-near" d="M0 44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13v12c-79 29-140 35-223 5-66-25-123-36-191-8-75 31-135 39-195 12-67-28-120-36-185-15-77 25-138 43-210 14C130 37 79 25 0 55Z"/>
+          <path class="hills-snow-near" d="M0 44C78 10 129 18 198 46c78 32 138 5 214-20 76-24 124-10 187 19 58 26 117 15 184-15 74-34 127-17 193 14 68 32 133 19 224-13"/>
         </svg>
         <div class="hill-trees-layer hill-trees-near"></div>
       </div>
@@ -92,11 +99,12 @@
 
     <nav class="world-portals" id="world-portals" aria-label="Discover Dav's projects in the world" aria-hidden="true" inert>
       <button class="world-portal" type="button" data-project="outpost" style="--portal-x: 680px; --portal-y: 210px" aria-label="Discover Idle Outpost"><small>01 / DISCOVER</small><strong>Idle Outpost</strong></button>
-      <button class="world-portal" type="button" data-project="sandship" style="--portal-x: 950px; --portal-y: 290px" aria-label="Discover Sandship"><small>02 / DISCOVER</small><strong>Sandship</strong></button>
+      <button class="world-portal" type="button" data-project="sandship" style="--portal-x: 950px; --portal-y: 365px" aria-label="Discover Sandship"><small>02 / DISCOVER</small><strong>Sandship</strong></button>
       <button class="world-portal" type="button" data-project="battle" style="--portal-x: 1230px; --portal-y: 215px" aria-label="Discover Battle Cards"><small>03 / DISCOVER</small><strong>Battle Cards</strong></button>
       <button class="world-portal" type="button" data-project="wizard" style="--portal-x: 1500px; --portal-y: 265px" aria-label="Discover Idle Wizard"><small>04 / PLAY NOW</small><strong>Idle Wizard</strong></button>
       <button class="world-portal" type="button" data-project="shmixel" style="--portal-x: 1780px; --portal-y: 220px" aria-label="Discover Shmixel"><small>05 / CREATE</small><strong>Shmixel</strong></button>
     </nav>
+    <div class="world-guide" aria-hidden="true"><span>THE VALLEY IS YOURS</span><strong>Drag to roam <b>← →</b></strong></div>
     <section class="discovery-panel" id="discovery-panel" role="dialog" aria-modal="false" aria-labelledby="discovery-title" hidden>
       <button class="discovery-close" id="discovery-close" type="button" aria-label="Close project details">×</button>
       <img id="discovery-image" alt="" width="1400" height="788" />
@@ -208,7 +216,7 @@
       <footer class="site-footer"><span>© <span id="footer-year">2026</span> DAV STEPANYAN</span><span>MADE WITH CURIOSITY & A FEW TOO MANY SIMULATION LOOPS</span><a href="#top">BACK TO TOP ↑</a></footer>
     </div>
 
-    <script src="world.js?v=5" defer></script>
-    <script src="site-explore.js?v=5" defer></script>
+    <script src="world.js?v=6" defer></script>
+    <script src="site-explore.js?v=6" defer></script>
   </body>
 </html>
