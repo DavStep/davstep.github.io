@@ -17,13 +17,15 @@ export const riverHalfWidth=(x:number)=>4.35+.42*Math.sin(x*.037)+.18*Math.sin(x
 export const riverSurfaceHeight=(x:number)=>baseTerrainHeight(x,riverCenter(x))-.78;
 export const PONDS=([{x:-82,z:-27,r:8},{x:83,z:-34,r:6.5}] as const);
 const smoothstep=(min:number,max:number,value:number)=>{const t=THREE.MathUtils.clamp((value-min)/(max-min),0,1);return t*t*(3-2*t);};
-export function terrainHeight(x:number,z:number):number{
+function terrainHeightAtStreamProgress(x:number,z:number,progress:number):number{
   const riverDepth=1.5*(1-smoothstep(riverHalfWidth(x)-.3,riverHalfWidth(x)+2.5,Math.abs(z-riverCenter(x))));
-  const branchDepth=1.65*(1-smoothstep(3,7,millStreamDistance(x,z)));
+  const branchDepth=progress*1.65*(1-smoothstep(3,7,millStreamDistance(x,z)));
   let pondDepth=0;
   for(const p of PONDS)pondDepth=Math.max(pondDepth,1.35*(1-smoothstep(p.r-.35,p.r+2.1,Math.hypot(x-p.x,z-p.z))));
   return baseTerrainHeight(x,z)-Math.max(riverDepth,pondDepth,branchDepth);
 }
+export const terrainHeight=(x:number,z:number):number=>terrainHeightAtStreamProgress(x,z,1);
+export const naturalTerrainHeight=(x:number,z:number):number=>terrainHeightAtStreamProgress(x,z,0);
 export function isWater(x:number,z:number,clearance=0):boolean{
   return Math.abs(z-riverCenter(x))<riverHalfWidth(x)+clearance||PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r+clearance);
 }
@@ -60,18 +62,38 @@ export class Environment {
   private readonly waterLight={value:1};
   private readonly reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   private currentSeason='';
-  constructor(scene:THREE.Scene,private mobile:boolean){
+  private terrainGeometry:THREE.PlaneGeometry|null=null;
+  private townSquare:THREE.Mesh|null=null;
+  private streamVertices:{index:number;natural:number;carved:number}[]=[];
+  private streamStep=-1;
+  constructor(scene:THREE.Scene,private mobile:boolean,private gameMode=false){
     this.buildTerrain();this.buildWater();this.buildMountains();this.buildForest();this.buildGrass();
     scene.add(this.group);
+  }
+  createRiverMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight);}
+  setRoadCenterVisible(visible:boolean):void{if(this.gameMode&&this.townSquare)this.townSquare.visible=visible;}
+  setStreamProgress(progress:number):void{
+    if(!this.gameMode||!this.terrainGeometry)return;
+    const step=Math.round(THREE.MathUtils.clamp(progress,0,1)*16);
+    if(step===this.streamStep)return;
+    this.streamStep=step;
+    const positions=this.terrainGeometry.getAttribute('position');
+    for(const vertex of this.streamVertices)positions.setY(vertex.index,THREE.MathUtils.lerp(vertex.natural,vertex.carved,step/16));
+    positions.needsUpdate=true;
+    this.terrainGeometry.computeVertexNormals();
+    this.terrainGeometry.getAttribute('normal').needsUpdate=true;
   }
   private buildTerrain(){
     const divisions=this.mobile?144:200;
     const g=new THREE.PlaneGeometry(700,700,divisions,divisions);g.rotateX(-Math.PI/2);
+    this.terrainGeometry=g;
     const positions=g.getAttribute('position'),colors:number[]=[];
     const low=new THREE.Color(0x789667),high=new THREE.Color(0x678566),sand=new THREE.Color(0x91a378),shoreColor=new THREE.Color(0x615f4e);
     for(let i=0;i<positions.count;i++){
       const x=positions.getX(i),z=positions.getZ(i),r=Math.hypot(x,z);
-      positions.setY(i,terrainHeight(x,z));
+      const carved=terrainHeight(x,z),natural=this.gameMode?naturalTerrainHeight(x,z):carved;
+      positions.setY(i,natural);
+      if(this.gameMode&&natural-carved>.001)this.streamVertices.push({index:i,natural,carved});
       const c=low.clone().lerp(high,THREE.MathUtils.smoothstep(r,70,220)*.8).lerp(sand,rand(i*741)*.13);
       if(isWater(x,z,2.5))c.lerp(shoreColor,.2);
       colors.push(c.r,c.g,c.b);
@@ -79,7 +101,7 @@ export class Environment {
     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.computeVertexNormals();
     const terrain=new THREE.Mesh(g,MAT.terrain);
     terrain.receiveShadow=true;this.group.add(terrain);
-    const square=new THREE.Mesh(new THREE.CylinderGeometry(INFRASTRUCTURE.squareRadius,INFRASTRUCTURE.squareRadius,.08,32),MAT.path);square.position.y=.55;square.receiveShadow=true;this.group.add(square);
+    const square=new THREE.Mesh(new THREE.CylinderGeometry(INFRASTRUCTURE.squareRadius,INFRASTRUCTURE.squareRadius,.08,32),MAT.path);square.position.y=.55;square.receiveShadow=true;square.visible=!this.gameMode;this.townSquare=square;this.group.add(square);
   }
   private buildWater(){
     const water:number[]=[],waterUv:number[]=[],banks:number[]=[];

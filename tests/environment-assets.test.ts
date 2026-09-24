@@ -35,6 +35,22 @@ test('authored forest and roads reuse source geometry through rebuilds', async()
   assert.ok(town.roads.children.some(o=>o instanceof THREE.InstancedMesh&&NATURE_SHARED_GEOMETRIES.has(o.geometry)));
 });
 
+test('game roads have no geometry before the Roads choice',async()=>{
+  Object.defineProperty(globalThis,'matchMedia',{configurable:true,value:()=>({matches:false})});
+  const [{TownScene},{snapshotForGame},{evaluate}]=await Promise.all([
+    import('../src/town/scene'),import('../src/town/game-snapshot'),import('../src/town/game'),
+  ]);
+  const town=Object.assign(Object.create(TownScene.prototype),{
+    mobile:true,gameMode:true,roads:new THREE.Group(),
+  }) as {roads:THREE.Group;buildRoads:(snapshot:ReturnType<typeof snapshotForGame>)=>void};
+  town.buildRoads(snapshotForGame(evaluate([]).levels));
+  assert.equal(town.roads.children.length,0);
+  town.buildRoads(snapshotForGame(evaluate(['settlers']).levels));
+  assert.equal(town.roads.children.length,0);
+  town.buildRoads(snapshotForGame(evaluate(['roads']).levels));
+  assert.ok(town.roads.children.some(child=>child.name==='Worn_dirt_lanes'));
+});
+
 test('building growth rebuilds retain authored buffers and replace merged meshes', async()=>{
   Object.defineProperty(globalThis,'matchMedia',{configurable:true,value:()=>({matches:false})});
   const [{TownScene},{townAt,createSave},...libraries]=await Promise.all([

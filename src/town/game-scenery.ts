@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { Levels } from './game';
 import type { Idea } from './game';
 import { millStreamDistance, millStreamPoint } from './game-path';
-import { riverSurfaceHeight, terrainHeight } from './environment';
+import { Environment, naturalTerrainHeight, riverSurfaceHeight, terrainHeight } from './environment';
 
 const hash = (n: number) => {
   let x = n | 0; x ^= x >>> 16; x = Math.imul(x, 0x7feb352d);
@@ -11,22 +11,27 @@ const hash = (n: number) => {
 const random = (n: number) => hash(n) / 0xffffffff;
 export const streamSurfaceHeight = (t: number): number => riverSurfaceHeight(30) * (1 - t) - .22 * t;
 
-function ribbon(width: number, water: boolean): THREE.BufferGeometry {
-  const positions: number[] = [];
+const streamHalfWidth=(t:number)=>3.1-.8*t;
+function streamEdge(t:number,side:number,bank=false):[number,number,number]{
+  const p=millStreamPoint(t),a=millStreamPoint(Math.max(0,t-.002)),b=millStreamPoint(Math.min(1,t+.002));
+  const dx=b.x-a.x,dz=b.z-a.z,length=Math.hypot(dx,dz)||1;
+  const offset=(streamHalfWidth(t)+(bank?2.3:0))*side;
+  const x=p.x+dz/length*offset,z=p.z-dx/length*offset;
+  return [x,bank?naturalTerrainHeight(x,z)+.04:streamSurfaceHeight(t),z];
+}
+function channelRibbon(bankSide=0): THREE.BufferGeometry {
+  const positions: number[] = [],uvs:number[]=[];
   const steps = 72;
-  const edge = (t: number, side: number): [number, number, number] => {
-    const p = millStreamPoint(t), a = millStreamPoint(Math.max(0, t - .002)), b = millStreamPoint(Math.min(1, t + .002));
-    const dx = b.x - a.x, dz = b.z - a.z, length = Math.hypot(dx, dz) || 1;
-    const x = p.x + side * dz / length * width / 2, z = p.z - side * dx / length * width / 2;
-    return [x, water ? streamSurfaceHeight(t) : terrainHeight(x, z) + .035, z];
-  };
   for (let index = 0; index < steps; index++) {
     const t0 = index / steps, t1 = (index + 1) / steps;
-    const a = edge(t0, -1), b = edge(t0, 1), c = edge(t1, -1), d = edge(t1, 1);
+    const a=streamEdge(t0,bankSide||-1),b=streamEdge(t0,bankSide||1,Boolean(bankSide));
+    const c=streamEdge(t1,bankSide||-1),d=streamEdge(t1,bankSide||1,Boolean(bankSide));
     for (const point of [a, b, c, b, d, c]) positions.push(...point);
+    if(!bankSide)for(const [side,t] of [[-1,t0],[1,t0],[-1,t1],[1,t0],[1,t1],[-1,t1]])uvs.push(side,t*36);
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  if(!bankSide)geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
   geometry.computeVertexNormals();
   return geometry;
 }
@@ -38,6 +43,7 @@ const harvestColor = new THREE.Color(0xe7bd5b);
 export class GameScenery {
   readonly group = new THREE.Group();
   private readonly water: THREE.Mesh;
+  private readonly banks: THREE.Mesh[]=[];
   private readonly wheat: THREE.InstancedMesh;
   private readonly plants: WheatPlant[] = [];
   private readonly rotor = new THREE.Group();
@@ -62,15 +68,15 @@ export class GameScenery {
   private beat: { started: number; failed: boolean } | null = null;
   private reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-  constructor(scene: THREE.Scene, mobile: boolean) {
-    const bed = new THREE.Mesh(ribbon(6.5, false), new THREE.MeshStandardMaterial({ color: 0x756a53, roughness: 1, side: THREE.DoubleSide }));
-    bed.receiveShadow = true;
-    this.water = new THREE.Mesh(ribbon(4.2, true), new THREE.MeshStandardMaterial({
-      color: 0x54a9a5, emissive: 0x07343a, roughness: .28, metalness: .08,
-      transparent: true, opacity: .88, side: THREE.DoubleSide,
-    }));
+  constructor(scene: THREE.Scene, mobile: boolean,private readonly environment:Environment) {
+    const bankMaterial=new THREE.MeshStandardMaterial({color:0x827e68,roughness:1,side:THREE.DoubleSide});
+    for(const side of [-1,1]){
+      const bank=new THREE.Mesh(channelRibbon(side),bankMaterial);
+      bank.geometry.setDrawRange(0,0);bank.receiveShadow=true;this.banks.push(bank);this.group.add(bank);
+    }
+    this.water = new THREE.Mesh(channelRibbon(),environment.createRiverMaterial());
     this.water.geometry.setDrawRange(0, 0);
-    this.group.add(bed, this.water);
+    this.group.add(this.water);
 
     const plantGeometry = new THREE.Group();
     const stalk = new THREE.Mesh(new THREE.CylinderGeometry(.025, .045, .9, 4), new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: false, roughness: 1 }));
@@ -240,6 +246,8 @@ export class GameScenery {
     this.bridge.children.forEach((plank, i) => { plank.position.y = -1.2 * (1 - THREE.MathUtils.clamp(this.bridgeGrowth * 1.6 - i * .075, 0, 1)); });
     const waterTriangles = Math.floor(this.waterFill * 72);
     this.water.geometry.setDrawRange(0, waterTriangles * 6);
+    for(const bank of this.banks)bank.geometry.setDrawRange(0,waterTriangles*6);
+    this.environment.setStreamProgress(this.waterFill);
     this.wheat.visible = this.wheatGrowth > .01;
     if (this.wheat.visible) {
       for (let i = 0; i < this.plants.length; i++) {

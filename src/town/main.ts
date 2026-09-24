@@ -351,7 +351,7 @@ function positionLabels(){
     const x=(projected.x*.5+.5)*innerWidth,y=(-projected.y*.5+.5)*innerHeight;
     const behindIntro=introRect&&x>introRect.left-80&&x<introRect.right+80&&y>introRect.top-32&&y<introRect.bottom+32;
     const nearby=!roaming||Math.hypot(roam.position.x-p.x,roam.position.z-p.z)<42;
-    const visible=nearby&&!behindIntro&&projected.z<1&&projected.z>-1&&projected.x>-(town.mobile?.86:1.02)&&projected.x<(town.mobile?.86:1.02)&&projected.y>-1.08&&projected.y<1.08;
+    const visible=p.stage>0&&nearby&&!behindIntro&&projected.z<1&&projected.z>-1&&projected.x>-(town.mobile?.86:1.02)&&projected.x<(town.mobile?.86:1.02)&&projected.y>-1.08&&projected.y<1.08;
     button.style.display=visible?'flex':'none';button.style.left=`${x}px`;button.style.top=`${y}px`;
   }
 }
@@ -399,7 +399,7 @@ function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!tow
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.25);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);scenery=new GameScenery(town.scene,town.mobile);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
+  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.25);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,gameSave,gameState:()=>gameState,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();positionLabels();});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;labels.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}

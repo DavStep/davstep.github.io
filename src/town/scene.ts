@@ -256,7 +256,7 @@ export class TownScene {
     this.sun.shadow.bias=-.00008;
     this.sun.shadow.normalBias=.035;this.sun.shadow.radius=this.mobile?1.25:2.5;
     this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls);
-    this.environment=new Environment(this.scene,this.mobile);
+    this.environment=new Environment(this.scene,this.mobile,this.gameMode);
     this.sky=new TownSky(this.scene);
     this.rain=new Rain(this.scene,this.mobile);
     this.contactShadows=new ContactShadows(this.scene,terrainHeight);
@@ -313,7 +313,7 @@ export class TownScene {
       const angle=i*Math.PI*2/INFRASTRUCTURE.lamps.count,x=Math.cos(angle)*INFRASTRUCTURE.lamps.radius,z=Math.sin(angle)*INFRASTRUCTURE.lamps.radius;
       return {x,y:terrainHeight(x,z),z};
     });
-    placeLanterns(this.land,lamps,this.mobile);
+    if(!this.gameMode)placeLanterns(this.land,lamps,this.mobile);
   }
 
   private clear(group:THREE.Group){const dispose=(object:THREE.Object3D)=>{if(object instanceof THREE.InstancedMesh)object.dispose();if(object instanceof THREE.Mesh&&object.geometry!==boxGeometry&&object.geometry!==plainBoxGeometry&&object.geometry!==sphereGeometry&&object.geometry!==coneGeometry&&!COTTAGE_SHARED_GEOMETRIES.has(object.geometry)&&!CASTLE_SHARED_GEOMETRIES.has(object.geometry)&&!CIVIC_SHARED_GEOMETRIES.has(object.geometry)&&!NATURE_SHARED_GEOMETRIES.has(object.geometry)&&!PROPS_SHARED_GEOMETRIES.has(object.geometry)&&!AUTHORED_LANDMARK_SHARED_GEOMETRIES.has(object.geometry))object.geometry.dispose();for(const child of object.children)dispose(child);};for(const child of [...group.children]){group.remove(child);dispose(child);}}
@@ -389,14 +389,16 @@ export class TownScene {
   }
   private buildRoads(snapshot:TownSnapshot){
     this.clear(this.roads);
+    const roadTier=this.gameMode?snapshot.roads===0?0:snapshot.roads<20?1:snapshot.roads<INFRASTRUCTURE.road.ringSegments?2:3:3;
+    if(roadTier===0)return;
     const dirt:THREE.BufferGeometry[]=[];
-    const reach=INFRASTRUCTURE.road.spokeLength;
+    const reach=roadTier===1?INFRASTRUCTURE.road.ringRadius:INFRASTRUCTURE.road.spokeLength;
     for(const [x,z] of [[-reach,0],[reach,0],[0,-reach],[0,reach]])
-      dirt.push(pathRibbon(linePoints({x:0,z:0},{x,z}),2.8));
-    dirt.push(pathRibbon(ringPoints(INFRASTRUCTURE.road.ringRadius,INFRASTRUCTURE.road.ringSegments),2.35));
+      dirt.push(pathRibbon(linePoints({x:0,z:0},{x,z}),roadTier===1?1.75:2.8));
+    if(roadTier>=2)dirt.push(pathRibbon(ringPoints(INFRASTRUCTURE.road.ringRadius,INFRASTRUCTURE.road.ringSegments,this.gameMode?snapshot.roads/INFRASTRUCTURE.road.ringSegments:1),2.35));
     if(snapshot.outerRoad>0)dirt.push(pathRibbon(ringPoints(INFRASTRUCTURE.road.outerRingRadius,INFRASTRUCTURE.road.outerRingSegments,snapshot.outerRoad/INFRASTRUCTURE.road.outerRingSegments),2.15));
     const accessPaths:{x1:number;z1:number;x2:number;z2:number}[]=[];
-    for(const plot of snapshot.plots){
+    for(const plot of roadTier>=2?snapshot.plots:[]){
       if(plot.stage===0)continue;
       const access=accessPathFor(plot);if(!access)continue;
       accessPaths.push(access);
@@ -412,13 +414,14 @@ export class TownScene {
     // Pale irregular slabs collect into loose courses, with visible earth joints.
     for(let axis=0;axis<2;axis++)for(const sign of [-1,1])for(let j=8;j<reach;j+=this.mobile?1.7:1.16){
       for(let lane=-1;lane<=1;lane++){
+        if(roadTier===1&&lane!==0)continue;
         if(this.mobile&&lane===0)continue;
         const seed=Math.round(j*71)+axis*301+lane*79+sign*19;
         const along=sign*(j+(lane%2)*.35),across=lane*.66+((hash(seed)%15)-7)/100;
         stone(axis?across:along,axis?along:across,seed,.56);
       }
     }
-    for(let segment=0;segment<snapshot.roads;segment++)for(let j=0;j<(this.mobile?3:5);j++)for(let lane=-1;lane<=1;lane++){
+    for(let segment=0;segment<(roadTier>=2?snapshot.roads:0);segment++)for(let j=0;j<(this.mobile?3:5);j++)for(let lane=-1;lane<=1;lane++){
       const rows=this.mobile?3:5,a=(segment+(j+.5)/rows)*Math.PI*2/INFRASTRUCTURE.road.ringSegments;
       const r=INFRASTRUCTURE.road.ringRadius+lane*.64;
       stone(Math.cos(a)*r,Math.sin(a)*r,segment*197+j*47+lane*23,.56);
@@ -431,6 +434,13 @@ export class TownScene {
       }
     }
     addNatureInstances(this.roads,paving,this.mobile,false);
+    if(this.gameMode&&roadTier>=2){
+      const lamps=Array.from({length:INFRASTRUCTURE.lamps.count},(_,i)=>{
+        const angle=i*Math.PI*2/INFRASTRUCTURE.lamps.count,x=Math.cos(angle)*INFRASTRUCTURE.lamps.radius,z=Math.sin(angle)*INFRASTRUCTURE.lamps.radius;
+        return {x,y:terrainHeight(x,z),z};
+      });
+      placeLanterns(this.roads,lamps,this.mobile);
+    }
   }
   private buildWalls(snapshot:TownSnapshot){
     this.clear(this.walls);
@@ -503,6 +513,7 @@ export class TownScene {
     }
   }
   update(snapshot:TownSnapshot){
+    this.environment.setRoadCenterVisible(snapshot.roads>0);
     const structureSignature=snapshot.plots.map(p=>`${p.stage}${p.renovation}${p.complexId?'c':''}`).join('');
     const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}`;
     if(structureSignature!==this.structureSignature){this.structureSignature=structureSignature;this.buildStructures(snapshot.plots);}

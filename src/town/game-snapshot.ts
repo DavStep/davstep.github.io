@@ -24,9 +24,9 @@ function tierFor(plot: Plot, levels: Levels): number | null {
 export function snapshotForGame(levels: Levels, elapsed = 0): TownSnapshot {
   const plots = PLOTS.map(plot => {
     const tier = tierFor(plot, levels);
-    // Existing authored models contain six construction stages. The puzzle
-    // chooses three distinct silhouettes and retains a readable starting site.
-    const stage = tier === null ? 0 : [1, 2, 4, 6][tier];
+    // An unchosen idea has no visible construction site. Each later level
+    // reveals a distinct authored silhouette.
+    const stage = tier === null ? 0 : [0, 2, 4, 6][tier];
     return { ...plot, stage, renovation: 0 };
   });
   const wallSegments = INFRASTRUCTURE.wall.segments;
@@ -36,7 +36,7 @@ export function snapshotForGame(levels: Levels, elapsed = 0): TownSnapshot {
     innerWood: levels.roads >= 2 ? wallSegments : 0,
     innerStone: levels.roads === 3 ? wallSegments : 0,
     outerWood: 0,
-    roads: levels.roads === 3 ? INFRASTRUCTURE.road.ringSegments : levels.roads >= 2 ? 20 : 0,
+    roads: levels.roads === 3 ? INFRASTRUCTURE.road.ringSegments : levels.roads === 2 ? 20 : levels.roads === 1 ? 8 : 0,
     outerRoad: 0,
     phase: Math.min(4, Math.floor(Object.values(levels).reduce((sum, level) => sum + level, 0) / 5)),
     season: 'summer',

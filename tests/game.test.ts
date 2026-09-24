@@ -4,7 +4,7 @@ import { IDEAS, SECRET_ORDER, chooseIdea, evaluate, newGameSave, parseGameSave, 
 import { snapshotForGame } from '../src/town/game-snapshot';
 import { millStreamPoint } from '../src/town/game-path';
 import { streamSurfaceHeight } from '../src/town/game-scenery';
-import { riverCenter, riverHalfWidth, riverSurfaceHeight, terrainHeight } from '../src/town/environment';
+import { naturalTerrainHeight, riverCenter, riverHalfWidth, riverSurfaceHeight, terrainHeight } from '../src/town/environment';
 
 function* orders(items: readonly (typeof IDEAS)[number][]): Generator<(typeof IDEAS)[number][]> {
   if (items.length === 0) { yield []; return; }
@@ -39,6 +39,19 @@ test('new ideas upgrade earlier buildings and their surroundings', () => {
   assert.equal(snapshot.plots.find(plot => plot.id === 'home-12')?.stage, 0);
 });
 
+test('the opening landscape has no sites or roads until those ideas arrive', () => {
+  const empty = snapshotForGame(evaluate([]).levels);
+  assert.ok(empty.plots.every(plot => plot.stage === 0));
+  assert.equal(empty.roads, 0);
+  assert.equal(empty.residents, 0);
+  const homes = snapshotForGame(evaluate(['settlers']).levels);
+  assert.ok(homes.plots.some(plot => plot.kind === 'home' && plot.stage > 0));
+  assert.equal(homes.roads, 0);
+  const firstRoad = snapshotForGame(evaluate(['roads']).levels);
+  assert.ok(firstRoad.roads > 0);
+  assert.ok(firstRoad.roads < snapshotForGame(evaluate(IDEAS.slice(0, 4)).levels).roads);
+});
+
 test('save resumes, rejects corrupt choices, and preserves discoveries on restart', () => {
   const save = newGameSave();
   chooseIdea(save, 'settlers');
@@ -60,4 +73,9 @@ test('upgraded stream starts inside the main river and stays above its carved be
     const point = millStreamPoint(t);
     assert.ok(streamSurfaceHeight(t) > terrainHeight(point.x, point.z) + .25, `stream submerged at ${t}`);
   }
+});
+
+test('the mill channel is uncarved before its progression begins', () => {
+  const point = millStreamPoint(.62);
+  assert.ok(naturalTerrainHeight(point.x, point.z) > terrainHeight(point.x, point.z) + .8);
 });
