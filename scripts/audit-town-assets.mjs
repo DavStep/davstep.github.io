@@ -62,7 +62,7 @@ for (const plot of PLOTS) {
 const environment = new Environment(new THREE.Scene(), mobile);
 const decor = Object.assign(Object.create(TownScene.prototype), { mobile, land: new THREE.Group(), treeObstacles: [] });
 decor.createDecor();
-const snapshot = townAt(createSave(0, 12345), 50 * 60000);
+const snapshot = townAt(createSave(0), 50 * 60000);
 const contactsScene = new THREE.Scene();
 const contactShadows = new ContactShadows(contactsScene, terrainHeight);
 contactShadows.setTrees([...environment.trees, ...decor.treeObstacles]);
@@ -89,7 +89,7 @@ for (const [name, original] of generatedFiles) {
 const report = {
   scope: 'Living Town authored and procedural assets; source geometry only, no shader displacement, GPU, shadow-pass, culling, or artistic validation',
   mobile, sourceHashes: hashes, plots: PLOTS.length, assets,
-  matureScene: { ageMinutes: 50, seed: 12345, structures: inspect(town.structures), roads: inspect(town.roads), walls: inspect(town.walls), environment: inspect(environment.group), decor: inspect(decor.land), residents: inspect(residents.group), contactShadows: inspect(contactsScene), forestTrees: environment.trees.length, townTrees: decor.treeObstacles.length },
+  matureScene: { ageMinutes: 50, structures: inspect(town.structures), roads: inspect(town.roads), walls: inspect(town.walls), environment: inspect(environment.group), decor: inspect(decor.land), residents: inspect(residents.group), contactShadows: inspect(contactsScene), forestTrees: environment.trees.length, townTrees: decor.treeObstacles.length },
   renderSupport: { sky: inspect(skyScene), rainWhenEnabled: inspect(rainScene) },
 };
 const output = new URL(`docs/art-direction/geometry-${process.argv.includes('--production') ? 'production' : 'audit'}-${mobile ? 'mobile' : 'desktop'}.json`, root);

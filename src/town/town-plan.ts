@@ -2,8 +2,7 @@ import type { Plot } from './model';
 
 const MINUTE = 60_000;
 
-// The settlement is a designed map. A save seed may shift construction by a few
-// seconds, but it never changes a site's position, purpose, or road access.
+// The settlement is a designed map with fixed sites and construction times.
 const projectPlots: Plot[] = [
   { id: 'project-outpost', kind: 'project', project: 'outpost', x: -22, z: 7, start: 0, step: 4 * MINUTE, variant: 0 },
   { id: 'project-sandship', kind: 'project', project: 'sandship', x: 22, z: 9, start: 0, step: 4.2 * MINUTE, variant: 1 },

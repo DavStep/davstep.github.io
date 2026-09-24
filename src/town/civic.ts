@@ -42,7 +42,7 @@ export const CIVIC_SHARED_GEOMETRIES: ReadonlySet<THREE.BufferGeometry> = new Se
   parts.map(part => part.geometry),
 );
 
-export function civicBuilding(plot: PlotState, mobile: boolean): THREE.Group {
+export function civicBuilding(plot: PlotState, mobile: boolean, animateMillSails = false): THREE.Group {
   const group = new THREE.Group();
   group.position.set(plot.x, .48, plot.z);
   if (plot.stage <= 0) return group;
@@ -51,6 +51,7 @@ export function civicBuilding(plot: PlotState, mobile: boolean): THREE.Group {
   for (const part of parts) {
     if (part.family !== family || part.lod !== lod
       || plot.stage < part.minStage || plot.stage > part.maxStage) continue;
+    if (animateMillSails && family === 'mill' && part.name.includes('_mill_sails_')) continue;
     const mesh = new THREE.Mesh(part.geometry, part.materialObject);
     mesh.name = part.name;
     mesh.castShadow = true;

@@ -25,7 +25,7 @@ test('authored forest and roads reuse source geometry through rebuilds', async()
   };
   let cachedDisposed=false;
   for(const geometry of NATURE_SHARED_GEOMETRIES)geometry.addEventListener('dispose',()=>{cachedDisposed=true;});
-  const save=createSave(0,12345);
+  const save=createSave(0);
   town.buildRoads(townAt(save,30*60000));
   const oldRoad=(town.roads.children.find(o=>o.name==='Worn_dirt_lanes') as THREE.Mesh).geometry;
   let oldDisposed=false;oldRoad.addEventListener('dispose',()=>{oldDisposed=true;});
@@ -50,7 +50,7 @@ test('building growth rebuilds retain authored buffers and replace merged meshes
   const town=Object.assign(Object.create(TownScene.prototype),{
     mobile:false,structures:new THREE.Group(),pickBoxes:new Map(),contactShadows:{setBuildings(){}},
   }) as {structures:THREE.Group;pickBoxes:Map<string,THREE.Box3>;buildStructures:(plots:ReturnType<typeof townAt>['plots'])=>void};
-  const save=createSave(0,12345);
+  const save=createSave(0);
   town.buildStructures(townAt(save,20*60000).plots);
   const previous=town.structures.children.map(child=>(child as THREE.Mesh).geometry);
   let disposed=0;for(const geometry of previous)geometry.addEventListener('dispose',()=>{disposed++;});

@@ -31,7 +31,7 @@ const { MAT } = await import(new URL('src/town/materials.ts', root));
 const materialNames = new Map(Object.entries(MAT).map(([key, value]) => [value, key]));
 
 
-const snapshot=townAt(createSave(0,12345),30*60000);
+const snapshot=townAt(createSave(0),30*60000);
 const scene=new THREE.Scene();
 const env=new Environment(scene,mobile);
 const town=Object.assign(Object.create(TownScene.prototype),{

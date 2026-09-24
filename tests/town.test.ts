@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three';
-import { createSave, milestoneRecap, parseSave, townAt, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
+import { createSave, milestoneRecap, parseSave, townAt, TOWN_SAVE_KEY, MINUTE, PLOTS, WALL_SEGMENTS } from '../src/town/model';
 import { routeBetween } from '../src/town/residents';
 import { buildColliders, isBlocked, moveWithCollisions } from '../src/town/collision';
 import { isWater, riverCenter, riverHalfWidth, terrainHeight } from '../src/town/environment';
@@ -11,30 +11,46 @@ import { INFRASTRUCTURE, accessPathFor } from '../src/town/town-plan';
 import { cottageBuilding } from '../src/town/cottages';
 
 const t0=1_700_000_000_000;
-const save=createSave(t0,711);
+const save=createSave(t0);
 
-test('same seed and elapsed time produce the same town',()=>{
-  assert.deepEqual(townAt(save,t0+15*MINUTE),townAt({...save},t0+15*MINUTE));
+test('new towns at the same age follow the same plan',()=>{
+  const laterSave=createSave(t0+5*MINUTE);
+  for(const age of [0,8,16,30,60]){
+    assert.deepEqual(townAt(save,t0+age*MINUTE),townAt(laterSave,laterSave.createdAt+age*MINUTE));
+  }
   assert.equal(townAt(save,t0).plots.filter(p=>p.project).length,5);
 });
 
-test('the town follows fixed sites with only a small construction delay',()=>{
-  const other=createSave(t0,921);
-  for(const age of [0,8,16,30,60]){
-    const first=townAt(save,t0+age*MINUTE),second=townAt(other,t0+age*MINUTE);
-    assert.deepEqual(first.plots.map(({id,kind,x,z,project})=>({id,kind,x,z,project})),
-      second.plots.map(({id,kind,x,z,project})=>({id,kind,x,z,project})));
-  }
+test('construction starts at the planned time',()=>{
   for(const plot of PLOTS){
-    if(plot.kind==='project'||plot.kind==='castle'||plot.start<0)continue;
-    const before=townAt(other,t0+plot.start-1).plots.find(p=>p.id===plot.id)!;
-    const after=townAt(other,t0+plot.start+8_000).plots.find(p=>p.id===plot.id)!;
+    if(plot.kind==='project'||plot.kind==='castle'||plot.start<=0)continue;
+    const before=townAt(save,t0+plot.start-1).plots.find(p=>p.id===plot.id)!;
+    const after=townAt(save,t0+plot.start).plots.find(p=>p.id===plot.id)!;
     assert.equal(before.stage,0,`${plot.id} started before its planned time`);
-    assert.ok(after.stage>0,`${plot.id} missed its small timing window`);
+    assert.equal(after.stage,1,`${plot.id} missed its planned start`);
     assert.ok(accessPathFor(plot));
   }
   assert.equal(townAt(save,t0+8*MINUTE).outerRoad,0);
   assert.equal(townAt(save,t0+12*MINUTE).outerRoad,INFRASTRUCTURE.road.outerRingSegments);
+});
+
+test('completed buildings and cottage details stay fixed',()=>{
+  const finished=townAt(save,t0+60*MINUTE);
+  const later=townAt(save,t0+120*MINUTE);
+  assert.deepEqual(finished.plots,later.plots);
+  assert.equal(finished.plots.find(p=>p.kind==='castle')?.stage,6);
+  assert.ok(finished.plots.filter(p=>p.kind==='home').some(p=>p.renovation>0));
+  assert.deepEqual(
+    [finished.innerWood,finished.innerStone,finished.outerWood,finished.roads,finished.outerRoad],
+    [later.innerWood,later.innerStone,later.outerWood,later.roads,later.outerRoad],
+  );
+});
+
+test('weather follows a fixed repeating schedule',()=>{
+  assert.equal(townAt(save,t0).weather,'clear');
+  assert.equal(townAt(save,t0+12*MINUTE).weather,'cloudy');
+  assert.equal(townAt(save,t0+24*MINUTE).weather,'rain');
+  assert.equal(townAt(save,t0+60*MINUTE).weather,'clear');
 });
 
 test('progression makes inner and outer walls in order and keeps the castle growing',()=>{
@@ -74,7 +90,13 @@ test('mature mergers retain children and most small homes',()=>{
 });
 
 test('save parsing tolerates corrupt input and protects progressed time from clock rollback',()=>{
-  assert.equal(parseSave('{',t0).version,2);
+  assert.equal(parseSave('{',t0).version,3);
+  assert.equal(TOWN_SAVE_KEY,'davstep.town.v3');
+  const oldSave={version:2,seed:711,createdAt:t0-60*MINUTE,lastSeenAt:t0-1,eventCursor:60,elapsedFloorMs:60*MINUTE};
+  assert.deepEqual(parseSave(JSON.stringify(oldSave),t0),createSave(t0));
+  const reset=createSave(t0+60*MINUTE);
+  assert.equal(townAt(reset,reset.createdAt).elapsed,0);
+  assert.equal(townAt(reset,reset.createdAt).plots.find(p=>p.kind==='castle')?.stage,2);
   const progressed={...save,elapsedFloorMs:25*MINUTE};
   assert.equal(townAt(progressed,t0+MINUTE).elapsed,25*MINUTE);
 });

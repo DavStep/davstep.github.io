@@ -1,6 +1,6 @@
-# Living Town portfolio
+# Living Town choice game
 
-The 2.0 homepage is a TypeScript and Three.js town that grows with elapsed time. The old 2D homepage is preserved at the annotated `webpage-1.0` tag.
+The homepage is a short, replayable Three.js town game inspired by order-dependent GROW games. Choose eight ideas once each. Buildings gain three distinct forms, earlier choices react to later ones, and the surroundings change with them. A windmill upgrade draws a stream from the main river, turns its sails, and grows wheat. One order brings every idea to MAX; another reveals a secret ending. The five project landmarks remain clickable portfolio entries throughout. The old 2D homepage is preserved at the annotated `webpage-1.0` tag.
 
 ## Run locally
 
@@ -16,20 +16,17 @@ The production build is in `dist/`. The staging script copies the existing `idle
 
 ## Town systems
 
-- `src/town/town-plan.ts` defines every building site and type, the market and civic districts, road and wall dimensions, construction timing, and eligible neighbor mergers. `src/town/model.ts` builds the planned town from elapsed time, including time spent away; the save seed only shifts construction starts by up to eight seconds and varies weather.
-- `src/town/residents.ts` defines the road graph, cached routes, resident roles, destinations, schedules, and instanced character parts.
-- `src/town/scene.ts` builds staged cottages, landmarks, access paths, roads, and fortifications from the town plan and shared matte materials. Static structure geometry is batched by material; repeated walls, trees, lights, and residents are instanced. Mobile uses simpler geometry.
-- `src/town/environment.ts` builds the surrounding terrain, mountains, forest, river, ponds, and shader-animated grass. `src/town/materials.ts` provides subtle timber and stone surface detail.
-- `src/town/player.ts` animates the walkable human avatar, while `src/town/collision.ts` handles buildings, added wings, walls and gates, trees, and water.
-- `src/town/main.ts` handles local saves, the camera, portfolio panels, history, controls, reduced motion, adaptive resolution, and the WebGL poster fallback.
-- `src/town/projects.ts` holds the real-world project copy and public links. Town construction stages describe the fictional settlement and do not imply a change in project status.
-
-Saves use the versioned `davstep.town.v2` local storage key. They include a seed, creation and last-visit timestamps, event progress, and a monotonic elapsed-time floor. Corrupt or older saves start a new settlement.
+- `src/town/game.ts` evaluates each choice and its chain reactions. A missed prerequisite cannot be recovered during that run. The game save uses `davstep.choice-town.v1` and keeps the current run, best MAX count, and secret discovery.
+- `src/town/game-snapshot.ts` maps idea levels to authored 3D building stages. `src/town/town-plan.ts` defines the building sites and the existing road and wall layout.
+- `src/town/game-path.ts` and `src/town/game-scenery.ts` add the windmill stream, growing wheat, moving sails, bridge, grove, and secret-ending birds. `src/town/environment.ts` carves the stream bed into the terrain.
+- `src/town/scene.ts` builds staged cottages, landmarks, civic buildings, roads, and fortifications from shared materials and geometry. Mobile uses simpler geometry.
+- `src/town/residents.ts` and `src/town/collision.ts` handle townspeople and walking collision. `src/town/main.ts` runs the game, choice animations, camera, portfolio panels, controls, reduced motion, and WebGL fallback.
+- `src/town/projects.ts` holds the real-world project copy and public links. The fictional town's upgrade levels do not imply a change in project status.
 
 ## Visual and performance previews
 
-In development, `?age=7`, `?age=16`, `?age=23`, `?age=30`, and `?age=50` preview milestone states without advancing the saved town. `?fallback=1` previews the WebGL fallback. `?profile` exposes browser metrics as `data-*` attributes on `<body>`; pairing it with `&age=30` works in the production build for release profiling. These previews do not change the stored creation time.
+In development, `?fallback=1` previews the WebGL fallback. `?profile` exposes browser metrics as `data-*` attributes on `<body>`. The game itself is deterministic and saves after every choice.
 
 The production scene targets 60 fps on desktop and 30 fps on mobile, with adaptive pixel ratio and a paused render loop in hidden tabs. Project artwork loads when its panel opens. The HTML poster and navigation appear before Three.js initializes.
 
-Choose **Walk** to explore on foot. WASD or arrow keys move, Shift runs, dragging turns the view, and Escape returns to the overview. On touch screens a joystick appears for movement. The portfolio remains available from the menu and each project landmark.
+Choose **Roam** to explore on foot. WASD or arrow keys move, Shift moves faster, dragging turns the view, and Escape returns to the overview. On touch screens a joystick appears for movement. The portfolio remains available from the menu and each project landmark.

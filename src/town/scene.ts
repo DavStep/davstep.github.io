@@ -20,6 +20,7 @@ import { placeProp, placeLanterns, placeFenceSections } from './prop-placement';
 import { addNatureInstances, type NaturePlacement } from './nature-placement';
 import { wallIsGate, wallSection } from './wall-layout';
 import { pathRibbon, linePoints, ringPoints } from './paths';
+import { millStreamDistance } from './game-path';
 const MOBILE=matchMedia('(max-width: 700px)').matches;
 const boxGeometry = new RoundedBoxGeometry(1,1,1,2,.08);
 const plainBoxGeometry = new THREE.BoxGeometry(1,1,1);
@@ -188,12 +189,12 @@ function flag(parent:THREE.Group,x:number,y:number,z:number,material:Mat) {
   box(parent,x,y+.75,z,.09,1.5,.09,MAT.woodDark);
   box(parent,x+.42,y+1.25,z,.8,.42,.06,material);
 }
-function building(plot:PlotState): THREE.Group {
+function building(plot:PlotState,gameMode=false): THREE.Group {
   if(plot.stage<=0){const empty=new THREE.Group();empty.position.set(plot.x,0,plot.z);return empty;}
   if(plot.kind==='home')return cottageBuilding(plot,MOBILE);
   if(plot.kind==='castle')return castleBuilding(plot,MOBILE);
   if(plot.kind==='project')return authoredLandmarkBuilding(plot,MOBILE);
-  return civicBuilding(plot,MOBILE);
+  return civicBuilding(plot,MOBILE,gameMode);
 }
 function hash(n:number){let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;}
 function wallSectorGeometry(radius:number):THREE.BufferGeometry{
@@ -235,7 +236,7 @@ export class TownScene {
   private wallSignature='';
   private roadSignature='';
   readonly mobile=MOBILE;
-  constructor(canvas:HTMLCanvasElement){
+  constructor(canvas:HTMLCanvasElement,private readonly gameMode=false){
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:!this.mobile,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -284,7 +285,7 @@ export class TownScene {
     for(let i=0;i<150;i++){
       const angle=hash(i*397)%6283/1000,r=8+(hash(i*193+8)%580)/10;
       const x=Math.cos(angle)*r,z=Math.sin(angle)*r;
-      if(r>66||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3.5||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5))||Math.abs(x)<2.2||Math.abs(z)<2.2)continue;
+      if(r>66||this.gameMode&&(millStreamDistance(x,z)<8||x>29&&x<45&&z>-43&&z<-23||x>6&&x<17&&z>-43&&z<-24)||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3.5||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5))||Math.abs(x)<2.2||Math.abs(z)<2.2)continue;
       trees.push({x,z,scale:.75+(hash(i*411)%75)/100,shape:i%3});
       this.treeObstacles.push({x,z,r:.8});
     }
@@ -295,7 +296,7 @@ export class TownScene {
     const stones:{x:number;z:number;s:number}[]=[],shrubs:{x:number;z:number;s:number}[]=[];
     for(let i=0;i<(this.mobile?250:480);i++){
       const angle=(hash(i*293)%6283)/1000,r=8+(hash(i*719+3)%570)/10,x=Math.cos(angle)*r,z=Math.sin(angle)*r;
-      if(Math.abs(r-INFRASTRUCTURE.wall.innerRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3||Math.abs(x)<2.1||Math.abs(z)<2.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.4)))continue;
+      if(this.gameMode&&(millStreamDistance(x,z)<8||x>29&&x<45&&z>-43&&z<-23||x>6&&x<17&&z>-43&&z<-24)||Math.abs(r-INFRASTRUCTURE.wall.innerRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3||Math.abs(x)<2.1||Math.abs(z)<2.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.4)))continue;
       const item={x,z,s:.28+(hash(i*133+5)%80)/100};
       if(i%3===0)shrubs.push(item);else stones.push(item);
     }
@@ -334,7 +335,7 @@ export class TownScene {
     };
     for(const p of plots){
       if(p.stage===0)continue;
-      const g=building(p);
+      const g=building(p,this.gameMode);
       // Small household clusters use the existing occupied footprint and keep
       // the central entrance clear. They share the same batched material pool.
       if(p.kind==='home'&&p.stage>=4){

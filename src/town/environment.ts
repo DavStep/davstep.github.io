@@ -3,6 +3,7 @@ import { PLOTS } from './model';
 import { INFRASTRUCTURE } from './town-plan';
 import { MAT } from './materials';
 import { addNatureInstances, type NaturePlacement } from './nature-placement';
+import { millStreamDistance } from './game-path';
 
 const hash=(n:number)=>{let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;};
 const rand=(seed:number)=>hash(seed)/0xffffffff;
@@ -13,13 +14,15 @@ function baseTerrainHeight(x:number,z:number):number{
 }
 export const riverCenter=(x:number)=>-86+7*Math.sin(x*.027)+3*Math.sin(x*.071+1.3);
 export const riverHalfWidth=(x:number)=>4.35+.42*Math.sin(x*.037)+.18*Math.sin(x*.11+1);
+export const riverSurfaceHeight=(x:number)=>baseTerrainHeight(x,riverCenter(x))-.78;
 export const PONDS=([{x:-82,z:-27,r:8},{x:83,z:-34,r:6.5}] as const);
 const smoothstep=(min:number,max:number,value:number)=>{const t=THREE.MathUtils.clamp((value-min)/(max-min),0,1);return t*t*(3-2*t);};
 export function terrainHeight(x:number,z:number):number{
   const riverDepth=1.5*(1-smoothstep(riverHalfWidth(x)-.3,riverHalfWidth(x)+2.5,Math.abs(z-riverCenter(x))));
+  const branchDepth=1.65*(1-smoothstep(3,7,millStreamDistance(x,z)));
   let pondDepth=0;
   for(const p of PONDS)pondDepth=Math.max(pondDepth,1.35*(1-smoothstep(p.r-.35,p.r+2.1,Math.hypot(x-p.x,z-p.z))));
-  return baseTerrainHeight(x,z)-Math.max(riverDepth,pondDepth);
+  return baseTerrainHeight(x,z)-Math.max(riverDepth,pondDepth,branchDepth);
 }
 export function isWater(x:number,z:number,clearance=0):boolean{
   return Math.abs(z-riverCenter(x))<riverHalfWidth(x)+clearance||PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r+clearance);
@@ -85,7 +88,7 @@ export class Environment {
       const x=first+(last-first)*i/steps,z=riverCenter(x)+side*(riverHalfWidth(x)+margin);
       return {x,z};
     };
-    const waterY=(x:number)=>baseTerrainHeight(x,riverCenter(x))-.78;
+    const waterY=riverSurfaceHeight;
     const quad=(target:number[],a:[number,number,number],b:[number,number,number],c:[number,number,number],d:[number,number,number])=>{
       for(const p of [a,b,c,b,d,c])target.push(...p);
     };
@@ -179,7 +182,7 @@ export class Environment {
     const count=this.mobile?250:520;
     for(let i=0;i<count;i++){
       const a=rand(i*311+9)*Math.PI*2,r=69+Math.sqrt(rand(i*797+18))*90,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      if(isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3.8||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3.5||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<4))continue;
+      if(isWater(x,z)||millStreamDistance(x,z)<7.4||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3.8||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3.5||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<4))continue;
       this.trees.push({x,z,r:.7+rand(i*27)*.5});
     }
     const pineFamilies=['Pine_A','Pine_B','Pine_C'] as const;
@@ -237,7 +240,7 @@ export class Environment {
     for(let i=0;i<attempts;i++){
       const a=rand(i*167+2)*Math.PI*2,r=i%2===0?Math.sqrt(rand(i*911+9))*71:71+Math.sqrt(rand(i*911+9))*75,x=Math.cos(a)*r,z=Math.sin(a)*r;
       const meadow=Math.sin(x*.045)*Math.sin(z*.059);
-      if(rand(i*631+5)>.72+meadow*.24||isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<2.3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<2.3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<2.5))continue;
+      if(rand(i*631+5)>.72+meadow*.24||isWater(x,z)||millStreamDistance(x,z)<7.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<2.3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<2.3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<2.5))continue;
       positions.push({x,z,s:.68+rand(i*13)*.72,a:rand(i*27)*6.28,color:i%5});
     }
     const grass=new THREE.InstancedMesh(geometry,this.grassPaint,positions.length),d=new THREE.Object3D();

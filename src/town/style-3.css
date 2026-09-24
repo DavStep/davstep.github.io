@@ -95,6 +95,17 @@ button:focus-visible, a:focus-visible {
 .settings-panel div { border-color: rgba(40, 101, 100, .17); }
 .settings-panel b { color: var(--ui-accent); }
 .settings-panel p { color: var(--ui-muted); }
+.settings-panel .age-controls { display: inline-flex; align-items: center; gap: 8px; }
+.settings-panel #reset-town-age {
+  padding: 3px 7px;
+  border: 1px solid rgba(35, 127, 128, .3);
+  border-radius: 7px;
+  background: rgba(35, 127, 128, .08);
+  color: #245f63;
+  font-size: 10px;
+  font-weight: 700;
+}
+.settings-panel #reset-town-age:hover { background: #237f80; color: white; }
 .settings-panel .weather-preview {
   border: 1px solid rgba(35, 127, 128, .22);
   border-radius: 11px;
