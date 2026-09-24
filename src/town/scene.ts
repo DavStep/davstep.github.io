@@ -11,7 +11,7 @@ import { ContactShadows, type ContactFootprint } from './contact-shadows';
 import { TownSky } from './sky';
 import { Rain } from './rain';
 import { AUTHORED_LANDMARK_SHARED_GEOMETRIES, authoredLandmarkBuilding } from './authored-landmarks';
-import { COTTAGE_SHARED_GEOMETRIES, cottageBuilding } from './cottages';
+import { COTTAGE_SHARED_GEOMETRIES, cottageBuilding, gameCottageBuilding } from './cottages';
 import { CASTLE_SHARED_GEOMETRIES, castleBuilding } from './castle';
 import { CIVIC_SHARED_GEOMETRIES, civicBuilding } from './civic';
 import { NATURE_SHARED_GEOMETRIES } from './nature';
@@ -191,7 +191,7 @@ function flag(parent:THREE.Group,x:number,y:number,z:number,material:Mat) {
 }
 function building(plot:PlotState,gameMode=false): THREE.Group {
   if(plot.stage<=0){const empty=new THREE.Group();empty.position.set(plot.x,0,plot.z);return empty;}
-  if(plot.kind==='home')return cottageBuilding(plot,MOBILE);
+  if(plot.kind==='home')return gameMode?gameCottageBuilding(plot,MOBILE):cottageBuilding(plot,MOBILE);
   if(plot.kind==='castle')return castleBuilding(plot,MOBILE);
   if(plot.kind==='project')return authoredLandmarkBuilding(plot,MOBILE);
   return civicBuilding(plot,MOBILE,gameMode);
@@ -228,6 +228,17 @@ export class TownScene {
   private readonly structures=new THREE.Group();
   private readonly roads=new THREE.Group();
   private readonly walls=new THREE.Group();
+  private readonly structureReveal=new THREE.Group();
+  private readonly previousRoads=new THREE.Group();
+  private readonly previousWalls=new THREE.Group();
+  private readonly structurePlane=new THREE.Plane(new THREE.Vector3(0,-1,0),.48);
+  private readonly wallPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),.48);
+  private structureMaterials:THREE.Material[]=[];
+  private wallMaterials:THREE.Material[]=[];
+  private structureTransition:{started:number;plots:PlotState[]}|null=null;
+  private wallTransition:{started:number;snapshot:TownSnapshot}|null=null;
+  private roadTransition:{started:number;draws:{geometry:THREE.BufferGeometry;count:number}[];instances:{mesh:THREE.InstancedMesh;count:number}[]}|null=null;
+  private lastPlots:PlotState[]=[];
   private readonly sun=new THREE.DirectionalLight(0xffdfad,3.05);
   private readonly fill=new THREE.HemisphereLight(0xb8c8eb,0x9d806a,.68);
   private readonly environmentMap:THREE.WebGLRenderTarget;
@@ -243,6 +254,7 @@ export class TownScene {
     this.renderer.toneMappingExposure=1;
     this.renderer.shadowMap.enabled=true;
     this.renderer.shadowMap.type=THREE.PCFShadowMap;
+    this.renderer.localClippingEnabled=true;
     const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(this.renderer);
     this.environmentMap=pmrem.fromScene(room,.02);
     this.scene.environment=this.environmentMap.texture;this.scene.environmentIntensity=.09;
@@ -255,7 +267,7 @@ export class TownScene {
     this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=270;
     this.sun.shadow.bias=-.00008;
     this.sun.shadow.normalBias=.035;this.sun.shadow.radius=this.mobile?1.25:2.5;
-    this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls);
+    this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.previousRoads,this.previousWalls);
     this.environment=new Environment(this.scene,this.mobile,this.gameMode);
     this.sky=new TownSky(this.scene);
     this.rain=new Rain(this.scene,this.mobile);
@@ -512,14 +524,109 @@ export class TownScene {
       }
     }
   }
-  update(snapshot:TownSnapshot){
-    this.environment.setRoadCenterVisible(snapshot.roads>0);
+  private clipGroup(group:THREE.Group,plane:THREE.Plane):THREE.Material[]{
+    const clones=new Map<THREE.Material,THREE.Material>();
+    group.traverse(object=>{
+      if(!(object instanceof THREE.Mesh))return;
+      const clip=(source:THREE.Material)=>{
+        let material=clones.get(source);
+        if(!material){material=source.clone();material.clippingPlanes=[plane];material.clipShadows=true;clones.set(source,material);}
+        return material;
+      };
+      object.material=Array.isArray(object.material)?object.material.map(clip):clip(object.material);
+    });
+    return [...clones.values()];
+  }
+  private finishStructureTransition(){
+    if(!this.structureTransition)return;
+    const plots=this.structureTransition.plots;
+    this.clear(this.structureReveal);this.structureMaterials.forEach(material=>material.dispose());this.structureMaterials=[];
+    this.structureTransition=null;this.buildStructures(plots);
+  }
+  private finishWallTransition(){
+    if(!this.wallTransition)return;
+    const snapshot=this.wallTransition.snapshot;
+    this.clear(this.walls);this.wallMaterials.forEach(material=>material.dispose());this.wallMaterials=[];
+    this.clear(this.previousWalls);this.wallTransition=null;this.buildWalls(snapshot);
+  }
+  private finishRoadTransition(){
+    if(!this.roadTransition)return;
+    for(const {geometry,count} of this.roadTransition.draws)geometry.setDrawRange(0,count);
+    for(const {mesh,count} of this.roadTransition.instances)mesh.count=count;
+    this.clear(this.previousRoads);this.roadTransition=null;
+    this.environment.setRoadCenterProgress(this.roads.children.length?1:0);
+  }
+  finishTransitions(){this.finishStructureTransition();this.finishWallTransition();this.finishRoadTransition();}
+  private updateTransitions(now:number){
+    const ease=(t:number)=>1-Math.pow(1-THREE.MathUtils.clamp(t,0,1),2);
+    if(this.structureTransition){
+      const t=ease((now-this.structureTransition.started)/1150);
+      this.structurePlane.constant=.48+t*23;
+      if(t>=1)this.finishStructureTransition();
+    }
+    if(this.wallTransition){
+      const t=ease((now-this.wallTransition.started)/1250);
+      this.wallPlane.constant=.48+t*7;
+      if(t>=1)this.finishWallTransition();
+    }
+    if(this.roadTransition){
+      const t=ease((now-this.roadTransition.started)/1450);
+      // The dirt route is traced first; its irregular stones follow behind it.
+      const dirt=THREE.MathUtils.clamp(t/.83,0,1),paving=THREE.MathUtils.clamp((t-.16)/.84,0,1);
+      for(const {geometry,count} of this.roadTransition.draws)geometry.setDrawRange(0,Math.floor(count*dirt/3)*3);
+      for(const {mesh,count} of this.roadTransition.instances)mesh.count=Math.floor(count*(mesh.name.startsWith('Street_lantern')?Math.max(0,(t-.74)/.26):paving));
+      this.environment.setRoadCenterProgress(t);
+      if(t>=1)this.finishRoadTransition();
+    }
+  }
+  update(snapshot:TownSnapshot,animate=false){
+    if(!animate)this.finishTransitions();
+    if(!this.roadTransition)this.environment.setRoadCenterProgress(snapshot.roads>0?1:0);
     const structureSignature=snapshot.plots.map(p=>`${p.stage}${p.renovation}${p.complexId?'c':''}`).join('');
     const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}`;
-    if(structureSignature!==this.structureSignature){this.structureSignature=structureSignature;this.buildStructures(snapshot.plots);}
-    if(wallSignature!==this.wallSignature){this.wallSignature=wallSignature;this.buildWalls(snapshot);}
+    if(structureSignature!==this.structureSignature){
+      this.finishStructureTransition();this.structureSignature=structureSignature;
+      if(animate&&this.gameMode&&this.lastPlots.length){
+        const previous=new Map(this.lastPlots.map(plot=>[plot.id,plot]));
+        this.clear(this.structureReveal);
+        for(const plot of snapshot.plots){
+          if(plot.stage<=0||previous.get(plot.id)?.stage===plot.stage)continue;
+          this.structureReveal.add(building(plot,this.gameMode));
+        }
+        this.structurePlane.constant=.48;
+        this.structureMaterials=this.clipGroup(this.structureReveal,this.structurePlane);
+        this.structureTransition={started:performance.now(),plots:snapshot.plots};
+      }else this.buildStructures(snapshot.plots);
+      this.lastPlots=snapshot.plots.map(plot=>({...plot}));
+    }
+    if(wallSignature!==this.wallSignature){
+      this.finishWallTransition();this.wallSignature=wallSignature;
+      if(animate&&this.gameMode&&this.walls.children.length){
+        for(const child of [...this.walls.children])this.previousWalls.add(child);
+        this.buildWalls(snapshot);this.wallPlane.constant=.48;
+        this.wallMaterials=this.clipGroup(this.walls,this.wallPlane);
+        this.wallTransition={started:performance.now(),snapshot};
+      }else if(animate&&this.gameMode&&snapshot.innerWood>0){
+        this.buildWalls(snapshot);this.wallPlane.constant=.48;
+        this.wallMaterials=this.clipGroup(this.walls,this.wallPlane);
+        this.wallTransition={started:performance.now(),snapshot};
+      }else this.buildWalls(snapshot);
+    }
     const roadSignature=`${snapshot.roads}/${snapshot.outerRoad}/${snapshot.plots.map(p=>p.stage>0?'1':'0').join('')}`;
-    if(roadSignature!==this.roadSignature){this.roadSignature=roadSignature;this.buildRoads(snapshot);}
+    if(roadSignature!==this.roadSignature){
+      this.finishRoadTransition();this.roadSignature=roadSignature;
+      if(animate&&this.gameMode&&snapshot.roads>0){
+        for(const child of [...this.roads.children])this.previousRoads.add(child);
+        this.buildRoads(snapshot);
+        const draws:{geometry:THREE.BufferGeometry;count:number}[]=[],instances:{mesh:THREE.InstancedMesh;count:number}[]=[];
+        this.roads.traverse(object=>{
+          if(object instanceof THREE.InstancedMesh){instances.push({mesh:object,count:object.count});object.count=0;}
+          else if(object instanceof THREE.Mesh){const count=object.geometry.index?.count??object.geometry.getAttribute('position').count;draws.push({geometry:object.geometry,count});object.geometry.setDrawRange(0,0);}
+        });
+        this.roadTransition={started:performance.now(),draws,instances};
+        this.environment.setRoadCenterProgress(0);
+      }else this.buildRoads(snapshot);
+    }
   }
   private updateAtmosphere(snapshot:TownSnapshot){
     this.currentSeason=snapshot.season;
@@ -546,6 +653,6 @@ export class TownScene {
     this.renderer.toneMappingExposure=1-.04*night;
     this.sky.update(snapshot,night,this.sun.position,this.camera.position);
   }
-  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateAtmosphere(snapshot);this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
-  dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
+  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
+  dispose(){this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
 }

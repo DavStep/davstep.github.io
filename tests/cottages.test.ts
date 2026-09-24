@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three';
-import { COTTAGE_SHARED_GEOMETRIES, cottageBuilding } from '../src/town/cottages';
+import { COTTAGE_SHARED_GEOMETRIES, cottageBuilding, gameCottageBuilding } from '../src/town/cottages';
 import cottageData from '../src/town/generated/cottages.json';
 import type { PlotState } from '../src/town/model';
 
@@ -59,6 +59,23 @@ test('porch geometry follows the four-variant porch slot', () => {
     assert.ok(withPorch.children.some(child => child.name === part.name));
     assert.ok(!withoutPorch.children.some(child => child.name === part.name));
   }
+});
+
+test('game homes begin with four distinct construction footprints', () => {
+  const names = new Set<string>();
+  for (let variant = 0; variant < 4; variant++) {
+    const group = gameCottageBuilding(plot(2, variant), false);
+    assert.ok(group.children.length >= 7);
+    const footprint = group.children.filter(child => child.name.endsWith('-floor'))
+      .map(child => child.name).sort().join(',');
+    names.add(footprint);
+    for (const child of group.children) {
+      assert.ok(child instanceof THREE.Mesh);
+      assert.ok(COTTAGE_SHARED_GEOMETRIES.has(child.geometry));
+    }
+  }
+  assert.equal(names.size, 4);
+  assert.ok(gameCottageBuilding(plot(4, 0), false).children.some(child => child.name.includes('roof')));
 });
 
 test('scene batching disposes old batches while retaining authored cottage buffers', async () => {

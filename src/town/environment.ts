@@ -71,7 +71,13 @@ export class Environment {
     scene.add(this.group);
   }
   createRiverMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight);}
-  setRoadCenterVisible(visible:boolean):void{if(this.gameMode&&this.townSquare)this.townSquare.visible=visible;}
+  setRoadCenterProgress(progress:number):void{
+    if(!this.gameMode||!this.townSquare)return;
+    const size=THREE.MathUtils.clamp(progress,0,1);
+    this.townSquare.visible=size>0;
+    this.townSquare.scale.set(Math.max(.001,size),1,Math.max(.001,size));
+  }
+  setRoadCenterVisible(visible:boolean):void{this.setRoadCenterProgress(visible?1:0);}
   setStreamProgress(progress:number):void{
     if(!this.gameMode||!this.terrainGeometry)return;
     const step=Math.round(THREE.MathUtils.clamp(progress,0,1)*16);

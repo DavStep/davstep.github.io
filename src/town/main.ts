@@ -225,7 +225,7 @@ function renderGameHud(){
 }
 function refreshGameWorld(instant=false){
   snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart);
-  town?.update(weatherSnapshot());
+  town?.update(weatherSnapshot(),!instant&&animating&&!reduced.matches);
   scenery?.setLevels(shownLevels,gameState.secret&&gameState.finished&&!animating,instant);
   if(town){
     colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);
@@ -286,7 +286,7 @@ async function playChoice(idea:Idea){
         residents?.startCue('windmill',{x:34,z:-31},false,1.65);
         renderGameHud();
         await delay(1650);
-      }else await delay(reduced.matches?50:1250);
+      }else await delay(reduced.matches?50:key==='roads'?1650:1450);
       residents?.finishCue();scenery?.endBeat();
       while(activePanel&&token===animationToken)await delay(150);
     }
