@@ -191,6 +191,16 @@ const descriptions:Record<Idea,[string,string,string]>={
   archive:['The post begins collecting the town’s stories.','Plans travel between the guild and the post.','The Archive maps every part of the town.'],
   observatory:['A star platform rises above the rooftops.','The wizard aligns a new lens.','The five project landmarks shine as constellations.'],
 };
+const approaches:Record<Idea,string>={
+  settlers:'A little settler carries a seed toward the square…',
+  grove:'A gardener brings a sapling to the edge of town…',
+  workshop:'A smith hurries over with a hammer…',
+  roads:'A surveyor carries the first stone to the crossing…',
+  market:'A trader brings a crate of supplies…',
+  windmill:'A builder carries a gear to the river mill…',
+  archive:'A messenger brings a letter to the post…',
+  observatory:'An astronomer carries a bright lens to the tower…',
+};
 const focalPlot:Record<Idea,string>={settlers:'castle',grove:'project-wizard',workshop:'forge',roads:'project-dwarves',market:'market',windmill:'mill',archive:'post',observatory:'project-wizard'};
 
 function renderGameHud(){
@@ -231,11 +241,13 @@ function startGame(){
 }
 function restart(){
   animationToken++;animating=false;restartGame(gameSave);gameState=evaluate([]);shownLevels={...gameState.levels};
+  residents?.finishCue();scenery?.endBeat();
   eventMessage='A fresh town. What should arrive first?';persist();renderGameHud();refreshGameWorld(true);recenter();
 }
 function skipAnimation(){
   if(!animating)return;
   animationToken++;animating=false;shownLevels={...gameState.levels};
+  residents?.finishCue();scenery?.endBeat();
   eventMessage=gameState.finished?'The town remembers your choices.':'The town is ready for its next idea.';
   refreshGameWorld(true);renderGameHud();recenter();
 }
@@ -248,12 +260,34 @@ async function playChoice(idea:Idea){
   for(const key of changed){
     for(let level=before[key]+1;level<=gameState.levels[key];level++){
       if(token!==animationToken)return;
-      shownLevels[key]=level;eventMessage=descriptions[key][level-1];
-      if(key===idea&&level===1&&gameState.missed.includes(key))eventMessage+=` ${IDEA_INFO[key].hint}`;
       const focus=snapshot.plots.find(plot=>plot.id===focalPlot[key]);
       if(focus&&town){desiredTarget.set(focus.x,0,focus.z);desiredDistance=key==='windmill'?94:89;}
+      const failed=key===idea&&level===1&&gameState.missed.includes(key);
+      eventMessage=key===idea?approaches[key]:`${IDEA_INFO[key].name} responds to the new idea…`;
+      if(focus)residents?.startCue(key,focus,failed,reduced.matches?.1:1.7);
+      renderGameHud();
+      await delay(reduced.matches?40:690);
+      if(token!==animationToken)return;
+      shownLevels[key]=level;
+      eventMessage=descriptions[key][level-1];
+      if(failed)eventMessage+=` ${IDEA_INFO[key].hint}`;
       refreshGameWorld();renderGameHud();
-      await delay(reduced.matches?80:950);
+      if(focus)scenery?.beginBeat(key,focus,failed);
+      if(key==='windmill'&&level===2&&!reduced.matches){
+        await delay(850);
+        if(token!==animationToken)return;
+        eventMessage='The sails catch wind. Water runs from the river through the new channel.';
+        renderGameHud();
+        await delay(1550);
+      }else if(key==='windmill'&&level===3&&!reduced.matches){
+        await delay(750);
+        if(token!==animationToken)return;
+        eventMessage='Green shoots spread from the water. The field turns gold.';
+        residents?.startCue('windmill',{x:34,z:-31},false,1.65);
+        renderGameHud();
+        await delay(1650);
+      }else await delay(reduced.matches?50:1250);
+      residents?.finishCue();scenery?.endBeat();
       while(activePanel&&token===animationToken)await delay(150);
     }
   }

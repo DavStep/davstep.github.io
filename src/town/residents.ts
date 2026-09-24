@@ -1,149 +1,201 @@
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PLOTS, type TownSnapshot } from './model';
 import { INFRASTRUCTURE } from './town-plan';
+import type { Idea } from './game';
+import { terrainHeight } from './environment';
 
-type Role='builder'|'merchant'|'guard'|'mage'|'warrior'|'resident'|'artist'|'miner';
-interface Node { x:number;z:number;links:number[]; }
-const nodes:Node[]=[{x:0,z:0,links:[]}];
-for(let i=0;i<12;i++){const a=i*Math.PI*2/12;nodes.push({x:Math.cos(a)*INFRASTRUCTURE.residentRoutes.innerRadius,z:Math.sin(a)*INFRASTRUCTURE.residentRoutes.innerRadius,links:[]});}
-for(let i=1;i<=12;i++){nodes[i].links.push(i===1?12:i-1,i===12?1:i+1);if(i%3===1){nodes[i].links.push(0);nodes[0].links.push(i);}}
-for(let i=0;i<16;i++){const a=i*Math.PI*2/16;nodes.push({x:Math.cos(a)*INFRASTRUCTURE.residentRoutes.outerRadius,z:Math.sin(a)*INFRASTRUCTURE.residentRoutes.outerRadius,links:[]});}
-for(let i=13;i<=28;i++){nodes[i].links.push(i===13?28:i-1,i===28?13:i+1);if((i-13)%4===0){const inner=1+Math.round((i-13)/16*12)%12;nodes[i].links.push(inner);nodes[inner].links.push(i);}}
-const dist=(a:{x:number;z:number},b:{x:number;z:number})=>Math.hypot(a.x-b.x,a.z-b.z);
-function nearest(p:{x:number;z:number}){let best=0,d=Infinity;for(let i=0;i<nodes.length;i++){const q=dist(p,nodes[i]);if(q<d){best=i;d=q;}}return best;}
-const routeCache=new Map<string,THREE.Vector3[]>();
-export function routeBetween(a:{x:number;z:number},b:{x:number;z:number}):THREE.Vector3[]{
-  const start=nearest(a),goal=nearest(b),key=`${start}:${goal}`;
-  let mid=routeCache.get(key);
-  if(!mid){
-    const costs=nodes.map(()=>Infinity),prev=nodes.map(()=>-1),remaining=new Set(nodes.map((_,i)=>i));costs[start]=0;
-    while(remaining.size){let current=-1,min=Infinity;for(const i of remaining)if(costs[i]<min){current=i;min=costs[i];}if(current<0||current===goal)break;remaining.delete(current);for(const next of nodes[current].links){const n=costs[current]+dist(nodes[current],nodes[next]);if(n<costs[next]){costs[next]=n;prev[next]=current;}}}
-    const path:number[]=[];let at=goal;while(at>=0){path.unshift(at);if(at===start)break;at=prev[at];}
-    mid=path.map(i=>new THREE.Vector3(nodes[i].x,.58,nodes[i].z));routeCache.set(key,mid);
+interface Node { x: number; z: number; links: number[] }
+const nodes: Node[] = [{ x: 0, z: 0, links: [] }];
+for (let i = 0; i < 12; i++) { const a = i * Math.PI * 2 / 12; nodes.push({ x: Math.cos(a) * INFRASTRUCTURE.residentRoutes.innerRadius, z: Math.sin(a) * INFRASTRUCTURE.residentRoutes.innerRadius, links: [] }); }
+for (let i = 1; i <= 12; i++) { nodes[i].links.push(i === 1 ? 12 : i - 1, i === 12 ? 1 : i + 1); if (i % 3 === 1) { nodes[i].links.push(0); nodes[0].links.push(i); } }
+for (let i = 0; i < 16; i++) { const a = i * Math.PI * 2 / 16; nodes.push({ x: Math.cos(a) * INFRASTRUCTURE.residentRoutes.outerRadius, z: Math.sin(a) * INFRASTRUCTURE.residentRoutes.outerRadius, links: [] }); }
+for (let i = 13; i <= 28; i++) { nodes[i].links.push(i === 13 ? 28 : i - 1, i === 28 ? 13 : i + 1); if ((i - 13) % 4 === 0) { const inner = 1 + Math.round((i - 13) / 16 * 12) % 12; nodes[i].links.push(inner); nodes[inner].links.push(i); } }
+const dist = (a: { x: number; z: number }, b: { x: number; z: number }) => Math.hypot(a.x - b.x, a.z - b.z);
+function nearest(p: { x: number; z: number }) { let best = 0, d = Infinity; for (let i = 0; i < nodes.length; i++) { const q = dist(p, nodes[i]); if (q < d) { best = i; d = q; } } return best; }
+const routeCache = new Map<string, THREE.Vector3[]>();
+export function routeBetween(a: { x: number; z: number }, b: { x: number; z: number }): THREE.Vector3[] {
+  const start = nearest(a), goal = nearest(b), key = `${start}:${goal}`;
+  let mid = routeCache.get(key);
+  if (!mid) {
+    const costs = nodes.map(() => Infinity), prev = nodes.map(() => -1), remaining = new Set(nodes.map((_, i) => i)); costs[start] = 0;
+    while (remaining.size) { let current = -1, min = Infinity; for (const i of remaining) if (costs[i] < min) { current = i; min = costs[i]; } if (current < 0 || current === goal) break; remaining.delete(current); for (const next of nodes[current].links) { const n = costs[current] + dist(nodes[current], nodes[next]); if (n < costs[next]) { costs[next] = n; prev[next] = current; } } }
+    const path: number[] = []; let at = goal; while (at >= 0) { path.unshift(at); if (at === start) break; at = prev[at]; }
+    mid = path.map(i => new THREE.Vector3(nodes[i].x, .58, nodes[i].z)); routeCache.set(key, mid);
   }
-  return [new THREE.Vector3(a.x,.58,a.z),...mid,new THREE.Vector3(b.x,.58,b.z)];
+  return [new THREE.Vector3(a.x, .58, a.z), ...mid, new THREE.Vector3(b.x, .58, b.z)];
 }
-function sampleRoute(path:THREE.Vector3[],progress:number){
-  let length=0;for(let i=1;i<path.length;i++)length+=path[i-1].distanceTo(path[i]);
-  let left=progress*length;
-  for(let i=1;i<path.length;i++){const segment=path[i-1].distanceTo(path[i]);if(left<=segment)return path[i-1].clone().lerp(path[i],segment?left/segment:0);left-=segment;}
-  return path[path.length-1].clone();
-}
-const palettes={
-  skin:[0xe5bda0,0xc68f74,0x9d6b54,0xf0cfb1],
-  cloth:[0x748b87,0xb06f61,0x797392,0x9a9b6a,0x6480a3],
+
+const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xf9f6e9, roughness: .92 });
+const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x293b3d, roughness: .9 });
+const shadowMaterial = new THREE.MeshBasicMaterial({ color: 0x42696a, transparent: true, opacity: .15, depthWrite: false });
+const headGeometry = new THREE.SphereGeometry(1, 10, 8);
+const torsoGeometry = new THREE.SphereGeometry(1, 8, 7);
+const limbGeometry = new THREE.CylinderGeometry(1, 1, 1, 5);
+const eyeGeometry = new THREE.SphereGeometry(1, 6, 5);
+const badgeGeometry = new THREE.SphereGeometry(1, 6, 5);
+const makeProp = (idea: Idea): THREE.Group => {
+  const group = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial({ color: markerColors[idea], roughness: .83 });
+  const add = (geometry: THREE.BufferGeometry, position: [number, number, number], rotation?: [number, number, number]) => {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(...position); if (rotation) mesh.rotation.set(...rotation); group.add(mesh);
+  };
+  switch (idea) {
+    case 'settlers': add(new THREE.SphereGeometry(.17, 7, 6), [0, 0, 0]); break;
+    case 'grove':
+      add(new THREE.CylinderGeometry(.035, .045, .46, 5), [0, .08, 0]);
+      add(new THREE.ConeGeometry(.2, .36, 6), [0, .35, 0]); break;
+    case 'workshop':
+      add(new THREE.CylinderGeometry(.045, .045, .5, 6), [0, 0, 0]);
+      add(new THREE.BoxGeometry(.35, .14, .15), [0, .23, 0]); break;
+    case 'roads': add(new THREE.DodecahedronGeometry(.22, 0), [0, 0, 0]); break;
+    case 'market': add(new THREE.BoxGeometry(.4, .3, .34), [0, 0, 0]); break;
+    case 'windmill':
+      add(new THREE.TorusGeometry(.22, .07, 5, 8), [0, 0, 0]);
+      add(new THREE.SphereGeometry(.07, 6, 5), [0, 0, 0]); break;
+    case 'archive': add(new THREE.BoxGeometry(.37, .28, .035), [0, 0, 0]); break;
+    case 'observatory': add(new THREE.IcosahedronGeometry(.23, 0), [0, 0, 0]); break;
+  }
+  group.position.set(.71, 1.02, .1);
+  group.visible = false;
+  return group;
 };
-const roles:Role[]=['builder','resident','merchant','resident','guard','mage','resident','warrior','resident','artist','resident','miner'];
-interface Resident { role:Role;home:{x:number;z:number};work:{x:number;z:number};id:number; }
-type Part='torso'|'head'|'hair'|'fringe'|'leftEyeWhite'|'rightEyeWhite'|'leftEye'|'rightEye'|'nose'|'mouth'|'leftEar'|'rightEar'|'collar'|'belt'|'buckle'|'leftLeg'|'rightLeg'|'leftFoot'|'rightFoot'|'leftArm'|'rightArm'|'leftHand'|'rightHand'|'hat'|'mageHat'|'apron'|'shield'|'parcel'|'food';
-const BOX=new RoundedBoxGeometry(1,1,1,2,.16),PLAIN_BOX=new THREE.BoxGeometry(1,1,1),HEAD=new THREE.SphereGeometry(1,10,8),LOW_HEAD=new THREE.IcosahedronGeometry(1,1),HAT=new THREE.ConeGeometry(1,1,7);
-const PARTS:Part[]=['torso','head','hair','fringe','leftEyeWhite','rightEyeWhite','leftEye','rightEye','nose','mouth','leftEar','rightEar','collar','belt','buckle','leftLeg','rightLeg','leftFoot','rightFoot','leftArm','rightArm','leftHand','rightHand','hat','mageHat','apron','shield','parcel','food'];
-const COLOR={wood:0x5a514b,guard:0x8f9694,builder:0xe0bc71,mage:0x756594,merchant:0xd4bb8b,artist:0xb78180,miner:0xe4c38a,plain:0x6d5142,shield:0xa3a9a4};
+const markerColors: Record<Idea, number> = {
+  settlers: 0x8bbf80, grove: 0x66ad78, workshop: 0xe6aa68, roads: 0x9baabc,
+  market: 0xe0bb70, windmill: 0x72bdbd, archive: 0xa593c3, observatory: 0xe4ca80,
+};
+const ease = (n: number) => { const x = THREE.MathUtils.clamp(n, 0, 1); return x * x * (3 - 2 * x); };
+function sampleRoute(path: THREE.Vector3[], progress: number): THREE.Vector3 {
+  let length = 0; for (let i = 1; i < path.length; i++) length += path[i - 1].distanceTo(path[i]);
+  let left = progress * length;
+  for (let i = 1; i < path.length; i++) { const segment = path[i - 1].distanceTo(path[i]); if (left <= segment) return path[i - 1].clone().lerp(path[i], segment ? left / segment : 0); left -= segment; }
+  return path[path.length - 1].clone();
+}
+
+interface Figure {
+  root: THREE.Group;
+  body: THREE.Group;
+  head: THREE.Group;
+  arms: [THREE.Group, THREE.Group];
+  legs: [THREE.Group, THREE.Group];
+  prop: THREE.Group;
+  props: Record<Idea, THREE.Group>;
+  badge: THREE.Mesh;
+  home: THREE.Vector3;
+  work: THREE.Vector3;
+  path: THREE.Vector3[];
+}
+interface Cue { idea: Idea; target: THREE.Vector3; failed: boolean; started: number; duration: number; origin: THREE.Vector3 }
+
+/** Small white figures with dot eyes. Their gestures carry the upgrade story. */
 export class Residents {
-  readonly group=new THREE.Group();
-  private readonly mobile=matchMedia('(max-width: 700px)').matches;
-  private readonly capacity=this.mobile?12:24;
-  private readonly residents:Resident[]=[];
-  private readonly meshes=new Map<Part,THREE.InstancedMesh>();
-  private readonly dummy=new THREE.Object3D();
-  constructor(scene:THREE.Scene){
-    const base=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.87});
-    for(const part of PARTS){
-      const geo=part==='mageHat'?HAT:['head','hair','fringe','leftEyeWhite','rightEyeWhite','leftEye','rightEye','nose','leftEar','rightEar','leftHand','rightHand','food'].includes(part)?this.mobile?LOW_HEAD:HEAD:this.mobile?PLAIN_BOX:BOX;
-      const mesh=new THREE.InstancedMesh(geo,base,this.capacity);
-      mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      mesh.frustumCulled=false;
-      mesh.castShadow=!this.mobile&&(part==='torso'||part==='head'||part==='hat');
-      mesh.receiveShadow=true;this.meshes.set(part,mesh);this.group.add(mesh);
-    }
-    const homes=PLOTS.filter(p=>p.kind==='home');
-    const jobs=PLOTS.filter(p=>p.kind==='project'||p.kind==='market'||p.kind==='forge'||p.kind==='post'||p.kind==='tavern');
-    const landmark=(key:string)=>PLOTS.find(p=>p.project===key)!;
-    for(let id=0;id<this.capacity;id++){
-      const role=roles[id%roles.length],home=homes[(id*5)%homes.length];
-      const job=role==='merchant'?PLOTS.find(p=>p.id==='market')!:role==='mage'?landmark('wizard'):role==='artist'?PLOTS.find(p=>p.id==='workshop')!:role==='miner'?landmark('dwarves'):role==='guard'?{x:32,z:0}:role==='warrior'?{x:-32,z:0}:jobs[(id*3+2)%jobs.length];
-      this.residents.push({id,role,home:{x:home.x,z:home.z},work:{x:job.x,z:job.z}});
-      const cloth=palettes.cloth[id%palettes.cloth.length],skin=palettes.skin[(id*7)%palettes.skin.length];
-      const colors:Record<Part,number>={
-        torso:cloth,head:skin,hair:[0x42382f,0x6c4a35,0x393942,0x8a6243][id%4],fringe:[0x42382f,0x6c4a35,0x393942,0x8a6243][id%4],leftEyeWhite:0xfff2df,rightEyeWhite:0xfff2df,leftEye:0x263038,rightEye:0x263038,nose:skin,mouth:0x5b463d,leftEar:skin,rightEar:skin,
-        collar:role==='mage'?0xb9a7ce:role==='guard'?0xd4ddda:0xd6c7a9,belt:0x51483e,buckle:0xd4af70,
-        leftLeg:COLOR.wood,rightLeg:COLOR.wood,leftFoot:COLOR.wood,rightFoot:COLOR.wood,leftArm:cloth,rightArm:cloth,leftHand:skin,rightHand:skin,
-        hat:role==='builder'?COLOR.builder:role==='guard'||role==='warrior'?COLOR.guard:role==='merchant'?COLOR.merchant:role==='artist'?COLOR.artist:role==='miner'?COLOR.miner:COLOR.plain,
-        mageHat:COLOR.mage,apron:COLOR.merchant,shield:COLOR.shield,parcel:role==='miner'?COLOR.wood:COLOR.builder,food:0xc47d53,
+  readonly group = new THREE.Group();
+  private readonly figures: Figure[] = [];
+  private readonly capacity = matchMedia('(max-width: 700px)').matches ? 10 : 17;
+  private cue: Cue | null = null;
+
+  constructor(scene: THREE.Scene) {
+    const homes = PLOTS.filter(plot => plot.kind === 'home');
+    const jobs = PLOTS.filter(plot => ['project', 'market', 'forge', 'post', 'tavern'].includes(plot.kind));
+    for (let i = 0; i < this.capacity; i++) {
+      const root = new THREE.Group(), body = new THREE.Group(), head = new THREE.Group();
+      const sphere = (geo: THREE.BufferGeometry, material: THREE.Material, x: number, y: number, z: number, sx: number, sy: number, sz: number) => {
+        const mesh = new THREE.Mesh(geo, material); mesh.position.set(x, y, z); mesh.scale.set(sx, sy, sz); return mesh;
       };
-      for(const part of PARTS)this.meshes.get(part)!.setColorAt(id,new THREE.Color(colors[part]));
+      const torso = sphere(torsoGeometry, bodyMaterial, 0, 1.15, 0, .38, .53, .29); torso.castShadow = true; body.add(torso);
+      const face = sphere(headGeometry, bodyMaterial, 0, 2.03, .02, .49, .52, .45); face.castShadow = true; head.add(face);
+      for (const x of [-.19, .19]) head.add(sphere(eyeGeometry, eyeMaterial, x, 2.07, .445, .048, .064, .028));
+      const arms: [THREE.Group, THREE.Group] = [new THREE.Group(), new THREE.Group()];
+      const legs: [THREE.Group, THREE.Group] = [new THREE.Group(), new THREE.Group()];
+      for (const side of [-1, 1] as const) {
+        const index = side === -1 ? 0 : 1;
+        const arm = arms[index]; arm.position.set(side * .4, 1.43, 0);
+        arm.add(sphere(limbGeometry, bodyMaterial, side * .08, -.31, 0, .09, .62, .09)); body.add(arm);
+        const leg = legs[index]; leg.position.set(side * .18, .71, 0);
+        leg.add(sphere(limbGeometry, bodyMaterial, 0, -.32, 0, .10, .66, .1)); body.add(leg);
+      }
+      const badge = sphere(badgeGeometry, new THREE.MeshStandardMaterial({ color: Object.values(markerColors)[i % 8], roughness: 1 }), 0, 1.45, .29, .095, .095, .04);
+      body.add(badge);
+      const props = Object.fromEntries((Object.keys(markerColors) as Idea[]).map(idea => [idea, makeProp(idea)])) as Record<Idea, THREE.Group>;
+      for (const item of Object.values(props)) body.add(item);
+      root.add(body, head);
+      const shadow = new THREE.Mesh(new THREE.CircleGeometry(.43, 12), shadowMaterial);
+      shadow.rotation.x = -Math.PI / 2; shadow.position.y = .035; root.add(shadow);
+      const home = homes[(i * 5) % homes.length], job = jobs[(i * 3 + 2) % jobs.length];
+      const homePoint = new THREE.Vector3(home.x, 0, home.z), workPoint = new THREE.Vector3(job.x, 0, job.z);
+      this.figures.push({ root, body, head, arms, legs, prop: props.settlers, props, badge, home: homePoint, work: workPoint, path: routeBetween(homePoint, workPoint) });
+      this.group.add(root);
     }
-    for(const mesh of this.meshes.values())if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
     scene.add(this.group);
   }
-  private put(part:Part,id:number,x:number,y:number,z:number,sx:number,sy:number,sz:number,yaw:number,tilt=0){
-    const d=this.dummy;d.position.set(x,y,z);d.rotation.set(tilt,yaw,0);d.scale.set(sx,sy,sz);d.updateMatrix();this.meshes.get(part)!.setMatrixAt(id,d.matrix);
+
+  startCue(idea: Idea, target: { x: number; z: number }, failed: boolean, duration = 1.7): void {
+    const actor = this.figures[0];
+    const direction = new THREE.Vector3(target.x, 0, target.z).normalize();
+    const origin = new THREE.Vector3(target.x - direction.x * 4.5 - 2.5, 0, target.z - direction.z * 4.5 + 1.5);
+    actor.root.position.copy(origin);
+    this.cue = { idea, target: new THREE.Vector3(target.x, 0, target.z), failed, started: performance.now() / 1000, duration, origin };
+    actor.prop.visible = false;
+    actor.prop = actor.props[idea];
+    actor.prop.visible = true;
+    (actor.badge.material as THREE.MeshStandardMaterial).color.setHex(markerColors[idea]);
   }
-  update(snapshot:TownSnapshot){
-    const count=Math.min(this.capacity,snapshot.residents),t=snapshot.dayFraction;
-    for(const mesh of this.meshes.values())mesh.count=count;
-    for(let id=0;id<count;id++){
-      const p=this.residents[id],offset=(id%5)*.013,shift=(t+offset)%1;
-      const market=PLOTS.find(q=>q.id==='market')!,square={x:0,z:0};
-      const activeSite=p.role==='builder'&&snapshot.elapsed<28*60_000?snapshot.plots.find(q=>q.stage>0&&q.stage<4&&q.kind!=='project'):undefined;
-      const job=activeSite?{x:activeSite.x,z:activeSite.z}:p.role==='guard'||p.role==='warrior'?snapshot.outerWood>8?{x:p.role==='guard'?53:-53,z:0}:p.work:p.work;
-      let from=p.home,to=job,progress=0,moving=false;
-      if(shift<.13){from=p.home;to=job;progress=shift/.13;moving=true;}
-      else if(shift<.50){from=job;to=job;}
-      else if(shift<.63){from=job;to=id%3===0?square:market;progress=(shift-.5)/.13;moving=true;}
-      else if(shift<.74){from=id%3===0?square:market;to=from;}
-      else if(shift<.87){from=id%3===0?square:market;to=p.home;progress=(shift-.74)/.13;moving=true;}
-      else {from=p.home;to=p.home;}
-      const path=routeBetween(from,to),pos=moving?sampleRoute(path,progress):new THREE.Vector3(to.x,.58,to.z);
-      const next=moving?sampleRoute(path,Math.min(1,progress+.01)):pos;
-      const yaw=moving?Math.atan2(next.x-pos.x,next.z-pos.z):0;
-      let routeLength=0;for(let i=1;i<path.length;i++)routeLength+=path[i-1].distanceTo(path[i]);
-      const phase=progress*routeLength*1.55+id*.71;
-      const step=moving?Math.sin(phase):0;
-      const bob=moving?Math.abs(Math.sin(phase))*.045:Math.sin(snapshot.elapsed/920+id)*.012;
-      const size=.8+(id%4)*.07,yy=.58+bob;
-      const greeting=!moving&&shift>=.63&&shift<.74&&id%3===0;
-      const armSwing=moving?-step*.48:p.role==='builder'&&activeSite?Math.sin(snapshot.elapsed/230+id)*.75:greeting?Math.sin(snapshot.elapsed/260+id)*.6:Math.sin(snapshot.elapsed/1200+id)*.1;
-      const dx=Math.cos(yaw),dz=-Math.sin(yaw);
-      const local=(x:number,z:number):[number,number]=>[pos.x+x*dx+z*Math.sin(yaw),pos.z+z*Math.cos(yaw)+x*dz];
-      let q=local(0,0);this.put('torso',id,q[0],yy+1.43*size,q[1],.83*size,1.17*size,.65*size,yaw,moving?.055:0);
-      this.put('head',id,q[0],yy+2.36*size,q[1],.53*size,.55*size,.49*size,yaw);
-      this.put('hair',id,q[0],yy+2.73*size,q[1]-.04,.54*size,.22*size,.51*size,yaw);
-      q=local(-.14*size,.35*size);this.put('fringe',id,q[0],yy+2.65*size,q[1],.27*size,.19*size,.22*size,yaw);
-      q=local(-.18*size,.455*size);this.put('leftEyeWhite',id,q[0],yy+2.43*size,q[1],.09*size,.092*size,.04*size,yaw);
-      q=local(.18*size,.455*size);this.put('rightEyeWhite',id,q[0],yy+2.43*size,q[1],.09*size,.092*size,.04*size,yaw);
-      q=local(-.18*size,.486*size);this.put('leftEye',id,q[0],yy+2.42*size,q[1],.047*size,.061*size,.026*size,yaw);
-      q=local(.18*size,.486*size);this.put('rightEye',id,q[0],yy+2.42*size,q[1],.047*size,.061*size,.026*size,yaw);
-      q=local(0,.49*size);this.put('nose',id,q[0],yy+2.23*size,q[1],.1*size,.11*size,.12*size,yaw);
-      q=local(0,.47*size);this.put('mouth',id,q[0],yy+2.08*size,q[1],.13*size,.026*size,.025*size,yaw);
-      q=local(-.47*size,0);this.put('leftEar',id,q[0],yy+2.31*size,q[1],.12*size,.17*size,.13*size,yaw);
-      q=local(.47*size,0);this.put('rightEar',id,q[0],yy+2.31*size,q[1],.12*size,.17*size,.13*size,yaw);
-      q=local(0,.21*size);this.put('collar',id,q[0],yy+2.01*size,q[1],.61*size,.19*size,.31*size,yaw);
-      q=local(0,.36*size);this.put('belt',id,q[0],yy+1.13*size,q[1],.9*size,.13*size,.12*size,yaw);
-      q=local(0,.43*size);this.put('buckle',id,q[0],yy+1.13*size,q[1],.18*size,.17*size,.055*size,yaw);
-      for(const [index,side] of [-1,1].entries()){
-        const stride=side<0?step:-step,lift=Math.max(0,stride);
-        q=local(side*.25*size,stride*.09*size);
-        this.put(side<0?'leftLeg':'rightLeg',id,q[0],yy+(.56+lift*.045)*size,q[1],.29*size,1.05*size,.35*size,yaw,stride*.38);
-        q=local(side*.25*size,(.16+stride*.24)*size);
-        this.put(side<0?'leftFoot':'rightFoot',id,q[0],yy+(.11+lift*.14)*size,q[1],.37*size,.26*size,.52*size,yaw,-stride*.18);
-        const swing=index===0?armSwing:-armSwing;
-        q=local(side*.58*size,-swing*.11*size);
-        this.put(side<0?'leftArm':'rightArm',id,q[0],yy+1.53*size,q[1],.29*size,.8*size,.33*size,yaw,swing);
-        q=local(side*.61*size,(.04-swing*.25)*size);
-        this.put(side<0?'leftHand':'rightHand',id,q[0],yy+(1.07+Math.max(0,swing)*.07)*size,q[1],.18*size,.2*size,.18*size,yaw);
+
+  finishCue(): void { this.cue = null; this.figures[0].prop.visible = false; }
+
+  update(snapshot: TownSnapshot): void {
+    const seconds = performance.now() / 1000;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const count = Math.min(this.capacity, snapshot.residents);
+    this.figures.forEach((figure, i) => {
+      const starring = i === 0 && this.cue !== null;
+      figure.root.visible = i < count || starring;
+      if (!figure.root.visible) return;
+      let x: number, z: number, walk = 0, gesture = 0, failed = false;
+      if (starring) {
+        const cue = this.cue!;
+        const progress = THREE.MathUtils.clamp((seconds - cue.started) / cue.duration, 0, 1);
+        const travel = ease(progress / .43);
+        x = THREE.MathUtils.lerp(cue.origin.x, cue.target.x, travel);
+        z = THREE.MathUtils.lerp(cue.origin.z, cue.target.z, travel);
+        walk = progress < .43 ? 1 : 0;
+        gesture = progress >= .43 ? Math.sin(Math.min(1, (progress - .43) / .57) * Math.PI) : 0;
+        failed = cue.failed;
+        figure.root.rotation.y = Math.atan2(cue.target.x - cue.origin.x, cue.target.z - cue.origin.z);
+        figure.prop.visible = progress < .55;
+      } else {
+        const phase = (seconds * .028 + i * .17) % 1;
+        const move = phase < .39 ? ease(phase / .39) : phase < .55 ? 1 : phase < .94 ? 1 - ease((phase - .55) / .39) : 0;
+        const point = sampleRoute(figure.path, move);
+        x = point.x; z = point.z;
+        walk = phase < .39 || phase > .55 && phase < .94 ? 1 : 0;
+        figure.root.rotation.y = phase > .55 ? Math.atan2(figure.home.x - figure.work.x, figure.home.z - figure.work.z) : Math.atan2(figure.work.x - figure.home.x, figure.work.z - figure.home.z);
+        if (this.cue && i < 5) {
+          const cueProgress = (seconds - this.cue.started) / this.cue.duration;
+          gesture = cueProgress > .52 ? Math.sin(Math.min(1, (cueProgress - .52) / .48) * Math.PI) * .65 : 0;
+        }
       }
-      this.put('hat',id,pos.x,yy+2.81*size,pos.z,p.role==='mage'?.0001:.87*size,p.role==='mage'?.0001:.29*size,p.role==='mage'?.0001:.84*size,yaw);
-      this.put('mageHat',id,pos.x,yy+2.98*size,pos.z,p.role==='mage'?.8*size:.0001, p.role==='mage'?1.05*size:.0001,p.role==='mage'?.8*size:.0001,yaw);
-      q=local(0,.36*size);this.put('apron',id,q[0],yy+1.34*size,q[1],p.role==='merchant'?.75*size:.0001,p.role==='merchant'?.9*size:.0001,.12*size,yaw);
-      q=local(-.75*size,.25*size);this.put('shield',id,q[0],yy+1.38*size,q[1],p.role==='warrior'?.65*size:.0001,p.role==='warrior'?.85*size:.0001,.2*size,yaw);
-      const carrying=moving&&(p.role==='builder'||p.role==='miner'||p.role==='merchant');
-      q=local(.8*size,.32*size);this.put('parcel',id,q[0],yy+.98*size,q[1],carrying?.45*size:.0001,carrying?.42*size:.0001,carrying?.48*size:.0001,yaw);
-      const eating=!moving&&shift>=.63&&shift<.74&&id%3!==0;
-      q=local(.23*size,.4*size);this.put('food',id,q[0],yy+2.14*size,q[1],eating?.22*size:.0001,eating?.18*size:.0001,eating?.22*size:.0001,yaw);
-    }
-    for(const mesh of this.meshes.values())mesh.instanceMatrix.needsUpdate=true;
+      const stride = seconds * 13 + i;
+      figure.root.position.set(x, terrainHeight(x, z) + (reduced ? 0 : walk * Math.abs(Math.sin(stride)) * .16), z);
+      figure.body.scale.y = reduced ? 1 : 1 + (walk ? Math.sin(stride * 2) * .045 : Math.sin(seconds * 2.2 + i) * .025);
+      figure.head.rotation.z = reduced ? 0 : failed ? Math.sin(seconds * 8) * .2 * gesture : Math.sin(seconds * 2.4 + i) * .06;
+      figure.head.position.y = reduced ? 0 : gesture * (failed ? -.12 : .13);
+      figure.arms[0].rotation.z = reduced ? 0 : failed ? -.7 * gesture : -gesture * 1.3 + walk * Math.sin(stride) * .45;
+      figure.arms[1].rotation.z = reduced ? 0 : failed ? .7 * gesture : -gesture * 1.3 - walk * Math.sin(stride) * .45;
+      figure.legs[0].rotation.x = reduced ? 0 : walk * Math.sin(stride) * .5;
+      figure.legs[1].rotation.x = reduced ? 0 : -walk * Math.sin(stride) * .5;
+    });
   }
-  dispose(){this.group.removeFromParent();this.group.clear();for(const mesh of this.meshes.values())mesh.dispose();}
+
+  dispose(): void {
+    this.group.removeFromParent();
+    for (const figure of this.figures) {
+      for (const prop of Object.values(figure.props)) {
+        prop.traverse(object => { if (object instanceof THREE.Mesh) object.geometry.dispose(); });
+        const first = prop.children[0]; if (first instanceof THREE.Mesh) (first.material as THREE.Material).dispose();
+      }
+      (figure.badge.material as THREE.Material).dispose();
+    }
+    this.group.clear();
+  }
 }
