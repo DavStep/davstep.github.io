@@ -1,0 +1,1557 @@
+      :root {
+        --bg: #1a1410;
+        --panel: rgba(28, 20, 12, 0.96);
+        --frame: #4a3422;
+        --frame-light: #6b4a30;
+        --ink: #e8d9b0;
+        --muted: #9a8466;
+        --gold: #d4a017;
+        --ember: #c84a35;
+        --moss: #6b8e3a;
+        --rare: #6b8cca;
+        --epic: #a060c0;
+
+        /* Seasonal palette — defaults are SUMMER. Per-season overrides on .world[data-season=...]. */
+        --grass: #3a5a28;
+        --grass-dark: #25401a;
+        --grass-blade: #4a6a30;
+        --grass-blade-2: #5a7a36;
+        --grass-rim: #4a6a30;
+        --grass-rim-dark: #2f4a20;
+        --grass-back: #4d6c2c;
+        --grass-back-dark: #36511e;
+        --grass-back-rim: #3a5520;
+        --grass-back-shadow: #233814;
+        --leaf-light: #4a6a36;
+        --leaf-mid: #3a5a26;
+        --leaf-dark: #2a4a1a;
+        --leaf-shadow: #1a3010;
+        --leaf-canopy-1: #3a5a26; /* oak outer */
+        --leaf-canopy-2: #2a4a1a; /* oak mid */
+        --leaf-canopy-3: #1a3010; /* oak inner */
+        --leaf-pine-light: #345a2c;
+        --leaf-pine-mid: #284a22;
+        --leaf-pine-dark: #1a3818;
+        --bark: #3a2410;
+        --bark-light: #5a3818;
+        --fruit-show: 1;
+        --hill-far-fill: #1a1208;
+        --hill-near-fill: #2a2018;
+        --mountain-fill: #5a6878;
+        --snow-top: #f7fbff;
+        --snow-mid: #dce8f3;
+        --snow-low: #b9cadb;
+        --snow-shadow: rgba(65, 82, 102, 0.38);
+        --snow-opacity: 0;
+        --bare-show: 0;
+      }
+
+      /* ============= SEASON PALETTES ============= */
+      .world[data-season="spring"] {
+        --grass: #4d7a30;
+        --grass-dark: #356018;
+        --grass-blade: #5e8c3a;
+        --grass-blade-2: #74a448;
+        --grass-rim: #5f8a36;
+        --grass-rim-dark: #3c641f;
+        --grass-back: #5b7d36;
+        --grass-back-dark: #3f6124;
+        --grass-back-rim: #486d28;
+        --grass-back-shadow: #263d16;
+        --leaf-canopy-1: #6aa040;
+        --leaf-canopy-2: #4a8030;
+        --leaf-canopy-3: #2e6420;
+        --leaf-pine-light: #4a7a3a;
+        --leaf-pine-mid: #386030;
+        --leaf-pine-dark: #1e4824;
+        --hill-far-fill: #1c2208;
+        --hill-near-fill: #2c3018;
+        --mountain-fill: #5e7080;
+        --snow-opacity: 0;
+        --bare-show: 0;
+        --fruit-show: 1;
+      }
+      .world[data-season="summer"] {
+        /* defaults — same as :root */
+        --snow-opacity: 0;
+        --bare-show: 0;
+        --fruit-show: 1;
+      }
+      .world[data-season="autumn"] {
+        --grass: #7a6228;
+        --grass-dark: #5a4818;
+        --grass-blade: #8a7030;
+        --grass-blade-2: #a87836;
+        --grass-rim: #9a7a34;
+        --grass-rim-dark: #6a531e;
+        --grass-back: #80682e;
+        --grass-back-dark: #604b1e;
+        --grass-back-rim: #6f5624;
+        --grass-back-shadow: #3b2c12;
+        --leaf-canopy-1: #e08838;
+        --leaf-canopy-2: #c86028;
+        --leaf-canopy-3: #8a3818;
+        --leaf-pine-light: #386030;
+        --leaf-pine-mid: #2a4a22;
+        --leaf-pine-dark: #1a3818;
+        --hill-far-fill: #2a2010;
+        --hill-near-fill: #3a2818;
+        --mountain-fill: #6a6a68;
+        --snow-opacity: 0;
+        --bare-show: 0;
+        --fruit-show: 0;
+      }
+      .world[data-season="winter"] {
+        --grass: #c7ced6;
+        --grass-dark: #8a92a0;
+        --grass-blade: #d8dee6;
+        --grass-blade-2: #e4e8ee;
+        --grass-rim: #eef4fb;
+        --grass-rim-dark: #b7c4d2;
+        --grass-back: #d5dde6;
+        --grass-back-dark: #aeb8c5;
+        --grass-back-rim: #eff6ff;
+        --grass-back-shadow: #7d8b9c;
+        --leaf-canopy-1: #3a5a26;
+        --leaf-canopy-2: #2a4a1a;
+        --leaf-canopy-3: #1a3010;
+        --leaf-pine-light: #2a4a22;
+        --leaf-pine-mid: #1e3a1a;
+        --leaf-pine-dark: #142a14;
+        --bark: #2a1a08;
+        --bark-light: #3a2410;
+        --hill-far-fill: #3a4248;
+        --hill-near-fill: #586068;
+        --mountain-fill: #8a98a8;
+        --snow-top: #f8fcff;
+        --snow-mid: #dce8f4;
+        --snow-low: #b8c9da;
+        --snow-shadow: rgba(64, 84, 108, 0.46);
+        --snow-opacity: 1;
+        --bare-show: 1;
+        --fruit-show: 0;
+      }
+      /* Smooth fade when season changes */
+      .grass, .grass::before, .grass::after,
+      .hills path, .mountains svg path,
+      .hills-snow-fill, .mountains-snow-fill, .hills-snow-far, .hills-snow-near, .mountains-snow,
+      .tree .canopy, .tree .bark, .tree .bare-branches, .tree .snow-cap, .tree .fruits,
+      .grass-back {
+        transition: fill 3s ease, stroke 3s ease, background 3s ease, opacity 3s ease, color 3s ease, box-shadow 3s ease;
+      }
+
+      * { box-sizing: border-box; image-rendering: pixelated; }
+      html, body { overflow-x: hidden; }
+      body {
+        margin: 0;
+        padding-bottom: clamp(96px, 18vh, 180px);
+        font-family: "VT323", monospace;
+        font-size: 20px;
+        line-height: 1.4;
+        color: var(--ink);
+        background: #0a0810;
+        min-height: 100vh;
+      }
+
+      /* ============= WORLD ============= */
+      .world {
+        position: fixed; inset: 0;
+        right: auto; width: max(2000px, 100vw);
+        z-index: 0; pointer-events: none; overflow: hidden;
+        will-change: transform;
+      }
+      .world-dim {
+        position: fixed; inset: 0; z-index: 9;
+        background: rgba(0, 0, 0, 0.55);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      body.dim-world .world-dim { opacity: 1; }
+
+      /* World snap-back button — appears when world has been panned away from origin */
+      .world-pan-reset {
+        position: fixed;
+        bottom: calc(14px + env(safe-area-inset-bottom));
+        right: calc(14px + env(safe-area-inset-right));
+        z-index: 12;
+        color: var(--muted); background: var(--panel);
+        border: 1px solid var(--frame);
+        padding: 10px 12px; min-height: 32px; min-width: 62px;
+        font-family: "Press Start 2P", monospace;
+        font-size: 0.45rem;
+        letter-spacing: 0.5px;
+        display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer; user-select: none;
+        touch-action: manipulation;
+        line-height: 1;
+        border-radius: 0;
+        appearance: none;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .world-pan-reset.visible { opacity: 1; pointer-events: auto; }
+      .world-pan-reset:active { color: var(--gold); border-color: var(--gold); transform: translate(1px, 1px); }
+      body.ui-hidden .world-pan-reset { opacity: 0; pointer-events: none; }
+
+      .sky {
+        position: absolute; inset: 0; z-index: 0;
+        background: linear-gradient(180deg,
+          var(--sky-top, #6a98c8) 0%,
+          var(--sky-mid, #d8c8a8) 70%,
+          var(--sky-bot, #b89868) 100%);
+      }
+
+      .weather-veil {
+        position: absolute; inset: 0; z-index: 3;
+        background: rgba(20, 20, 30, 0);
+        transition: background 8s ease;
+        pointer-events: none;
+      }
+      .world[data-weather="cloudy"] .weather-veil { background: rgba(20, 20, 30, 0.25); }
+      .world[data-weather="rain"]   .weather-veil { background: rgba(15, 15, 25, 0.45); }
+      .world[data-weather="storm"]  .weather-veil { background: rgba(8, 8, 18, 0.65); }
+      .world.manual-weather .weather-veil { transition: background 1.4s ease; }
+
+      .stars {
+        position: absolute; inset: 0; z-index: 1;
+        background-image:
+          radial-gradient(1px 1px at 5% 8%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 12% 22%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 19% 5%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 27% 18%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 34% 12%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 41% 25%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 48% 6%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 55% 20%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 62% 10%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 69% 23%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 76% 8%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 83% 16%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 90% 5%, #fff, transparent 100%),
+          radial-gradient(1px 1px at 97% 19%, #fff, transparent 100%);
+        opacity: var(--stars-opacity, 0);
+        animation: twinkle 4s steps(2) infinite;
+      }
+      @keyframes twinkle { 0%,100% { filter: brightness(1); } 50% { filter: brightness(0.65); } }
+
+      .sun {
+        position: absolute;
+        left: var(--sun-x, 18%); top: var(--sun-y, 8%);
+        width: 28px; height: 28px;
+        background: var(--sun-color, #f0d060);
+        border-radius: 50%;
+        box-shadow: 0 0 22px 6px var(--sun-glow, rgba(240, 208, 96, 0.45));
+        opacity: var(--sun-opacity, 0);
+        transform: translate(-50%, -50%); z-index: 1;
+        transition: left 0.55s linear, top 0.55s linear;
+      }
+
+      .moon {
+        position: absolute;
+        left: var(--moon-x, 82%); top: var(--moon-y, 12%);
+        width: 24px; height: 24px;
+        background: #e0d4a8; border-radius: 50%;
+        box-shadow: 0 0 16px 3px rgba(224, 212, 168, 0.35), inset -6px -3px 0 -2px #b4a684;
+        opacity: var(--moon-opacity, 0);
+        transform: translate(-50%, -50%); z-index: 1;
+        transition: left 0.55s linear, top 0.55s linear;
+      }
+
+      /* CLOUDS — SVG puffs */
+      .clouds-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+      .cloud {
+        position: absolute;
+        width: 64px; height: 24px;
+        transition: filter 6s ease, opacity 6s ease;
+        will-change: transform;
+        color: var(--cloud-light, #f0e4c0);
+      }
+      .cloud svg { width: 100%; height: 100%; display: block; }
+      .cloud .cl-light { fill: var(--cloud-light, #f0e4c0); }
+      .cloud .cl-dark  { fill: var(--cloud-dark, #c8b890); }
+      .world[data-weather="rain"] .cloud,
+      .world[data-weather="storm"] .cloud { filter: brightness(0.55) saturate(0.35); }
+      .world.manual-weather .cloud { transition: filter 1.4s ease, opacity 1.4s ease; }
+
+      /* DRAGONS — SVG sprite */
+      .dragons-layer { position: absolute; inset: 0; z-index: 4; }
+      .dragon {
+        position: absolute;
+        width: 56px; height: 26px;
+        will-change: transform, left, top;
+      }
+      .dragon svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .dragon .dr-wing-up, .dragon .dr-wing-dn {
+        animation: flap 0.45s steps(2) infinite;
+        transform-origin: 28px 13px;
+      }
+      .dragon .dr-wing-dn { animation-delay: 0.225s; }
+      @keyframes flap {
+        0%,100% { transform: scaleY(1); }
+        50%     { transform: scaleY(0.4) translateY(-1px); }
+      }
+      .dragon.flyby { animation: flyby linear forwards; }
+      @keyframes flyby {
+        from { left: -80px; } to { left: calc(100% + 80px); }
+      }
+
+      /* ARROW (guard-post projectile) */
+      .arrow {
+        position: absolute;
+        width: 8px; height: 2px;
+        background: linear-gradient(90deg, #3a2410 0%, #5a3818 60%, #c8c0b0 60%, #e8e0d0 100%);
+        z-index: 6;
+        pointer-events: none;
+        transform: rotate(var(--ang, 0deg));
+        transform-origin: 50% 50%;
+      }
+      .arrow::after {
+        content: ""; position: absolute;
+        right: -3px; top: -1px;
+        width: 0; height: 0;
+        border-left: 3px solid #c8c0b0;
+        border-top: 2px solid transparent;
+        border-bottom: 2px solid transparent;
+      }
+      .arrow-hit {
+        position: absolute;
+        width: 6px; height: 6px;
+        background: radial-gradient(circle, #fff8d0 0%, #f0c440 50%, transparent 100%);
+        border-radius: 50%;
+        z-index: 7;
+        pointer-events: none;
+        animation: arrow-hit 0.4s ease-out forwards;
+      }
+      @keyframes arrow-hit {
+        0%   { transform: scale(0.5); opacity: 1; }
+        100% { transform: scale(1.6); opacity: 0; }
+      }
+      /* Dragon flinch when hit */
+      .dragon.flinch { animation: dragon-flinch 0.2s steps(2) !important; }
+      @keyframes dragon-flinch {
+        0%,100% { translate: 0 0; }
+        25%     { translate: -2px 1px; }
+        50%     { translate: 2px -1px; }
+        75%     { translate: -1px 0; }
+      }
+
+      /* ARGUMENT BANG (exclamation above a stall fight) */
+      .argue-bang {
+        position: absolute;
+        color: #c84a35;
+        font-family: "Press Start 2P", monospace;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 8;
+        pointer-events: none;
+        text-shadow: 0 0 4px #ffd8a8, 1px 1px 0 #3a1818;
+        animation: argue-bang 1.1s ease-out forwards;
+      }
+      @keyframes argue-bang {
+        0%   { transform: translateY(0) scale(0.4); opacity: 0; }
+        20%  { transform: translateY(-3px) scale(1.2); opacity: 1; }
+        80%  { transform: translateY(-8px) scale(1.05); opacity: 1; }
+        100% { transform: translateY(-14px) scale(0.9); opacity: 0; }
+      }
+      .person.arguing { animation: argue-shake 0.18s steps(2) infinite; }
+      @keyframes argue-shake {
+        0%,100% { translate: 0 0; }
+        50%     { translate: 1px 0; }
+      }
+      .person.stall-merchant {
+        bottom: 46px;
+        animation: walk-bob 1.8s ease-in-out infinite;
+      }
+      .person.stall-merchant.trading { animation: walk-bob 0.3s steps(2) infinite; }
+
+      /* FIRE BREATH */
+      .fire-breath {
+        position: absolute;
+        width: 28px; height: 26px;
+        z-index: 6;
+        pointer-events: none;
+        background-image:
+          radial-gradient(circle 6px at 50% 50%, #fff4a0 0 30%, #f0c440 31% 55%, #d04830 56% 80%, transparent 81%);
+        filter: blur(0.5px);
+        animation: fire-flicker 0.1s steps(2) infinite, fire-fade 1.2s ease-out forwards;
+      }
+      @keyframes fire-flicker {
+        0%,100% { transform: scale(1) rotate(0deg); }
+        50%     { transform: scale(0.9) rotate(8deg); }
+      }
+      @keyframes fire-fade {
+        0%   { opacity: 0.95; }
+        80%  { opacity: 0.7; }
+        100% { opacity: 0; }
+      }
+
+      /* MOUNTAINS — distant atmospheric ridge behind the hills */
+      .mountains {
+        position: absolute; bottom: 56px; left: 0;
+        width: 100%; height: 220px;
+        z-index: 1;
+        pointer-events: none;
+        filter: brightness(var(--world-brightness, 1)) saturate(0.55);
+      }
+      .mountains svg { width: 100%; height: 100%; display: block; }
+
+      /* HILLS — rolling rounded silhouette */
+      .hills {
+        position: absolute; bottom: 56px; left: 0;
+        width: 100%; height: 130px;
+        z-index: 5;
+        filter: brightness(var(--world-brightness, 1));
+      }
+      .hills .hills-far, .hills .hills-near {
+        position: absolute; left: 0; right: 0;
+        width: 100%; pointer-events: none;
+      }
+      .hills .hills-far  { bottom: 30px; height: 100px; z-index: 1; }
+      .hills .hills-near { bottom: 0;    height: 80px;  z-index: 3; }
+      .hills svg { width: 100%; height: 100%; display: block; }
+      .hills .h-far-fill  { fill: var(--hill-far-fill); }
+      .hills .h-near-fill { fill: var(--hill-near-fill); }
+      .mountains .m-fill  { fill: var(--mountain-fill); }
+      /* Snow blankets: filled caps plus a small bright ridge, instead of flat white strokes. */
+      .hills-snow-fill, .mountains-snow-fill {
+        fill: var(--snow-mid);
+        opacity: calc(var(--snow-opacity) * 0.92);
+        filter: drop-shadow(0 3px 0 var(--snow-shadow));
+      }
+      .hills-snow-fill-far { opacity: calc(var(--snow-opacity) * 0.72); }
+      .mountains-snow-fill {
+        fill: var(--snow-top);
+        opacity: calc(var(--snow-opacity) * 0.82);
+        filter: drop-shadow(0 4px 0 rgba(56, 72, 94, 0.42));
+      }
+      .hills-snow-far, .hills-snow-near, .mountains-snow {
+        fill: none;
+        stroke: var(--snow-top);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+        opacity: calc(var(--snow-opacity) * 0.86);
+        filter: drop-shadow(0 2px 0 var(--snow-shadow));
+      }
+      .hills-snow-far  { stroke-width: 3; opacity: calc(var(--snow-opacity) * 0.62); }
+      .hills-snow-near { stroke-width: 4; }
+      .mountains-snow  { stroke-width: 2.5; opacity: calc(var(--snow-opacity) * 0.72); }
+
+      /* TREES */
+      .trees-layer { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+      /* Filters hoisted from per-tree onto the parent layer — one filter for many trees
+         instead of one per element. Saves a lot of repaint when --world-brightness changes. */
+      .back-trees-layer {
+        position: absolute; inset: 0; z-index: 5; pointer-events: none;
+        filter: brightness(calc(var(--world-brightness, 1) * 0.82)) saturate(0.72);
+      }
+      .hill-trees-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+      .hill-trees-far {
+        z-index: 2;
+        filter: brightness(calc(var(--world-brightness, 1) * 0.78)) saturate(0.68);
+      }
+      .hill-trees-near {
+        z-index: 4;
+        filter: brightness(calc(var(--world-brightness, 1) * 0.84)) saturate(0.74);
+      }
+      .tree {
+        position: absolute;
+        bottom: 48px;
+        width: 24px; height: 48px;
+        z-index: 2;
+        transform: scale(var(--g, 0));
+        transform-origin: bottom center;
+        transition: transform 2.5s cubic-bezier(.34, 1.2, .64, 1);
+      }
+      .back-trees-layer .tree {
+        bottom: 68px;
+        width: 18px; height: 36px;
+        opacity: 0.72;
+      }
+      .hill-trees-layer .tree {
+        bottom: var(--hill-bottom, 40px);
+        width: var(--hill-tree-w, 14px);
+        height: var(--hill-tree-h, 28px);
+        opacity: 0.62;
+      }
+      .hill-trees-near .tree {
+        opacity: 0.7;
+      }
+      .tree svg { width: 100%; height: 100%; display: block; }
+      .tree.falling { animation: fall 1.4s cubic-bezier(.45, 0, .85, .55) forwards; }
+      @keyframes fall {
+        0%   { transform: scale(var(--g, 1)) rotate(0deg); }
+        20%  { transform: scale(var(--g, 1)) rotate(-4deg); }
+        100% { transform: scale(var(--g, 1)) rotate(86deg); opacity: 0.4; }
+      }
+
+      /* STRUCTURES (houses, towers, wells, signposts, campfires) */
+      .house {
+        position: absolute;
+        bottom: 48px;
+        width: 48px;
+        height: 42px;
+        transform-origin: bottom center;
+      }
+      .house[data-kind="tower"]    { width: 32px; height: 64px; }
+      .house[data-kind="well"]     { width: 28px; height: 30px; bottom: 50px; }
+      .house[data-kind="signpost"] { width: 22px; height: 32px; bottom: 50px; }
+      .house[data-kind="campfire"] { width: 34px; height: 24px; bottom: 50px; }
+      .house[data-kind="castle"]   { width: 200px; height: 150px; }
+      .house[data-kind="tavern"]   { width: 72px; height: 58px; }
+      .house[data-kind="guildhall"]{ width: 66px; height: 68px; }
+      .house[data-kind="mill"]     { width: 44px; height: 60px; }
+      /* Per-tile "road" structure removed in favor of the continuous road strip below */
+      .house[data-kind="lamppost"] { width: 18px; height: 38px; bottom: 50px; }
+      .house[data-kind="garden"]   { width: 32px; height: 18px; bottom: 50px; }
+      .house[data-kind="statue"]   { width: 22px; height: 38px; bottom: 50px; }
+      .house[data-kind="marketstall"]{ width: 32px; height: 36px; bottom: 50px; }
+      .house[data-kind="marketstall"][data-upgrade="1"]{ width: 52px; height: 40px; }
+      .house[data-kind="marketstall"][data-upgrade="2"]{ width: 80px; height: 40px; }
+      .house[data-kind="marketstall"][data-upgrade="3"]{ width: 120px; height: 40px; }
+      .house[data-kind="marketstall"][data-upgrade="4"]{ width: 120px; height: 40px; }
+      .house[data-kind="guardpost"]  { width: 24px; height: 50px; }
+      .house[data-kind="blacksmith"] { width: 46px; height: 44px; bottom: 50px; }
+      /* House silhouette variants */
+      .house[data-kind="house"][data-variant="two-story"] { width: 44px; height: 58px; }
+      .house[data-kind="house"][data-variant="a-frame"]   { width: 48px; height: 52px; }
+      .house[data-kind="house"][data-variant="longhouse"] { width: 64px; height: 38px; }
+
+      /* DEPTH LANES — buildings stagger above/below the road line so neighbors don't collide.
+         Lane offset/scale ride on CSS vars so they compose with the per-kind translateX(-50%) rules below.
+         Vertical spread is kept tight (≤8px total) so back-lane neighbors never appear to float
+         above front-lane ones; depth is carried mostly by --lane-scale + brightness.
+         lane-road is reserved for decorations + small shops — they hug the road in their own front row. */
+      .house                 { --lane-y: 0px; --lane-scale: 1; --lane-z: 2; z-index: var(--lane-z); transform: translateY(var(--lane-y)) scale(var(--lane-scale)); transition: transform 1.2s ease, filter 1.2s ease; }
+      .house.lane-back       { --lane-y: -4px; --lane-scale: 0.92; --lane-z: 1; filter: brightness(0.93) saturate(0.9); }
+      .house.lane-road       { --lane-y: 2px;  --lane-scale: 1;    --lane-z: 2; }
+      .house.lane-front      { --lane-y: 4px;  --lane-scale: 1.06; --lane-z: 3; }
+      /* Castle is dead-center and already scaled per tier — back-row offset only, no shrink. */
+      .house[data-kind="castle"].lane-back { --lane-y: -2px; --lane-scale: 1; filter: none; }
+
+      .house { position: absolute; }
+
+      /* CONTINUOUS ROAD STRIP — the end-to-end path people walk on */
+      .road-strip {
+        position: absolute;
+        left: 0; right: 0;
+        bottom: 7px;
+        height: 42px;
+        z-index: 5;
+        pointer-events: none;
+        --road-edge-top: rgba(45, 32, 20, 0.55);
+        --road-edge-bottom: rgba(20, 16, 12, 0.5);
+        --road-pebble: rgba(250, 220, 150, 0.28);
+        --road-shadow: rgba(0, 0, 0, 0.28);
+        filter: brightness(var(--world-brightness, 1));
+        image-rendering: pixelated;
+      }
+      .road-tier {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 2s ease;
+        box-shadow:
+          inset 0 2px 0 rgba(255, 234, 174, 0.14),
+          inset 0 -3px 0 rgba(0, 0, 0, 0.28);
+      }
+      .road-strip::before,
+      .road-strip::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 8px;
+        z-index: 2;
+        opacity: 0.95;
+        pointer-events: none;
+        background-repeat: repeat-x;
+      }
+      .road-strip::before {
+        top: -4px;
+        background-image:
+          radial-gradient(circle 3px at 8px 6px, var(--grass-dark) 0 2px, transparent 3px),
+          radial-gradient(circle 2px at 24px 4px, var(--grass-blade) 0 1.5px, transparent 2px),
+          radial-gradient(circle 3px at 40px 7px, var(--road-edge-top) 0 2px, transparent 3px),
+          linear-gradient(180deg, transparent 0 3px, var(--road-edge-top) 3px 6px, transparent 6px);
+        background-size: 52px 8px, 52px 8px, 52px 8px, 100% 8px;
+      }
+      .road-strip::after {
+        bottom: -5px;
+        background-image:
+          radial-gradient(circle 3px at 10px 1px, var(--road-edge-bottom) 0 2px, transparent 3px),
+          radial-gradient(circle 2px at 28px 3px, var(--grass-blade-2) 0 1.5px, transparent 2px),
+          radial-gradient(circle 2px at 45px 1px, var(--road-pebble) 0 1.5px, transparent 2px),
+          linear-gradient(180deg, var(--road-edge-bottom) 0 3px, transparent 3px);
+        background-size: 58px 8px, 58px 8px, 58px 8px, 100% 8px;
+      }
+      /* Tier 0 = raw grass — no road strip at all */
+      .world[data-road="0"] .road-strip           { opacity: 0; }
+      .world[data-road="1"] .road-tier.t-dirt     { opacity: 1; }
+      .world[data-road="2"] .road-tier.t-packed   { opacity: 1; }
+      .world[data-road="3"] .road-tier.t-stone    { opacity: 1; }
+      .world[data-road="4"] .road-tier.t-cobble   { opacity: 1; }
+      .world[data-road="5"] .road-tier.t-flagstone{ opacity: 1; }
+      .road-strip { transition: opacity 2s ease; }
+      .world[data-road="1"] .road-strip {
+        --road-edge-top: rgba(80, 49, 24, 0.75);
+        --road-edge-bottom: rgba(52, 32, 17, 0.72);
+        --road-pebble: rgba(160, 108, 54, 0.52);
+      }
+      .world[data-road="2"] .road-strip {
+        --road-edge-top: rgba(114, 77, 45, 0.72);
+        --road-edge-bottom: rgba(69, 45, 27, 0.7);
+        --road-pebble: rgba(194, 143, 86, 0.5);
+      }
+      .world[data-road="3"] .road-strip,
+      .world[data-road="4"] .road-strip,
+      .world[data-road="5"] .road-strip {
+        --road-edge-top: rgba(100, 93, 79, 0.68);
+        --road-edge-bottom: rgba(39, 36, 31, 0.58);
+        --road-pebble: rgba(218, 208, 180, 0.36);
+      }
+      /* dirt - uneven footpath with wheel ruts */
+      .road-tier.t-dirt {
+        background-color: #765025;
+        background-image:
+          linear-gradient(90deg, transparent 0 14px, rgba(55, 33, 16, 0.38) 14px 18px, transparent 18px 46px, rgba(55, 33, 16, 0.3) 46px 50px, transparent 50px),
+          radial-gradient(circle 2px at 7px 13px, #4a2b12 0 1.5px, transparent 2px),
+          radial-gradient(circle 1.5px at 27px 29px, #a66d32 0 1px, transparent 2px),
+          radial-gradient(circle 2px at 42px 19px, #573617 0 1.5px, transparent 2px),
+          radial-gradient(circle 2px at 63px 33px, #b77a3a 0 1.5px, transparent 2px),
+          linear-gradient(180deg, #9b6830 0%, #845426 35%, #633b18 100%);
+        background-size: 96px 42px, 72px 42px, 88px 42px, 94px 42px, 110px 42px, 100% 100%;
+      }
+      /* packed dirt - tamped center lane with cleaner wagon tracks */
+      .road-tier.t-packed {
+        background-color: #94663c;
+        background-image:
+          linear-gradient(90deg, transparent 0 18px, rgba(58, 36, 18, 0.3) 18px 22px, transparent 22px 74px, rgba(58, 36, 18, 0.24) 74px 78px, transparent 78px),
+          repeating-linear-gradient(90deg, transparent 0 31px, rgba(245, 198, 112, 0.12) 31px 33px, transparent 33px 64px),
+          radial-gradient(ellipse 10px 2px at 12px 11px, rgba(60, 37, 18, 0.25) 0 65%, transparent 70%),
+          radial-gradient(ellipse 8px 2px at 48px 31px, rgba(60, 37, 18, 0.22) 0 65%, transparent 70%),
+          linear-gradient(180deg, #b48958 0%, #93623a 48%, #654225 100%);
+        background-size: 112px 42px, 64px 42px, 86px 42px, 104px 42px, 100% 100%;
+      }
+      /* dressed stone - worn slabs with softened mortar */
+      .road-tier.t-stone {
+        background-color: #706c62;
+        background-image:
+          linear-gradient(180deg, rgba(245, 236, 206, 0.22) 0 2px, transparent 2px 32px, rgba(27, 24, 21, 0.26) 39px 42px),
+          radial-gradient(ellipse 72px 18px at 18% 28%, rgba(255, 255, 255, 0.08) 0 45%, transparent 72%),
+          radial-gradient(ellipse 90px 20px at 78% 82%, rgba(0, 0, 0, 0.13) 0 42%, transparent 74%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='42' viewBox='0 0 180 42'%3E%3Crect width='180' height='42' fill='%23736f66'/%3E%3Cg stroke='%23433f38' stroke-opacity='.42' stroke-width='1.15'%3E%3Cpath d='M0,2H42L38,20H0Z' fill='%23837e73'/%3E%3Cpath d='M42,2H92L88,20H38Z' fill='%237a756b'/%3E%3Cpath d='M92,2H132L130,20H88Z' fill='%238b8579'/%3E%3Cpath d='M132,2H180V20H130Z' fill='%23746f66'/%3E%3Cpath d='M0,20H36L40,40H0Z' fill='%237b766c'/%3E%3Cpath d='M36,20H84L82,40H40Z' fill='%23878075'/%3E%3Cpath d='M84,20H130L126,40H82Z' fill='%23706b62'/%3E%3Cpath d='M130,20H180V40H126Z' fill='%23817b70'/%3E%3C/g%3E%3Cg stroke='%23c8bea9' stroke-opacity='.28' stroke-width='1'%3E%3Cpath d='M5,5H34M48,5H84M99,6H124M137,6H172M6,24H29M43,25H75M90,24H121M137,24H173'/%3E%3C/g%3E%3Cg stroke='%23504b43' stroke-opacity='.24' stroke-width='1' fill='none'%3E%3Cpath d='M24,10l6,3l-4,4M112,26l7,3l-5,5M154,11l8,4'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 100% 100%, 260px 42px, 320px 42px, 180px 42px;
+        box-shadow:
+          inset 0 2px 0 rgba(219, 207, 177, 0.28),
+          inset 0 -3px 0 rgba(30, 27, 23, 0.35);
+      }
+      /* cobblestone - rounded pavers with calmer spacing */
+      .road-tier.t-cobble {
+        background-color: #5f5a52;
+        background-image:
+          linear-gradient(180deg, rgba(239, 229, 198, 0.18) 0 2px, transparent 2px 36px, rgba(24, 22, 19, 0.27) 39px 42px),
+          radial-gradient(ellipse 80px 18px at 24% 18%, rgba(255, 255, 255, 0.07) 0 46%, transparent 74%),
+          radial-gradient(ellipse 88px 20px at 70% 88%, rgba(0, 0, 0, 0.14) 0 42%, transparent 72%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='42' viewBox='0 0 112 42'%3E%3Crect width='112' height='42' fill='%235f5a52'/%3E%3Cg stroke='%2338342f' stroke-opacity='.43' stroke-width='1'%3E%3Cellipse cx='8' cy='7' rx='7' ry='4.5' fill='%238c8478'/%3E%3Cellipse cx='25' cy='7' rx='8' ry='4.7' fill='%237a7369'/%3E%3Cellipse cx='43' cy='8' rx='8' ry='4.9' fill='%23938b7f'/%3E%3Cellipse cx='62' cy='7' rx='7.5' ry='4.5' fill='%23736d64'/%3E%3Cellipse cx='82' cy='8' rx='8.5' ry='5' fill='%23857e73'/%3E%3Cellipse cx='102' cy='7' rx='8' ry='4.6' fill='%237a746b'/%3E%3Cellipse cx='16' cy='20' rx='8.5' ry='5' fill='%237f786e'/%3E%3Cellipse cx='35' cy='20' rx='8' ry='4.6' fill='%238d8579'/%3E%3Cellipse cx='54' cy='20' rx='8.5' ry='5' fill='%23736d64'/%3E%3Cellipse cx='73' cy='20' rx='8' ry='4.7' fill='%23898176'/%3E%3Cellipse cx='93' cy='20' rx='8.5' ry='5' fill='%23766f67'/%3E%3Cellipse cx='6' cy='33' rx='8' ry='4.7' fill='%23877f74'/%3E%3Cellipse cx='24' cy='33' rx='8.5' ry='5' fill='%23756f66'/%3E%3Cellipse cx='43' cy='34' rx='8' ry='4.7' fill='%238e867a'/%3E%3Cellipse cx='62' cy='33' rx='8.5' ry='5' fill='%237a736a'/%3E%3Cellipse cx='82' cy='34' rx='8' ry='4.6' fill='%23898277'/%3E%3Cellipse cx='102' cy='33' rx='8.5' ry='5' fill='%23716b63'/%3E%3C/g%3E%3Cg stroke='%23cabfa9' stroke-opacity='.24' stroke-width='1' fill='none'%3E%3Cpath d='M4,5Q8,3 13,5M38,6Q43,4 49,6M78,6Q83,4 89,6M30,18Q35,16 41,18M69,18Q74,16 80,18M18,31Q24,29 30,31M76,32Q82,30 88,32'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 100% 100%, 220px 42px, 280px 42px, 112px 42px;
+        box-shadow:
+          inset 0 2px 0 rgba(215, 203, 174, 0.25),
+          inset 0 -3px 0 rgba(28, 26, 23, 0.38);
+      }
+      /* flagstone - large irregular slabs with restrained cracks */
+      .road-tier.t-flagstone {
+        background-color: #67635b;
+        background-image:
+          linear-gradient(180deg, rgba(248, 239, 210, 0.2) 0 2px, transparent 2px 37px, rgba(24, 22, 20, 0.28) 39px 42px),
+          radial-gradient(ellipse 96px 20px at 20% 24%, rgba(255, 255, 255, 0.08) 0 48%, transparent 74%),
+          radial-gradient(ellipse 110px 22px at 82% 80%, rgba(0, 0, 0, 0.14) 0 45%, transparent 75%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='42' viewBox='0 0 240 42'%3E%3Crect width='240' height='42' fill='%2367635b'/%3E%3Cg stroke='%2338342f' stroke-opacity='.42' stroke-width='1.2'%3E%3Cpath d='M0,2H58L52,21H0Z' fill='%23817a6f'/%3E%3Cpath d='M58,2H126L122,21H52Z' fill='%23756f66'/%3E%3Cpath d='M126,2H188L184,21H122Z' fill='%23877f73'/%3E%3Cpath d='M188,2H240V21H184Z' fill='%23736d64'/%3E%3Cpath d='M0,21H46L54,40H0Z' fill='%23766f66'/%3E%3Cpath d='M46,21H109L105,40H54Z' fill='%23847c71'/%3E%3Cpath d='M109,21H171L181,40H105Z' fill='%23716b63'/%3E%3Cpath d='M171,21H240V40H181Z' fill='%23837b70'/%3E%3C/g%3E%3Cg stroke='%23d1c5ae' stroke-opacity='.26' stroke-width='1' fill='none'%3E%3Cpath d='M7,5H49M65,5H116M133,5H177M194,6H232M8,25H39M61,25H98M116,25H158M186,25H232'/%3E%3C/g%3E%3Cg stroke='%2349443c' stroke-opacity='.38' stroke-width='1.1' fill='none' stroke-linecap='round'%3E%3Cpath d='M30,8l8,4l-5,5M148,26l9,3l-4,7M208,9l11,4M86,28l-5,5l7,3'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 100% 100%, 300px 42px, 360px 42px, 240px 42px;
+        box-shadow:
+          inset 0 2px 0 rgba(225, 211, 181, 0.3),
+          inset 0 -4px 0 rgba(27, 25, 22, 0.4),
+          inset 0 0 0 1px rgba(255,255,255,0.04);
+      }
+
+      /* CAMEL */
+      .camel {
+        position: absolute;
+        width: 32px; height: 22px;
+        bottom: 4px;
+        animation: walk-bob 0.65s steps(2) infinite;
+      }
+      .camel svg { width: 100%; height: 100%; display: block; }
+
+      /* Lamppost glow at night */
+      .world[data-time="night"] .house[data-kind="lamppost"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="lamppost"] .hs-windows-lit,
+      .world[data-time="dawn"]  .house[data-kind="lamppost"] .hs-windows-lit { opacity: 1; }
+      .house[data-kind="lamppost"] .hs-windows-lit { filter: drop-shadow(0 0 4px #f0c440); }
+      .house[data-kind="lamppost"][data-upgrade="3"] .hs-windows-lit,
+      .house[data-kind="lamppost"][data-upgrade="4"] .hs-windows-lit { filter: drop-shadow(0 0 5px #f0c440); }
+      .house[data-kind="mill"] .mill-blades {
+        animation: mill-spin 6s linear infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes mill-spin { to { transform: rotate(360deg); } }
+      .world[data-time="night"] .house[data-kind="tavern"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="tavern"] .hs-windows-lit,
+      .world[data-time="dawn"]  .house[data-kind="tavern"] .hs-windows-lit,
+      .world[data-time="night"] .house[data-kind="guildhall"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="guildhall"] .hs-windows-lit,
+      .world[data-time="dawn"]  .house[data-kind="guildhall"] .hs-windows-lit,
+      .world[data-time="night"] .house[data-kind="mill"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="mill"] .hs-windows-lit,
+      .world[data-time="dawn"]  .house[data-kind="mill"] .hs-windows-lit { opacity: 1; }
+
+      /* UPGRADE LEVELS — gentle brightness/saturate bump only.
+         Some tiers redraw richer assets; size changes are handled per kind below.
+         No transform: scale — pixel art must never be CSS-scaled. */
+      .house[data-upgrade] { transition: width 0.8s ease, height 0.8s ease, filter 1s ease; }
+      .house[data-upgrade="1"] { filter: brightness(1.04) saturate(1.06); }
+      .house[data-upgrade="2"] { filter: brightness(1.08) saturate(1.1); }
+      .house[data-upgrade="3"] { filter: brightness(1.12) saturate(1.14); }
+      .house[data-upgrade="4"] { filter: brightness(1.16) saturate(1.18); }
+      .house[data-upgrade="5"] { filter: brightness(1.18) saturate(1.21); }
+      .house[data-upgrade="6"] { filter: brightness(1.2) saturate(1.24); }
+      .house[data-upgrade="7"] { filter: brightness(1.22) saturate(1.27); }
+      .house[data-upgrade="8"] { filter: brightness(1.24) saturate(1.3); }
+      .house[data-upgrade="9"] { filter: brightness(1.26) saturate(1.33); }
+      .house[data-upgrade="10"] { filter: brightness(1.28) saturate(1.36); }
+      /* Legacy additive decoration groups — preserved as a no-op for any building
+         that hasn't been migrated to per-tier full-redraw SVGs yet. New per-tier
+         SVGs simply omit up-N classes. */
+      .house [class^="up-"] { opacity: 0; transition: opacity 1s ease; }
+      .house[data-upgrade="1"] .up-1,
+      .house[data-upgrade="2"] .up-1, .house[data-upgrade="2"] .up-2,
+      .house[data-upgrade="3"] .up-1, .house[data-upgrade="3"] .up-2, .house[data-upgrade="3"] .up-3,
+      .house[data-upgrade="4"] .up-1, .house[data-upgrade="4"] .up-2, .house[data-upgrade="4"] .up-3, .house[data-upgrade="4"] .up-4 {
+        opacity: 1;
+      }
+      .house[data-upgrade="5"] [class^="up-"],
+      .house[data-upgrade="6"] [class^="up-"],
+      .house[data-upgrade="7"] [class^="up-"],
+      .house[data-upgrade="8"] [class^="up-"],
+      .house[data-upgrade="9"] [class^="up-"],
+      .house[data-upgrade="10"] [class^="up-"] {
+        opacity: 1;
+      }
+      /* Castle progression — each tier is a redrawn bigger asset, NOT a CSS scale.
+         translateX(-50%) keeps the castle centered around its spawn x as the container grows. */
+      .house[data-kind="castle"]                   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); }
+      .house[data-kind="castle"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 240px; height: 156px; }
+      .house[data-kind="castle"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 290px; height: 168px; }
+      .house[data-kind="castle"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 360px; height: 184px; }
+      .house[data-kind="castle"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 204px; }
+      .house[data-kind="castle"][data-upgrade="5"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 214px; }
+      .house[data-kind="castle"][data-upgrade="6"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 226px; }
+      .house[data-kind="castle"][data-upgrade="7"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 238px; }
+      .house[data-kind="castle"][data-upgrade="8"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 250px; }
+      .house[data-kind="castle"][data-upgrade="9"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 262px; }
+      .house[data-kind="castle"][data-upgrade="10"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 430px; height: 274px; }
+
+      /* Watchtower progression — upgraded towers get a modestly larger footprint. */
+      .house[data-kind="tower"]                   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 32px; height: 64px; }
+      .house[data-kind="tower"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 38px; height: 70px; }
+      .house[data-kind="tower"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 42px; height: 76px; }
+      .house[data-kind="tower"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 46px; height: 82px; }
+      .house[data-kind="tower"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 50px; height: 88px; }
+      /* At L3+, legacy overlay towers swap small bartizans for bigger flanking turrets, so hide them to avoid overlap. */
+      .house[data-kind="tower"][data-upgrade="3"] .up-1,
+      .house[data-kind="tower"][data-upgrade="4"] .up-1 { opacity: 0; }
+
+      /* House cottage progression — redrawn bigger per tier. translateX(-50%) keeps spawn x centered. */
+      .house[data-kind="house"][data-variant="cottage"][data-upgrade="1"],
+      .house[data-kind="house"]:not([data-variant])[data-upgrade="1"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 56px;  height: 40px; }
+      .house[data-kind="house"][data-variant="cottage"][data-upgrade="2"],
+      .house[data-kind="house"]:not([data-variant])[data-upgrade="2"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 80px;  height: 48px; }
+      .house[data-kind="house"][data-variant="cottage"][data-upgrade="3"],
+      .house[data-kind="house"]:not([data-variant])[data-upgrade="3"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 104px; height: 56px; }
+      .house[data-kind="house"][data-variant="cottage"][data-upgrade="4"],
+      .house[data-kind="house"]:not([data-variant])[data-upgrade="4"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 128px; height: 64px; }
+
+      /* House two-story progression */
+      .house[data-kind="house"][data-variant="two-story"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 60px;  height: 64px; }
+      .house[data-kind="house"][data-variant="two-story"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 78px;  height: 72px; }
+      .house[data-kind="house"][data-variant="two-story"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 100px; height: 82px; }
+      .house[data-kind="house"][data-variant="two-story"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 122px; height: 94px; }
+
+      /* House a-frame progression */
+      .house[data-kind="house"][data-variant="a-frame"][data-upgrade="1"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 64px;  height: 58px; }
+      .house[data-kind="house"][data-variant="a-frame"][data-upgrade="2"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 82px;  height: 66px; }
+      .house[data-kind="house"][data-variant="a-frame"][data-upgrade="3"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 104px; height: 76px; }
+      .house[data-kind="house"][data-variant="a-frame"][data-upgrade="4"]   { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 126px; height: 86px; }
+
+      /* House longhouse progression */
+      .house[data-kind="house"][data-variant="longhouse"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 84px;  height: 44px; }
+      .house[data-kind="house"][data-variant="longhouse"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 104px; height: 52px; }
+      .house[data-kind="house"][data-variant="longhouse"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 124px; height: 62px; }
+      .house[data-kind="house"][data-variant="longhouse"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 144px; height: 72px; }
+
+      /* Tavern progression */
+      .house[data-kind="tavern"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 84px;  height: 64px; }
+      .house[data-kind="tavern"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 108px; height: 76px; }
+      .house[data-kind="tavern"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 132px; height: 90px; }
+      .house[data-kind="tavern"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 158px; height: 104px; }
+
+      /* Guildhall progression */
+      .house[data-kind="guildhall"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 78px;  height: 76px; }
+      .house[data-kind="guildhall"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 100px; height: 86px; }
+      .house[data-kind="guildhall"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 124px; height: 96px; }
+      .house[data-kind="guildhall"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 150px; height: 110px; }
+
+      /* Mill progression */
+      .house[data-kind="mill"][data-upgrade="1"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 60px;  height: 70px; }
+      .house[data-kind="mill"][data-upgrade="2"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 78px;  height: 82px; }
+      .house[data-kind="mill"][data-upgrade="3"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 100px; height: 96px; }
+      .house[data-kind="mill"][data-upgrade="4"] { transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1)); width: 124px; height: 112px; }
+
+      /* HUGE DRAGON */
+      .dragon.huge {
+        width: 110px; height: 50px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+        z-index: 5;
+      }
+
+      /* SKY WIZARD (on broom) */
+      .sky-wizard {
+        position: absolute;
+        width: 36px; height: 22px;
+        z-index: 4;
+        pointer-events: none;
+        animation: sky-bob 1.6s ease-in-out infinite;
+      }
+      .sky-wizard svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      @keyframes sky-bob {
+        0%,100% { translate: 0 0; }
+        50%     { translate: 0 -3px; }
+      }
+
+      /* FLYING CASTLE */
+      .flying-castle {
+        position: absolute;
+        width: 180px; height: 120px;
+        z-index: 2;
+        pointer-events: none;
+        animation: castle-bob 5s ease-in-out infinite;
+      }
+      .flying-castle svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      @keyframes castle-bob {
+        0%,100% { translate: 0 0; }
+        50%     { translate: 0 -4px; }
+      }
+
+      .world[data-time="night"] .house[data-kind="castle"] .hs-windows-lit { opacity: 1; }
+      .world[data-time="dusk"]  .house[data-kind="castle"] .hs-windows-lit { opacity: 1; }
+      .house svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .house .hs-walls, .house .hs-roof { transition: opacity 0.6s ease; }
+      .house[data-stage]:not([data-stage="2"]) .hs-windows-lit,
+      .house[data-upgrading="1"] .hs-windows-lit {
+        opacity: 0 !important;
+        animation: none !important;
+      }
+      .house.is-upgrading > svg {
+        opacity: 0.72;
+        filter: saturate(0.85) brightness(0.88);
+      }
+      .upgrade-scaffold {
+        position: absolute;
+        left: -8px;
+        right: -8px;
+        top: -8px;
+        bottom: -2px;
+        z-index: 4;
+        pointer-events: none;
+        opacity: 0;
+        image-rendering: pixelated;
+      }
+      .house.is-upgrading .upgrade-scaffold {
+        opacity: 1;
+        animation: scaffold-glow 1.1s steps(2) infinite;
+      }
+      .upgrade-scaffold svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .house[data-kind="castle"] .upgrade-scaffold .scaffold-work-lights {
+        display: none;
+      }
+      @keyframes scaffold-glow {
+        0%, 100% { filter: drop-shadow(0 0 1px rgba(240, 196, 64, 0.35)); }
+        50%      { filter: drop-shadow(0 0 4px rgba(240, 196, 64, 0.8)); }
+      }
+      /* Subtle pulse on lit windows at night — a warm hearth feel */
+      .world[data-time="night"] .house .hs-windows-lit { animation: window-glow 3.5s ease-in-out infinite; }
+      @keyframes window-glow {
+        0%, 100% { filter: brightness(1) drop-shadow(0 0 1px #f0c440); }
+        50%      { filter: brightness(1.18) drop-shadow(0 0 4px #f0c440); }
+      }
+      .house[data-kind="campfire"] .hs-roof { animation: flame-flicker 0.3s steps(2) infinite; transform-origin: center bottom; transition: opacity 1.5s ease; }
+      @keyframes flame-flicker {
+        0%,100% { transform: scaleY(1) scaleX(1); }
+        50%     { transform: scaleY(1.1) scaleX(0.9); }
+      }
+      /* Chimney smoke wisps drift upward and fade — pause under rain/storm */
+      .house .chimney-smoke {
+        transform-origin: center bottom;
+        animation: chimney-smoke 3.4s ease-out infinite;
+        will-change: transform, opacity;
+      }
+      .house .chimney-smoke circle:nth-child(2) { animation-delay: 1.1s; }
+      .house .chimney-smoke circle:nth-child(3) { animation-delay: 2.2s; }
+      @keyframes chimney-smoke {
+        0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+        20%  { opacity: 0.75; }
+        100% { transform: translate(-3px, -16px) scale(1.4); opacity: 0; }
+      }
+      .world[data-weather="rain"]  .house .chimney-smoke,
+      .world[data-weather="storm"] .house .chimney-smoke { opacity: 0; animation: none; }
+      /* Rain extinguishes campfires */
+      .world[data-weather="rain"]  .house[data-kind="campfire"] .hs-roof,
+      .world[data-weather="storm"] .house[data-kind="campfire"] .hs-roof {
+        opacity: 0;
+      }
+      .house.crumbling { animation: crumble 1.6s ease-in forwards; }
+      @keyframes crumble {
+        0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+        20%  { transform: translateY(2px) rotate(-3deg) skewX(-2deg); }
+        45%  { transform: translateY(6px) rotate(4deg) skewX(3deg); opacity: 0.85; }
+        100% { transform: translateY(22px) rotate(-10deg) skewX(-4deg); opacity: 0; }
+      }
+
+      /* PEOPLE — SVG sprites */
+      .people-layer { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
+      .person {
+        position: absolute;
+        width: 12px; height: 22px;
+      }
+      .person svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .person .p-tool { transform-origin: 9px 8px; }
+      .person.lumberjack.chopping .p-tool { animation: chop 0.7s ease-in-out infinite; }
+      .person.builder.working .p-tool { animation: hammer 0.6s ease-in-out infinite; }
+      @keyframes chop {
+        0%,100% { transform: rotate(-70deg); }
+        45%     { transform: rotate(35deg); }
+        55%     { transform: rotate(35deg); }
+      }
+      @keyframes hammer {
+        0%,100% { transform: rotate(-50deg); }
+        40%     { transform: rotate(40deg); }
+        50%     { transform: rotate(40deg); }
+      }
+      /* PARTICLES — wood chips & dust */
+      .particle {
+        position: absolute;
+        width: 3px; height: 3px;
+        z-index: 7;
+        pointer-events: none;
+        animation: particle-fly 0.9s ease-out forwards;
+        will-change: transform, opacity;
+      }
+      .particle.chip { background: #5a3818; box-shadow: inset 0 -1px 0 #3a2410; }
+      .particle.dust { background: #b8a890; border-radius: 50%; }
+      @keyframes particle-fly {
+        0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(var(--vx, 12px), var(--vy, -20px)) rotate(180deg); opacity: 0; }
+      }
+      /* tiny bob while walking */
+      .person { animation: walk-bob 0.4s steps(2) infinite; }
+      .person.lumberjack.chopping, .person.builder.working { animation: none; }
+      @keyframes walk-bob {
+        0%,100% { translate: 0 0; }
+        50%     { translate: 0 -1px; }
+      }
+
+      /* HORSEMAN / HORSE / CART / SOLDIER / KING */
+      .horseman { position: absolute; bottom: 4px; width: 28px; height: 26px; }
+      .horseman svg { width: 100%; height: 100%; display: block; }
+      .horseman.attacking .hr-sword { animation: slash 0.4s steps(2) infinite; transform-origin: 0 100%; }
+      @keyframes slash { 0%,100% { transform: rotate(-45deg); } 50% { transform: rotate(35deg); } }
+
+      .cart { position: absolute; bottom: 2px; width: 32px; height: 22px; }
+      .cart svg { width: 100%; height: 100%; display: block; }
+
+      .soldier { position: absolute; bottom: 4px; width: 12px; height: 18px; }
+      .soldier svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .soldier.banner { width: 14px; height: 22px; }
+
+      .king { position: absolute; bottom: 4px; width: 18px; height: 22px; }
+      .king svg { width: 100%; height: 100%; display: block; }
+
+      .person.legionary {
+        width: 14px;
+        height: 22px;
+        filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
+      }
+      .person.legionary.centurion { width: 15px; height: 23px; }
+      .person.legionary.legion-standard { width: 16px; height: 26px; }
+      .person.legionary .legion-pilum {
+        transform-origin: 11px 8px;
+        animation: legion-pilum 0.7s steps(2) infinite;
+      }
+      .person.legionary .legion-standard-cloth {
+        animation: legion-standard-flutter 0.8s steps(2) infinite;
+      }
+      @keyframes legion-pilum {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(1px); }
+      }
+      @keyframes legion-standard-flutter {
+        0%, 100% { transform: translateX(0); }
+        50%      { transform: translateX(1px); }
+      }
+
+      /* DUEL */
+      .person.fighting { animation: walk-bob 0.18s steps(2) infinite; }
+      .person.fighting .p-tool { animation: chop 0.3s steps(2) infinite; }
+      .person.defeated { animation: defeat 1s ease-out forwards; }
+      @keyframes defeat {
+        0%   { transform: rotate(0deg); opacity: 1; }
+        40%  { transform: rotate(-30deg) translateY(-2px); }
+        100% { transform: rotate(-90deg) translateY(6px); opacity: 0; }
+      }
+
+      /* GRASS — front shelf (where the road + front-lane buildings sit) */
+      .grass {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        height: 60px; z-index: 5;
+        background: linear-gradient(180deg, var(--grass) 0%, var(--grass-dark) 100%);
+        box-shadow: inset 0 6px 0 var(--grass-rim), inset 0 12px 0 var(--grass-rim-dark);
+        filter: brightness(var(--world-brightness, 1));
+      }
+      .grass::before {
+        content: ""; position: absolute; top: -6px; left: 0; right: 0; height: 8px;
+        background-image:
+          radial-gradient(circle 2px at 4px 4px, var(--grass-blade) 2px, transparent 3px),
+          radial-gradient(circle 2px at 16px 2px, var(--grass-blade-2) 2px, transparent 3px),
+          radial-gradient(circle 2px at 28px 5px, var(--grass-blade) 2px, transparent 3px);
+        background-size: 36px 8px;
+        background-repeat: repeat-x;
+      }
+
+      /* GRASS — back shelf (raised terrace behind the road, where back-lane buildings sit).
+         Darker + desaturated to read as further away. The ledge shadow underneath is what
+         visually separates the two ground layers. */
+      .grass-back {
+        position: absolute; left: 0; right: 0;
+        bottom: 49px;       /* sits flush with the top edge of the road-strip (road = bottom 7, height 42 -> top at 49) */
+        height: 22px;
+        z-index: 5;
+        background: linear-gradient(180deg, var(--grass-back) 0%, var(--grass-back-dark) 100%);
+        box-shadow:
+          inset 0 4px 0 var(--grass-back-rim),
+          inset 0 -2px 0 var(--grass-back-shadow);
+        filter: brightness(calc(var(--world-brightness, 1) * 0.92)) saturate(0.88);
+        pointer-events: none;
+      }
+      .grass-back::before {
+        content: ""; position: absolute; top: -5px; left: 0; right: 0; height: 6px;
+        background-image:
+          radial-gradient(circle 1.5px at 8px 3px,  var(--grass-blade) 1.5px, transparent 2px),
+          radial-gradient(circle 1.5px at 22px 1px, var(--grass-blade-2) 1.5px, transparent 2px),
+          radial-gradient(circle 1.5px at 34px 4px, var(--grass-blade) 1.5px, transparent 2px);
+        background-size: 42px 6px;
+        background-repeat: repeat-x;
+        opacity: 0.85;
+      }
+      .grass-back::after {
+        content: ""; position: absolute; bottom: -5px; left: 0; right: 0; height: 5px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%);
+      }
+      /* Snow blanket on top of the front shelf, fades in with --snow-opacity */
+      .grass::after {
+        content: ""; position: absolute; top: -9px; left: 0; right: 0; height: 24px;
+        background-image:
+          linear-gradient(180deg, transparent 0 2px, var(--snow-top) 2px 9px, var(--snow-mid) 10px 16px, transparent 22px),
+          radial-gradient(ellipse 28px 7px at 26px 7px, var(--snow-top) 0 68%, transparent 72%),
+          radial-gradient(ellipse 36px 8px at 52px 11px, var(--snow-mid) 0 62%, transparent 68%),
+          radial-gradient(ellipse 9px 3px at 12px 16px, var(--snow-low) 0 58%, transparent 64%);
+        background-size: 100% 100%, 96px 20px, 132px 18px, 68px 12px;
+        background-position: 0 0, 0 0, 36px 4px, 12px 8px;
+        background-repeat: no-repeat, repeat-x, repeat-x, repeat-x;
+        opacity: calc(var(--snow-opacity) * 0.96);
+        transition: opacity 3s ease;
+        pointer-events: none;
+        filter: drop-shadow(0 3px 0 var(--snow-shadow));
+      }
+
+      /* AMBIENT DECORATION LAYERS */
+      .sky-life-layer,
+      .ground-decor-layer,
+      .tracks-layer,
+      .ambient-particle-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .sky-life-layer { z-index: 2; }
+      .ground-decor-layer { z-index: 6; }
+      .tracks-layer { z-index: 6; }
+      .ambient-particle-layer { z-index: 7; }
+
+      .moon::after {
+        content: "";
+        position: absolute;
+        inset: -16px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(240,230,190,0.24), rgba(240,230,190,0.08) 42%, transparent 70%);
+        opacity: 0;
+        transition: opacity 2.5s ease;
+      }
+      .world[data-time="night"] .moon::after,
+      .world[data-time="dusk"] .moon::after { opacity: 1; }
+
+      .amb-decor {
+        position: absolute;
+        left: var(--x, 0px);
+        bottom: var(--b, 50px);
+        width: var(--w, 16px);
+        height: var(--h, 16px);
+        z-index: var(--z, 1);
+        transform: translateX(-50%) scale(var(--s, 1));
+        transform-origin: bottom center;
+        opacity: var(--o, 0.95);
+        filter: brightness(var(--world-brightness, 1));
+      }
+      .amb-decor svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .amb-decor.back {
+        opacity: 0.72;
+        filter: brightness(calc(var(--world-brightness, 1) * 0.86)) saturate(0.8);
+      }
+      .amb-decor.front { z-index: 2; }
+      .amb-decor.soft { opacity: 0.78; }
+      .amb-decor .glow { opacity: 0; transition: opacity 2.2s ease; }
+      .world[data-time="night"] .amb-decor .glow,
+      .world[data-time="dusk"] .amb-decor .glow,
+      .world[data-time="dawn"] .amb-decor .glow {
+        opacity: 1;
+        animation: ambient-glow 2.6s ease-in-out infinite;
+      }
+      @keyframes ambient-glow {
+        0%,100% { filter: brightness(0.9); opacity: 0.7; }
+        50% { filter: brightness(1.25); opacity: 1; }
+      }
+      .amb-flag .cloth,
+      .amb-banner .cloth {
+        transform-box: fill-box;
+        transform-origin: left center;
+        animation: flag-flutter 1.2s steps(2) infinite;
+      }
+      @keyframes flag-flutter {
+        0%,100% { transform: skewY(0deg); }
+        50% { transform: skewY(8deg) translateY(-1px); }
+      }
+      .amb-sign .board,
+      .amb-charm .charm {
+        transform-box: fill-box;
+        transform-origin: center top;
+        animation: decor-sway 3.2s ease-in-out infinite;
+      }
+      @keyframes decor-sway {
+        0%,100% { transform: rotate(-2deg); }
+        50% { transform: rotate(2deg); }
+      }
+      .amb-laundry .cloth { animation: laundry-sway 2.4s ease-in-out infinite; }
+      @keyframes laundry-sway {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-1px); }
+      }
+      .amb-glowmushroom .cap,
+      .amb-rune .rune {
+        animation: rune-pulse 3s ease-in-out infinite;
+      }
+      @keyframes rune-pulse {
+        0%,100% { opacity: 0.58; filter: drop-shadow(0 0 1px currentColor); }
+        50% { opacity: 1; filter: drop-shadow(0 0 5px currentColor); }
+      }
+
+      .wet-shine {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 7px;
+        height: 42px;
+        z-index: 1;
+        opacity: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(90deg, transparent 0 10%, rgba(255,255,255,0.16) 12%, transparent 18%, transparent 42%, rgba(255,255,255,0.12) 47%, transparent 54%, transparent),
+          linear-gradient(180deg, rgba(150,180,220,0.12), rgba(20,30,45,0.14));
+        mix-blend-mode: screen;
+        transition: opacity 2.8s ease;
+      }
+      .world[data-weather="rain"] .wet-shine,
+      .world[data-weather="storm"] .wet-shine,
+      .world.wet-ground .wet-shine { opacity: 0.62; }
+
+      .amb-puddle {
+        opacity: 0;
+        transition: opacity 3.5s ease;
+      }
+      .world[data-weather="rain"] .amb-puddle,
+      .world[data-weather="storm"] .amb-puddle,
+      .world.wet-ground .amb-puddle { opacity: 0.78; }
+      .amb-puddle .ripple {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: puddle-ripple 1.5s ease-out infinite;
+      }
+      .amb-puddle .ripple:nth-child(2) { animation-delay: 0.6s; }
+      @keyframes puddle-ripple {
+        0% { transform: scale(0.5); opacity: 0; }
+        25% { opacity: 0.65; }
+        100% { transform: scale(1.55); opacity: 0; }
+      }
+
+      .track-mark {
+        position: absolute;
+        left: var(--x, 0px);
+        bottom: var(--b, 8px);
+        width: 6px;
+        height: 3px;
+        border-radius: 50%;
+        transform: rotate(var(--r, 0deg));
+        opacity: 0;
+        pointer-events: none;
+        animation: track-fade 6s ease-out forwards;
+      }
+      .track-mark::after {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 2px;
+        border-radius: 50%;
+        left: 5px;
+        top: 3px;
+        background: inherit;
+        opacity: 0.82;
+      }
+      .track-snow { background: rgba(78, 92, 110, 0.34); box-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+      .track-mud { background: rgba(55, 34, 18, 0.52); }
+      .track-dust { background: rgba(170, 118, 58, 0.34); }
+      .track-stone { background: rgba(35, 32, 28, 0.22); }
+      @keyframes track-fade {
+        0% { opacity: 0; transform: translateY(1px) rotate(var(--r, 0deg)) scale(0.75); }
+        18% { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)) scale(1); }
+        100% { opacity: 0; transform: translateY(2px) rotate(var(--r, 0deg)) scale(0.82); }
+      }
+
+      .firefly,
+      .season-mote,
+      .micro-event,
+      .shooting-star,
+      .sky-critter {
+        position: absolute;
+        pointer-events: none;
+      }
+      .firefly {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #f8f0a0;
+        box-shadow: 0 0 6px #f8e880, 0 0 12px rgba(190,255,150,0.55);
+        animation: firefly-drift var(--dur, 4.8s) ease-in-out forwards;
+        opacity: 0;
+      }
+      @keyframes firefly-drift {
+        0% { opacity: 0; transform: translate(0, 0) scale(0.7); }
+        18% { opacity: 1; }
+        72% { opacity: 0.9; }
+        100% { opacity: 0; transform: translate(var(--vx, 20px), var(--vy, -18px)) scale(0.55); }
+      }
+      .season-mote {
+        width: var(--mw, 5px);
+        height: var(--mh, 5px);
+        background: var(--mc, #f2dca0);
+        opacity: 0;
+        animation: mote-drift var(--dur, 7s) linear forwards;
+      }
+      .season-mote.round { border-radius: 50%; }
+      .season-mote.leaf { border-radius: 60% 0 60% 0; transform-origin: center; }
+      @keyframes mote-drift {
+        0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+        14% { opacity: var(--mo, 0.75); }
+        100% { opacity: 0; transform: translate(var(--vx, 30px), var(--vy, 80px)) rotate(var(--rot, 180deg)); }
+      }
+      .sky-critter {
+        width: var(--w, 28px);
+        height: var(--h, 14px);
+        top: var(--top, 14%);
+        opacity: 0.78;
+        transition-property: left, top;
+        transition-timing-function: linear, ease-in-out;
+      }
+      .sky-critter svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .sky-critter .wing { animation: wing-flap 0.5s steps(2) infinite; transform-origin: center; }
+      @keyframes wing-flap {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-2px); }
+      }
+      .shooting-star {
+        width: 78px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
+        box-shadow: 0 0 6px rgba(210,230,255,0.9);
+        transform: rotate(-22deg);
+        opacity: 0;
+        animation: shooting-star 1.1s ease-out forwards;
+      }
+      @keyframes shooting-star {
+        0% { opacity: 0; transform: translate(0,0) rotate(-22deg) scaleX(0.3); }
+        12% { opacity: 1; }
+        100% { opacity: 0; transform: translate(180px, 86px) rotate(-22deg) scaleX(1); }
+      }
+      .micro-event {
+        width: 8px;
+        height: 8px;
+        z-index: 3;
+        animation: micro-pop 1.4s ease-out forwards;
+      }
+      .micro-event.glint {
+        background: #fff4a0;
+        box-shadow: 0 0 6px #f0c440;
+        clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+      }
+      .micro-event.ember {
+        background: #f08840;
+        box-shadow: 0 0 8px #d04830;
+        border-radius: 50%;
+      }
+      .micro-event.bubble {
+        border: 1px solid #c8a8ff;
+        border-radius: 50%;
+        box-shadow: 0 0 5px #b080ff;
+      }
+      .micro-event.door-peek {
+        width: 5px;
+        height: 10px;
+        background: linear-gradient(#fff4a0, #f0a040);
+        box-shadow: 0 0 7px #f0c440;
+      }
+      @keyframes micro-pop {
+        0% { opacity: 0; transform: translateY(0) scale(0.3); }
+        20% { opacity: 1; transform: translateY(-4px) scale(1.1); }
+        100% { opacity: 0; transform: translateY(-24px) scale(0.65); }
+      }
+
+      .rain-canvas { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+
+      /* SHEEP */
+      .sheep { position: absolute; width: 14px; height: 10px; bottom: 4px; }
+      .sheep svg { width: 100%; height: 100%; display: block; }
+      .sheep { animation: walk-bob 0.5s steps(2) infinite; }
+      .sheep.lamb { width: 10px; height: 7px; }
+      .sheep.hopping {
+        animation: sheep-hop 0.75s ease-in-out infinite;
+      }
+      .sheep.hopping.lamb {
+        animation: sheep-hop 0.55s ease-in-out infinite;
+      }
+      @keyframes sheep-hop {
+        0%,100% { translate: 0 0; }
+        35%     { translate: 0 -8px; }
+        50%     { translate: 0 0; }
+        65%     { translate: 0 -5px; }
+        80%     { translate: 0 -1px; }
+      }
+
+      /* DOGS */
+      .dog { position: absolute; width: 12px; height: 8px; bottom: 4px; }
+      .dog svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .dog { animation: dog-bob 0.25s steps(2) infinite; }
+      @keyframes dog-bob {
+        0%,100% { translate: 0 0; }
+        50%     { translate: 0 -1px; }
+      }
+
+      /* BANDIT (red-shirted attacker) */
+      .person.bandit svg { /* uses standard person frame */ }
+
+      /* CLERIC (robed healer) */
+      .person.cleric { /* uses standard person frame */ }
+
+      /* GRAVE */
+      .grave { position: absolute; width: 10px; height: 14px; bottom: 50px; }
+      .grave svg { width: 100%; height: 100%; display: block; }
+
+      /* TENT (adventurer camp) */
+      .tent {
+        position: absolute;
+        width: 22px; height: 20px;
+        bottom: 50px;
+        z-index: 5;
+        transform-origin: bottom center;
+        transform: scale(var(--g, 0));
+        transition: transform 1.5s cubic-bezier(.34, 1.2, .64, 1), opacity 1.5s ease;
+      }
+      .tent svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .tent.collapsing { opacity: 0; transform: scale(var(--g, 1)) scaleY(0.1); }
+
+      /* CROPS */
+      .crops-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+      .crop {
+        position: absolute;
+        width: 8px; height: 12px;
+        bottom: 50px;
+        transform: scale(var(--g, 0));
+        transform-origin: bottom center;
+        transition: transform 1.5s cubic-bezier(.34, 1.2, .64, 1);
+      }
+      .crop svg { width: 100%; height: 100%; display: block; }
+
+      /* HEART (wedding) */
+      .heart {
+        position: absolute;
+        width: 8px; height: 8px;
+        z-index: 7;
+        pointer-events: none;
+        animation: heart-rise 2.2s ease-out forwards;
+      }
+      .heart svg { width: 100%; height: 100%; display: block; }
+      @keyframes heart-rise {
+        0%   { transform: translate(0, 0) scale(0.3); opacity: 0; }
+        20%  { transform: translate(var(--vx, 0), -8px) scale(1.1); opacity: 1; }
+        100% { transform: translate(var(--vx, 0), -40px) scale(0.6); opacity: 0; }
+      }
+
+      /* COIN SPARKLE */
+      .coin {
+        position: absolute;
+        width: 5px; height: 5px;
+        background: #f0d060;
+        border-radius: 50%;
+        box-shadow: 0 0 4px rgba(240, 208, 96, 0.7);
+        animation: coin-rise 1.4s ease-out forwards;
+        z-index: 7;
+        pointer-events: none;
+      }
+      @keyframes coin-rise {
+        0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+        100% { transform: translate(var(--vx, 0px), -28px) scale(0.4); opacity: 0; }
+      }
+
+      /* MAGE SPARKLE */
+      .sparkle {
+        position: absolute;
+        width: 3px; height: 3px;
+        background: #fff8d0;
+        box-shadow: 0 0 4px #c0a0ff, 0 0 2px #ffffff;
+        animation: sparkle 1s ease-out forwards;
+        z-index: 7;
+        pointer-events: none;
+      }
+      @keyframes sparkle {
+        0%   { transform: translate(0, 0) scale(0); opacity: 0; }
+        25%  { transform: translate(var(--vx, 0), var(--vy, -8px)) scale(1.2); opacity: 1; }
+        100% { transform: translate(var(--vx, 0), var(--vy, -8px)) scale(0); opacity: 0; }
+      }
+
+      /* CHIMNEY / CAMPFIRE SMOKE */
+      .smoke {
+        position: absolute;
+        width: 6px; height: 6px;
+        background: rgba(210, 205, 195, 0.55);
+        border-radius: 50%;
+        animation: smoke-rise 4.5s ease-out forwards;
+        z-index: 3;
+        pointer-events: none;
+      }
+      @keyframes smoke-rise {
+        0%   { transform: translate(0, 0) scale(0.3); opacity: 0; }
+        15%  { opacity: 0.55; }
+        100% { transform: translate(var(--vx, 6px), -52px) scale(1.6); opacity: 0; }
+      }
+
+      /* RAINBOW — anchored at ground, hidden behind hills (z-index 5) */
+      .rainbow {
+        position: absolute;
+        left: 50%;
+        bottom: 30px;
+        width: 180%;
+        transform: translateX(-50%);
+        aspect-ratio: 3 / 1;
+        z-index: 3;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 3s ease;
+      }
+      .world.has-rainbow .rainbow { opacity: 0.7; }
+      .rainbow svg { width: 100%; height: 100%; display: block; }
+
+      /* SOLAR HALO — circular rainbow around the sun */
+      .solar-halo {
+        position: absolute;
+        left: var(--sun-x, 18%);
+        top: var(--sun-y, 8%);
+        width: 220px; height: 220px;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 3.5s ease, left 0.55s linear, top 0.55s linear;
+      }
+      .solar-halo svg { width: 100%; height: 100%; display: block; }
+      .world.has-halo .solar-halo { opacity: 0.55; }
+
+      /* LIT WINDOWS at night */
+      .house .hs-windows-lit { opacity: 0; transition: opacity 4s ease; }
+      .world[data-time="night"] .house[data-kind="house"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="house"] .hs-windows-lit,
+      .world[data-time="dawn"]  .house[data-kind="house"] .hs-windows-lit { opacity: 1; }
+      .world[data-time="night"] .house[data-kind="tower"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="tower"] .hs-windows-lit { opacity: 1; }
+      .world[data-time="night"] .house[data-kind="marketstall"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="marketstall"] .hs-windows-lit { opacity: 1; }
+      .world[data-time="night"] .house[data-kind="blacksmith"] .hs-windows-lit,
+      .world[data-time="dusk"]  .house[data-kind="blacksmith"] .hs-windows-lit,
+      .world[data-time="dawn"]  .house[data-kind="blacksmith"] .hs-windows-lit { opacity: 1; }
+      .house[data-kind="blacksmith"] .hs-windows-lit { filter: drop-shadow(0 0 5px #f08850); }
+
+      /* SIGNPOST LABEL */
+      .sign-label {
+        position: absolute;
+        bottom: 86px;
+        transform: translateX(-50%) translateY(var(--lane-y, 0px)) scale(var(--lane-scale, 1));
+        font-family: "VT323", monospace;
+        font-size: 0.75rem;
+        color: var(--ink);
+        background: rgba(20, 14, 8, 0.85);
+        border: 1px solid var(--frame-light);
+        padding: 1px 5px;
+        white-space: nowrap;
+        text-shadow: 1px 1px 0 #000;
+        z-index: 6;
+        animation: label-pop 0.4s ease-out;
+      }
+      @keyframes label-pop {
+        0%   { transform: translateX(-50%) scale(0); opacity: 0; }
+        80%  { transform: translateX(-50%) scale(1.1); opacity: 1; }
+        100% { transform: translateX(-50%) scale(1); opacity: 1; }
+      }
+
+      .lightning {
+        position: absolute; inset: 0; z-index: 9;
+        background: rgba(220, 230, 255, 0); pointer-events: none;
+      }
+      .lightning.flash { animation: flash 0.5s ease-out; }
+      @keyframes flash {
+        0%   { background: rgba(220, 230, 255, 0); }
+        8%   { background: rgba(230, 240, 255, 0.9); }
+        20%  { background: rgba(230, 240, 255, 0.15); }
+        35%  { background: rgba(230, 240, 255, 0.75); }
+        100% { background: rgba(230, 240, 255, 0); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .cloud, .dragon, .rain-canvas, .lightning,
+        .person, .tree, .house, .horseman, .stars,
+        .firefly, .season-mote, .micro-event, .shooting-star, .sky-critter,
+        .track-mark, .amb-decor .glow, .amb-flag .cloth, .amb-banner .cloth,
+        .amb-sign .board, .amb-charm .charm, .amb-laundry .cloth,
+        .amb-glowmushroom .cap, .amb-rune .rune, .wet-shine {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
