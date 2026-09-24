@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dav Stepanyan — Game Developer & World Builder</title>
     <meta name="description" content="Dav Stepanyan builds playful systems and living worlds. Explore his work on Idle Outpost, Sandship, Battle Cards, Idle Wizard, and Shmixel." />
-    <meta name="theme-color" content="#101719" />
+    <meta name="theme-color" content="#080d18" />
     <meta property="og:title" content="Dav Stepanyan — Game Developer & World Builder" />
     <meta property="og:description" content="Games, systems, and a tiny kingdom that keeps itself busy." />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="world.css?v=3" />
-    <link rel="stylesheet" href="site.css?v=3" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="world.css?v=5" />
+    <link rel="stylesheet" href="site.css?v=5" />
   </head>
   <body>
     <div class="world" data-weather="clear" data-time="day" data-season="summer" data-road="0" aria-hidden="true">
@@ -90,6 +90,19 @@
 
     <div class="world-dim" aria-hidden="true"></div>
 
+    <nav class="world-portals" id="world-portals" aria-label="Discover Dav's projects in the world" aria-hidden="true" inert>
+      <button class="world-portal" type="button" data-project="outpost" style="--portal-x: 680px; --portal-y: 210px" aria-label="Discover Idle Outpost"><small>01 / DISCOVER</small><strong>Idle Outpost</strong></button>
+      <button class="world-portal" type="button" data-project="sandship" style="--portal-x: 950px; --portal-y: 290px" aria-label="Discover Sandship"><small>02 / DISCOVER</small><strong>Sandship</strong></button>
+      <button class="world-portal" type="button" data-project="battle" style="--portal-x: 1230px; --portal-y: 215px" aria-label="Discover Battle Cards"><small>03 / DISCOVER</small><strong>Battle Cards</strong></button>
+      <button class="world-portal" type="button" data-project="wizard" style="--portal-x: 1500px; --portal-y: 265px" aria-label="Discover Idle Wizard"><small>04 / PLAY NOW</small><strong>Idle Wizard</strong></button>
+      <button class="world-portal" type="button" data-project="shmixel" style="--portal-x: 1780px; --portal-y: 220px" aria-label="Discover Shmixel"><small>05 / CREATE</small><strong>Shmixel</strong></button>
+    </nav>
+    <section class="discovery-panel" id="discovery-panel" role="dialog" aria-modal="false" aria-labelledby="discovery-title" hidden>
+      <button class="discovery-close" id="discovery-close" type="button" aria-label="Close project details">×</button>
+      <img id="discovery-image" alt="" width="1400" height="788" />
+      <div class="discovery-copy"><span id="discovery-kicker"></span><h2 id="discovery-title"></h2><p id="discovery-description"></p><div class="discovery-actions"><a id="discovery-link" target="_blank" rel="noopener noreferrer">Open project ↗</a><button id="discovery-page" type="button">See on page ↗</button></div></div>
+    </section>
+
     <button class="world-pan-reset" id="world-pan-reset" type="button" title="Recenter the world" aria-label="Recenter the world">↺ Recenter</button>
 
     <div class="hud" aria-label="World controls">
@@ -104,7 +117,7 @@
         </div>
       </div>
       <button class="hud-control" id="hud-dim" type="button" title="Dim the world" aria-pressed="false">◐ <span>Focus</span></button>
-      <button class="hud-ui-toggle" id="hud-ui" type="button" title="Explore the world" aria-pressed="false">✧ <span>Explore</span></button>
+      <button class="hud-ui-toggle" id="hud-ui" type="button" title="Explore the world" aria-pressed="false">↗ <span>Explore</span></button>
     </div>
 
     <div class="log" id="log" aria-label="Realm chronicle" aria-hidden="true">
@@ -113,7 +126,7 @@
 
     <div class="site-shell container">
       <nav class="topbar" aria-label="Main navigation">
-        <a class="brand" href="#top" aria-label="Dav Stepanyan, back to top"><span class="brand-mark">D<span>✳</span></span><span class="brand-copy">DAV STEPANYAN<small>GAME DEVELOPER / WORLD BUILDER</small></span></a>
+        <a class="brand" href="#top" aria-label="Dav Stepanyan, back to top"><span class="brand-mark">D<span>S</span></span><span class="brand-copy">DAV STEPANYAN<small>GAME DEVELOPER / WORLD BUILDER</small></span></a>
         <div class="links">
           <a href="#work">Work</a>
           <a href="#lab">The lab</a>
@@ -121,71 +134,71 @@
           <a class="nav-contact" href="#contact">Let's talk <span aria-hidden="true">↗</span></a>
         </div>
       </nav>
+      <nav class="mobile-nav" aria-label="Section navigation"><a href="#work">01 Work</a><a href="#lab">02 Lab</a><a href="#about">03 About</a><button id="mobile-world-enter" type="button">World ↗</button></nav>
 
       <main id="top">
         <header class="hero">
           <div class="hero-main">
-            <div class="eyebrow"><span class="status-dot"></span> CURRENTLY BUILDING AT ROCKBITE GAMES <span class="eyebrow-line"></span> YEREVAN, ARMENIA</div>
-            <h1>I build worlds<br>that <em>keep moving.</em></h1>
-            <p class="hero-lead">Hey, I'm Dav. I make game systems that feel alive, from the tiny choices players make to the worlds that keep going after they leave.</p>
+            <div class="eyebrow"><span class="status-dot"></span> DAV STEPANYAN <span class="eyebrow-line"></span> GAME DEVELOPER IN YEREVAN</div>
+            <h1>I make worlds<br>that won't <em>sit still.</em></h1>
+            <p class="hero-lead">I build games full of curious systems and tiny surprises. The village behind this page is one of them. Give it a moment; it has plans of its own.</p>
             <div class="hero-actions">
-              <a class="button button-primary" href="#work">Explore my work <span aria-hidden="true">↗</span></a>
-              <a class="button button-quiet" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer">Play Idle Wizard <span aria-hidden="true">↗</span></a>
+              <button class="button button-primary" id="explore-world" type="button">Enter the world <span aria-hidden="true">↗</span></button>
+              <a class="button button-quiet" href="#work">Browse my work <span aria-hidden="true">↓</span></a>
             </div>
           </div>
-          <aside class="hero-aside" aria-label="Living world preview">
-            <div class="aside-top"><span>01 / THE LIVING WORLD</span><span class="signal">● LIVE</span></div>
-            <div class="world-orbit" aria-hidden="true"><span class="orbit-star orbit-star-a">✦</span><span class="orbit-star orbit-star-b">✦</span><span class="orbit-core">✳</span><span class="orbit-ring"></span></div>
-            <div class="aside-bottom">
-              <strong>A little kingdom lives behind this page.</strong>
-              <p>Builders raise homes. Seasons turn. Travelers appear. Leave it alone for a while and see what changes.</p>
-              <button class="text-action" id="explore-world" type="button">Step into the world <span aria-hidden="true">↗</span></button>
-            </div>
+          <aside class="hero-world-note" aria-label="Live world status">
+            <div class="note-heading"><span class="live-dot"></span> THE WORLD IS RUNNING <span class="note-live">LIVE</span></div>
+            <p class="world-whisper" id="hero-world-events" aria-live="off">Homes appear. People wander. The weather has its own plans.</p>
+            <div class="world-readouts"><span><small>SEASON</small><b id="hero-season">SUMMER</b></span><span><small>SKY</small><b id="hero-weather">CLEAR</b></span><span><small>HOUR</small><b id="hero-time">DAY</b></span></div>
+            <button class="text-action" id="explore-world-note" type="button">Find the projects <span aria-hidden="true">↗</span></button>
           </aside>
         </header>
 
-        <div class="hero-footnote"><span>SCROLL TO EXPLORE <span aria-hidden="true">↓</span></span><span>THE BACKGROUND IS A REAL-TIME SIMULATION</span></div>
+        <div class="hero-footnote"><span>SCROLL TO EXPLORE <span aria-hidden="true">↓</span></span><span>EVERYTHING BEHIND THIS TEXT IS ALIVE</span></div>
 
         <section id="work" class="content-section">
           <div class="section-heading"><div><span class="section-index">01 / SELECTED WORK</span><h2>Games with <em>something to say.</em></h2></div><p>Games I've helped take from early ideas to worlds people spend time in.</p></div>
           <div class="project-grid">
             <a class="project-card project-outpost" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer">
-              <div class="project-art art-outpost" aria-hidden="true"><span class="art-horizon"></span><span class="art-sun"></span><span class="art-tower art-tower-one"></span><span class="art-tower art-tower-two"></span><span class="art-floor"></span><b>IO</b></div>
+              <div class="project-art art-outpost" aria-hidden="true"><img src="assets/games/idle-outpost.webp" alt="" width="1400" height="788" loading="lazy" decoding="async" /><b>FROM THE GAME</b></div>
               <div class="project-body"><div class="project-meta"><span>ROCKBITE GAMES · CURRENT</span><span>01 ↗</span></div><h3>Idle Outpost</h3><p>A business at the end of the world. Trade with survivors, recruit heroes, and build something worth defending. I've been there since the first prototype.</p><div class="project-tags"><span>Systems</span><span>Economy</span><span>Progression</span></div></div>
             </a>
             <a class="project-card project-sandship" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer">
-              <div class="project-art art-sandship" aria-hidden="true"><span class="sand-sun"></span><span class="sand-ship">▰</span><span class="sand-dune dune-one"></span><span class="sand-dune dune-two"></span><b>SS</b></div>
+              <div class="project-art art-sandship" aria-hidden="true"><img src="assets/games/sandship.webp" alt="" width="1400" height="788" loading="lazy" decoding="async" /><b>FROM THE GAME</b></div>
               <div class="project-body"><div class="project-meta"><span>ROCKBITE GAMES · SHIPPED</span><span>02 ↗</span></div><h3>Sandship</h3><p>A moving factory in a strange desert. I joined during development and helped bring its crafting and automation systems to players.</p><div class="project-tags"><span>Automation</span><span>Crafting</span><span>Live operations</span></div></div>
             </a>
-            <a class="project-card project-battle" href="https://rockbitegames.com/games" target="_blank" rel="noopener noreferrer">
-              <div class="project-art art-battle" aria-hidden="true"><span class="battle-card battle-card-one">♠</span><span class="battle-card battle-card-two">✦</span><span class="battle-card battle-card-three">♣</span><b>BC</b></div>
+            <a class="project-card project-battle" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer">
+              <div class="project-art art-battle" aria-hidden="true"><img src="assets/games/battle-cards.webp" alt="" width="1242" height="690" loading="lazy" decoding="async" /><b>FROM THE GAME</b></div>
               <div class="project-body"><div class="project-meta"><span>ROCKBITE GAMES · SHIPPED</span><span>03 ↗</span></div><h3>Battle Cards</h3><p>A fast PvP card battler starring heroic ducks. What began as a game jam prototype became a full game; I worked on it from day one to launch.</p><div class="project-tags"><span>PvP</span><span>Strategy</span><span>Deck building</span></div></div>
             </a>
           </div>
         </section>
 
+        <div class="world-interlude"><span><b>MEANWHILE, BACK IN THE VILLAGE...</b></span><p>It kept moving while you were reading.</p></div>
+
         <section id="lab" class="content-section lab-section">
           <div class="section-heading"><div><span class="section-index">02 / AFTER HOURS</span><h2>Experiments from <em>the lab.</em></h2></div><p>Side projects where I follow an idea until it gets interesting.</p></div>
           <div class="lab-grid">
             <a class="lab-card wizard-card" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer">
-              <div class="lab-copy"><div class="project-meta"><span>PLAYABLE NOW · BROWSER GAME</span><span>↗</span></div><span class="lab-glyph">✦</span><h3>Idle Wizard</h3><p>A magical idle game I'm working on right now. Meet Elara Starbrew and start a new adventure.</p><span class="lab-link">Play the game <span aria-hidden="true">↗</span></span></div>
-              <div class="wizard-art" aria-hidden="true"><div class="spell-ring spell-ring-outer"></div><div class="spell-ring spell-ring-inner"></div><span class="spell-spark spark-one">✦</span><span class="spell-spark spark-two">✧</span><span class="spell-spark spark-three">✦</span><span class="wizard-hat">◕</span></div>
+              <div class="lab-visual wizard-art" aria-hidden="true"><img src="assets/games/idle-wizard.webp" alt="" width="768" height="256" loading="lazy" decoding="async" /></div>
+              <div class="lab-copy"><div class="project-meta"><span>PLAYABLE NOW · BROWSER GAME</span><span>↗</span></div><h3>Idle Wizard</h3><p>A magical idle game I'm working on right now. Meet Elara Starbrew and start a new adventure.</p><span class="lab-link">Play the game <span aria-hidden="true">↗</span></span></div>
             </a>
             <a class="lab-card shmixel-card" href="https://davstep.github.io/shmixel/" target="_blank" rel="noopener noreferrer">
-              <div class="lab-copy"><div class="project-meta"><span>CREATIVE TOOL · LIVE</span><span>↗</span></div><span class="lab-glyph">▦</span><h3>Shmixel</h3><p>A pixel art editor for turning little ideas into sprites right in your browser.</p><span class="lab-link">Make something <span aria-hidden="true">↗</span></span></div>
-              <div class="pixel-art" aria-hidden="true"><span>◼</span><span>◼</span><span>◼</span><span>◼</span><span>◼</span><span>◼</span><span>◼</span><span>◼</span><span>◼</span></div>
+              <div class="lab-visual shmixel-visual" aria-hidden="true"><img src="assets/games/shmixel-art.webp" alt="" width="880" height="670" loading="lazy" decoding="async" /></div>
+              <div class="lab-copy"><div class="project-meta"><span>CREATIVE TOOL · LIVE</span><span>↗</span></div><h3>Shmixel</h3><p>A pixel art editor for turning little ideas into sprites right in your browser.</p><span class="lab-link">Make something <span aria-hidden="true">↗</span></span></div>
             </a>
           </div>
         </section>
 
         <section id="about" class="content-section about-section">
-          <div class="about-label"><span class="section-index">03 / THE PERSON BEHIND THE SYSTEMS</span><span class="about-asterisk" aria-hidden="true">✳</span></div>
+          <div class="about-label"><span class="section-index">03 / THE PERSON BEHIND THE SYSTEMS</span></div>
           <div class="about-copy"><h2>Curious about the <em>small stuff.</em><br>Obsessed with the big picture.</h2><p>For <span id="years-at-rockbite">six</span> years at Rockbite Games, I've worked across gameplay, economy, progression, and all the invisible details that make a game feel good to play. I like writing the code, tuning the systems, and watching what real players actually do.</p><p>Off the clock: games, board games, anime, and time with my fiancée.</p><div class="about-facts"><div><span>ROLE</span><strong>Lead Code Wizard</strong></div><div><span>BASE</span><strong>Yerevan, Armenia</strong></div><div><span>LEVEL</span><strong id="player-level">24</strong></div></div></div>
         </section>
 
         <section class="realm-section" aria-labelledby="realm-title">
-          <div><span class="section-index">BONUS / THIS PAGE IS ALIVE</span><h2 id="realm-title">Watch a world<br><em>make itself.</em></h2><p>The village outside these panels builds, trades, travels, and changes with the weather. Open the controls to steer it, or step into a full-screen view and see what happens.</p><div class="realm-stats"><span><b id="realm-buildings">0</b> buildings</span><span><b id="realm-trees">0</b> trees</span><span><b id="realm-road">wild</b> road</span></div><button class="button button-primary" id="realm-enter" type="button">Explore the simulation <span aria-hidden="true">↗</span></button></div>
-          <div class="realm-window" aria-hidden="true"><div class="realm-window-top"><span>REALM.EXE</span><span>● LIVE</span></div><div class="realm-window-inner"><span>✳</span><small>ALWAYS IN MOTION</small></div></div>
+          <div><span class="section-index">BONUS / THIS PAGE IS ALIVE</span><h2 id="realm-title">Watch a world<br><em>make itself.</em></h2><p>The village builds, trades, travels, and changes with the weather. Step into it and discover the projects scattered across the landscape.</p><div class="realm-stats"><span><b id="realm-buildings">0</b> buildings</span><span><b id="realm-trees">0</b> trees</span><span><b id="realm-road">wild</b> road</span></div><button class="button button-primary" id="realm-enter" type="button">Explore the simulation <span aria-hidden="true">↗</span></button></div>
+          <div class="realm-window" aria-hidden="true"><span>WINDOW INTO THE WORLD <b>● LIVE</b></span></div>
         </section>
 
         <section id="contact" class="contact-section">
@@ -195,6 +208,7 @@
       <footer class="site-footer"><span>© <span id="footer-year">2026</span> DAV STEPANYAN</span><span>MADE WITH CURIOSITY & A FEW TOO MANY SIMULATION LOOPS</span><a href="#top">BACK TO TOP ↑</a></footer>
     </div>
 
-    <script src="world.js?v=3" defer></script>
+    <script src="world.js?v=5" defer></script>
+    <script src="site-explore.js?v=5" defer></script>
   </body>
 </html>

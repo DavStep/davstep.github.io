@@ -44,6 +44,7 @@
         --snow-shadow: rgba(65, 82, 102, 0.38);
         --snow-opacity: 0;
         --bare-show: 0;
+        --field-near: #31553a;
       }
 
       /* ============= SEASON PALETTES ============= */
@@ -70,6 +71,7 @@
         --snow-opacity: 0;
         --bare-show: 0;
         --fruit-show: 1;
+        --field-near: #416c43;
       }
       .world[data-season="summer"] {
         /* defaults — same as :root */
@@ -100,6 +102,7 @@
         --snow-opacity: 0;
         --bare-show: 0;
         --fruit-show: 0;
+        --field-near: #665036;
       }
       .world[data-season="winter"] {
         --grass: #c7ced6;
@@ -130,6 +133,7 @@
         --snow-opacity: 1;
         --bare-show: 1;
         --fruit-show: 0;
+        --field-near: #aebbc8;
       }
       /* Smooth fade when season changes */
       .grass, .grass::before, .grass::after,
@@ -159,6 +163,14 @@
         right: auto; width: max(2000px, 100vw);
         z-index: 0; pointer-events: none; overflow: hidden;
         will-change: transform;
+      }
+      /* The village retains room to pan, while smaller screens avoid painting
+         an offscreen desktop-sized sky and weather canvas every frame. */
+      @media (min-width: 640px) and (max-width: 1024px) {
+        .world { width: max(1500px, 100vw); }
+      }
+      @media (max-width: 639px) {
+        .world { width: max(1080px, 100vw); }
       }
       .world-dim {
         position: fixed; inset: 0; z-index: 9;
@@ -194,14 +206,25 @@
       .world-pan-reset.visible { opacity: 1; pointer-events: auto; }
       .world-pan-reset:active { color: var(--gold); border-color: var(--gold); transform: translate(1px, 1px); }
       body.ui-hidden .world-pan-reset { opacity: 0; pointer-events: none; }
+      body.ui-hidden .world-pan-reset.visible { opacity: 1; pointer-events: auto; }
 
       .sky {
         position: absolute; inset: 0; z-index: 0;
         background: linear-gradient(180deg,
-          var(--sky-top, #6a98c8) 0%,
-          var(--sky-mid, #d8c8a8) 70%,
-          var(--sky-bot, #b89868) 100%);
+          var(--sky-top, #4e6287) 0%,
+          var(--sky-mid, #9299ad) 64%,
+          var(--sky-bot, #c48d94) 100%);
       }
+      /* A little warm light hangs over the village. Its slow phase changes make
+         the world feel atmospheric without another animated canvas or DOM loop. */
+      .sky::before {
+        content: ""; position: absolute; inset: 40% 0 0;
+        background: linear-gradient(180deg, transparent, rgba(224, 188, 197, .055) 45%, rgba(206, 131, 150, .19));
+        opacity: 1; transition: opacity 3s ease;
+      }
+      .world[data-time="night"] .sky::before { opacity: .12; }
+      .world[data-time="dawn"] .sky::before,
+      .world[data-time="dusk"] .sky::before { opacity: .86; }
 
       .weather-veil {
         position: absolute; inset: 0; z-index: 3;
@@ -239,19 +262,23 @@
       .sun {
         position: absolute;
         left: var(--sun-x, 18%); top: var(--sun-y, 8%);
-        width: 28px; height: 28px;
+        width: 43px; height: 43px;
         background: var(--sun-color, #f0d060);
-        border-radius: 50%;
-        box-shadow: 0 0 22px 6px var(--sun-glow, rgba(240, 208, 96, 0.45));
+        border-radius: 50%; border: 3px solid rgba(255, 228, 227, .4);
+        box-shadow: 0 0 0 7px rgba(236, 190, 205, .11), 0 0 55px 17px var(--sun-glow, rgba(220, 151, 156, .38));
         opacity: var(--sun-opacity, 0);
         transform: translate(-50%, -50%); z-index: 1;
         transition: left 0.55s linear, top 0.55s linear;
+      }
+      .sun::after {
+        content: ""; position: absolute; inset: -20px; border-radius: 50%;
+        border: 1px solid rgba(255, 225, 231, .25);
       }
 
       .moon {
         position: absolute;
         left: var(--moon-x, 82%); top: var(--moon-y, 12%);
-        width: 24px; height: 24px;
+        width: 33px; height: 33px;
         background: #e0d4a8; border-radius: 50%;
         box-shadow: 0 0 16px 3px rgba(224, 212, 168, 0.35), inset -6px -3px 0 -2px #b4a684;
         opacity: var(--moon-opacity, 0);
@@ -264,7 +291,7 @@
       .cloud {
         position: absolute;
         width: 64px; height: 24px;
-        transition: filter 6s ease, opacity 6s ease;
+        transition: transform 90s linear, filter 6s ease, opacity 6s ease;
         will-change: transform;
         color: var(--cloud-light, #f0e4c0);
       }
@@ -396,6 +423,14 @@
         filter: brightness(var(--world-brightness, 1)) saturate(0.55);
       }
       .mountains svg { width: 100%; height: 100%; display: block; }
+      .mountains::after {
+        content: ""; position: absolute; inset: 42% 0 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(186, 143, 165, .12) 100%);
+        pointer-events: none;
+      }
+      .world[data-time="night"] .mountains::after {
+        background: linear-gradient(180deg, transparent 0%, rgba(92, 96, 157, .12) 100%);
+      }
 
       /* HILLS — rolling rounded silhouette */
       .hills {
@@ -1554,4 +1589,36 @@
           animation: none !important;
           transition: none !important;
         }
+      }
+
+      /* Raise the inhabited shelf into the page's visible stage. Anchored layers
+         move by bottom offset, so sprites retain their own transforms and the
+         world remains cheap to paint. Explore mode uses the full-screen camera. */
+      body:not(.ui-hidden) .world { --page-ground-lift: clamp(64px, 9svh, 110px); }
+      body:not(.ui-hidden) .world .mountains,
+      body:not(.ui-hidden) .world .hills { bottom: calc(56px + var(--page-ground-lift)); }
+      body:not(.ui-hidden) .world .back-trees-layer,
+      body:not(.ui-hidden) .world .trees-layer,
+      body:not(.ui-hidden) .world .crops-layer,
+      body:not(.ui-hidden) .world .people-layer,
+      body:not(.ui-hidden) .world .tracks-layer,
+      body:not(.ui-hidden) .world .ground-decor-layer,
+      body:not(.ui-hidden) .world .ambient-particle-layer { bottom: var(--page-ground-lift); }
+      body:not(.ui-hidden) .world .grass {
+        bottom: 0;
+        height: calc(60px + var(--page-ground-lift));
+        background:
+          radial-gradient(circle 2px at 11px 12px, rgba(208, 230, 169, .16) 0 2px, transparent 3px) 0 66px / 47px 37px repeat,
+          radial-gradient(ellipse 20px 5px at 25px 18px, rgba(8, 24, 24, .12) 0 70%, transparent 75%) 0 68px / 113px 40px repeat,
+          linear-gradient(180deg, var(--grass) 0, var(--grass-dark) 60px, var(--field-near) 100%);
+      }
+      body:not(.ui-hidden) .world .grass-back { bottom: calc(49px + var(--page-ground-lift)); }
+      body:not(.ui-hidden) .world .road-strip { bottom: calc(7px + var(--page-ground-lift)); }
+      body:not(.ui-hidden) .world .rainbow { bottom: calc(30px + var(--page-ground-lift)); }
+      @media (max-width: 600px) {
+        body:not(.ui-hidden) .world { --page-ground-lift: clamp(64px, 15svh, 138px); }
+        body:not(.ui-hidden) .world .trees-layer > .tree { scale: 1.3; }
+        body:not(.ui-hidden) .world .back-trees-layer > .tree { scale: 1.14; }
+        body:not(.ui-hidden) .world .house { scale: 1.28; }
+        body:not(.ui-hidden) .world .people-layer > :is(.person, .horseman, .dog, .sheep, .cart, .camel) { scale: 1.3; }
       }

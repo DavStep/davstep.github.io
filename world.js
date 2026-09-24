@@ -28,6 +28,10 @@
         const hudSeason = document.getElementById("hud-season");
         const hudUi = document.getElementById("hud-ui");
         const logEl = document.getElementById("log");
+        const heroSeason = document.getElementById("hero-season");
+        const heroWeather = document.getElementById("hero-weather");
+        const heroTime = document.getElementById("hero-time");
+        const heroWorldEvents = document.getElementById("hero-world-events");
         const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         // Forward declaration — referenced by tickRain before season setup runs
@@ -50,6 +54,7 @@
         const MAX_LOG = 5;
         function logEvent(text, kind = "") {
           if (document.hidden) return;
+          if (heroWorldEvents && heroWorldEvents.textContent !== text) heroWorldEvents.textContent = text;
           const e = document.createElement("div");
           e.className = "log-entry" + (kind ? " " + kind : "");
           e.textContent = text;
@@ -71,19 +76,19 @@
         };
 
         const palette = {
-          dawn:  { skyTop:"#3a2848", skyMid:"#c87a4a", skyBot:"#f0b870",
-                   cloudL:"#f0c4a0", cloudD:"#c89878",
-                   sun:"#f08850", sunGlow:"rgba(240,136,80,0.45)",
+          dawn:  { skyTop:"#333a61", skyMid:"#8b7189", skyBot:"#d3948d",
+                   cloudL:"#d8c9cc", cloudD:"#a994a4",
+                   sun:"#e6a39a", sunGlow:"rgba(224,143,148,0.40)",
                    sunO:0.65, moonO:0.25, starsO:0.4, bright:0.78 },
-          day:   { skyTop:"#6a98c8", skyMid:"#d8c8a8", skyBot:"#b89868",
-                   cloudL:"#f0e4c0", cloudD:"#c8b890",
-                   sun:"#f0d060", sunGlow:"rgba(240,208,96,0.45)",
+          day:   { skyTop:"#4e6287", skyMid:"#9299ad", skyBot:"#c48d94",
+                   cloudL:"#d9d8d8", cloudD:"#a6adbd",
+                   sun:"#e5b3a2", sunGlow:"rgba(220,151,156,0.38)",
                    sunO:1, moonO:0, starsO:0, bright:1 },
-          dusk:  { skyTop:"#5a2848", skyMid:"#c84a35", skyBot:"#8a3018",
-                   cloudL:"#e08858", cloudD:"#a85838",
-                   sun:"#d04830", sunGlow:"rgba(208,72,48,0.45)",
+          dusk:  { skyTop:"#292e58", skyMid:"#735473", skyBot:"#ba707b",
+                   cloudL:"#b4879a", cloudD:"#73576d",
+                   sun:"#dc8f8d", sunGlow:"rgba(210,111,132,0.4)",
                    sunO:0.6, moonO:0.25, starsO:0.3, bright:0.78 },
-          night: { skyTop:"#08081a", skyMid:"#181230", skyBot:"#261a3a",
+          night: { skyTop:"#0c1025", skyMid:"#202344", skyBot:"#3b3152",
                    cloudL:"#2a2438", cloudD:"#14101e",
                    sun:"#1a1428", sunGlow:"rgba(20,16,32,0)",
                    sunO:0, moonO:0.95, starsO:0.95, bright:0.45 },
@@ -91,7 +96,7 @@
 
         const BASE_DAY_LENGTH_MS = 120000;
         let dayLengthMs = BASE_DAY_LENGTH_MS;
-        let dayStart = performance.now() - 0.25 * dayLengthMs; // start at "day"
+        let dayStart = performance.now() - 0.34 * dayLengthMs; // visible afternoon sun, then dusk
         let manualOverride = null; // { startTime, fromT, toT, duration }
 
         // Time speed multiplier (SPEED_OPTIONS / speedIdx / getSpeed defined at top)
@@ -115,7 +120,7 @@
           const dock = document.querySelector(".hud");
           dock.inert = !hidden && dock.classList.contains("is-offscreen");
           logEl.setAttribute("aria-hidden", String(!hidden));
-          hudUi.innerHTML = hidden ? '↩ <span>Return to page</span>' : '✧ <span>Explore</span>';
+          hudUi.innerHTML = hidden ? '↩ <span>Return to page</span>' : '↗ <span>Explore</span>';
           hudUi.title = hidden ? "Return to page" : "Explore the world";
           hudUi.setAttribute("aria-label", hudUi.title);
           hudUi.setAttribute("aria-pressed", String(hidden));
@@ -160,6 +165,7 @@
 
           function applyWorldPan() {
             world.style.transform = `translateX(${-worldPanX}px)`;
+            document.body.style.setProperty("--world-pan-x", worldPanX + "px");
             const visible = Math.abs(worldPanX - centerPan()) > THRESHOLD;
             worldPanReset.classList.toggle("visible", visible);
             worldPanReset.inert = !visible;
@@ -222,14 +228,22 @@
           document.addEventListener("mousemove", (e) => { if (dragging) onWorldDragMove(e); });
           document.addEventListener("mouseup", onWorldDragEnd);
           worldPanReset.addEventListener("click", resetWorldPan);
-          window.addEventListener("resize", () => {
+          function recenterAfterResize() {
             const nextCenter = centerPan();
             worldPanX = Math.abs(worldPanX - panCenter) <= THRESHOLD
               ? nextCenter
               : Math.max(0, Math.min(maxPan(), worldPanX));
             panCenter = nextCenter;
             applyWorldPan();
+          }
+          let panResizeFrame = 0;
+          window.addEventListener("resize", () => {
+            cancelAnimationFrame(panResizeFrame);
+            panResizeFrame = requestAnimationFrame(recenterAfterResize);
           });
+          // CSS breakpoints can change the world width after a viewport resize.
+          // Observe the actual world box so a centered camera stays centered.
+          if ("ResizeObserver" in window) new ResizeObserver(recenterAfterResize).observe(world);
         }
 
         const hudSettings = document.getElementById("hud-settings");
@@ -290,7 +304,6 @@
           };
         }
 
-        const root = document.documentElement;
         let lastHudPhase = "";
 
         // Cache last-written values so updateDay only writes when a value actually changed.
@@ -300,7 +313,9 @@
         function setVar(name, value) {
           if (dayCache[name] === value) return;
           dayCache[name] = value;
-          root.style.setProperty(name, value);
+          // These variables are only consumed inside the world. Keeping them on
+          // this subtree avoids restyling every card and control four times a second.
+          world.style.setProperty(name, value);
         }
 
         function computeT() {
@@ -361,6 +376,7 @@
             lastHudPhase = labelPhase;
             world.dataset.time = labelPhase;
             hudTime.textContent = phaseLabels[labelPhase];
+            if (heroTime) heroTime.textContent = phaseLabels[labelPhase];
             // Atmospheric effects only make sense by day — strip at night
             if (labelPhase === "night") {
               world.classList.remove("has-rainbow");
@@ -383,6 +399,7 @@
           setInterval(updateDay, 250);
         } else {
           world.dataset.time = "day"; hudTime.textContent = "DAY";
+          if (heroTime) heroTime.textContent = "DAY";
         }
 
         /* ============= SEASONS ============= */
@@ -398,12 +415,14 @@
         let dayOfYear = seasons.indexOf("summer") * SEASON_DAYS;
         world.dataset.season = currentSeason;
         hudSeason.textContent = seasonLabels[currentSeason];
+        if (heroSeason) heroSeason.textContent = seasonLabels[currentSeason];
 
         function setSeason(s, isManual) {
           if (s === currentSeason) return;
           currentSeason = s;
           world.dataset.season = s;
           hudSeason.textContent = seasonLabels[s];
+          if (heroSeason) heroSeason.textContent = seasonLabels[s];
           logEvent(seasonLog[s], "time");
           if (isManual) dayOfYear = seasons.indexOf(s) * SEASON_DAYS;
           scheduleAmbientRefresh(120);
@@ -435,6 +454,7 @@
           storm: "A storm rolls in. Lightning splits the sky!",
         };
         let weather = "clear";
+        if (heroWeather) heroWeather.textContent = weatherLabels[weather];
 
         function setWeather(w, manual = false) {
           if (w === weather) return;
@@ -447,6 +467,7 @@
           world.dataset.weather = w;
           syncWeatherAftermath(old, w);
           hudWeather.textContent = weatherLabels[w];
+          if (heroWeather) heroWeather.textContent = weatherLabels[w];
           const weatherMessage = currentSeason === "winter" && w === "rain"
             ? "Snow begins to fall across the realm."
             : currentSeason === "winter" && w === "storm"
@@ -519,11 +540,18 @@
         const ctx = canvas.getContext("2d");
         let CW, CH;
         let isSmallViewport = false;
+        let lastCanvasWidth = 0, lastCanvasHeight = 0, lastCanvasDpr = 0;
         function resize() {
           isSmallViewport = innerWidth < 640;
-          const dpr = Math.min(window.devicePixelRatio || 1, isSmallViewport ? 1.5 : 2);
+          // Weather is deliberately pixel-sized; supersampling a 2000px-wide
+          // canvas at 2x wasted memory and fill rate with no visible benefit.
+          const dpr = Math.min(window.devicePixelRatio || 1, isSmallViewport ? 1 : 1.25);
           CW = W(); CH = innerHeight;
-          canvas.width = CW * dpr; canvas.height = CH * dpr;
+          const pixelWidth = Math.round(CW * dpr);
+          const pixelHeight = Math.round(CH * dpr);
+          if (pixelWidth === lastCanvasWidth && pixelHeight === lastCanvasHeight && dpr === lastCanvasDpr) return;
+          lastCanvasWidth = pixelWidth; lastCanvasHeight = pixelHeight; lastCanvasDpr = dpr;
+          canvas.width = pixelWidth; canvas.height = pixelHeight;
           canvas.style.width = CW + "px"; canvas.style.height = CH + "px";
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
@@ -560,10 +588,9 @@
           });
 
           // Re-target in-flight movers to the new viewport edge so they don't overshoot
-          document.querySelectorAll(".person, .horseman, .cloud, .dragon, .sheep, .dog, .cart, .house, .tree").forEach((el) => {
+          document.querySelectorAll(".person, .horseman, .dragon, .sheep, .dog, .cart").forEach((el) => {
             // For entities currently mid-transition with a left value, just stop them at current spot — they'll naturally despawn.
             // Cleaner: redirect their target to the closer viewport edge.
-            if (el.classList.contains("house") || el.classList.contains("tree")) return; // already handled
             const cs = getComputedStyle(el);
             const curLeft = parseFloat(cs.left);
             if (isNaN(curLeft)) return;
@@ -618,15 +645,25 @@
           while (flakes.length < n) flakes.push(makeFlake());
         }
         let rainRafRunning = false;
-        function tickRain() {
+        let lastRainFrame = 0;
+        function tickRain(frameTime) {
           if (document.hidden) {
             rainRafRunning = false;
+            lastRainFrame = 0;
             return;
           }
           rainRafRunning = true;
-          wind += (windTarget - wind) * 0.02;
-          intensity += (intensityTarget - intensity) * 0.012;
-          gustTimer--;
+          // Draw weather at ~30fps and advance it by elapsed time. The rest of
+          // the scene remains animated by CSS while this full-width canvas rests.
+          if (lastRainFrame && frameTime - lastRainFrame < 32) {
+            requestAnimationFrame(tickRain);
+            return;
+          }
+          const frameStep = lastRainFrame ? Math.min(2.5, (frameTime - lastRainFrame) / 16.67) : 1;
+          lastRainFrame = frameTime;
+          wind += (windTarget - wind) * Math.min(1, 0.02 * frameStep);
+          intensity += (intensityTarget - intensity) * Math.min(1, 0.012 * frameStep);
+          gustTimer -= frameStep;
           if (gustTimer <= 0 && (intensityTarget > 0 || currentSeason === "winter")) {
             const base = weather === "storm" ? 9 : (currentSeason === "winter" ? 2.6 : 4);
             windTarget = (Math.random() * 2 - 1) * base;
@@ -635,7 +672,7 @@
 
           // Snow ramps independently from rain — driven by season, not weather
           const snowTarget = currentSeason === "winter" ? (weather === "storm" ? 1.12 : 1) : 0;
-          snowIntensity += (snowTarget - snowIntensity) * 0.008;
+          snowIntensity += (snowTarget - snowIntensity) * Math.min(1, 0.008 * frameStep);
 
           ctx.clearRect(0, 0, CW, CH);
 
@@ -646,8 +683,8 @@
             ensureFlakes(wantFlakes);
             for (let i = 0; i < wantFlakes; i++) {
               const f = flakes[i];
-              f.y += f.vy;
-              f.x += Math.sin((f.y + f.phase) * f.wave) * f.drift + wind * 0.045;
+              f.y += f.vy * frameStep;
+              f.x += (Math.sin((f.y + f.phase) * f.wave) * f.drift + wind * 0.045) * frameStep;
               if (f.y > CH + 8) Object.assign(f, makeFlake(-12 - Math.random() * 40));
               if (f.x > CW + 20) f.x = -10;
               if (f.x < -20) f.x = CW + 10;
@@ -669,7 +706,7 @@
             for (let i = 0; i < want; i++) {
               const d = drops[i];
               const vx = wind, vy = d.speed;
-              d.x += vx * 0.6; d.y += vy;
+              d.x += vx * 0.6 * frameStep; d.y += vy * frameStep;
               if (d.y > CH + 10) { d.y = -20; d.x = Math.random() * (CW + 200) - 100; }
               if (d.x > CW + 60) d.x = -40;
               if (d.x < -60) d.x = CW + 40;
@@ -686,6 +723,7 @@
                        Math.abs(wind) < 0.05;
           if (idle) {
             rainRafRunning = false;
+            lastRainFrame = 0;
             ctx.clearRect(0, 0, CW, CH);
             return;
           }
@@ -739,7 +777,7 @@
           return `<svg viewBox="0 0 ${W_} ${H_}" xmlns="http://www.w3.org/2000/svg">${undersideRects}${puffRects}${highlightRects}</svg>`;
         }
 
-        function randomCloud() {
+        function randomCloud(initialProgress = 0) {
           const mobileClouds = innerWidth < 640;
           const cloudLimit = weather === "storm" ? (mobileClouds ? 22 : 42)
             : weather === "rain" ? (mobileClouds ? 16 : 30)
@@ -749,19 +787,20 @@
           c.className = "cloud";
           c.innerHTML = cloudSVG();
           c.style.top = (4 + Math.random() * 22) + "%";
-          const scale = 0.7 + Math.random() * 0.9;
-          c.style.transform = `scale(${scale})`;
+          const scale = 1.05 + Math.random() * 0.9;
           const fromLeft = Math.random() > 0.5;
           const startX = fromLeft ? -100 : (W() + 30);
           const endX = fromLeft ? (W() + 100) : -100;
+          const travel = endX - startX;
           c.style.left = startX + "px";
+          c.style.transform = `translateX(${travel * initialProgress}px) scale(${scale})`;
           cloudsLayer.appendChild(c);
           const speed = 8 + Math.random() * 18;
           const dist = Math.abs(endX - startX);
-          const dur = dist / speed;
+          const dur = dist * (1 - initialProgress) / speed;
           requestAnimationFrame(() => {
-            c.style.transition = `left ${dur}s linear, filter 6s ease, opacity 6s ease`;
-            c.style.left = endX + "px";
+            c.style.transition = `transform ${dur}s linear, filter 6s ease, opacity 6s ease`;
+            c.style.transform = `translateX(${travel}px) scale(${scale})`;
           });
           setTimeout(() => c.remove(), dur * 1000 + 500);
         }
@@ -769,10 +808,7 @@
         function seedClouds(n) {
           for (let i = 0; i < n; i++) {
             setTimeout(() => {
-              randomCloud();
-              const lastCloud = cloudsLayer.lastElementChild;
-              if (!lastCloud) return;
-              lastCloud.style.left = (Math.random() * W()) + "px";
+              randomCloud(Math.random() * 0.8);
             }, i * 30);
           }
         }
@@ -3002,6 +3038,7 @@
         const HILL_TREE_MIN_SPACING = 38;
         const HILL_TREE_SPOT_ATTEMPTS = 90;
         const STARTER_STRUCTURE_SEEDS = [
+          { kind: "castle",    pos: 0.50, up: 0 },
           { kind: "house",     pos: 0.44, up: 1 },
           { kind: "tavern",    pos: 0.52, up: 0 },
           { kind: "marketstall", pos: 0.60, up: 0 },
@@ -8973,7 +9010,8 @@
           setTimeout(() => loop(fn, min, max, opts), interval);
         }
 
-        // Seed only trees at load; every structure should enter through the builder flow.
+        // Establish a visible home base on the first frame. The remaining
+        // structures still arrive through the builder flow as the village grows.
         setTimeout(() => {
           plantTreeBurst(true, 8, 55);
           plantBackTreeBurst(true, Math.ceil(backTreeLimit() * 0.45), 35);
@@ -9034,13 +9072,17 @@
           el.querySelectorAll(".hs-walls, .hs-roof").forEach((part) => part.setAttribute("opacity", 1));
           applyLane(rec, pickLane(x, kind, palette, 0, rec));
         }
+        buildStaticStarter(STARTER_STRUCTURE_SEEDS[0]);
+        buildStaticStarter(STARTER_STRUCTURE_SEEDS[6]);
         setTimeout(() => {
           if (reduced) {
-            STARTER_STRUCTURE_SEEDS.forEach(buildStaticStarter);
+            STARTER_STRUCTURE_SEEDS.forEach((seed, i) => {
+              if (i !== 0 && i !== 6) buildStaticStarter(seed);
+            });
             return;
           }
           STARTER_STRUCTURE_SEEDS.forEach((seed, i) => {
-            setTimeout(() => buildStarterStructure(seed), 200 + i * 1200);
+            if (i !== 0 && i !== 6) setTimeout(() => buildStarterStructure(seed), 200 + i * 1200);
           });
         }, 600);
         setTimeout(() => scheduleAmbientRefresh(0), 900);
@@ -9131,7 +9173,7 @@
         const orig = btn.innerHTML;
         btn.addEventListener("click", () => {
           navigator.clipboard && navigator.clipboard.writeText("step_dev");
-          btn.innerHTML = '<span class="ico">✦</span>copied!';
+          btn.innerHTML = '<span class="ico">✓</span>copied!';
           setTimeout(() => { btn.innerHTML = orig; }, 1500);
         });
       })();
