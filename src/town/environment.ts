@@ -64,26 +64,50 @@ export class Environment {
     }
   }
   private buildMountains(){
-    const count=this.mobile?17:23,baseGeo=new THREE.IcosahedronGeometry(1,0);
-    const base=new THREE.InstancedMesh(baseGeo,new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,flatShading:true}),count);
-    const caps=new THREE.InstancedMesh(baseGeo,new THREE.MeshStandardMaterial({color:0xc9bba7,roughness:1,flatShading:true}),count);
-    const d=new THREE.Object3D();
-    for(let i=0;i<count;i++){
-      const a=i*Math.PI*2/count+.12*(rand(i*13)-.5),r=230+rand(i*37)*58,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      const height=31+rand(i*47)*24,width=22+rand(i*23)*17;
-      d.position.set(x,terrainHeight(x,z)+height*.53,z);d.scale.set(width,height*.59,width*.89);d.rotation.set(0,a,.1*(rand(i*11)-.5));d.updateMatrix();base.setMatrixAt(i,d.matrix);
-      base.setColorAt(i,new THREE.Color([0x8d8b80,0xa69b89,0x7c817b,0xb0a28f][i%4]));
-      d.position.y+=height*.41;d.scale.set(width*.47,height*.27,width*.42);d.updateMatrix();caps.setMatrixAt(i,d.matrix);
+    // A connected ridge replaces the detached boulders. Its spine wanders in
+    // radius, rises into several sharp summits, and falls into two river passes.
+    const segments=this.mobile?72:120;
+    const bands=[0,.08,.25,.72,1,.66,.16,0];
+    const points:{position:THREE.Vector3;lift:number;peak:number}[][]=[];
+    const angularDistance=(a:number,b:number)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
+    for(let i=0;i<=segments;i++){
+      const a=i*Math.PI*2/segments;
+      const spine=229+13*Math.sin(a*3+.6)+7*Math.sin(a*7+1.5);
+      const summit=Math.pow(Math.max(0,Math.sin(a*7+.15)),4)*21;
+      let peak=42+10*Math.sin(a*4+.5)+9*Math.sin(a*9+1.9)+6*Math.sin(a*15+1.4)+summit;
+      for(const pass of [-.38,-2.76]){
+        const d=angularDistance(a,pass);
+        peak*=1-.64*Math.exp(-d*d/.022);
+      }
+      peak=THREE.MathUtils.clamp(peak,15,79);
+      const radii=[150,174,190,spine-16,spine,spine+21,286,338];
+      points.push(radii.map((radius,j)=>{
+        const x=Math.cos(a)*radius,z=Math.sin(a)*radius;
+        const lift=bands[j]*peak+(j>0&&j<7?Math.sin(a*19+j*1.7)*bands[j]*1.3:0);
+        return {position:new THREE.Vector3(x,terrainHeight(x,z)+lift+.06,z),lift:bands[j],peak};
+      }));
     }
-    base.instanceMatrix.needsUpdate=true;caps.instanceMatrix.needsUpdate=true;
-    if(base.instanceColor)base.instanceColor.needsUpdate=true;
-    base.receiveShadow=true;this.group.add(base,caps);
-    const foothills=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),MAT.grassDark,this.mobile?14:20);
-    for(let i=0;i<foothills.count;i++){
-      const a=i*2.399,r=150+rand(i*97)*48,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      d.position.set(x,terrainHeight(x,z)+3,z);d.rotation.set(0,a,0);d.scale.set(7+rand(i*3)*6,4+rand(i*7)*5,6+rand(i*17)*6);d.updateMatrix();foothills.setMatrixAt(i,d.matrix);
+    const positions:number[]=[],colors:number[]=[];
+    const turf=new THREE.Color(0x708365),rock=new THREE.Color(0x918b7f),high=new THREE.Color(0xafa698),summitColor=new THREE.Color(0xcac2b3);
+    const addFace=(a:typeof points[number][number],b:typeof points[number][number],c:typeof points[number][number],cell:number)=>{
+      const lift=(a.lift+b.lift+c.lift)/3,peak=(a.peak+b.peak+c.peak)/3;
+      const color=turf.clone().lerp(rock,THREE.MathUtils.smoothstep(lift,.12,.57))
+        .lerp(high,THREE.MathUtils.smoothstep(lift,.55,1)*.75)
+        .lerp(summitColor,THREE.MathUtils.smoothstep(peak,54,73)*THREE.MathUtils.smoothstep(lift,.73,1)*.72);
+      color.multiplyScalar(.91+rand(cell*131+7)*.16);
+      for(const point of [a,b,c]){positions.push(point.position.x,point.position.y,point.position.z);colors.push(color.r,color.g,color.b);}
+    };
+    for(let i=0;i<segments;i++)for(let j=0;j<bands.length-1;j++){
+      const near=points[i][j],next=points[i+1][j],far=points[i][j+1],diagonal=points[i+1][j+1];
+      addFace(near,next,far,i*31+j*2);
+      addFace(next,diagonal,far,i*31+j*2+1);
     }
-    foothills.instanceMatrix.needsUpdate=true;foothills.receiveShadow=true;this.group.add(foothills);
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+    geometry.computeVertexNormals();
+    const ridge=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:true,side:THREE.DoubleSide}));
+    ridge.receiveShadow=true;this.group.add(ridge);
   }
   private buildForest(){
     const count=this.mobile?250:520;
