@@ -8,6 +8,7 @@ import { MILESTONES, TOWN_SAVE_KEY, parseSave, milestoneRecap, townAt, MINUTE, t
 import { PROJECTS, PROJECT_BY_KEY, type ProjectKey } from './projects';
 import './style.css';
 import './style-2.css';
+import './style-3.css';
 
 const $ = <T extends HTMLElement>(selector:string) => document.querySelector(selector) as T;
 const canvas=$<HTMLCanvasElement>('#town-canvas');
@@ -44,6 +45,8 @@ const townNow=()=>Number.isFinite(previewAge)&&previewAge>=0?save.createdAt+prev
 const recap=milestoneRecap(save,Date.now());
 function persist(){save.lastSeenAt=Date.now();save.elapsedFloorMs=Math.max(save.elapsedFloorMs,save.lastSeenAt-save.createdAt);save.eventCursor=Math.floor(save.elapsedFloorMs/MINUTE);try{localStorage.setItem(TOWN_SAVE_KEY,JSON.stringify(save));}catch{}}
 let snapshot:TownSnapshot=townAt(save,townNow());
+let rainPreview=false;
+const weatherSnapshot=():TownSnapshot=>rainPreview?{...snapshot,weather:'rain'}:snapshot;
 let town:TownScene|null=null,residents:Residents|null=null;
 let colliders:Collider[]=[],roaming=false;
 const roam=new RoamController();
@@ -68,7 +71,7 @@ const labelButtons=new Map<ProjectKey,HTMLButtonElement>();
 function announce(text:string){toast.textContent=text;toast.hidden=false;clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>toast.hidden=true,5500);}
 function saveNow(){persist();}
 window.addEventListener('pagehide',saveNow);
-document.addEventListener('visibilitychange',()=>{if(document.hidden){heldKeys.clear();saveNow();}else {snapshot=townAt(save,townNow());town?.update(snapshot);lastFrame=0;}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){heldKeys.clear();saveNow();}else {snapshot=townAt(save,townNow());town?.update(weatherSnapshot());lastFrame=0;}});
 window.setInterval(persist,15000);
 function setIntroHidden(value:boolean){intro.classList.toggle('dismissed',value);}
 $('#intro-hide').addEventListener('click',()=>setIntroHidden(true));
@@ -163,6 +166,13 @@ $('#control-zoom-in').addEventListener('click',()=>zoom(-14));
 $('#control-zoom-out').addEventListener('click',()=>zoom(14));
 const settings=$<HTMLDivElement>('#settings-panel'),settingsButton=$<HTMLButtonElement>('#control-settings');
 settingsButton.addEventListener('click',()=>{settings.hidden=!settings.hidden;settingsButton.setAttribute('aria-expanded',String(!settings.hidden));});
+const weatherPreviewButton=$<HTMLButtonElement>('#weather-preview');
+weatherPreviewButton.addEventListener('click',()=>{
+  rainPreview=!rainPreview;
+  weatherPreviewButton.setAttribute('aria-pressed',String(rainPreview));
+  weatherPreviewButton.innerHTML=rainPreview?'Return to live weather <span aria-hidden="true">↗</span>':'Make it rain <span aria-hidden="true">↗</span>';
+  town?.update(weatherSnapshot());updateReadouts();
+});
 function moveStick(event:PointerEvent){
   const rect=joystick.getBoundingClientRect(),radius=rect.width*.34;
   const dx=event.clientX-(rect.left+rect.width/2),dy=event.clientY-(rect.top+rect.height/2),length=Math.max(1,Math.hypot(dx,dy));
@@ -213,12 +223,12 @@ function positionLabels(){
 }
 function updateReadouts(){
   $<HTMLElement>('#season-readout').textContent=snapshot.season.toUpperCase();
-  $<HTMLElement>('#weather-readout').textContent=snapshot.weather.toUpperCase();
+  $<HTMLElement>('#weather-readout').textContent=rainPreview?'RAIN · PREVIEW':snapshot.weather.toUpperCase();
   $<HTMLElement>('#age-readout').textContent=snapshot.elapsed<MINUTE?'< 1 MIN':`${Math.floor(snapshot.elapsed/MINUTE)} MIN`;
   $<HTMLElement>('#building-readout').textContent=String(snapshot.buildings);
   const event=[...MILESTONES].reverse().find(m=>snapshot.elapsed>=m.at);
   $<HTMLElement>('#status-text').textContent=event?.label??'The settlement is waking up.';
-  document.body.dataset.weather=snapshot.weather;
+  document.body.dataset.weather=rainPreview?'rain':snapshot.weather;
   document.body.dataset.season=snapshot.season;
 }
 function stepCamera(dt:number){
@@ -243,7 +253,7 @@ function stepCamera(dt:number){
   town.camera.lookAt(target);
 }
 function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!town)return;const cap=town.mobile?30:60;if(now-lastFrame<1000/cap-1)return;const elapsed=lastFrame?now-lastFrame:1000/cap;lastFrame=now;
-  if(now-lastModel>750){lastModel=now;snapshot=townAt(save,townNow());town.update(snapshot);colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();}
+  if(now-lastModel>750){lastModel=now;snapshot=townAt(save,townNow());town.update(weatherSnapshot());colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();}
   snapshot.elapsed=Math.max(0,townNow()-save.createdAt,save.elapsedFloorMs);snapshot.dayFraction=(snapshot.elapsed%(12*MINUTE))/(12*MINUTE);
   if(roaming){
     const input={x:(heldKeys.has('KeyD')||heldKeys.has('ArrowRight')?1:0)-(heldKeys.has('KeyA')||heldKeys.has('ArrowLeft')?1:0)+joystickInput.x,z:(heldKeys.has('KeyW')||heldKeys.has('ArrowUp')?1:0)-(heldKeys.has('KeyS')||heldKeys.has('ArrowDown')?1:0)+joystickInput.z,sprint:heldKeys.has('ShiftLeft')||heldKeys.has('ShiftRight')};
@@ -255,7 +265,7 @@ function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!tow
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas);pixelRatio=Math.min(devicePixelRatio,town.mobile?1.25:1.5);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);town.update(snapshot);colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();document.body.classList.add('town-ready');requestAnimationFrame(frame);
+  town=new TownScene(canvas);pixelRatio=Math.min(devicePixelRatio,town.mobile?1.25:1.5);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);town.update(weatherSnapshot());colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);updateReadouts();document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,save,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();positionLabels();});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;labels.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}

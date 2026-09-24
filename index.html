@@ -9,13 +9,12 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <div id="app" class="app">
     <div class="world-poster" aria-hidden="true"><div class="poster-hill back"></div><div class="poster-hill front"></div><div class="poster-castle">♜</div></div>
     <canvas id="town-canvas" aria-hidden="true"></canvas>
-    <div id="weather-overlay" aria-hidden="true"></div>
     <header class="chrome">
       <button id="brand" class="brand" type="button" aria-label="Return to town overview"><span class="brand-icon">D<span>S</span></span><span class="brand-name">DAV STEPANYAN<small>GAME DEVELOPER · WORLD BUILDER</small></span></button>
       <nav aria-label="Main navigation"><button data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav>
@@ -27,7 +26,7 @@
       <div class="controls"><button id="control-walk" type="button" aria-label="Roam through town" aria-pressed="false">Roam</button><button id="control-recenter" type="button" title="Recenter town" aria-label="Recenter town">⌖</button><button id="control-zoom-in" type="button" aria-label="Zoom in">+</button><button id="control-zoom-out" type="button" aria-label="Zoom out">−</button><button id="control-settings" type="button" aria-label="World settings" aria-expanded="false" aria-controls="settings-panel">⚙</button></div>
       <div id="walk-hint" class="walk-hint" hidden>WASD / arrows to move · Shift to move faster · Drag to look · Esc for overview</div>
       <div id="joystick" class="joystick" aria-label="Touch movement control" hidden><div id="joystick-stick"></div></div>
-      <div class="settings-panel" id="settings-panel" hidden><strong>World notes</strong><div><span>Season</span><b id="season-readout">SUMMER</b></div><div><span>Weather</span><b id="weather-readout">CLEAR</b></div><div><span>Town age</span><b id="age-readout">0 MIN</b></div><div><span>Buildings</span><b id="building-readout">0</b></div><p>Drag to orbit · scroll or pinch to zoom · select a landmark to explore.</p></div>
+      <div class="settings-panel" id="settings-panel" hidden><strong>World notes</strong><div><span>Season</span><b id="season-readout">SUMMER</b></div><div><span>Weather</span><b id="weather-readout">CLEAR</b></div><button id="weather-preview" class="weather-preview" type="button" aria-pressed="false">Make it rain <span aria-hidden="true">↗</span></button><div><span>Town age</span><b id="age-readout">0 MIN</b></div><div><span>Buildings</span><b id="building-readout">0</b></div><p>Drag to orbit · scroll or pinch to zoom · select a landmark to explore.</p></div>
       <button id="open-work-mobile" class="mobile-work" type="button">Explore work <span>↗</span></button>
     </main>
     <div class="panel-backdrop" id="panel-backdrop" hidden></div>

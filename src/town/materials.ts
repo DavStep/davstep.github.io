@@ -7,7 +7,7 @@ export const C = {
   grass: 0x789667, grassDark: 0x5a7b59, earth: 0x8d795f, path: 0xbda982,
   wood: 0x80604b, woodLight: 0x9b7759, woodDark: 0x674d3d,
   stone: 0xa7a195, stoneDark: 0x777b78, plaster: 0xe5c9a1,
-  roof: 0xb56c58, roofDark: 0x76576b, roofBlue: 0x668193,
+  roof: 0xa95745, roofDark: 0x765740, roofBlue: 0x657f8b,
   gold: 0xe9c06c, window: 0x50433d, lamp: 0xffd390,
 } as const;
 
@@ -42,12 +42,9 @@ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'
         float fleck=townNoise(floor(stagger*vec3(1.3,1.25,1.3))*.8);
         float joint=1.0-smoothstep(.025,.065,fract(vTownSurface.y*1.25));
         diffuseColor.rgb*=.81+fleck*.25-joint*.07;`,
-      roof:`vec2 tile=vTownSurface.xz*vec2(1.7,1.95);
-        tile.y+=mod(floor(tile.x),2.0)*.5;
-        float seamX=1.0-smoothstep(.015,.07,fract(tile.x));
-        float seamZ=1.0-smoothstep(.025,.09,fract(tile.y));
-        float tileTint=townNoise(floor(vec3(tile.x,tile.y,0.0))*.77);
-        diffuseColor.rgb*=.83+tileTint*.25-max(seamX,seamZ)*.13;`,
+      roof:`float clay=townNoise(vTownSurface*vec3(2.7,1.9,2.7));
+        float speckle=townNoise(vTownSurface*vec3(8.0,5.0,8.0));
+        diffuseColor.rgb*=.88+clay*.16+speckle*.045;`,
       plaster:`float wash=townNoise(vTownSurface*vec3(1.4,1.1,1.4));
         diffuseColor.rgb*=.94+wash*.10;`,
       ground:`float groundPatch=townNoise(vTownSurface*vec3(.075,.01,.075));
@@ -57,7 +54,7 @@ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'
     }[surface];
     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n${treatment}`);
   };
-  material.customProgramCacheKey=()=>`town-painted-${surface}-v2`;
+  material.customProgramCacheKey=()=>`town-painted-${surface}-v3`;
   return material;
 }
 
@@ -67,6 +64,7 @@ export const MAT = {
   stone:painted(make(C.stone,1),'stone'),stoneDark:painted(make(C.stoneDark,1),'stone'),
   plaster:painted(make(C.plaster,1),'plaster'),plasterIvory:painted(make(0xe1d2b4,1),'plaster'),plasterRose:painted(make(0xdab8a5,1),'plaster'),plasterSage:painted(make(0xbfc9af,1),'plaster'),
   roof:painted(make(C.roof,.92),'roof'),roofDark:painted(make(C.roofDark,.92),'roof'),roofBlue:painted(make(C.roofBlue,.92),'roof'),
+  roofTiles:painted(new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.96,side:THREE.DoubleSide}),'roof'),
   gold:make(C.gold,.68,.1),window:make(C.window,.88),glass:new THREE.MeshStandardMaterial({color:0x8db3ab,roughness:.25,metalness:.12,emissive:0x193633,emissiveIntensity:.22}),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
   white:make(0xeae9dd),leaf:make(0x52775a,1),leafLight:make(0x709466,1),leafDark:make(0x456b5a,1),foliage:make(0xffffff,1),pine:make(0xffffff,1),
   red:make(0xbe7062),purple:make(0x8d729e),blue:make(0x668db0),

@@ -16,9 +16,9 @@ The production build is in `dist/`. The staging script copies the existing `idle
 
 ## Town systems
 
-- `src/town/model.ts` defines seeded plots, milestone timing, section-by-section roads and walls, seasons, renovations, and eligible neighbor mergers. A snapshot is calculated directly from elapsed time, including time spent away.
+- `src/town/town-plan.ts` defines every building site and type, the market and civic districts, road and wall dimensions, construction timing, and eligible neighbor mergers. `src/town/model.ts` builds the planned town from elapsed time, including time spent away; the save seed only shifts construction starts by up to eight seconds and varies weather.
 - `src/town/residents.ts` defines the road graph, cached routes, resident roles, destinations, schedules, and instanced character parts.
-- `src/town/scene.ts` builds staged cottages, landmarks, and fortifications from shared matte materials. Static structure geometry is batched by material; repeated walls, trees, lights, and residents are instanced. Mobile uses simpler geometry.
+- `src/town/scene.ts` builds staged cottages, landmarks, access paths, roads, and fortifications from the town plan and shared matte materials. Static structure geometry is batched by material; repeated walls, trees, lights, and residents are instanced. Mobile uses simpler geometry.
 - `src/town/environment.ts` builds the surrounding terrain, mountains, forest, river, ponds, and shader-animated grass. `src/town/materials.ts` provides subtle timber and stone surface detail.
 - `src/town/player.ts` animates the walkable human avatar, while `src/town/collision.ts` handles buildings, added wings, walls and gates, trees, and water.
 - `src/town/main.ts` handles local saves, the camera, portfolio panels, history, controls, reduced motion, adaptive resolution, and the WebGL poster fallback.

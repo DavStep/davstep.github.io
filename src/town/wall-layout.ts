@@ -1,7 +1,8 @@
 import { WALL_SEGMENTS } from './model';
+import { INFRASTRUCTURE } from './town-plan';
 
 export interface WallPoint {x:number;z:number}
-export const WALL_GATE_INTERVAL=8;
+export const WALL_GATE_INTERVAL=INFRASTRUCTURE.wall.gateInterval;
 export const wallIsGate=(index:number)=>index%WALL_GATE_INTERVAL===0;
 
 export function wallSection(radius:number,index:number){

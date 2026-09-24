@@ -6,6 +6,7 @@ import { buildColliders, isBlocked, moveWithCollisions } from '../src/town/colli
 import { isWater, riverCenter, riverHalfWidth, terrainHeight } from '../src/town/environment';
 import { RoamController } from '../src/town/navigation';
 import { wallIsGate, wallSection } from '../src/town/wall-layout';
+import { INFRASTRUCTURE, accessPathFor } from '../src/town/town-plan';
 
 const t0=1_700_000_000_000;
 const save=createSave(t0,711);
@@ -13,6 +14,25 @@ const save=createSave(t0,711);
 test('same seed and elapsed time produce the same town',()=>{
   assert.deepEqual(townAt(save,t0+15*MINUTE),townAt({...save},t0+15*MINUTE));
   assert.equal(townAt(save,t0).plots.filter(p=>p.project).length,5);
+});
+
+test('the town follows fixed sites with only a small construction delay',()=>{
+  const other=createSave(t0,921);
+  for(const age of [0,8,16,30,60]){
+    const first=townAt(save,t0+age*MINUTE),second=townAt(other,t0+age*MINUTE);
+    assert.deepEqual(first.plots.map(({id,kind,x,z,project})=>({id,kind,x,z,project})),
+      second.plots.map(({id,kind,x,z,project})=>({id,kind,x,z,project})));
+  }
+  for(const plot of PLOTS){
+    if(plot.kind==='project'||plot.kind==='castle'||plot.start<0)continue;
+    const before=townAt(other,t0+plot.start-1).plots.find(p=>p.id===plot.id)!;
+    const after=townAt(other,t0+plot.start+8_000).plots.find(p=>p.id===plot.id)!;
+    assert.equal(before.stage,0,`${plot.id} started before its planned time`);
+    assert.ok(after.stage>0,`${plot.id} missed its small timing window`);
+    assert.ok(accessPathFor(plot));
+  }
+  assert.equal(townAt(save,t0+8*MINUTE).outerRoad,0);
+  assert.equal(townAt(save,t0+12*MINUTE).outerRoad,INFRASTRUCTURE.road.outerRingSegments);
 });
 
 test('progression makes inner and outer walls in order and keeps the castle growing',()=>{

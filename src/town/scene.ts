@@ -3,10 +3,13 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
+import { INFRASTRUCTURE, accessPathFor } from './town-plan';
 import type { ProjectKey } from './projects';
 import { C, MAT, type Mat } from './materials';
-import { Environment } from './environment';
+import { Environment, terrainHeight } from './environment';
+import { ContactShadows, type ContactFootprint } from './contact-shadows';
 import { TownSky } from './sky';
+import { Rain } from './rain';
 import { LANDMARK_SHARED_GEOMETRIES, landmarkBuilding } from './landmarks';
 import { wallIsGate, wallSection } from './wall-layout';
 const MOBILE=matchMedia('(max-width: 700px)').matches;
@@ -57,6 +60,66 @@ function dormer(parent:THREE.Group,x:number,h:number,z:number,roofMat:Mat){
   roofEdges(parent,1.44,1.24,h+1.27,.54);
 }
 
+// The tile rows overlap down each plane. Each tile has a slightly raised center
+// and a dark, exposed lower edge, so the courses keep their depth from above.
+function tiledRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:number,rise:number,hip:boolean,seed:number){
+  const positions:number[]=[],colors:number[]=[];
+  const a=w*.5,b=d*.5,flat=Math.min(w,d)*.18;
+  const faces:{span:(t:number)=>number;point:(t:number,u:number)=>THREE.Vector3;normal:THREE.Vector3;step:number}[]=[];
+  for(const side of [-1,1]){
+    if(hip){
+      faces.push({span:t=>flat+(a-flat)*t,point:(t,u)=>new THREE.Vector3(u,rise*(1-t),side*b*t),normal:new THREE.Vector3(0,1,side*rise/b).normalize(),step:.48});
+      faces.push({span:t=>b*t,point:(t,u)=>new THREE.Vector3(side*(flat+(a-flat)*t),rise*(1-t),u),normal:new THREE.Vector3(side*rise/(a-flat),1,0).normalize(),step:.48});
+    }else faces.push({span:()=>b,point:(t,u)=>new THREE.Vector3(side*a*t,rise*(1-t),u),normal:new THREE.Vector3(side*rise/a,1,0).normalize(),step:.48});
+  }
+  const palettes=[
+    [0xb95b48,0xcb7358,0xa64c3d,0xd18365,0x97483b],
+    [0x8f694b,0xa67b57,0x785a45,0xb68b63,0x725743],
+    [0x839aa4,0x9dafb6,0x6d8996,0xb4bfc1,0x72858e],
+  ];
+  const palette=palettes[((seed%3)+3)%3];
+  const emit=(p:THREE.Vector3,c:THREE.Color)=>{positions.push(p.x,p.y,p.z);colors.push(c.r,c.g,c.b);};
+  const tri=(p:THREE.Vector3,q:THREE.Vector3,r:THREE.Vector3,c:THREE.Color,n:THREE.Vector3)=>{
+    if(new THREE.Vector3().subVectors(q,p).cross(new THREE.Vector3().subVectors(r,p)).dot(n)<0)[q,r]=[r,q];
+    emit(p,c);emit(q,c);emit(r,c);
+  };
+  faces.forEach((face,faceIndex)=>{
+    const length=Math.hypot(hip&&faceIndex%2===0?b:hip?a-flat:a,rise);
+    const rows=Math.max(3,Math.ceil(length/(MOBILE?.57:.42)));
+    const cols=Math.ceil((hip?Math.max(a,b):b)*2/(MOBILE?.64:face.step));
+    const width=(hip?Math.max(a,b):b)*2/cols;
+    for(let row=0;row<rows;row++){
+      const t0=row/rows,t1=Math.min(1.025,(row+1.18)/rows);
+      const offset=row%2?width*.5:0;
+      for(let col=-1;col<=cols;col++){
+        const left=-cols*width*.5+col*width+offset,right=left+width-.018;
+        const backSpan=face.span(Math.min(1,t0)),frontSpan=face.span(Math.min(1,t1));
+        const backL=Math.max(left,-backSpan),backR=Math.min(right,backSpan);
+        const frontL=Math.max(left,-frontSpan),frontR=Math.min(right,frontSpan);
+        if(backR-backL<.055||frontR-frontL<.055)continue;
+        const noise=hash(seed*997+faceIndex*7919+row*191+col*43);
+        const color=new THREE.Color(palette[noise%palette.length]);
+        color.multiplyScalar(.94+((noise>>>8)%13)/100);
+        const lift=face.normal.clone().multiplyScalar(.045+((noise>>>14)%5)*.002);
+        const bl=face.point(t0,backL).add(lift),br=face.point(t0,backR).add(lift);
+        const fl=face.point(t1,frontL).add(lift),fr=face.point(t1,frontR).add(lift);
+        const center=bl.clone().add(br).add(fl).add(fr).multiplyScalar(.25).addScaledVector(face.normal,.018);
+        tri(bl,br,center,color,face.normal);tri(br,fr,center,color,face.normal);
+        tri(fr,fl,center,color,face.normal);tri(fl,bl,center,color,face.normal);
+        const lipColor=color.clone().multiplyScalar(.72),lipNormal=fr.clone().sub(br).normalize();
+        tri(fl,fr,fr.clone().add(new THREE.Vector3(0,-.055,0)),lipColor,lipNormal);
+        tri(fl,fr.clone().add(new THREE.Vector3(0,-.055,0)),fl.clone().add(new THREE.Vector3(0,-.055,0)),lipColor,lipNormal);
+      }
+    }
+  });
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+  geometry.computeVertexNormals();
+  const mesh=new THREE.Mesh(geometry,MAT.roofTiles);mesh.position.set(x,y,z);
+  mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
+}
+
 function gableRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:number,rise:number,material:Mat){
   const a=w/2,b=d/2;
   const vertices=new Float32Array([
@@ -65,7 +128,9 @@ function gableRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:numb
     -a,0,b, a,0,b, 0,rise,b, a,0,-b, -a,0,-b, 0,rise,-b,
   ]);
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(vertices,3));geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+  const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
+  if(material===MAT.roof||material===MAT.roofDark||material===MAT.roofBlue)tiledRoof(parent,x,y,z,w,d,rise,false,material===MAT.roof?0:material===MAT.roofDark?1:2);
+  return mesh;
 }
 function hipRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:number,rise:number,material:Mat){
   const a=w/2,b=d/2,flat=Math.min(w,d)*.18;
@@ -77,15 +142,11 @@ function hipRoof(parent:THREE.Group,x:number,y:number,z:number,w:number,d:number
   ]);
   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(vertices,3));geo.computeVertexNormals();
   const mesh=new THREE.Mesh(geo,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);
+  if(material===MAT.roof||material===MAT.roofDark||material===MAT.roofBlue)tiledRoof(parent,x,y,z,w,d,rise,true,material===MAT.roof?0:material===MAT.roofDark?1:2);
 }
 function roofDetail(parent:THREE.Group,w:number,d:number,h:number,rise:number,variant:number,material:Mat){
-  if(MOBILE)return;
-  // Broad courses give the roofs a hand-laid silhouette without a texture atlas.
-  for(const side of [-1,1])for(let i=1;i<=3;i++){
-    const x=side*w*(i/8), y=h+rise*(1-i/4)+.11;
-    box(parent,x,y,0,w*.23,.075,d+.42,material,0,false).rotation.z=-side*Math.atan2(rise,w*.5);
-  }
-  box(parent,0,h+rise+.08,0,.24,.17,d+.48,variant%2?MAT.woodDark:material,0,false);
+  const caps=Math.max(3,Math.ceil(d/.5));
+  for(let i=0;i<caps;i++)box(parent,0,h+rise+.1,-d*.5+(i+.5)*d/caps,.25,.15,d/caps+.025,material,0,false);
 }
 function chimney(parent:THREE.Group,x:number,z:number,h:number){
   box(parent,x,h+.7,z,.55,1.4,.55,MAT.stoneDark);
@@ -277,50 +338,55 @@ export class TownScene {
   private readonly land=new THREE.Group();
   readonly environment:Environment;
   private readonly sky:TownSky;
+  private readonly rain:Rain;
+  private readonly contactShadows:ContactShadows;
+  private readonly reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   private currentSeason='summer';
   private currentNight=0;
   private readonly structures=new THREE.Group();
   private readonly roads=new THREE.Group();
   private readonly walls=new THREE.Group();
-  private readonly sun=new THREE.DirectionalLight(0xffebca,2.45);
-  private readonly fill=new THREE.HemisphereLight(0xe4e5ed,0xc3a383,1.05);
+  private readonly sun=new THREE.DirectionalLight(0xffdfad,3.05);
+  private readonly fill=new THREE.HemisphereLight(0xb8c8eb,0x9d806a,.68);
   private readonly environmentMap:THREE.WebGLRenderTarget;
   private readonly materials=new Set<Mat>();
   private structureSignature='';
   private wallSignature='';
-  private roadSignature=-1;
+  private roadSignature='';
   readonly mobile=MOBILE;
   constructor(canvas:HTMLCanvasElement){
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:!this.mobile,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure=1.08;
-    this.renderer.shadowMap.enabled=!this.mobile;
+    this.renderer.toneMappingExposure=1;
+    this.renderer.shadowMap.enabled=true;
     this.renderer.shadowMap.type=THREE.PCFShadowMap;
     const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(this.renderer);
     this.environmentMap=pmrem.fromScene(room,.02);
-    this.scene.environment=this.environmentMap.texture;this.scene.environmentIntensity=.18;
+    this.scene.environment=this.environmentMap.texture;this.scene.environmentIntensity=.09;
     room.dispose();pmrem.dispose();
     this.scene.background=new THREE.Color(0xbad6dc);
-    this.scene.fog=new THREE.Fog(0xbad6dc,200,500);
-    this.sun.position.set(-32,63,28);this.sun.castShadow=!this.mobile;
-    this.sun.shadow.mapSize.set(2048,2048);
-    this.sun.shadow.camera.left=-76;this.sun.shadow.camera.right=76;this.sun.shadow.camera.top=76;this.sun.shadow.camera.bottom=-76;
-    this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=180;
-    this.sun.shadow.bias=-.00015;
-    this.sun.shadow.normalBias=.018;this.sun.shadow.radius=2;
+    this.scene.fog=new THREE.Fog(0xe5ddcd,155,430);
+    this.sun.position.set(-70,65,45);this.sun.castShadow=true;
+    this.sun.shadow.mapSize.setScalar(this.mobile?1024:4096);
+    this.sun.shadow.camera.left=-88;this.sun.shadow.camera.right=88;this.sun.shadow.camera.top=88;this.sun.shadow.camera.bottom=-88;
+    this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=270;
+    this.sun.shadow.bias=-.00008;
+    this.sun.shadow.normalBias=.035;this.sun.shadow.radius=this.mobile?1.25:2.5;
     this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls);
     this.environment=new Environment(this.scene,this.mobile);
     this.sky=new TownSky(this.scene);
+    this.rain=new Rain(this.scene,this.mobile);
+    this.contactShadows=new ContactShadows(this.scene,terrainHeight);
     this.camera.position.set(95,106,108);this.camera.lookAt(0,0,0);
-    this.createDecor();this.resize();
+    this.createDecor();this.contactShadows.setTrees([...this.environment.trees,...this.treeObstacles]);this.resize();
   }
   resize(){const w=innerWidth,h=innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
   setPixelRatio(r:number){this.renderer.setPixelRatio(r);this.resize();}
   private createLand(){
     const earth=new THREE.Mesh(new THREE.CylinderGeometry(70,73,3.8,72),MAT.earth);earth.position.y=-2;earth.receiveShadow=true;this.land.add(earth);
     const grass=new THREE.Mesh(new THREE.CylinderGeometry(68.8,70,1.15,72),MAT.grass);grass.position.y=-.05;grass.receiveShadow=true;this.land.add(grass);
-    const center=new THREE.Mesh(new THREE.CylinderGeometry(7.7,7.7,.09,32),MAT.path);center.position.y=.52;center.receiveShadow=true;this.land.add(center);
+    const center=new THREE.Mesh(new THREE.CylinderGeometry(INFRASTRUCTURE.squareRadius-.1,INFRASTRUCTURE.squareRadius-.1,.09,32),MAT.path);center.position.y=.52;center.receiveShadow=true;this.land.add(center);
     const patches=new Map<Mat,THREE.BufferGeometry[]>();
     for(let i=0;i<50;i++){
       const n=hash(i*71),angle=(n%628)/100,r=5+(hash(n+9)%570)/10;
@@ -337,7 +403,7 @@ export class TownScene {
     for(let i=0;i<150;i++){
       const angle=hash(i*397)%6283/1000,r=8+(hash(i*193+8)%580)/10;
       const x=Math.cos(angle)*r,z=Math.sin(angle)*r;
-      if(r>66||Math.abs(r-31.5)<3||Math.abs(r-55)<3.5||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5))||Math.abs(x)<2.2||Math.abs(z)<2.2)continue;
+      if(r>66||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3.5||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5))||Math.abs(x)<2.2||Math.abs(z)<2.2)continue;
       trees.push({x,z,scale:.75+(hash(i*411)%75)/100,shape:i%3});
       this.treeObstacles.push({x,z,r:.8});
     }
@@ -361,7 +427,7 @@ export class TownScene {
     const stones:{x:number;z:number;s:number}[]=[],shrubs:{x:number;z:number;s:number}[]=[];
     for(let i=0;i<(this.mobile?250:480);i++){
       const angle=(hash(i*293)%6283)/1000,r=8+(hash(i*719+3)%570)/10,x=Math.cos(angle)*r,z=Math.sin(angle)*r;
-      if(Math.abs(r-34)<3||Math.abs(r-55)<3||Math.abs(x)<2.1||Math.abs(z)<2.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.4)))continue;
+      if(Math.abs(r-INFRASTRUCTURE.wall.innerRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3||Math.abs(x)<2.1||Math.abs(z)<2.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.4)))continue;
       const item={x,z,s:.28+(hash(i*133+5)%80)/100};
       if(i%3===0)shrubs.push(item);else stones.push(item);
     }
@@ -375,7 +441,7 @@ export class TownScene {
       mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.castShadow=!this.mobile;mesh.receiveShadow=true;this.land.add(mesh);
     }
     const lampPositions:number[][]=[];
-    for(let a=0;a<24;a++){const angle=a*Math.PI*2/24;lampPositions.push([Math.cos(angle)*30,Math.sin(angle)*30]);}
+    for(let a=0;a<INFRASTRUCTURE.lamps.count;a++){const angle=a*Math.PI*2/INFRASTRUCTURE.lamps.count;lampPositions.push([Math.cos(angle)*INFRASTRUCTURE.lamps.radius,Math.sin(angle)*INFRASTRUCTURE.lamps.radius]);}
     const posts=new THREE.InstancedMesh(boxGeometry,MAT.woodDark,lampPositions.length),tops=new THREE.InstancedMesh(boxGeometry,MAT.lamp,lampPositions.length);
     lampPositions.forEach(([x,z],i)=>{dummy.rotation.set(0,0,0);dummy.position.set(x,1.6,z);dummy.scale.set(.15,3.2,.15);dummy.updateMatrix();posts.setMatrixAt(i,dummy.matrix);dummy.position.y=3.25;dummy.scale.set(.52,.5,.52);dummy.updateMatrix();tops.setMatrixAt(i,dummy.matrix);});
     posts.instanceMatrix.needsUpdate=tops.instanceMatrix.needsUpdate=true;this.land.add(posts,tops);
@@ -383,6 +449,7 @@ export class TownScene {
   private clear(group:THREE.Group){const dispose=(object:THREE.Object3D)=>{if(object instanceof THREE.InstancedMesh)object.dispose();if(object instanceof THREE.Mesh&&object.geometry!==boxGeometry&&object.geometry!==plainBoxGeometry&&object.geometry!==sphereGeometry&&object.geometry!==coneGeometry)object.geometry.dispose();for(const child of object.children)dispose(child);};for(const child of [...group.children]){group.remove(child);dispose(child);}}
   private buildStructures(plots:PlotState[]){
     this.clear(this.structures);this.pickBoxes.clear();
+    const contacts:ContactFootprint[]=[];
     const buckets=new Map<Mat,THREE.BufferGeometry[]>();
     const reusableGeometries=new Set<THREE.BufferGeometry>([boxGeometry,plainBoxGeometry,sphereGeometry,coneGeometry,towerBodyGeometry,towerRingGeometry,...LANDMARK_SHARED_GEOMETRIES]);
     const collect=(g:THREE.Group)=>{
@@ -390,7 +457,7 @@ export class TownScene {
       g.traverse(o=>{if(!(o instanceof THREE.Mesh))return;
         let geometry=o.geometry.clone();
         if(geometry.index){const plain=geometry.toNonIndexed();geometry.dispose();geometry=plain;}
-        for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal')geometry.deleteAttribute(name);
+        for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal'&&!(name==='color'&&o.material===MAT.roofTiles))geometry.deleteAttribute(name);
         geometry.applyMatrix4(o.matrixWorld);
         const bucket=buckets.get(o.material as Mat)??[];bucket.push(geometry);buckets.set(o.material as Mat,bucket);
         if(!reusableGeometries.has(o.geometry))o.geometry.dispose();
@@ -398,7 +465,10 @@ export class TownScene {
     };
     for(const p of plots){
       if(p.stage===0)continue;
-      const g=building(p);collect(g);
+      const g=building(p);
+      const bounds=new THREE.Box3().setFromObject(g),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
+      contacts.push({x:center.x,z:center.z,width:size.x+2,depth:size.z+2});
+      collect(g);
       if(p.project)this.pickBoxes.set(p.project,new THREE.Box3(new THREE.Vector3(p.x-5.3,0,p.z-5),new THREE.Vector3(p.x+5.3,20,p.z+5)));
     }
     const complexes=new Map<string,PlotState[]>();
@@ -435,19 +505,36 @@ export class TownScene {
     for(const [material,geos] of buckets){
       const geometry=mergeGeometries(geos,false);geos.forEach(g=>g.dispose());
       if(!geometry)continue;
-      const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=!this.mobile;mesh.receiveShadow=true;this.structures.add(mesh);
+      const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;mesh.receiveShadow=true;this.structures.add(mesh);
     }
+    this.contactShadows.setBuildings(contacts);
   }
-  private buildRoads(count:number){
+  private buildRoads(snapshot:TownSnapshot){
+    const count=snapshot.roads;
     this.clear(this.roads);
     const g=new THREE.Group();
     // The central spokes are always walkable dirt. Stone spreads outward in segments.
-    const spokes=[[0,0,-55,0],[0,0,55,0],[0,0,0,-55],[0,0,0,55]];
+    const reach=INFRASTRUCTURE.road.spokeLength;
+    const spokes=[[0,0,-reach,0],[0,0,reach,0],[0,0,0,-reach],[0,0,0,reach]];
     for(const [x1,z1,x2,z2] of spokes){const length=Math.hypot(x2-x1,z2-z1);const road=box(g,(x1+x2)/2,.54,(z1+z2)/2,length,.08,2.8,MAT.path);road.rotation.y=-Math.atan2(z2-z1,x2-x1);}
-    for(let i=0;i<40;i++){
-      const angle=i*Math.PI*2/40,r=31.5;
+    for(let i=0;i<INFRASTRUCTURE.road.ringSegments;i++){
+      const angle=i*Math.PI*2/INFRASTRUCTURE.road.ringSegments,r=INFRASTRUCTURE.road.ringRadius;
       const segment=box(g,Math.cos(angle)*r,.56,Math.sin(angle)*r,5.2,.08,2.35,i<count?MAT.stone:MAT.path);
       segment.rotation.y=-angle-Math.PI/2;
+    }
+    // The planned outer lane grows around the later neighborhoods.
+    for(let i=0;i<snapshot.outerRoad;i++){
+      const angle=i*Math.PI*2/INFRASTRUCTURE.road.outerRingSegments,r=INFRASTRUCTURE.road.outerRingRadius;
+      const segment=box(g,Math.cos(angle)*r,.55,Math.sin(angle)*r,2*r*Math.sin(Math.PI/INFRASTRUCTURE.road.outerRingSegments)+.1,.08,2.15,MAT.path);
+      segment.rotation.y=-angle-Math.PI/2;
+    }
+    for(const plot of snapshot.plots){
+      if(plot.stage===0)continue;
+      const access=accessPathFor(plot);
+      if(!access)continue;
+      const length=Math.hypot(access.x2-access.x1,access.z2-access.z1);
+      const path=box(g,(access.x1+access.x2)/2,.545,(access.z1+access.z2)/2,length,.05,1.2,MAT.path);
+      path.rotation.y=-Math.atan2(access.z2-access.z1,access.x2-access.x1);
     }
     const buckets=new Map<Mat,THREE.BufferGeometry[]>();g.updateMatrixWorld(true);g.traverse(o=>{if(o instanceof THREE.Mesh){const b=buckets.get(o.material as Mat)??[];b.push(o.geometry.clone().applyMatrix4(o.matrixWorld));buckets.set(o.material as Mat,b);}});
     for(const [material,geos] of buckets){const merged=mergeGeometries(geos);geos.forEach(q=>q.dispose());if(merged){const mesh=new THREE.Mesh(merged,material);mesh.receiveShadow=true;this.roads.add(mesh);}}
@@ -457,7 +544,7 @@ export class TownScene {
       pebbles.push({x:axis?across:along,z:axis?along:across,s:.28+(hash(j*53+axis*17+side*3)%40)/100});
     }
     for(let i=0;i<count;i++)for(let j=-2;j<=2;j+=this.mobile?2:1)for(const side of [-1,1]){
-      const a=(i+.5)*Math.PI*2/40,r=31.5+side*.57,t=j*.81;
+      const a=(i+.5)*Math.PI*2/INFRASTRUCTURE.road.ringSegments,r=INFRASTRUCTURE.road.ringRadius+side*.57,t=j*.81;
       pebbles.push({x:Math.cos(a)*r-Math.sin(a)*t,z:Math.sin(a)*r+Math.cos(a)*t,s:.27+(hash(i*73+j*29+side*7)%33)/100});
     }
     const stones=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),MAT.stone,pebbles.length),d=new THREE.Object3D();
@@ -466,7 +553,7 @@ export class TownScene {
   }
   private buildWalls(snapshot:TownSnapshot){
     this.clear(this.walls);
-    const lists:{radius:number;wood:number;stone:number}[]=[{radius:34,wood:snapshot.innerWood,stone:snapshot.innerStone},{radius:55,wood:snapshot.outerWood,stone:0}];
+    const lists:{radius:number;wood:number;stone:number}[]=[{radius:INFRASTRUCTURE.wall.innerRadius,wood:snapshot.innerWood,stone:snapshot.innerStone},{radius:INFRASTRUCTURE.wall.outerRadius,wood:snapshot.outerWood,stone:0}];
     for(const ring of lists){
       const sectorGeometry=wallSectorGeometry(ring.radius);
       let hasWall=false;
@@ -503,7 +590,7 @@ export class TownScene {
       if(!hasWall)sectorGeometry.dispose();
       if(ring.wood>0){
         const gates=new THREE.Group();
-        for(let i=0;i<WALL_SEGMENTS;i+=8){
+        for(let i=0;i<WALL_SEGMENTS;i+=INFRASTRUCTURE.wall.gateInterval){
           if(i+1>=ring.wood)continue;
           const section=wallSection(ring.radius,i),gate=new THREE.Group(),stone=i<ring.stone;
           gate.position.set(section.center.x,0,section.center.z);gate.rotation.y=section.rotation;
@@ -522,24 +609,31 @@ export class TownScene {
     const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}`;
     if(structureSignature!==this.structureSignature){this.structureSignature=structureSignature;this.buildStructures(snapshot.plots);}
     if(wallSignature!==this.wallSignature){this.wallSignature=wallSignature;this.buildWalls(snapshot);}
-    if(snapshot.roads!==this.roadSignature){this.roadSignature=snapshot.roads;this.buildRoads(snapshot.roads);}
+    const roadSignature=`${snapshot.roads}/${snapshot.outerRoad}/${snapshot.plots.map(p=>p.stage>0?'1':'0').join('')}`;
+    if(roadSignature!==this.roadSignature){this.roadSignature=roadSignature;this.buildRoads(snapshot);}
     const t=snapshot.dayFraction,night=Math.max(0,Math.sin((t-.55)*Math.PI*2));
     this.currentNight=night;
-    const rainy=snapshot.weather==='rain';
-    this.scene.environmentIntensity=.18*(1-.55*night);
-    this.sun.color.set(rainy?0xdce5eb:0xffebca).lerp(new THREE.Color(0x97afd3),night*.78);
-    this.sun.intensity=(rainy?1.85:2.45)*(1-.65*night);
-    this.fill.color.set(0xe4e5ed).lerp(new THREE.Color(0x8198b5),night*.7);
-    this.fill.groundColor.set(0xc3a383).lerp(new THREE.Color(0x5f6b7a),night*.67);
-    this.fill.intensity=(rainy?1.17:1.05)*(1-.22*night);
-    this.sun.position.set(Math.cos(t*Math.PI*2)*55,Math.max(14,Math.sin(t*Math.PI*2)*65+25),28);
-    const fogColor=new THREE.Color(snapshot.weather==='rain'?0xbac5c0:0xd1d8cc).lerp(new THREE.Color(0x57687b),night*.64);
+    const rainy=snapshot.weather==='rain',overcast=rainy?1:snapshot.weather==='cloudy'?.5:0;
+    this.rain.setWeather(rainy,this.reducedMotion.matches);
+    this.scene.environmentIntensity=.09*(1-.2*night);
+    const daylight=Math.max(0,Math.sin(t*Math.PI*2));
+    this.sun.color.set(0xffdfad).lerp(new THREE.Color(0xffedcf),daylight*.45)
+      .lerp(new THREE.Color(0xdce5f0),overcast*.85).lerp(new THREE.Color(0x9bb6e2),night);
+    this.sun.intensity=(3.05-overcast*1.8)*(1-.82*night);
+    this.fill.color.set(0xb8c8eb).lerp(new THREE.Color(0xd0d7e4),overcast*.6).lerp(new THREE.Color(0x8198c4),night*.7);
+    this.fill.groundColor.set(0x9d806a).lerp(new THREE.Color(0x59657d),night*.8);
+    this.fill.intensity=(.68+overcast*.2)*(1-.12*night);
+    // Keep a readable, raking sun throughout the cycle. Distance also keeps
+    // tall roofs inside the shadow camera at dawn and dusk.
+    this.sun.position.set(-70+Math.cos(t*Math.PI*2)*28,46+daylight*28,45);
+    this.sun.shadow.intensity=1-overcast*.28;
+    const fogColor=new THREE.Color(0xe5ddcd).lerp(new THREE.Color(0xbac5ce),overcast).lerp(new THREE.Color(0x52647c),night*.78);
     this.scene.background=fogColor;this.scene.fog?.color.copy(fogColor);
     MAT.grass.color.set(snapshot.season==='winter'?0xa7b4aa:snapshot.season==='autumn'?0x89845b:snapshot.season==='spring'?0x7a9a63:C.grass);
     MAT.leaf.color.set(snapshot.season==='autumn'?0xa47a4d:snapshot.season==='winter'?0x758270:0x52775a);
-    this.renderer.toneMappingExposure=1.08-.1*night;
+    this.renderer.toneMappingExposure=1-.04*night;
     this.sky.update(snapshot,night,this.sun.position,this.camera.position);
   }
-  render(){this.environment.update(performance.now()/1000,this.currentSeason,this.currentNight);this.sky.updatePosition(this.camera.position);this.renderer.render(this.scene,this.camera);}
-  dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.environmentMap.dispose();this.renderer.dispose();}
+  render(){const now=performance.now();this.environment.update(now/1000,this.currentSeason,this.currentNight);this.sky.updatePosition(this.camera.position);this.rain.update(this.camera,now);this.renderer.render(this.scene,this.camera);}
+  dispose(){this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
 }

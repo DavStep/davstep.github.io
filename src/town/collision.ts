@@ -1,4 +1,5 @@
 import type { TownSnapshot } from './model';
+import { INFRASTRUCTURE } from './town-plan';
 import { isWater } from './environment';
 import { wallIsGate, wallSection } from './wall-layout';
 
@@ -19,7 +20,7 @@ export function buildColliders(snapshot:TownSnapshot,trees:readonly {x:number;z:
     if(plot.kind!=='project'&&plot.stage>=5)result.push({kind:'box',x:plot.x+hx*.9,z:plot.z-.17,hx:1.1,hz:1.25});
     if(plot.kind!=='project'&&plot.stage>=6)result.push({kind:'box',x:plot.x-hx*1.17,z:plot.z-.8,hx:1.45,hz:1.65});
   }
-  for(const [radius,count] of [[34,snapshot.innerWood],[55,snapshot.outerWood]]){
+  for(const [radius,count] of [[INFRASTRUCTURE.wall.innerRadius,snapshot.innerWood],[INFRASTRUCTURE.wall.outerRadius,snapshot.outerWood]]){
     for(let i=0;i<count;i++){
       if(wallIsGate(i))continue;
       const {start,end}=wallSection(radius,i);

@@ -1,0 +1,8186 @@
+{
+  "scope": "Living Town procedural assets; source geometry only, no shader displacement, GPU, shadow-pass, culling, or artistic validation",
+  "mobile": false,
+  "sourceHashes": {
+    "scene.ts": "bcff9783e7a9760e666e2bcbe77478edc4cb5d36bccdfff062643496d4305339",
+    "landmarks.ts": "aca4cc54acc2e3c01856c6a2c374df41f1c3b1e431ded691a0e4f013a8989d32",
+    "environment.ts": "1c746004c364930bb48c1b34aae73557bfc5d998b09f1f88a900726f248eac7d",
+    "materials.ts": "489e2576fb121a2b0d064881dd9a6aebc8ffa32cf1861ac8224c7bf8f0f087b7",
+    "residents.ts": "9d2cb87970a12b1382b8cdd3eb3dd9914369d85ff1762fb14e827b59687545fc",
+    "town-plan.ts": "682387dab618b037d56fbf3bb0682cf959b7d843fffe34e69d0f3b5ac5e6d3c4",
+    "model.ts": "e43717aff5f6bff8146d5710564de110b2cce6c3138f257723e72e433c35fe41",
+    "wall-layout.ts": "45f68dfe23039bf1d4b2f9bebd846c97d38c40cae0ea18730bb8b89ee8df11dd",
+    "contact-shadows.ts": "e18846b79b8d24f13ed9d359168ec5d4a133b21f4e9a84a1b980effa543b2d00",
+    "sky.ts": "aba3029762865b572ea376b07105e8bab274eb191f8f8e285d624f776fc7814c",
+    "rain.ts": "e66670d8c8bbec2e0575c03baff0fc4b5ddfcf082dbdeea1b333e1c3ae3e729e"
+  },
+  "plots": 44,
+  "assets": [
+    {
+      "id": "project-outpost",
+      "kind": "project",
+      "project": "outpost",
+      "variant": 0,
+      "x": -22,
+      "z": 7,
+      "stages": [
+        {
+          "stage": 3,
+          "meshes": 21,
+          "instances": 21,
+          "triangles": 6300,
+          "geometries": 1,
+          "materials": [
+            "earth",
+            "gold",
+            "olive",
+            "plasterIvory",
+            "red",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.8,
+              0.03,
+              2.7
+            ],
+            "max": [
+              -17.2,
+              4.29,
+              11.3
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 27,
+          "instances": 27,
+          "triangles": 7828,
+          "geometries": 2,
+          "materials": [
+            "earth",
+            "gold",
+            "olive",
+            "plasterIvory",
+            "red",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.8,
+              0.03,
+              2.7
+            ],
+            "max": [
+              -17.2,
+              6.636,
+              11.3
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 36,
+          "instances": 36,
+          "triangles": 9596,
+          "geometries": 4,
+          "materials": [
+            "earth",
+            "gold",
+            "olive",
+            "plasterIvory",
+            "red",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.8,
+              0.03,
+              2.7
+            ],
+            "max": [
+              -17.2,
+              8.7,
+              11.3
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 44,
+          "instances": 44,
+          "triangles": 11504,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "gold",
+            "iron",
+            "olive",
+            "plasterIvory",
+            "red",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.8,
+              0.03,
+              2.48
+            ],
+            "max": [
+              -17.2,
+              10.16,
+              11.3
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "project-sandship",
+      "kind": "project",
+      "project": "sandship",
+      "variant": 1,
+      "x": 22,
+      "z": 9,
+      "stages": [
+        {
+          "stage": 3,
+          "meshes": 28,
+          "instances": 28,
+          "triangles": 5652,
+          "geometries": 11,
+          "materials": [
+            "copper",
+            "cyan",
+            "iron",
+            "sand"
+          ],
+          "bounds": {
+            "min": [
+              17.2,
+              0.03,
+              4.7
+            ],
+            "max": [
+              26.8,
+              7.483,
+              13.3
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 43,
+          "instances": 43,
+          "triangles": 9608,
+          "geometries": 13,
+          "materials": [
+            "copper",
+            "cyan",
+            "iron",
+            "sand",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              17.2,
+              0.03,
+              4.7
+            ],
+            "max": [
+              26.8,
+              7.483,
+              13.3
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 51,
+          "instances": 51,
+          "triangles": 10912,
+          "geometries": 18,
+          "materials": [
+            "copper",
+            "cyan",
+            "iron",
+            "plasterIvory",
+            "sand",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              17.2,
+              0.03,
+              4.7
+            ],
+            "max": [
+              26.8,
+              9.68,
+              13.3
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 61,
+          "instances": 61,
+          "triangles": 12032,
+          "geometries": 25,
+          "materials": [
+            "copper",
+            "cyan",
+            "iron",
+            "plasterIvory",
+            "red",
+            "sand",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              17,
+              0.03,
+              4.7
+            ],
+            "max": [
+              27,
+              10.1,
+              13.3
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "project-battle",
+      "kind": "project",
+      "project": "battle",
+      "variant": 2,
+      "x": 8,
+      "z": -23,
+      "stages": [
+        {
+          "stage": 3,
+          "meshes": 19,
+          "instances": 19,
+          "triangles": 2760,
+          "geometries": 12,
+          "materials": [
+            "blue",
+            "emerald",
+            "gold",
+            "ink",
+            "iron",
+            "plasterIvory",
+            "red",
+            "sand",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              3.2,
+              0.09,
+              -27.8
+            ],
+            "max": [
+              12.875,
+              7.125,
+              -18.2
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 35,
+          "instances": 35,
+          "triangles": 5800,
+          "geometries": 12,
+          "materials": [
+            "blue",
+            "emerald",
+            "gold",
+            "ink",
+            "iron",
+            "plasterIvory",
+            "red",
+            "sand",
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              3.2,
+              0.09,
+              -27.8
+            ],
+            "max": [
+              12.875,
+              7.125,
+              -18.2
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 40,
+          "instances": 40,
+          "triangles": 6172,
+          "geometries": 14,
+          "materials": [
+            "blue",
+            "emerald",
+            "gold",
+            "ink",
+            "iron",
+            "plasterIvory",
+            "red",
+            "sand",
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              3.2,
+              0.09,
+              -27.8
+            ],
+            "max": [
+              12.875,
+              7.985,
+              -18.2
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 45,
+          "instances": 45,
+          "triangles": 7380,
+          "geometries": 14,
+          "materials": [
+            "blue",
+            "emerald",
+            "gold",
+            "ink",
+            "iron",
+            "plasterIvory",
+            "red",
+            "sand",
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              3.2,
+              0.09,
+              -27.8
+            ],
+            "max": [
+              12.875,
+              8.91,
+              -18.2
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "project-wizard",
+      "kind": "project",
+      "project": "wizard",
+      "variant": 3,
+      "x": -8,
+      "z": 23,
+      "stages": [
+        {
+          "stage": 3,
+          "meshes": 12,
+          "instances": 12,
+          "triangles": 1488,
+          "geometries": 9,
+          "materials": [
+            "magic",
+            "stone",
+            "stoneDark",
+            "violet"
+          ],
+          "bounds": {
+            "min": [
+              -12.75,
+              0.04,
+              18.25
+            ],
+            "max": [
+              -3.25,
+              8.07,
+              27.75
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 20,
+          "instances": 20,
+          "triangles": 2136,
+          "geometries": 9,
+          "materials": [
+            "magic",
+            "roofDark",
+            "stone",
+            "stoneDark",
+            "violet"
+          ],
+          "bounds": {
+            "min": [
+              -12.75,
+              0.04,
+              18.25
+            ],
+            "max": [
+              -3.25,
+              9.27,
+              27.75
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 27,
+          "instances": 27,
+          "triangles": 3040,
+          "geometries": 13,
+          "materials": [
+            "gold",
+            "magic",
+            "roofDark",
+            "stone",
+            "stoneDark",
+            "violet",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -12.75,
+              0.04,
+              18.25
+            ],
+            "max": [
+              -3.25,
+              10.87,
+              27.75
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 33,
+          "instances": 33,
+          "triangles": 3368,
+          "geometries": 15,
+          "materials": [
+            "gold",
+            "magic",
+            "roofDark",
+            "stone",
+            "stoneDark",
+            "violet",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -12.75,
+              0.04,
+              18.25
+            ],
+            "max": [
+              -3.25,
+              13.27,
+              27.75
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-east-square",
+      "kind": "home",
+      "variant": 4,
+      "x": 24,
+      "z": -13,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              21.925,
+              0,
+              -14.925
+            ],
+            "max": [
+              26.249,
+              1.95,
+              -10.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              21.925,
+              0,
+              -14.925
+            ],
+            "max": [
+              26.075,
+              2.068,
+              -11.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              21.586,
+              -0.005,
+              -15.255
+            ],
+            "max": [
+              26.414,
+              4.085,
+              -9.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              21.586,
+              -0.005,
+              -15.255
+            ],
+            "max": [
+              27.115,
+              4.085,
+              -9.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              21.586,
+              -0.005,
+              -15.255
+            ],
+            "max": [
+              27.235,
+              5.27,
+              -9.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              20.105,
+              -0.005,
+              -15.67
+            ],
+            "max": [
+              27.545,
+              5.27,
+              -9.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "project-dwarves",
+      "kind": "project",
+      "project": "dwarves",
+      "variant": 5,
+      "x": -25,
+      "z": -14,
+      "stages": [
+        {
+          "stage": 3,
+          "meshes": 22,
+          "instances": 22,
+          "triangles": 4760,
+          "geometries": 3,
+          "materials": [
+            "earth",
+            "gold",
+            "ink",
+            "iron",
+            "stoneDark",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -31.289,
+              -0.789,
+              -19.72
+            ],
+            "max": [
+              -18.799,
+              7.189,
+              -9.45
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 35,
+          "instances": 35,
+          "triangles": 5672,
+          "geometries": 12,
+          "materials": [
+            "copper",
+            "cyan",
+            "earth",
+            "gold",
+            "ink",
+            "iron",
+            "stoneDark",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -31.289,
+              -0.789,
+              -19.72
+            ],
+            "max": [
+              -18.799,
+              7.189,
+              -9.45
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 41,
+          "instances": 41,
+          "triangles": 6072,
+          "geometries": 15,
+          "materials": [
+            "copper",
+            "cyan",
+            "earth",
+            "gold",
+            "ink",
+            "iron",
+            "roofDark",
+            "stoneDark",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -31.289,
+              -0.789,
+              -19.72
+            ],
+            "max": [
+              -18.799,
+              7.189,
+              -9.45
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 48,
+          "instances": 48,
+          "triangles": 6460,
+          "geometries": 17,
+          "materials": [
+            "copper",
+            "cyan",
+            "earth",
+            "gold",
+            "ink",
+            "iron",
+            "roofDark",
+            "stoneDark",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -31.289,
+              -0.789,
+              -19.72
+            ],
+            "max": [
+              -18.799,
+              7.799,
+              -9.45
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "castle",
+      "kind": "castle",
+      "variant": 0,
+      "x": 0,
+      "z": 0,
+      "stages": [
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -5.675,
+              0,
+              -5.175
+            ],
+            "max": [
+              5.675,
+              3.196,
+              5.175
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 88,
+          "instances": 88,
+          "triangles": 6994,
+          "geometries": 8,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "window",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -7.413,
+              -0.005,
+              -6.943
+            ],
+            "max": [
+              7.413,
+              6.56,
+              6.943
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 7186,
+          "geometries": 9,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "window",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -7.413,
+              -0.005,
+              -6.943
+            ],
+            "max": [
+              7.413,
+              7.51,
+              6.943
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 117,
+          "instances": 117,
+          "triangles": 6364,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "stone",
+            "stoneDark",
+            "window",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -7.413,
+              -0.005,
+              -6.943
+            ],
+            "max": [
+              7.413,
+              19.15,
+              6.943
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 152,
+          "instances": 152,
+          "triangles": 16630,
+          "geometries": 9,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "window",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -8.647,
+              -0.005,
+              -6.943
+            ],
+            "max": [
+              7.413,
+              20.1,
+              6.943
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "kind": "market",
+      "variant": 0,
+      "x": -10,
+      "z": -7,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -12.675,
+              0,
+              -9.425
+            ],
+            "max": [
+              -7.175,
+              1.95,
+              -4.31
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -12.675,
+              0,
+              -9.425
+            ],
+            "max": [
+              -7.325,
+              2.444,
+              -4.575
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.016,
+              -0.005,
+              -9.625
+            ],
+            "max": [
+              -6.985,
+              4.257,
+              -3.375
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 38,
+          "instances": 38,
+          "triangles": 4778,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.603,
+              -0.005,
+              -9.625
+            ],
+            "max": [
+              -6.397,
+              4.257,
+              -2.25
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 44,
+          "instances": 44,
+          "triangles": 6578,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.603,
+              -0.005,
+              -9.625
+            ],
+            "max": [
+              -6.397,
+              5.57,
+              -2.25
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 47,
+          "instances": 47,
+          "triangles": 7244,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -14.687,
+              -0.005,
+              -9.99
+            ],
+            "max": [
+              -6.397,
+              5.57,
+              -2.25
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "market-annex",
+      "kind": "market",
+      "variant": 1,
+      "x": -14,
+      "z": -8,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.675,
+              0,
+              -10.425
+            ],
+            "max": [
+              -11.175,
+              1.95,
+              -5.31
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -16.675,
+              0,
+              -10.425
+            ],
+            "max": [
+              -11.325,
+              2.444,
+              -5.575
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 28,
+          "instances": 28,
+          "triangles": 2930,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -17.016,
+              -0.005,
+              -10.625
+            ],
+            "max": [
+              -10.984,
+              4.257,
+              -4.375
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 34,
+          "instances": 34,
+          "triangles": 4730,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -17.603,
+              -0.005,
+              -10.625
+            ],
+            "max": [
+              -10.397,
+              4.257,
+              -3.25
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 40,
+          "instances": 40,
+          "triangles": 6530,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -17.603,
+              -0.005,
+              -10.625
+            ],
+            "max": [
+              -10.397,
+              5.57,
+              -3.25
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 43,
+          "instances": 43,
+          "triangles": 7196,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -18.687,
+              -0.005,
+              -10.99
+            ],
+            "max": [
+              -10.397,
+              5.57,
+              -3.25
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tavern",
+      "kind": "tavern",
+      "variant": 0,
+      "x": 14,
+      "z": 19,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.325,
+              0,
+              16.575
+            ],
+            "max": [
+              16.825,
+              1.95,
+              21.69
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              11.325,
+              0,
+              16.575
+            ],
+            "max": [
+              16.675,
+              2.444,
+              21.425
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              10.984,
+              -0.005,
+              16.375
+            ],
+            "max": [
+              17.015,
+              4.257,
+              22.625
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              10.984,
+              -0.005,
+              16.375
+            ],
+            "max": [
+              17.015,
+              4.257,
+              22.625
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 38,
+          "instances": 38,
+          "triangles": 4778,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              10.984,
+              -0.005,
+              16.375
+            ],
+            "max": [
+              17.6,
+              5.57,
+              22.625
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 41,
+          "instances": 41,
+          "triangles": 5444,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              9.313,
+              -0.005,
+              16.01
+            ],
+            "max": [
+              17.6,
+              5.57,
+              22.625
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "inn",
+      "kind": "tavern",
+      "variant": 1,
+      "x": 18,
+      "z": 21,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              15.325,
+              0,
+              18.575
+            ],
+            "max": [
+              20.825,
+              1.95,
+              23.69
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              15.325,
+              0,
+              18.575
+            ],
+            "max": [
+              20.675,
+              2.444,
+              23.425
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 28,
+          "instances": 28,
+          "triangles": 2930,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              14.984,
+              -0.005,
+              18.375
+            ],
+            "max": [
+              21.016,
+              4.257,
+              24.625
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 28,
+          "instances": 28,
+          "triangles": 2930,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              14.984,
+              -0.005,
+              18.375
+            ],
+            "max": [
+              21.016,
+              4.257,
+              24.625
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 34,
+          "instances": 34,
+          "triangles": 4730,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              14.984,
+              -0.005,
+              18.375
+            ],
+            "max": [
+              21.6,
+              5.57,
+              24.625
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 37,
+          "instances": 37,
+          "triangles": 5396,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              13.313,
+              -0.005,
+              18.01
+            ],
+            "max": [
+              21.6,
+              5.57,
+              24.625
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "forge",
+      "kind": "forge",
+      "variant": 0,
+      "x": -12,
+      "z": -23,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -14.675,
+              0,
+              -25.425
+            ],
+            "max": [
+              -9.175,
+              1.95,
+              -20.31
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -14.675,
+              0,
+              -25.425
+            ],
+            "max": [
+              -9.325,
+              2.444,
+              -20.575
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -15.016,
+              -0.005,
+              -25.625
+            ],
+            "max": [
+              -8.985,
+              4.257,
+              -19.375
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 33,
+          "instances": 33,
+          "triangles": 3278,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -15.016,
+              -0.005,
+              -25.625
+            ],
+            "max": [
+              -8.985,
+              4.257,
+              -19.375
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 39,
+          "instances": 39,
+          "triangles": 5078,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -15.016,
+              -0.005,
+              -25.625
+            ],
+            "max": [
+              -8.4,
+              5.57,
+              -19.375
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 42,
+          "instances": 42,
+          "triangles": 5744,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.687,
+              -0.005,
+              -25.99
+            ],
+            "max": [
+              -8.4,
+              5.57,
+              -19.375
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "workshop",
+      "kind": "forge",
+      "variant": 1,
+      "x": -17,
+      "z": -24,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -19.675,
+              0,
+              -26.425
+            ],
+            "max": [
+              -14.175,
+              1.95,
+              -21.31
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -19.675,
+              0,
+              -26.425
+            ],
+            "max": [
+              -14.325,
+              2.444,
+              -21.575
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 28,
+          "instances": 28,
+          "triangles": 2930,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.016,
+              -0.005,
+              -26.625
+            ],
+            "max": [
+              -13.984,
+              4.257,
+              -20.375
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 29,
+          "instances": 29,
+          "triangles": 3230,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.016,
+              -0.005,
+              -26.625
+            ],
+            "max": [
+              -13.984,
+              4.257,
+              -20.375
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 35,
+          "instances": 35,
+          "triangles": 5030,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.016,
+              -0.005,
+              -26.625
+            ],
+            "max": [
+              -13.4,
+              5.57,
+              -20.375
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 38,
+          "instances": 38,
+          "triangles": 5696,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -21.687,
+              -0.005,
+              -26.99
+            ],
+            "max": [
+              -13.4,
+              5.57,
+              -20.375
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mill",
+      "kind": "mill",
+      "variant": 0,
+      "x": 17,
+      "z": -30,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              14.325,
+              0,
+              -32.425
+            ],
+            "max": [
+              19.825,
+              1.95,
+              -27.31
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              14.325,
+              0,
+              -32.425
+            ],
+            "max": [
+              19.675,
+              2.444,
+              -27.575
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              13.984,
+              -0.005,
+              -32.625
+            ],
+            "max": [
+              20.015,
+              4.257,
+              -26.375
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 37,
+          "instances": 37,
+          "triangles": 4478,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              13.984,
+              -0.005,
+              -32.625
+            ],
+            "max": [
+              20.015,
+              6.6,
+              -26.375
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 43,
+          "instances": 43,
+          "triangles": 6278,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              13.984,
+              -0.005,
+              -32.625
+            ],
+            "max": [
+              20.6,
+              7.05,
+              -26.375
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 46,
+          "instances": 46,
+          "triangles": 6944,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.313,
+              -0.005,
+              -32.99
+            ],
+            "max": [
+              20.6,
+              7.05,
+              -26.375
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "guild",
+      "kind": "guild",
+      "variant": 0,
+      "x": 10,
+      "z": 28,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              7.325,
+              0,
+              25.575
+            ],
+            "max": [
+              12.825,
+              1.95,
+              30.69
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stone",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              7.325,
+              0,
+              25.575
+            ],
+            "max": [
+              12.675,
+              2.444,
+              30.425
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              6.984,
+              -0.005,
+              25.375
+            ],
+            "max": [
+              13.015,
+              4.257,
+              31.625
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              6.984,
+              -0.005,
+              25.375
+            ],
+            "max": [
+              13.015,
+              4.257,
+              31.625
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 38,
+          "instances": 38,
+          "triangles": 4778,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              6.984,
+              -0.005,
+              25.375
+            ],
+            "max": [
+              13.6,
+              5.57,
+              31.625
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 41,
+          "instances": 41,
+          "triangles": 5444,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              5.313,
+              -0.005,
+              25.01
+            ],
+            "max": [
+              13.6,
+              5.57,
+              31.625
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "post",
+      "kind": "post",
+      "variant": 0,
+      "x": 10,
+      "z": -8,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              7.325,
+              0,
+              -10.425
+            ],
+            "max": [
+              12.825,
+              1.95,
+              -5.31
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              7.325,
+              0,
+              -10.425
+            ],
+            "max": [
+              12.675,
+              2.444,
+              -5.575
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 32,
+          "instances": 32,
+          "triangles": 2978,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              6.984,
+              -0.005,
+              -10.625
+            ],
+            "max": [
+              13.015,
+              4.257,
+              -4.375
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 34,
+          "instances": 34,
+          "triangles": 3578,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              6.984,
+              -0.005,
+              -10.625
+            ],
+            "max": [
+              13.015,
+              4.4,
+              -4.375
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 40,
+          "instances": 40,
+          "triangles": 5378,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              6.984,
+              -0.005,
+              -10.625
+            ],
+            "max": [
+              13.6,
+              5.57,
+              -4.375
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 43,
+          "instances": 43,
+          "triangles": 6044,
+          "geometries": 7,
+          "materials": [
+            "glass",
+            "gold",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              5.313,
+              -0.005,
+              -10.99
+            ],
+            "max": [
+              13.6,
+              5.57,
+              -4.375
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-0",
+      "kind": "home",
+      "variant": 0,
+      "x": -16,
+      "z": 16,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -18.075,
+              0,
+              14.075
+            ],
+            "max": [
+              -13.751,
+              1.95,
+              18.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -18.075,
+              0,
+              14.075
+            ],
+            "max": [
+              -13.925,
+              2.068,
+              17.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -18.407,
+              -0.005,
+              13.745
+            ],
+            "max": [
+              -13.593,
+              3.635,
+              19.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -18.407,
+              -0.005,
+              13.745
+            ],
+            "max": [
+              -12.885,
+              3.635,
+              19.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -18.407,
+              -0.005,
+              13.745
+            ],
+            "max": [
+              -12.765,
+              5.27,
+              19.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -19.895,
+              -0.005,
+              13.33
+            ],
+            "max": [
+              -12.455,
+              5.27,
+              19.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-1",
+      "kind": "home",
+      "variant": 1,
+      "x": -17,
+      "z": -2,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -19.075,
+              0,
+              -3.925
+            ],
+            "max": [
+              -14.751,
+              1.95,
+              0.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -19.075,
+              0,
+              -3.925
+            ],
+            "max": [
+              -14.925,
+              2.82,
+              -0.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -19.414,
+              -0.005,
+              -4.255
+            ],
+            "max": [
+              -14.586,
+              4.885,
+              1.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.115,
+              -0.005,
+              -4.255
+            ],
+            "max": [
+              -14.586,
+              4.885,
+              1.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.235,
+              -0.005,
+              -4.255
+            ],
+            "max": [
+              -14.036,
+              6.07,
+              1.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.895,
+              -0.005,
+              -4.67
+            ],
+            "max": [
+              -13.455,
+              6.07,
+              1.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-2",
+      "kind": "home",
+      "variant": 2,
+      "x": -14,
+      "z": 4,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.075,
+              0,
+              2.075
+            ],
+            "max": [
+              -11.751,
+              1.95,
+              6.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -16.075,
+              0,
+              2.075
+            ],
+            "max": [
+              -11.925,
+              2.068,
+              5.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.421,
+              -0.005,
+              1.755
+            ],
+            "max": [
+              -11.579,
+              3.506,
+              8.232
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.421,
+              -0.005,
+              1.755
+            ],
+            "max": [
+              -10.885,
+              3.506,
+              8.232
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.421,
+              -0.005,
+              1.755
+            ],
+            "max": [
+              -10.765,
+              5.27,
+              8.232
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -17.895,
+              -0.005,
+              1.33
+            ],
+            "max": [
+              -10.455,
+              5.27,
+              8.232
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-3",
+      "kind": "home",
+      "variant": 3,
+      "x": -5,
+      "z": -14,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -7.075,
+              0,
+              -15.925
+            ],
+            "max": [
+              -2.751,
+              1.95,
+              -11.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -7.075,
+              0,
+              -15.925
+            ],
+            "max": [
+              -2.925,
+              2.068,
+              -12.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -7.407,
+              -0.005,
+              -16.255
+            ],
+            "max": [
+              -2.593,
+              3.635,
+              -10.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -8.115,
+              -0.005,
+              -16.255
+            ],
+            "max": [
+              -2.593,
+              3.635,
+              -10.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -8.235,
+              -0.005,
+              -16.255
+            ],
+            "max": [
+              -2.036,
+              5.27,
+              -10.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -8.895,
+              -0.005,
+              -16.67
+            ],
+            "max": [
+              -1.455,
+              5.27,
+              -10.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-4",
+      "kind": "home",
+      "variant": 0,
+      "x": 1,
+      "z": -15,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.075,
+              0,
+              -16.925
+            ],
+            "max": [
+              3.249,
+              1.95,
+              -12.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -1.075,
+              0,
+              -16.925
+            ],
+            "max": [
+              3.075,
+              2.068,
+              -13.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.407,
+              -0.005,
+              -17.255
+            ],
+            "max": [
+              3.407,
+              3.635,
+              -11.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.407,
+              -0.005,
+              -17.255
+            ],
+            "max": [
+              4.115,
+              3.635,
+              -11.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.407,
+              -0.005,
+              -17.255
+            ],
+            "max": [
+              4.235,
+              5.27,
+              -11.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -2.895,
+              -0.005,
+              -17.67
+            ],
+            "max": [
+              4.545,
+              5.27,
+              -11.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-5",
+      "kind": "home",
+      "variant": 1,
+      "x": 15,
+      "z": -5,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              -6.925
+            ],
+            "max": [
+              17.249,
+              1.95,
+              -2.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              -6.925
+            ],
+            "max": [
+              17.075,
+              2.82,
+              -3.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.586,
+              -0.005,
+              -7.255
+            ],
+            "max": [
+              17.414,
+              4.885,
+              -1.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.885,
+              -0.005,
+              -7.255
+            ],
+            "max": [
+              17.414,
+              4.885,
+              -1.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.765,
+              -0.005,
+              -7.255
+            ],
+            "max": [
+              17.964,
+              6.07,
+              -1.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.105,
+              -0.005,
+              -7.67
+            ],
+            "max": [
+              18.545,
+              6.07,
+              -1.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-6",
+      "kind": "home",
+      "variant": 2,
+      "x": 15,
+      "z": 2,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              0.075
+            ],
+            "max": [
+              17.249,
+              1.95,
+              4.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              0.075
+            ],
+            "max": [
+              17.075,
+              2.068,
+              3.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.579,
+              -0.005,
+              -0.245
+            ],
+            "max": [
+              17.421,
+              3.506,
+              6.232
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.579,
+              -0.005,
+              -0.245
+            ],
+            "max": [
+              18.115,
+              3.506,
+              6.232
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.579,
+              -0.005,
+              -0.245
+            ],
+            "max": [
+              18.235,
+              5.27,
+              6.232
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.105,
+              -0.005,
+              -0.67
+            ],
+            "max": [
+              18.545,
+              5.27,
+              6.232
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-7",
+      "kind": "home",
+      "variant": 3,
+      "x": 15,
+      "z": 10,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              8.075
+            ],
+            "max": [
+              17.249,
+              1.95,
+              12.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              8.075
+            ],
+            "max": [
+              17.075,
+              2.068,
+              11.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.593,
+              -0.005,
+              7.745
+            ],
+            "max": [
+              17.407,
+              3.635,
+              13.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.885,
+              -0.005,
+              7.745
+            ],
+            "max": [
+              17.407,
+              3.635,
+              13.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.765,
+              -0.005,
+              7.745
+            ],
+            "max": [
+              17.964,
+              5.27,
+              13.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.105,
+              -0.005,
+              7.33
+            ],
+            "max": [
+              18.545,
+              5.27,
+              13.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-8",
+      "kind": "home",
+      "variant": 0,
+      "x": 2,
+      "z": 17,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -0.075,
+              0,
+              15.075
+            ],
+            "max": [
+              4.249,
+              1.95,
+              19.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -0.075,
+              0,
+              15.075
+            ],
+            "max": [
+              4.075,
+              2.068,
+              18.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -0.407,
+              -0.005,
+              14.745
+            ],
+            "max": [
+              4.407,
+              3.635,
+              20.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -0.407,
+              -0.005,
+              14.745
+            ],
+            "max": [
+              5.115,
+              3.635,
+              20.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -0.407,
+              -0.005,
+              14.745
+            ],
+            "max": [
+              5.235,
+              5.27,
+              20.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.895,
+              -0.005,
+              14.33
+            ],
+            "max": [
+              5.545,
+              5.27,
+              20.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-9",
+      "kind": "home",
+      "variant": 1,
+      "x": -18,
+      "z": -17,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.075,
+              0,
+              -18.925
+            ],
+            "max": [
+              -15.751,
+              1.95,
+              -14.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -20.075,
+              0,
+              -18.925
+            ],
+            "max": [
+              -15.925,
+              2.82,
+              -15.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -20.414,
+              -0.005,
+              -19.255
+            ],
+            "max": [
+              -15.586,
+              4.885,
+              -13.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -21.115,
+              -0.005,
+              -19.255
+            ],
+            "max": [
+              -15.586,
+              4.885,
+              -13.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -21.235,
+              -0.005,
+              -19.255
+            ],
+            "max": [
+              -15.036,
+              6.07,
+              -13.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -21.895,
+              -0.005,
+              -19.67
+            ],
+            "max": [
+              -14.455,
+              6.07,
+              -13.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-10",
+      "kind": "home",
+      "variant": 2,
+      "x": -42,
+      "z": 0,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -44.075,
+              0,
+              -1.925
+            ],
+            "max": [
+              -39.751,
+              1.95,
+              2.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -44.075,
+              0,
+              -1.925
+            ],
+            "max": [
+              -39.925,
+              2.068,
+              1.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -44.421,
+              -0.005,
+              -2.245
+            ],
+            "max": [
+              -39.579,
+              3.506,
+              4.232
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -44.421,
+              -0.005,
+              -2.245
+            ],
+            "max": [
+              -38.885,
+              3.506,
+              4.232
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -44.421,
+              -0.005,
+              -2.245
+            ],
+            "max": [
+              -38.765,
+              5.27,
+              4.232
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -45.895,
+              -0.005,
+              -2.67
+            ],
+            "max": [
+              -38.455,
+              5.27,
+              4.232
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-11",
+      "kind": "home",
+      "variant": 3,
+      "x": -40,
+      "z": 11,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -42.075,
+              0,
+              9.075
+            ],
+            "max": [
+              -37.751,
+              1.95,
+              13.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -42.075,
+              0,
+              9.075
+            ],
+            "max": [
+              -37.925,
+              2.068,
+              12.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -42.407,
+              -0.005,
+              8.745
+            ],
+            "max": [
+              -37.593,
+              3.635,
+              14.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -43.115,
+              -0.005,
+              8.745
+            ],
+            "max": [
+              -37.593,
+              3.635,
+              14.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -43.235,
+              -0.005,
+              8.745
+            ],
+            "max": [
+              -37.036,
+              5.27,
+              14.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -43.895,
+              -0.005,
+              8.33
+            ],
+            "max": [
+              -36.455,
+              5.27,
+              14.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-12",
+      "kind": "home",
+      "variant": 0,
+      "x": -39,
+      "z": -11,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -41.075,
+              0,
+              -12.925
+            ],
+            "max": [
+              -36.751,
+              1.95,
+              -8.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -41.075,
+              0,
+              -12.925
+            ],
+            "max": [
+              -36.925,
+              2.068,
+              -9.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -41.407,
+              -0.005,
+              -13.255
+            ],
+            "max": [
+              -36.593,
+              3.635,
+              -7.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -41.407,
+              -0.005,
+              -13.255
+            ],
+            "max": [
+              -35.885,
+              3.635,
+              -7.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -41.407,
+              -0.005,
+              -13.255
+            ],
+            "max": [
+              -35.765,
+              5.27,
+              -7.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -42.895,
+              -0.005,
+              -13.67
+            ],
+            "max": [
+              -35.455,
+              5.27,
+              -7.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-13",
+      "kind": "home",
+      "variant": 1,
+      "x": -34,
+      "z": 24,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -36.075,
+              0,
+              22.075
+            ],
+            "max": [
+              -31.751,
+              1.95,
+              26.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -36.075,
+              0,
+              22.075
+            ],
+            "max": [
+              -31.925,
+              2.82,
+              25.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -36.414,
+              -0.005,
+              21.745
+            ],
+            "max": [
+              -31.586,
+              4.885,
+              27.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -37.115,
+              -0.005,
+              21.745
+            ],
+            "max": [
+              -31.586,
+              4.885,
+              27.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -37.235,
+              -0.005,
+              21.745
+            ],
+            "max": [
+              -31.036,
+              6.07,
+              27.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -37.895,
+              -0.005,
+              21.33
+            ],
+            "max": [
+              -30.455,
+              6.07,
+              27.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-14",
+      "kind": "home",
+      "variant": 2,
+      "x": -33,
+      "z": -24,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -35.075,
+              0,
+              -25.925
+            ],
+            "max": [
+              -30.751,
+              1.95,
+              -21.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -35.075,
+              0,
+              -25.925
+            ],
+            "max": [
+              -30.925,
+              2.068,
+              -22.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -35.421,
+              -0.005,
+              -26.245
+            ],
+            "max": [
+              -30.579,
+              3.506,
+              -19.768
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -35.421,
+              -0.005,
+              -26.245
+            ],
+            "max": [
+              -29.885,
+              3.506,
+              -19.768
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -35.421,
+              -0.005,
+              -26.245
+            ],
+            "max": [
+              -29.765,
+              5.27,
+              -19.768
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -36.895,
+              -0.005,
+              -26.67
+            ],
+            "max": [
+              -29.455,
+              5.27,
+              -19.768
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-15",
+      "kind": "home",
+      "variant": 3,
+      "x": -27,
+      "z": 34,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -29.075,
+              0,
+              32.075
+            ],
+            "max": [
+              -24.751,
+              1.95,
+              36.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -29.075,
+              0,
+              32.075
+            ],
+            "max": [
+              -24.925,
+              2.068,
+              35.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -29.407,
+              -0.005,
+              31.745
+            ],
+            "max": [
+              -24.593,
+              3.635,
+              37.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -30.115,
+              -0.005,
+              31.745
+            ],
+            "max": [
+              -24.593,
+              3.635,
+              37.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -30.235,
+              -0.005,
+              31.745
+            ],
+            "max": [
+              -24.036,
+              5.27,
+              37.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -30.895,
+              -0.005,
+              31.33
+            ],
+            "max": [
+              -23.455,
+              5.27,
+              37.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-16",
+      "kind": "home",
+      "variant": 0,
+      "x": -24,
+      "z": -35,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.075,
+              0,
+              -36.925
+            ],
+            "max": [
+              -21.751,
+              1.95,
+              -32.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -26.075,
+              0,
+              -36.925
+            ],
+            "max": [
+              -21.925,
+              2.068,
+              -33.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.407,
+              -0.005,
+              -37.255
+            ],
+            "max": [
+              -21.593,
+              3.635,
+              -31.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.407,
+              -0.005,
+              -37.255
+            ],
+            "max": [
+              -20.885,
+              3.635,
+              -31.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -26.407,
+              -0.005,
+              -37.255
+            ],
+            "max": [
+              -20.765,
+              5.27,
+              -31.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -27.895,
+              -0.005,
+              -37.67
+            ],
+            "max": [
+              -20.455,
+              5.27,
+              -31.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-17",
+      "kind": "home",
+      "variant": 1,
+      "x": -13,
+      "z": 39,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -15.075,
+              0,
+              37.075
+            ],
+            "max": [
+              -10.751,
+              1.95,
+              41.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -15.075,
+              0,
+              37.075
+            ],
+            "max": [
+              -10.925,
+              2.82,
+              40.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -15.414,
+              -0.005,
+              36.745
+            ],
+            "max": [
+              -10.586,
+              4.885,
+              42.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.115,
+              -0.005,
+              36.745
+            ],
+            "max": [
+              -10.586,
+              4.885,
+              42.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.235,
+              -0.005,
+              36.745
+            ],
+            "max": [
+              -10.036,
+              6.07,
+              42.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -16.895,
+              -0.005,
+              36.33
+            ],
+            "max": [
+              -9.455,
+              6.07,
+              42.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-18",
+      "kind": "home",
+      "variant": 2,
+      "x": -11,
+      "z": -42,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.075,
+              0,
+              -43.925
+            ],
+            "max": [
+              -8.751,
+              1.95,
+              -39.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -13.075,
+              0,
+              -43.925
+            ],
+            "max": [
+              -8.925,
+              2.068,
+              -40.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.421,
+              -0.005,
+              -44.245
+            ],
+            "max": [
+              -8.579,
+              3.506,
+              -37.768
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.421,
+              -0.005,
+              -44.245
+            ],
+            "max": [
+              -7.885,
+              3.506,
+              -37.768
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -13.421,
+              -0.005,
+              -44.245
+            ],
+            "max": [
+              -7.765,
+              5.27,
+              -37.768
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -14.895,
+              -0.005,
+              -44.67
+            ],
+            "max": [
+              -7.455,
+              5.27,
+              -37.768
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-19",
+      "kind": "home",
+      "variant": 3,
+      "x": 1,
+      "z": 41,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.075,
+              0,
+              39.075
+            ],
+            "max": [
+              3.249,
+              1.95,
+              43.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              -1.075,
+              0,
+              39.075
+            ],
+            "max": [
+              3.075,
+              2.068,
+              42.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -1.407,
+              -0.005,
+              38.745
+            ],
+            "max": [
+              3.407,
+              3.635,
+              44.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -2.115,
+              -0.005,
+              38.745
+            ],
+            "max": [
+              3.407,
+              3.635,
+              44.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -2.235,
+              -0.005,
+              38.745
+            ],
+            "max": [
+              3.964,
+              5.27,
+              44.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -2.895,
+              -0.005,
+              38.33
+            ],
+            "max": [
+              4.545,
+              5.27,
+              44.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-20",
+      "kind": "home",
+      "variant": 0,
+      "x": 3,
+      "z": -42,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              0.925,
+              0,
+              -43.925
+            ],
+            "max": [
+              5.249,
+              1.95,
+              -39.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              0.925,
+              0,
+              -43.925
+            ],
+            "max": [
+              5.075,
+              2.068,
+              -40.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              0.593,
+              -0.005,
+              -44.255
+            ],
+            "max": [
+              5.407,
+              3.635,
+              -38.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              0.593,
+              -0.005,
+              -44.255
+            ],
+            "max": [
+              6.115,
+              3.635,
+              -38.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              0.593,
+              -0.005,
+              -44.255
+            ],
+            "max": [
+              6.235,
+              5.27,
+              -38.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              -0.895,
+              -0.005,
+              -44.67
+            ],
+            "max": [
+              6.545,
+              5.27,
+              -38.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-21",
+      "kind": "home",
+      "variant": 1,
+      "x": 15,
+      "z": 38,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              36.075
+            ],
+            "max": [
+              17.249,
+              1.95,
+              40.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              36.075
+            ],
+            "max": [
+              17.075,
+              2.82,
+              39.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.586,
+              -0.005,
+              35.745
+            ],
+            "max": [
+              17.414,
+              4.885,
+              41.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.885,
+              -0.005,
+              35.745
+            ],
+            "max": [
+              17.414,
+              4.885,
+              41.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.765,
+              -0.005,
+              35.745
+            ],
+            "max": [
+              17.964,
+              6.07,
+              41.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.105,
+              -0.005,
+              35.33
+            ],
+            "max": [
+              18.545,
+              6.07,
+              41.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-22",
+      "kind": "home",
+      "variant": 2,
+      "x": 15,
+      "z": -40,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              -41.925
+            ],
+            "max": [
+              17.249,
+              1.95,
+              -37.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              12.925,
+              0,
+              -41.925
+            ],
+            "max": [
+              17.075,
+              2.068,
+              -38.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.579,
+              -0.005,
+              -42.245
+            ],
+            "max": [
+              17.421,
+              3.506,
+              -35.768
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.579,
+              -0.005,
+              -42.245
+            ],
+            "max": [
+              18.115,
+              3.506,
+              -35.768
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              12.579,
+              -0.005,
+              -42.245
+            ],
+            "max": [
+              18.235,
+              5.27,
+              -35.768
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              11.105,
+              -0.005,
+              -42.67
+            ],
+            "max": [
+              18.545,
+              5.27,
+              -35.768
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-23",
+      "kind": "home",
+      "variant": 3,
+      "x": 28,
+      "z": 32,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              25.925,
+              0,
+              30.075
+            ],
+            "max": [
+              30.249,
+              1.95,
+              34.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              25.925,
+              0,
+              30.075
+            ],
+            "max": [
+              30.075,
+              2.068,
+              33.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              25.593,
+              -0.005,
+              29.745
+            ],
+            "max": [
+              30.407,
+              3.635,
+              35.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              24.885,
+              -0.005,
+              29.745
+            ],
+            "max": [
+              30.407,
+              3.635,
+              35.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              24.765,
+              -0.005,
+              29.745
+            ],
+            "max": [
+              30.964,
+              5.27,
+              35.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              24.105,
+              -0.005,
+              29.33
+            ],
+            "max": [
+              31.545,
+              5.27,
+              35.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-24",
+      "kind": "home",
+      "variant": 0,
+      "x": 28,
+      "z": -33,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              25.925,
+              0,
+              -34.925
+            ],
+            "max": [
+              30.249,
+              1.95,
+              -30.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plaster",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              25.925,
+              0,
+              -34.925
+            ],
+            "max": [
+              30.075,
+              2.068,
+              -31.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 75,
+          "instances": 75,
+          "triangles": 6638,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plaster",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              25.593,
+              -0.005,
+              -35.255
+            ],
+            "max": [
+              30.407,
+              3.635,
+              -29.925
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 82,
+          "instances": 82,
+          "triangles": 7214,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              25.593,
+              -0.005,
+              -35.255
+            ],
+            "max": [
+              31.115,
+              3.635,
+              -29.07
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10071,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plaster",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              25.593,
+              -0.005,
+              -35.255
+            ],
+            "max": [
+              31.235,
+              5.27,
+              -29.07
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 113,
+          "instances": 113,
+          "triangles": 11277,
+          "geometries": 11,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              24.105,
+              -0.005,
+              -35.67
+            ],
+            "max": [
+              31.545,
+              5.27,
+              -29.07
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-25",
+      "kind": "home",
+      "variant": 1,
+      "x": 39,
+      "z": 17,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              36.925,
+              0,
+              15.075
+            ],
+            "max": [
+              41.249,
+              1.95,
+              19.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterIvory",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              36.925,
+              0,
+              15.075
+            ],
+            "max": [
+              41.075,
+              2.82,
+              18.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 71,
+          "instances": 71,
+          "triangles": 6590,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterIvory",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              36.586,
+              -0.005,
+              14.745
+            ],
+            "max": [
+              41.414,
+              4.885,
+              20.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 78,
+          "instances": 78,
+          "triangles": 7166,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              35.885,
+              -0.005,
+              14.745
+            ],
+            "max": [
+              41.414,
+              4.885,
+              20.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 99,
+          "instances": 99,
+          "triangles": 9536,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              35.765,
+              -0.005,
+              14.745
+            ],
+            "max": [
+              41.964,
+              6.07,
+              20.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 106,
+          "instances": 106,
+          "triangles": 10742,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roofDark",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              35.105,
+              -0.005,
+              14.33
+            ],
+            "max": [
+              42.545,
+              6.07,
+              20.93
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-26",
+      "kind": "home",
+      "variant": 2,
+      "x": 40,
+      "z": -16,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              37.925,
+              0,
+              -17.925
+            ],
+            "max": [
+              42.249,
+              1.95,
+              -13.83
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterRose",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              37.925,
+              0,
+              -17.925
+            ],
+            "max": [
+              42.075,
+              2.068,
+              -14.075
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 63,
+          "instances": 63,
+          "triangles": 7875,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterRose",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              37.579,
+              -0.005,
+              -18.245
+            ],
+            "max": [
+              42.421,
+              3.506,
+              -11.768
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 70,
+          "instances": 70,
+          "triangles": 8451,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              37.579,
+              -0.005,
+              -18.245
+            ],
+            "max": [
+              43.115,
+              3.506,
+              -11.768
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 80,
+          "instances": 80,
+          "triangles": 10299,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              37.579,
+              -0.005,
+              -18.245
+            ],
+            "max": [
+              43.235,
+              5.27,
+              -11.768
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 87,
+          "instances": 87,
+          "triangles": 11505,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterRose",
+            "red",
+            "roofBlue",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              36.105,
+              -0.005,
+              -18.67
+            ],
+            "max": [
+              43.545,
+              5.27,
+              -11.768
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "home-27",
+      "kind": "home",
+      "variant": 3,
+      "x": 43,
+      "z": 2,
+      "stages": [
+        {
+          "stage": 1,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "stoneDark",
+            "wood",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              40.925,
+              0,
+              0.075
+            ],
+            "max": [
+              45.249,
+              1.95,
+              4.17
+            ]
+          }
+        },
+        {
+          "stage": 2,
+          "meshes": 6,
+          "instances": 6,
+          "triangles": 1800,
+          "geometries": 1,
+          "materials": [
+            "plasterSage",
+            "stoneDark",
+            "woodDark"
+          ],
+          "bounds": {
+            "min": [
+              40.925,
+              0,
+              0.075
+            ],
+            "max": [
+              45.075,
+              2.068,
+              3.925
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "meshes": 72,
+          "instances": 72,
+          "triangles": 6890,
+          "geometries": 5,
+          "materials": [
+            "glass",
+            "gold",
+            "plasterSage",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              40.593,
+              -0.005,
+              -0.255
+            ],
+            "max": [
+              45.407,
+              3.635,
+              5.075
+            ]
+          }
+        },
+        {
+          "stage": 4,
+          "meshes": 79,
+          "instances": 79,
+          "triangles": 7466,
+          "geometries": 5,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              39.885,
+              -0.005,
+              -0.255
+            ],
+            "max": [
+              45.407,
+              3.635,
+              5.93
+            ]
+          }
+        },
+        {
+          "stage": 5,
+          "meshes": 100,
+          "instances": 100,
+          "triangles": 9836,
+          "geometries": 7,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "plasterSage",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              39.765,
+              -0.005,
+              -0.255
+            ],
+            "max": [
+              45.964,
+              5.27,
+              5.93
+            ]
+          }
+        },
+        {
+          "stage": 6,
+          "meshes": 107,
+          "instances": 107,
+          "triangles": 11042,
+          "geometries": 9,
+          "materials": [
+            "earth",
+            "glass",
+            "gold",
+            "leaf",
+            "plasterIvory",
+            "red",
+            "roof",
+            "roofTiles",
+            "stone",
+            "stoneDark",
+            "wood",
+            "woodDark",
+            "woodLight"
+          ],
+          "bounds": {
+            "min": [
+              39.105,
+              -0.005,
+              -0.67
+            ],
+            "max": [
+              46.545,
+              5.27,
+              5.93
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "matureScene": {
+    "ageMinutes": 50,
+    "seed": 12345,
+    "structures": {
+      "meshes": 29,
+      "instances": 29,
+      "triangles": 451717,
+      "geometries": 29,
+      "materials": [
+        "blue",
+        "copper",
+        "cyan",
+        "earth",
+        "emerald",
+        "glass",
+        "gold",
+        "ink",
+        "iron",
+        "leaf",
+        "magic",
+        "olive",
+        "path",
+        "plaster",
+        "plasterIvory",
+        "plasterRose",
+        "red",
+        "roof",
+        "roofBlue",
+        "roofDark",
+        "roofTiles",
+        "sand",
+        "stone",
+        "stoneDark",
+        "violet",
+        "window",
+        "wood",
+        "woodDark",
+        "woodLight"
+      ],
+      "bounds": {
+        "min": [
+          -45.895,
+          -0.334,
+          -44.67
+        ],
+        "max": [
+          46.545,
+          20.1,
+          44.93
+        ]
+      }
+    },
+    "roads": {
+      "meshes": 3,
+      "instances": 642,
+      "triangles": 53300,
+      "geometries": 3,
+      "materials": [
+        "path",
+        "stone"
+      ],
+      "bounds": {
+        "min": [
+          -55,
+          0.5,
+          -55
+        ],
+        "max": [
+          55,
+          0.741,
+          55
+        ]
+      }
+    },
+    "walls": {
+      "meshes": 28,
+      "instances": 192,
+      "triangles": 2304,
+      "geometries": 3,
+      "materials": [
+        "stone",
+        "stoneDark",
+        "wood",
+        "woodDark"
+      ],
+      "bounds": {
+        "min": [
+          -56.444,
+          -0.05,
+          -56.444
+        ],
+        "max": [
+          56.444,
+          5.08,
+          56.444
+        ]
+      }
+    },
+    "environment": {
+      "meshes": 36,
+      "instances": 12609,
+      "triangles": 294318,
+      "geometries": 34,
+      "materials": [
+        "MeshBasicMaterial",
+        "MeshLambertMaterial",
+        "MeshStandardMaterial",
+        "foliage",
+        "grassDark",
+        "path",
+        "pine",
+        "stone",
+        "terrain",
+        "woodDark"
+      ],
+      "bounds": {
+        "min": [
+          -350,
+          -0.867,
+          -350
+        ],
+        "max": [
+          350,
+          120.61,
+          350
+        ]
+      }
+    },
+    "decor": {
+      "meshes": 9,
+      "instances": 490,
+      "triangles": 28880,
+      "geometries": 6,
+      "materials": [
+        "foliage",
+        "lamp",
+        "pine",
+        "stone",
+        "woodDark"
+      ],
+      "bounds": {
+        "min": [
+          -62.332,
+          0,
+          -67.742
+        ],
+        "max": [
+          62.899,
+          7.067,
+          65.691
+        ]
+      }
+    },
+    "residents": {
+      "meshes": 29,
+      "instances": 696,
+      "triangles": 152016,
+      "geometries": 3,
+      "materials": [
+        "MeshStandardMaterial"
+      ],
+      "bounds": {
+        "min": [
+          -54.086,
+          0.548,
+          -24.462
+        ],
+        "max": [
+          53.64,
+          3.618,
+          23.696
+        ]
+      }
+    },
+    "contactShadows": {
+      "meshes": 2,
+      "instances": 2,
+      "triangles": 19360,
+      "geometries": 2,
+      "materials": [
+        "MeshBasicMaterial"
+      ],
+      "bounds": {
+        "min": [
+          -160.116,
+          0.048,
+          -160.496
+        ],
+        "max": [
+          159.376,
+          9.573,
+          159.982
+        ]
+      }
+    },
+    "forestTrees": 506,
+    "townTrees": 55
+  },
+  "renderSupport": {
+    "sky": {
+      "meshes": 1,
+      "instances": 1,
+      "triangles": 440,
+      "geometries": 1,
+      "materials": [
+        "ShaderMaterial"
+      ],
+      "bounds": {
+        "min": [
+          -440,
+          -440,
+          -440
+        ],
+        "max": [
+          440,
+          440,
+          440
+        ]
+      }
+    },
+    "rainWhenEnabled": {
+      "meshes": 2,
+      "instances": 161,
+      "triangles": 9040,
+      "geometries": 2,
+      "materials": [
+        "ShaderMaterial"
+      ],
+      "bounds": {
+        "min": [
+          -1,
+          -1,
+          -1
+        ],
+        "max": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  }
+}

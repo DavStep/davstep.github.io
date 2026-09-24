@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PLOTS } from './model';
+import { INFRASTRUCTURE } from './town-plan';
 import { MAT } from './materials';
 
 const hash=(n:number)=>{let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;};
@@ -49,7 +50,7 @@ function waterMaterial(time:{value:number},light:{value:number},pond=false):THRE
 export class Environment {
   readonly group=new THREE.Group();
   readonly trees:{x:number;z:number;r:number}[]=[];
-  private readonly grassPaint=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,toneMapped:true});
+  private readonly grassPaint=new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true});
   private readonly wind={value:0};
   private readonly waterTime={value:0};
   private readonly waterLight={value:1};
@@ -74,7 +75,7 @@ export class Environment {
     g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.computeVertexNormals();
     const terrain=new THREE.Mesh(g,MAT.terrain);
     terrain.receiveShadow=true;this.group.add(terrain);
-    const square=new THREE.Mesh(new THREE.CylinderGeometry(7.8,7.8,.08,32),MAT.path);square.position.y=.55;square.receiveShadow=true;this.group.add(square);
+    const square=new THREE.Mesh(new THREE.CylinderGeometry(INFRASTRUCTURE.squareRadius,INFRASTRUCTURE.squareRadius,.08,32),MAT.path);square.position.y=.55;square.receiveShadow=true;this.group.add(square);
   }
   private buildWater(){
     const water:number[]=[],waterUv:number[]=[],banks:number[]=[];
@@ -175,7 +176,7 @@ export class Environment {
     const count=this.mobile?250:520;
     for(let i=0;i<count;i++){
       const a=rand(i*311+9)*Math.PI*2,r=69+Math.sqrt(rand(i*797+18))*90,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      if(isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-31.5)<3.8||Math.abs(r-55)<4))continue;
+      if(isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3.8||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3.5||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<4))continue;
       this.trees.push({x,z,r:.7+rand(i*27)*.5});
     }
     const n=this.trees.length,d=new THREE.Object3D();
@@ -225,6 +226,13 @@ export class Environment {
     geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
     this.grassPaint.onBeforeCompile=shader=>{
       shader.uniforms.townWind=this.wind;
+      // Both sides of a thin blade share its upward meadow normal. Flipping
+      // the back face would turn half of each tuft black in direct sunlight.
+      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>',`#include <normal_fragment_begin>
+        #ifdef DOUBLE_SIDED
+          normal *= faceDirection;
+        #endif
+      `);
       shader.vertexShader='uniform float townWind;\n'+shader.vertexShader;
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
         #ifdef USE_INSTANCING
@@ -234,18 +242,18 @@ export class Environment {
         #endif
       `);
     };
-    this.grassPaint.customProgramCacheKey=()=> 'town-wind-grass-v2';
+    this.grassPaint.customProgramCacheKey=()=> 'town-lit-wind-grass-v3';
     const positions:{x:number;z:number;s:number;a:number;color:number}[]=[];
     const attempts=this.mobile?6500:17000;
     for(let i=0;i<attempts;i++){
       const a=rand(i*167+2)*Math.PI*2,r=i%2===0?Math.sqrt(rand(i*911+9))*71:71+Math.sqrt(rand(i*911+9))*75,x=Math.cos(a)*r,z=Math.sin(a)*r;
       const meadow=Math.sin(x*.045)*Math.sin(z*.059);
-      if(rand(i*631+5)>.72+meadow*.24||isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-31.5)<2.3||Math.abs(r-55)<2.5))continue;
+      if(rand(i*631+5)>.72+meadow*.24||isWater(x,z)||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<2.3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<2.3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<2.5))continue;
       positions.push({x,z,s:.68+rand(i*13)*.72,a:rand(i*27)*6.28,color:i%5});
     }
     const grass=new THREE.InstancedMesh(geometry,this.grassPaint,positions.length),d=new THREE.Object3D();
     positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.015,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0xe1e8c7,0xd7e2bc,0xe5eccb,0xcddcb4,0xe0e6bf][p.color]));});
-    grass.instanceMatrix.needsUpdate=true;if(grass.instanceColor)grass.instanceColor.needsUpdate=true;grass.frustumCulled=false;
+    grass.instanceMatrix.needsUpdate=true;if(grass.instanceColor)grass.instanceColor.needsUpdate=true;grass.frustumCulled=false;grass.receiveShadow=true;
     this.group.add(grass);
   }
   update(seconds:number,season:string,night:number){
@@ -253,6 +261,6 @@ export class Environment {
     this.waterTime.value=this.reducedMotion.matches?0:seconds;
     this.waterLight.value=1-night*.38;
     if(season!==this.currentSeason)this.currentSeason=season;
-    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff).multiplyScalar(1-night*.42);
+    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff);
   }
 }

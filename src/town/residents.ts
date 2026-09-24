@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PLOTS, type TownSnapshot } from './model';
+import { INFRASTRUCTURE } from './town-plan';
 
 type Role='builder'|'merchant'|'guard'|'mage'|'warrior'|'resident'|'artist'|'miner';
 interface Node { x:number;z:number;links:number[]; }
 const nodes:Node[]=[{x:0,z:0,links:[]}];
-for(let i=0;i<12;i++){const a=i*Math.PI*2/12;nodes.push({x:Math.cos(a)*31,z:Math.sin(a)*31,links:[]});}
+for(let i=0;i<12;i++){const a=i*Math.PI*2/12;nodes.push({x:Math.cos(a)*INFRASTRUCTURE.residentRoutes.innerRadius,z:Math.sin(a)*INFRASTRUCTURE.residentRoutes.innerRadius,links:[]});}
 for(let i=1;i<=12;i++){nodes[i].links.push(i===1?12:i-1,i===12?1:i+1);if(i%3===1){nodes[i].links.push(0);nodes[0].links.push(i);}}
-for(let i=0;i<16;i++){const a=i*Math.PI*2/16;nodes.push({x:Math.cos(a)*52,z:Math.sin(a)*52,links:[]});}
+for(let i=0;i<16;i++){const a=i*Math.PI*2/16;nodes.push({x:Math.cos(a)*INFRASTRUCTURE.residentRoutes.outerRadius,z:Math.sin(a)*INFRASTRUCTURE.residentRoutes.outerRadius,links:[]});}
 for(let i=13;i<=28;i++){nodes[i].links.push(i===13?28:i-1,i===28?13:i+1);if((i-13)%4===0){const inner=1+Math.round((i-13)/16*12)%12;nodes[i].links.push(inner);nodes[inner].links.push(i);}}
 const dist=(a:{x:number;z:number},b:{x:number;z:number})=>Math.hypot(a.x-b.x,a.z-b.z);
 function nearest(p:{x:number;z:number}){let best=0,d=Infinity;for(let i=0;i<nodes.length;i++){const q=dist(p,nodes[i]);if(q<d){best=i;d=q;}}return best;}
@@ -84,7 +85,7 @@ export class Residents {
     for(const mesh of this.meshes.values())mesh.count=count;
     for(let id=0;id<count;id++){
       const p=this.residents[id],offset=(id%5)*.013,shift=(t+offset)%1;
-      const market={x:-10,z:-7},square={x:0,z:0};
+      const market=PLOTS.find(q=>q.id==='market')!,square={x:0,z:0};
       const activeSite=p.role==='builder'&&snapshot.elapsed<28*60_000?snapshot.plots.find(q=>q.stage>0&&q.stage<4&&q.kind!=='project'):undefined;
       const job=activeSite?{x:activeSite.x,z:activeSite.z}:p.role==='guard'||p.role==='warrior'?snapshot.outerWood>8?{x:p.role==='guard'?53:-53,z:0}:p.work:p.work;
       let from=p.home,to=job,progress=0,moving=false;

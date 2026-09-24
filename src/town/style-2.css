@@ -27,6 +27,7 @@
 .controls button{color:#f1f1e8;border-radius:0}.controls button:hover{background:#ffffff22}
 .controls #control-walk{width:auto;padding:0 15px;background:#e2b274;color:#223b3c;font-size:11px;font-weight:800;letter-spacing:.03em}.controls #control-walk[aria-pressed=true]{background:#a5d7c7}
 .settings-panel{color:#f1f1e9;clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%);border-radius:0}.settings-panel strong{color:#f4f0e9}.settings-panel div{border-color:#ffffff2a}.settings-panel b{color:#e6bb82}.settings-panel p{color:#b4ceca}
+.settings-panel .weather-preview{width:100%;display:flex;align-items:center;justify-content:space-between;margin:5px 0 9px;padding:9px 10px;border:1px solid #ffffff75;background:var(--ui-accent,#a87542);color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;text-align:left}.settings-panel .weather-preview:hover,.settings-panel .weather-preview[aria-pressed=true]{filter:brightness(1.15)}
 .walk-hint{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);padding:10px 18px;color:#e6efea;font-size:10px;letter-spacing:.03em;white-space:nowrap}.walk-hint span{color:#e2b676;padding:0 5px}.walk-hint[hidden],.joystick[hidden]{display:none}
 .joystick{position:absolute;bottom:90px;left:24px;width:112px;height:112px;border-radius:50%;touch-action:none;display:grid;place-items:center}#joystick-stick{width:45px;height:45px;border-radius:50%;background:#e8b980;border:2px solid #fce0af;box-shadow:0 5px 22px #152b2b80}
 .roaming .mobile-work{display:none}
