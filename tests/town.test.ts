@@ -130,9 +130,11 @@ test('walk collision blocks buildings and water while sliding along their edges'
   const town=townAt(save,t0+30*MINUTE),colliders=buildColliders(town);
   assert.ok(isBlocked(0,0,colliders));
   assert.ok(isBlocked(0,riverCenter(0),colliders));
-  const moved=moveWithCollisions({x:8,z:8},{x:-7,z:4},colliders);
-  assert.ok(!isBlocked(moved.x,moved.z,colliders));
-  assert.ok(moved.z>8);
+  // Exercise edge sliding on the valley floor, away from the summit cliff.
+  const wall:import('../src/town/collision').Collider={kind:'box',x:60,z:5,hx:2,hz:2};
+  const moved=moveWithCollisions({x:65,z:5},{x:-7,z:4},[wall]);
+  assert.ok(!isBlocked(moved.x,moved.z,[wall]));
+  assert.ok(moved.z>5);
 });
 
 test('a walker cannot pass through a wall segment but can use a gate',()=>{

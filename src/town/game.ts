@@ -1,32 +1,45 @@
+import { MAX_LEVEL } from './milestones';
+import { missingRequirements, requirements, type Requirement } from './action-rules';
+export { MAX_LEVEL } from './milestones';
 import { CARDINAL_GATE_MASK } from './wall-layout';
 
 export const GAME_SAVE_KEY = 'davstep.choice-town.v1';
 
 export const IDEAS = [
-  'settlers', 'grove', 'workshop', 'roads', 'walls', 'market', 'windmill', 'archive', 'observatory',
+  'settlers', 'grove', 'workshop', 'roads', 'walls', 'market', 'windmill', 'archive', 'river', 'observatory',
 ] as const;
 export type Idea = typeof IDEAS[number];
 export type Levels = Record<Idea, number>;
 
 export const IDEA_INFO: Record<Idea, { name: string; icon: string; place: string; hint: string }> = {
-  settlers: { name: 'Settlers', icon: '⌂', place: 'Homes', hint: 'Someone must tend the first garden.' },
-  grove: { name: 'Grove', icon: '✿', place: 'Gardens', hint: 'The workshop needs living timber.' },
-  workshop: { name: 'Workshop', icon: '⚒', place: 'Forge', hint: 'A bridge needs a forged gear.' },
-  roads: { name: 'Roads', icon: '⌁', place: 'Bridge', hint: 'A caravan needs a crossing.' },
-  walls: { name: 'Walls', icon: '▥', place: 'Town Wall', hint: 'Build Roads first to leave gates for people and supplies.' },
-  market: { name: 'Market', icon: '◈', place: 'Trading Hall', hint: 'The windmill needs a part from the caravan.' },
-  windmill: { name: 'Windmill', icon: '✳', place: 'River Mill', hint: 'The Archive needs the mill working.' },
-  archive: { name: 'Archive', icon: '▤', place: 'Town Post', hint: 'The Observatory needs the town’s plans.' },
-  observatory: { name: 'Observatory', icon: '✦', place: 'Star Tower', hint: 'The final lens needs the Archive.' },
+  settlers: { name: 'Settlers', icon: '/assets/idea-icons/settlers.webp', place: 'Homes', hint: 'Someone must tend the first garden.' },
+  grove: { name: 'Grove', icon: '/assets/idea-icons/grove.webp', place: 'Gardens', hint: 'The workshop needs living timber.' },
+  workshop: { name: 'Workshop', icon: '/assets/idea-icons/workshop.webp', place: 'Forge', hint: 'A bridge needs a forged gear.' },
+  roads: { name: 'Roads', icon: '/assets/idea-icons/roads.webp', place: 'Bridge', hint: 'A caravan needs a crossing.' },
+  walls: { name: 'Walls', icon: '/assets/idea-icons/walls.webp', place: 'Town Wall', hint: 'Protect the homes. Road builders mark the gates when the crossings are ready.' },
+  market: { name: 'Market', icon: '/assets/idea-icons/market.webp', place: 'Idle Outpost market', hint: 'Build an outpost beyond the walls. Roads, trade and the Archive grow it into a connected marketplace.' },
+  windmill: { name: 'Windmill', icon: '/assets/idea-icons/windmill.webp', place: 'River Mill', hint: 'Bring water and merchant supplies to turn dry fields into a harvest.' },
+  archive: { name: 'Archive', icon: '/assets/idea-icons/archive.webp', place: 'Town Post', hint: 'The Observatory needs the town’s plans.' },
+  river: { name: 'River', icon: '/assets/idea-icons/river.svg', place: 'Waterworks', hint: 'Settlers and workshop tools dig a channel. Roads and trade extend it around the castle.' },
+  observatory: { name: 'Observatory', icon: '/assets/idea-icons/observatory.webp', place: 'Star Tower', hint: 'The final lens needs the Archive.' },
 };
 
-const predecessor: Partial<Record<Idea, Idea>> = {
-  grove: 'settlers', workshop: 'grove', roads: 'workshop', walls: 'roads', market: 'roads',
-  windmill: 'market', archive: 'windmill', observatory: 'archive',
-};
+/** A concrete, recoverable need rather than a hidden score or idea count. */
+export function upgradeBlocker(idea: Idea, levels: Levels, _gateMask = 0): string | null {
+  if (levels[idea] === 0 || levels[idea] >= MAX_LEVEL) return null;
+  const missing = missingRequirements(idea, levels[idea] + 1, levels);
+  return missing.length ? missing.map(req => `${IDEA_INFO[req.idea].name} ${req.level}: ${req.purpose}`).join('; ') + '.' : null;
+}
+
+export interface TownEvent {
+  idea: Idea;
+  level: number;
+  wave: number;
+  sources: Requirement[];
+}
 
 export const SECRET_ORDER: readonly Idea[] = [
-  'settlers', 'grove', 'workshop', 'roads', 'market', 'archive', 'walls', 'windmill', 'observatory',
+  'settlers', 'grove', 'workshop', 'roads', 'market', 'archive', 'walls', 'windmill', 'river', 'observatory',
 ];
 
 export interface GameSave {
@@ -39,6 +52,8 @@ export interface GameSave {
 
 export interface GameState {
   order: readonly Idea[];
+  /** Events for the last decision, in simultaneous causal waves. */
+  events: TownEvent[];
   levels: Levels;
   gateMask: number;
   isolatedMill: boolean;
@@ -75,43 +90,33 @@ function emptyLevels(): Levels {
 
 export function evaluate(order: readonly Idea[]): GameState {
   const levels = emptyLevels();
-  const missed: Idea[] = [];
   let gateMask = 0;
+  let events: TownEvent[] = [];
   for (const idea of order) {
     if (!IDEAS.includes(idea) || levels[idea] !== 0) throw new Error(`Invalid idea sequence: ${idea}`);
+    events = [{ idea, level: 1, wave: 0, sources: [] }];
     levels[idea] = 1;
-    const needed = predecessor[idea];
-    if (needed) {
-      const routeOpen = levels.walls === 0 || gateMask !== 0;
-      const supplied = (idea !== 'market' && idea !== 'windmill') || routeOpen;
-      if (levels[needed] >= (idea === 'grove' ? 1 : 2) && supplied) levels[idea] = 2;
-      else missed.push(idea);
+    // A wave only consumes infrastructure that existed BEFORE that wave.
+    // This trace is also the animation plan: causes always precede effects.
+    for (let wave = 1; ; wave++) {
+      const ready = IDEAS.filter(key => levels[key] > 0 && levels[key] < MAX_LEVEL
+        && upgradeBlocker(key, levels, gateMask) === null);
+      if (!ready.length) break;
+      for (const key of ready) {
+        const level = levels[key] + 1;
+        events.push({ idea: key, level, wave, sources: requirements(key, level) });
+      }
+      for (const key of ready) levels[key]++;
+      // Masons can retrofit gates once the road builders survey a route.
+      if (levels.walls > 0 && levels.roads >= 2) gateMask = CARDINAL_GATE_MASK;
     }
-    // A wall only has openings for routes that existed when its foundations
-    // were laid. Later road construction cannot silently cut a new gate.
-    if (idea === 'walls' && levels.walls >= 2) gateMask = CARDINAL_GATE_MASK;
-    // Each new arrival can change buildings that were already in the world.
-    // Iterate until every causal reaction for this turn has settled.
-    let changed = true;
-    while (changed) {
-      const before = IDEAS.map(key => levels[key]).join('');
-      if (levels.settlers && levels.roads >= 2) levels.settlers = Math.max(levels.settlers, 2);
-      if (levels.settlers >= 2 && levels.market >= 2 && levels.walls >= 2) levels.settlers = 3;
-      if (levels.grove >= 2 && levels.windmill >= 2) levels.grove = 3;
-      if (levels.workshop >= 2 && levels.roads >= 2 && levels.windmill >= 2) levels.workshop = 3;
-      if (levels.roads >= 2 && levels.market >= 2) levels.roads = 3;
-      if (levels.walls >= 2 && gateMask && levels.market >= 2 && levels.windmill >= 2) levels.walls = 3;
-      if (levels.market >= 2 && levels.archive >= 2) levels.market = 3;
-      if (levels.windmill >= 2 && levels.workshop >= 2 && levels.grove >= 2) levels.windmill = 3;
-      if (levels.archive >= 2 && levels.settlers >= 2 && levels.market >= 2) levels.archive = 3;
-      if (levels.observatory >= 2 && IDEAS.slice(0, -1).every(key => levels[key] === 3)) levels.observatory = 3;
-      changed = before !== IDEAS.map(key => levels[key]).join('');
-    }
+    if (levels.walls > 0 && levels.roads >= 2) gateMask = CARDINAL_GATE_MASK;
   }
-  const maxCount = IDEAS.filter(idea => levels[idea] === 3).length;
+  const missed = IDEAS.filter(idea => levels[idea] > 0 && levels[idea] < MAX_LEVEL && upgradeBlocker(idea, levels, gateMask) !== null);
+  const maxCount = IDEAS.filter(idea => levels[idea] >= MAX_LEVEL).length;
   const finished = order.length === IDEAS.length;
   return {
-    order: [...order], levels, gateMask,
+    order: [...order], levels, gateMask, events,
     isolatedMill: levels.walls > 0 && gateMask === 0 && levels.windmill > 0,
     missed, maxCount, finished,
     perfect: finished && maxCount === IDEAS.length,

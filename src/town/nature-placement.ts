@@ -7,6 +7,7 @@ export interface NaturePlacement {
   x: number; y: number; z: number;
   sx: number; sy: number; sz: number;
   rotation: number;
+  groundNormal?: {x:number;y:number;z:number};
 }
 
 // Keep authored parts shared and group all placements by family and material.
@@ -18,6 +19,7 @@ export function addNatureInstances(parent: THREE.Group, placements: NaturePlacem
     group.push(placement); families.set(placement.family, group);
   }
   const transform = new THREE.Object3D();
+  const up=new THREE.Vector3(0,1,0),normal=new THREE.Vector3(),yaw=new THREE.Quaternion();
   for (const [family, sites] of families) {
     for (const part of getNatureAsset(family, mobile)) {
       const mesh = new THREE.InstancedMesh(part.geometry, part.material, sites.length);
@@ -25,6 +27,11 @@ export function addNatureInstances(parent: THREE.Group, placements: NaturePlacem
       sites.forEach((site, index) => {
         transform.position.set(site.x, site.y, site.z);
         transform.rotation.set(0, site.rotation, 0);
+        if(site.groundNormal){
+          normal.copy(site.groundNormal).normalize();
+          transform.quaternion.setFromUnitVectors(up,normal);
+          yaw.setFromAxisAngle(up,site.rotation);transform.quaternion.multiply(yaw);
+        }
         transform.scale.set(site.sx, site.sy, site.sz);
         transform.updateMatrix(); mesh.setMatrixAt(index, transform.matrix);
       });

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import civicData from './generated/civic.json';
 import { MAT } from './materials';
 import type { PlotKind, PlotState } from './model';
+import { MILL_ROTOR_SOCKET } from './windmill-layout';
 
 export type CivicFamily = Extract<PlotKind, 'market' | 'tavern' | 'forge' | 'mill' | 'guild' | 'post'>;
 type CivicPart = {
@@ -59,4 +60,24 @@ export function civicBuilding(plot: PlotState, mobile: boolean, animateMillSails
     group.add(mesh);
   }
   return group;
+}
+
+// Own cloned buffers/materials: GameScenery disposes its children independently.
+export function millRotor(mobile: boolean): THREE.Group {
+  const rotor = new THREE.Group();
+  rotor.name = 'windmill-rotor';
+  for (const part of parts) {
+    if (part.family !== 'mill' || part.lod !== (mobile ? 1 : 0)
+      || !part.name.includes('_mill_sails_')) continue;
+    const geometry = part.geometry.clone().translate(-MILL_ROTOR_SOCKET.x, -MILL_ROTOR_SOCKET.y, -MILL_ROTOR_SOCKET.z);
+    const material = part.materialObject.clone();
+    material.onBeforeCompile = part.materialObject.onBeforeCompile;
+    material.customProgramCacheKey = part.materialObject.customProgramCacheKey;
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = part.name;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    rotor.add(mesh);
+  }
+  return rotor;
 }

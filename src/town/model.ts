@@ -8,6 +8,8 @@ export interface Plot { id: string; kind: PlotKind; x: number; z: number; start:
 export interface PlotState extends Plot { stage: number; renovation: number; complexId?: string; }
 export interface TownSave { version: 3; createdAt: number; lastSeenAt: number; eventCursor: number; elapsedFloorMs: number; }
 export interface TownSnapshot {
+  districtConnections?: string[];
+  riverLevel?: number;
   elapsed: number;
   plots: PlotState[];
   innerWood: number;

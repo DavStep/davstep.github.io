@@ -1,20 +1,30 @@
 import * as THREE from 'three';
 import { TownScene } from './scene';
 import { Residents } from './residents';
-import { RoamController } from './navigation';
-import { buildColliders, isBlocked, type Collider } from './collision';
 import { terrainHeight } from './environment';
 import type { TownSnapshot } from './model';
 import { PROJECTS, PROJECT_BY_KEY, type ProjectKey } from './projects';
-import { GAME_SAVE_KEY, IDEAS, IDEA_INFO, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, type Idea, type Levels } from './game';
+import { GAME_SAVE_KEY, IDEAS, IDEA_INFO, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, upgradeBlocker, type Idea, type Levels } from './game';
 import { snapshotForGame } from './game-snapshot';
+import { MILESTONES, MAX_LEVEL } from './milestones';
+import { ACTIONS, eventTitle, eventWaves, explainEvent, levelLabel, nextSuggestion, turnSummary } from './action-story';
+import { chapterMarkup, decisionMarkup, journalMarkup } from './decision-panel';
+import { ReactionEffects, eventFocus } from './reaction-effects';
+import { moatColliders } from './moat-layout';
+import { SANDSHIP_ARRIVAL_MS } from './parachute-arrival';
 import { GameScenery } from './game-scenery';
-import { streamCollisionSegments } from './game-path';
+import { buildColliders, isBlocked } from './collision';
+import { outskirtsOverviewDistance } from './outskirts-state';
+import { landscapeColliders } from './landscape-state';
+import { boundedOrbitDistance, orbitFieldOfView } from './camera-bounds';
 import './style.css';
 import './style-2.css';
 import './style-3.css';
 import './panels.css';
 import './game.css';
+import './glass.css';
+import './panel-rail.css';
+import './story-flow.css';
 
 const $ = <T extends HTMLElement>(selector:string) => document.querySelector(selector) as T;
 const canvas=$<HTMLCanvasElement>('#town-canvas');
@@ -23,7 +33,6 @@ const panel=$<HTMLElement>('#content-panel');
 const backdrop=$<HTMLDivElement>('#panel-backdrop');
 const panelBody=$<HTMLDivElement>('#panel-body');
 const panelTitleId='panel-title';
-const panelKicker=$<HTMLSpanElement>('#panel-kicker');
 const closeButton=$<HTMLButtonElement>('#panel-close');
 const toast=$<HTMLDivElement>('#toast');
 const intro=$<HTMLElement>('#intro');
@@ -43,28 +52,18 @@ if(profile&&'PerformanceObserver'in window){
     }catch{}
   }
 }
-const gameSave=(()=>{try{return parseGameSave(localStorage.getItem(GAME_SAVE_KEY));}catch{return newGameSave();}})();
+const storageKey=GAME_SAVE_KEY+(import.meta.env.DEV&&new URLSearchParams(location.search).has('playtest')?'.playtest':'');
+const gameSave=(()=>{try{return parseGameSave(localStorage.getItem(storageKey));}catch{return newGameSave();}})();
 let gameState=evaluate(gameSave.order);
 let shownLevels:Levels={...gameState.levels};
 const sessionStart=performance.now();
-function persist(){try{localStorage.setItem(GAME_SAVE_KEY,JSON.stringify(gameSave));}catch{}}
+function persist(){try{localStorage.setItem(storageKey,JSON.stringify(gameSave));}catch{}}
 let snapshot:TownSnapshot=snapshotForGame(shownLevels,0,gameState.gateMask);
 let rainPreview=false;
 const weatherSnapshot=():TownSnapshot=>rainPreview?{...snapshot,weather:'rain'}:snapshot;
-let town:TownScene|null=null,residents:Residents|null=null,scenery:GameScenery|null=null;
-let colliders:Collider[]=[],roaming=false;
-const roam=new RoamController();
-const heldKeys=new Set<string>();
-const walkButton=$<HTMLButtonElement>('#control-walk');
-const walkHint=$<HTMLDivElement>('#walk-hint');
-const joystick=$<HTMLDivElement>('#joystick');
-const joystickStick=$<HTMLDivElement>('#joystick-stick');
-let joystickInput={x:0,z:0};
-let target=new THREE.Vector3(0,0,0),desiredTarget=target.clone();
-let azimuth=.72,elevation=1.05,distance=154,desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
-const touchControls=matchMedia('(pointer: coarse), (max-width: 700px)');
-const roamStartPosition=new THREE.Vector3(),roamStartLook=new THREE.Vector3(),roamEye=new THREE.Vector3(),roamLook=new THREE.Vector3();
-let roamTransition=1;
+let town:TownScene|null=null,residents:Residents|null=null,scenery:GameScenery|null=null,reactions:ReactionEffects|null=null;
+let target=new THREE.Vector3(0,terrainHeight(0,0)*.55,0),desiredTarget=target.clone();
+let azimuth=.72,elevation=Math.max(...Object.values(shownLevels))>3?.38:1.05,distance=outskirtsOverviewDistance(shownLevels),desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
 let pointerStart:{x:number;y:number;time:number}|null=null;
 let lastPointer:{x:number;y:number}|null=null;
 const pointers=new Map<number,{x:number;y:number}>();
@@ -75,14 +74,14 @@ const labelButtons=new Map<ProjectKey,HTMLButtonElement>();
 function announce(text:string){toast.textContent=text;toast.hidden=false;clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>toast.hidden=true,5500);}
 function saveNow(){persist();}
 window.addEventListener('pagehide',saveNow);
-document.addEventListener('visibilitychange',()=>{if(document.hidden){heldKeys.clear();saveNow();}else {lastFrame=0;}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow();else lastFrame=0;});
 window.setInterval(persist,15000);
-function setIntroHidden(value:boolean){intro.classList.toggle('dismissed',gameSave.started||value);}
+function setIntroHidden(value:boolean){const hidden=gameSave.started||value;intro.classList.toggle('dismissed',hidden);intro.inert=hidden;intro.setAttribute('aria-hidden',String(hidden));}
 $('#intro-start').addEventListener('click',()=>startGame());
 $('#fallback-start').addEventListener('click',()=>startGame());
 $('#intro-work').addEventListener('click',()=>openPanel('work'));
 $('#open-work-mobile').addEventListener('click',()=>openPanel('work'));
-$('#brand').addEventListener('click',()=>{closePanel();if(roaming)leaveRoam();else recenter();setIntroHidden(false);});
+$('#brand').addEventListener('click',()=>{closePanel();recenter();setIntroHidden(false);});
 for(const button of document.querySelectorAll<HTMLButtonElement>('[data-panel]'))button.addEventListener('click',()=>openPanel(button.dataset.panel!));
 
 function projectMarkup(key:ProjectKey):string{
@@ -97,12 +96,10 @@ function validPanel(id:string|null):string|null{return id&&(id==='work'||id==='a
 function openPanel(id:string,updateHistory=true){
   const valid=validPanel(id);if(!valid)return;
   if(activePanel===valid)return;
-  if(roaming)leaveRoam(false);
   if(!activePanel)lastFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   activePanel=valid;
   panel.dataset.view=valid.startsWith('project-')?'project':valid;
   panel.querySelectorAll<HTMLButtonElement>('.panel-tab').forEach(button=>button.setAttribute('aria-current',String(button.dataset.panel===valid||(valid.startsWith('project-')&&button.dataset.panel==='work'))));
-  panelKicker.textContent=valid.startsWith('project-')?PROJECT_BY_KEY[valid.slice(8) as ProjectKey].kicker:valid==='work'?'THE TOWN ARCHIVE':valid==='about'?'ABOUT DAV':'GET IN TOUCH';
   panelBody.innerHTML=valid.startsWith('project-')?projectMarkup(valid.slice(8) as ProjectKey):valid==='work'?workMarkup():valid==='about'?aboutMarkup():contactMarkup();
   panelBody.scrollTop=0;
   panel.hidden=false;backdrop.hidden=false;$('.chrome').inert=true;$('.town-ui').inert=true;fallback.inert=true;
@@ -110,7 +107,7 @@ function openPanel(id:string,updateHistory=true){
   document.body.classList.add('panel-open');
   if(valid.startsWith('project-')){
     const p=snapshot.plots.find(q=>q.project===valid.slice(8));
-    if(p&&town){desiredTarget.set(p.x,0,p.z);desiredDistance=Math.min(desiredDistance,88);setIntroHidden(true);}
+    if(p&&town){desiredTarget.set(p.x,terrainHeight(p.x,p.z),p.z);desiredDistance=Math.min(desiredDistance,88);setIntroHidden(true);}
   }
   if(updateHistory)history.pushState({panel:valid},'',`#${valid}`);
   panelBody.querySelectorAll<HTMLButtonElement>('[data-project-link]').forEach(button=>button.addEventListener('click',()=>openPanel(`project-${button.dataset.projectLink}`)));
@@ -127,112 +124,95 @@ function closePanel(updateHistory=true){
 closeButton.addEventListener('click',()=>closePanel());backdrop.addEventListener('click',()=>closePanel());
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&activePanel){e.preventDefault();closePanel();return;}
-  if(e.key==='Escape'&&roaming){e.preventDefault();leaveRoam();return;}
-  if(!activePanel&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)){
-    e.preventDefault();if(!roaming)enterRoam();heldKeys.add(e.code);
-  }
-  if(roaming&&(e.code==='ShiftLeft'||e.code==='ShiftRight'))heldKeys.add(e.code);
   if(e.key==='Tab'&&activePanel){const items=[...panel.querySelectorAll<HTMLElement>('button,a[href]')].filter(el=>!el.hasAttribute('disabled'));if(!items.length)return;const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
   if(!activePanel&&e.key==='+'||!activePanel&&e.key==='=')zoom(-12);
   if(!activePanel&&e.key==='-')zoom(12);
 });
-document.addEventListener('keyup',e=>heldKeys.delete(e.code));
-window.addEventListener('blur',()=>heldKeys.clear());
 window.addEventListener('popstate',()=>{const id=validPanel(location.hash.slice(1));if(id)openPanel(id,false);else closePanel(false);});
 
-function recenter(){desiredTarget.set(0,0,0);desiredDistance=154;desiredAzimuth=.72;desiredElevation=1.05;}
-function enterRoam(){
-  if(!town)return;
-  const focused={x:desiredTarget.x,z:desiredTarget.z};
-  const eastRoad={x:28,z:-1.5};
-  const candidates=Math.hypot(focused.x,focused.z)>8?[focused,eastRoad,{x:0,z:28},{x:40,z:0}]:[eastRoad,{x:0,z:28},{x:40,z:0}];
-  const spawn=candidates.find(p=>!isBlocked(p.x,p.z,colliders,.9));
-  if(spawn){roam.setPosition(spawn);if(spawn!==focused)desiredAzimuth=spawn.x>20?0:Math.PI/2;}
-  roaming=true;document.body.classList.add('roaming');setIntroHidden(true);
-  roamStartPosition.copy(town.camera.position);roamStartLook.copy(target);roamTransition=0;
-  desiredElevation=1.52;
-  walkButton.textContent='Overview';walkButton.setAttribute('aria-label','Return to town overview');walkButton.setAttribute('aria-pressed','true');
-  walkHint.textContent=touchControls.matches?'Use the pad to move · drag the world to look · Overview to exit':'WASD / arrows to move · Shift to move faster · Drag to look · Esc for overview';
-  walkHint.hidden=false;joystick.hidden=!touchControls.matches;
-}
-function leaveRoam(recenterTown=true){
-  roaming=false;document.body.classList.remove('roaming');roam.stop();heldKeys.clear();joystickInput={x:0,z:0};joystickStick.style.transform='translate(0,0)';
-  walkButton.textContent='Roam';walkButton.setAttribute('aria-label','Roam through town');walkButton.setAttribute('aria-pressed','false');
-  walkHint.hidden=true;joystick.hidden=true;
-  if(town){target.copy(town.camera.position);distance=0;town.camera.fov=43;town.camera.updateProjectionMatrix();}
-  desiredElevation=1.05;
-  if(recenterTown)recenter();else {desiredTarget.set(roam.position.x,0,roam.position.z);desiredDistance=72;}
-}
+function recenter(){desiredTarget.set(0,terrainHeight(0,0)*.55,0);desiredDistance=outskirtsOverviewDistance(shownLevels);desiredAzimuth=.72;desiredElevation=Math.max(...Object.values(shownLevels))>3?.38:1.05;}
 function zoom(delta:number){
-  if(roaming&&town){town.camera.fov=THREE.MathUtils.clamp(town.camera.fov+delta*.4,35,65);town.camera.updateProjectionMatrix();return;}
-  desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,52,220);
+  desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,52,520);
 }
-walkButton.addEventListener('click',()=>roaming?leaveRoam():enterRoam());
-$('#control-recenter').addEventListener('click',()=>{if(roaming)leaveRoam();else recenter();});
+$('#control-recenter').addEventListener('click',recenter);
 $('#control-zoom-in').addEventListener('click',()=>zoom(-14));
 $('#control-zoom-out').addEventListener('click',()=>zoom(14));
 const settings=$<HTMLDivElement>('#settings-panel'),settingsButton=$<HTMLButtonElement>('#control-settings');
 settingsButton.addEventListener('click',()=>{settings.hidden=!settings.hidden;settingsButton.setAttribute('aria-expanded',String(!settings.hidden));});
 const gameHud=$<HTMLElement>('#game-hud');
 const gameCards=$<HTMLDivElement>('#game-cards');
+const gameProgress=$<HTMLDivElement>('#game-progress');
 const gameEvent=$<HTMLParagraphElement>('#game-event');
 const gameResult=$<HTMLDivElement>('#game-result');
 const gameSkip=$<HTMLButtonElement>('#game-skip');
-const CARD_ORDER:readonly Idea[]=['windmill','archive','market','settlers','observatory','roads','walls','grove','workshop'];
+const CARD_ORDER:readonly Idea[]=['settlers','grove','workshop','roads','market','river','windmill','walls','archive','observatory'];
+const decision=$<HTMLDivElement>('#game-decision');
+const sceneCard=$<HTMLElement>('#game-scene');
+const journal=$<HTMLDetailsElement>('#game-journal');
 let animating=false,animationToken=0;
-let eventMessage='Choose what enters the town. Watch earlier ideas change.';
-const descriptions:Record<Idea,[string,string,string]>={
-  settlers:['Builders arrive and mark out their homes.','Homes rise around the new roads.','The tournament fills with neighbors and banners.'],
-  grove:['Saplings take root beyond the square.','Gardens spread and the workshop gets timber.','The irrigated grove bursts into bloom.'],
-  workshop:['A little forge opens its doors.','The smiths make a gear for the bridge.','The Machine Yard and forge start working together.'],
-  roads:['Surveyors mark a route through town.','The geared bridge opens a crossing.','Stone roads and minecart tracks connect the town.'],
-  walls:['A timber wall rises around the town. Without a road, it has no gates.','Road gates and a stone wall secure the crossings.','A second line of walls protects the outer mill.'],
-  market:['Stalls appear in the square.','A caravan crosses the bridge with supplies.','The Trading Hall fills with goods and visitors.'],
-  windmill:['A small mill rises beside dry fields.','The sails turn; a stream branches from the river to the mill.','Water feeds the fields and golden wheat grows.'],
-  archive:['The post begins collecting the town’s stories.','Plans travel between the guild and the post.','The Archive maps every part of the town.'],
-  observatory:['A star platform rises above the rooftops.','The wizard aligns a new lens.','The five project landmarks shine as constellations.'],
-};
-const approaches:Record<Idea,string>={
-  settlers:'A little settler carries a seed toward the square…',
-  grove:'A gardener brings a sapling to the edge of town…',
-  workshop:'A smith hurries over with a hammer…',
-  roads:'A surveyor carries the first stone to the crossing…',
-  walls:'A mason measures the edge of town for the new wall…',
-  market:'A trader brings a crate of supplies…',
-  windmill:'A builder carries a gear to the river mill…',
-  archive:'A messenger brings a letter to the post…',
-  observatory:'An astronomer carries a bright lens to the tower…',
-};
-const focalPlot:Record<Idea,string>={settlers:'castle',grove:'project-wizard',workshop:'forge',roads:'project-dwarves',walls:'',market:'market',windmill:'mill',archive:'post',observatory:'project-wizard'};
+let selectedIdea:Idea=nextSuggestion(gameState)??'observatory';
+let eventMessage=gameState.order.length?'Select a district to inspect it, or plan your next decision.':'Start with a need. Choose an idea to see what it makes possible.';
+let journalOrder='';
+let decisionKey='';
+let needsContinue=false;
+let showEnding=gameState.finished;
+let desiredUiOffset=0,uiOffset=0;
+// Frame the action in the exposed landscape, above the decision dock.
+// Observe layout changes instead of measuring the DOM in the render loop.
+new ResizeObserver(()=>{
+  const top=gameHud.getBoundingClientRect().top;
+  desiredUiOffset=gameHud.hidden?0:Math.max(0,Math.min(innerHeight*.32,innerHeight/2-(90+top)/2));
+}).observe(gameHud);
 
 function renderGameHud(){
   gameHud.hidden=!gameSave.started;
   $('#fallback-start').hidden=gameSave.started;
   document.body.classList.toggle('game-running',gameSave.started);
-  $('#game-turn').textContent=`TURN ${gameSave.order.length} / ${IDEAS.length}`;
-  $('#game-summary').textContent=animating?'The town is changing…':gameState.finished?`${gameState.maxCount} of ${IDEAS.length} ideas reached MAX`:'Choose the next idea.';
+  document.body.classList.toggle('town-reacting',animating);
+  $('#game-turn').textContent=`DECISION ${gameSave.order.length} / ${IDEAS.length}`;
+  if(!gameProgress.children.length)gameProgress.innerHTML=IDEAS.map(()=>'<span></span>').join('');
+  for(const [index,mark] of [...gameProgress.children].entries())mark.classList.toggle('filled',index<gameSave.order.length);
+  $('#game-summary').textContent=animating?'Watch the connection.':needsContinue?'See what your decision changed.':gameState.finished?'Your valley, connected.':'What does the town need?';
+  $('#game-chapter').innerHTML=chapterMarkup(gameState);
   gameSkip.hidden=!animating;
   gameEvent.textContent=eventMessage;
-  gameCards.innerHTML=CARD_ORDER.map(idea=>{
-    const info=IDEA_INFO[idea],level=shownLevels[idea],chosen=gameSave.order.includes(idea),missed=gameState.missed.includes(idea);
-    const status=level===3?'MAX':level?`LV ${level}`:'CHOOSE';
-    return `<button type="button" class="game-card ${chosen?'chosen':''} ${level===3?'max':''} ${missed?'missed':''}" data-idea="${idea}" aria-label="${info.name}, ${status}" ${chosen||animating||gameState.finished?'disabled':''}><span class="game-card-icon" aria-hidden="true">${info.icon}</span><span class="game-card-label">${info.name}</span><span class="game-card-level">${status}</span></button>`;
+  if(!gameCards.children.length)gameCards.innerHTML=CARD_ORDER.map(idea=>{
+    const info=IDEA_INFO[idea];
+    return `<button type="button" class="game-card" data-idea="${idea}" aria-controls="game-decision"><span class="game-card-icon" aria-hidden="true"><img src="${info.icon}" alt="" draggable="false" /></span><span class="game-card-label">${info.name}</span><span class="game-card-level"></span></button>`;
   }).join('');
-  gameResult.hidden=!gameState.finished||animating;
+  const suggested=nextSuggestion(gameState);
+  for(const idea of CARD_ORDER){
+    const info=IDEA_INFO[idea],chosen=gameSave.order.includes(idea);
+    const button=gameCards.querySelector<HTMLButtonElement>(`[data-idea="${idea}"]`)!;
+    button.classList.toggle('chosen',chosen);
+    button.classList.toggle('selected',selectedIdea===idea);
+    button.classList.toggle('suggested',suggested===idea);
+    const level=shownLevels[idea];
+    button.querySelector('.game-card-level')!.textContent=level?levelLabel(level):suggested===idea?'Next step':'Plan';
+    button.title=level?`${MILESTONES[idea][level-1].name}. ${upgradeBlocker(idea,shownLevels)??'Fully developed.'}`:ACTIONS[idea].need;
+    button.disabled=animating;
+    button.setAttribute('aria-pressed',String(selectedIdea===idea));
+    button.setAttribute('aria-label',`${info.name}, ${levelLabel(level)}${suggested===idea?', suggested next':''}. Inspect plan`);
+  }
+  sceneCard.hidden=!animating;
+  decision.hidden=animating||needsContinue||showEnding;
+  const nextKey=gameSave.order.join(',')+':'+selectedIdea;
+  if(decisionKey!==nextKey){decision.innerHTML=decisionMarkup(gameState,selectedIdea);decisionKey=nextKey;}
+  journal.hidden=animating;
+  if(journalOrder!==gameSave.order.join(',')||!$('#journal-entries').children.length){
+    $('#journal-entries').innerHTML=journalMarkup(gameState);journalOrder=gameSave.order.join(',');
+  }
+  gameResult.hidden=animating||(!needsContinue&&!showEnding);
   if(!gameResult.hidden){
-    const title=gameState.perfect?'A town in harmony':gameState.secret?'Storybook Night discovered':`A town with ${gameState.maxCount} of ${IDEAS.length} ideas at MAX`;
-    const detail=gameState.perfect?'Every building and its surroundings reached their fullest form.':gameState.isolatedMill?'The wall was built before a road reached it. No gate connects the outside mill, so its supplies and water system cannot develop.':gameState.secret?'The Archive’s sketches turned into glowing paper birds.':gameState.missed.length?`Look again at ${IDEA_INFO[gameState.missed[0]].place.toLowerCase()}. ${IDEA_INFO[gameState.missed[0]].hint}`:'Watch which buildings were waiting for each other.';
-    gameResult.innerHTML=`<strong>${title}</strong>${detail}<br><button type="button" data-replay>Try another order</button>`;
+    const previous=evaluate(gameSave.order.slice(0,-1));
+    const title=gameState.secret?'Storybook Night discovered':gameState.finished?'A valley built on connections':`Decision ${gameState.order.length} · The town answers`;
+    gameResult.innerHTML=`<strong>${title}</strong><p>${turnSummary(previous,gameState)}</p>${gameState.finished?'<p>Every district is complete. Try a different route through the needs and watch how the story changes.</p><button type="button" data-replay>Build another town</button>':'<button type="button" data-continue>Plan the next decision →</button>'}`;
   }
 }
 function refreshGameWorld(instant=false){
-  snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart,gameState.gateMask);
+  snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart,shownLevels.roads>=2?gameState.gateMask:0);
   town?.update(weatherSnapshot(),!instant&&animating&&!reduced.matches);
   scenery?.setLevels(shownLevels,gameState.secret&&gameState.finished&&!animating,instant);
-  if(town){
-    colliders=buildColliders(snapshot,[...town.environment.trees,...town.treeObstacles]);
-    if(shownLevels.windmill>=2)colliders.push(...streamCollisionSegments());
-  }
   residents?.update(snapshot);
   updateReadouts();
   positionLabels();
@@ -242,66 +222,99 @@ function startGame(){
   gameCards.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
 }
 function restart(){
-  animationToken++;animating=false;restartGame(gameSave);gameState=evaluate([]);shownLevels={...gameState.levels};
-  residents?.finishCue();scenery?.endBeat();
-  eventMessage='A fresh town. What should arrive first?';persist();renderGameHud();refreshGameWorld(true);recenter();
+  animationToken++;animating=false;needsContinue=false;showEnding=false;restartGame(gameSave);gameState=evaluate([]);shownLevels={...gameState.levels};
+  residents?.finishCue();scenery?.endBeat();reactions?.clear();
+  selectedIdea='settlers';journal.open=false;
+  eventMessage='An empty valley. Welcome the people who will bring it to life.';persist();renderGameHud();refreshGameWorld(true);recenter();
+}
+function finishDecision(instant=false){
+  animating=false;needsContinue=true;showEnding=gameState.finished;shownLevels={...gameState.levels};
+  residents?.finishCue();scenery?.endBeat();reactions?.clear();
+  eventMessage=turnSummary(evaluate(gameSave.order.slice(0,-1)),gameState);
+  refreshGameWorld(instant);renderGameHud();recenter();
+  gameResult.querySelector<HTMLButtonElement>('button')?.focus({preventScroll:true});
 }
 function skipAnimation(){
   if(!animating)return;
-  animationToken++;animating=false;shownLevels={...gameState.levels};
-  residents?.finishCue();scenery?.endBeat();
-  eventMessage=gameState.finished?'The town remembers your choices.':gameState.levels.walls>0&&gameState.gateMask===0?'The sealed wall blocks the road to the outside mill.':'The town is ready for its next idea.';
-  refreshGameWorld(true);renderGameHud();recenter();
+  animationToken++;finishDecision(true);
 }
 const delay=(ms:number)=>new Promise<void>(resolve=>window.setTimeout(resolve,ms));
+async function waitForScene(ms:number,token:number){
+  let remaining=ms;
+  while(remaining>0&&token===animationToken){
+    await delay(100);
+    if(!document.hidden&&!activePanel)remaining-=100;
+  }
+}
 async function playChoice(idea:Idea){
   if(animating||gameState.finished||gameSave.order.includes(idea))return;
-  const before={...shownLevels};gameState=chooseIdea(gameSave,idea);persist();
-  animating=true;const token=++animationToken;renderGameHud();
-  const changed=[idea,...IDEAS.filter(key=>key!==idea&&gameState.levels[key]>before[key])];
-  for(const key of changed){
-    for(let level=before[key]+1;level<=gameState.levels[key];level++){
+  gameState=chooseIdea(gameSave,idea);persist();
+  animating=true;needsContinue=false;journal.open=false;const token=++animationToken;
+  const waves=eventWaves(gameState);
+  renderGameHud();gameSkip.focus({preventScroll:true});
+  try{
+    for(const [index,wave] of waves.entries()){
       if(token!==animationToken)return;
-      const focus=key==='walls'?{x:34,z:0}:snapshot.plots.find(plot=>plot.id===focalPlot[key]);
-      if(focus&&town){desiredTarget.set(focus.x,0,focus.z);desiredDistance=key==='windmill'?94:89;}
-      const failed=key===idea&&level===1&&gameState.missed.includes(key);
-      eventMessage=key===idea?approaches[key]:`${IDEA_INFO[key].name} responds to the new idea…`;
-      if(focus)residents?.startCue(key,focus,failed,reduced.matches?.1:1.7);
+      // Water release and the first harvest get the hero shot; other changes
+      // in this causal wave happen together and remain readable in the journal.
+      const hero=wave.find(e=>e.idea==='river'&&e.level<=3)??wave.find(e=>e.idea==='windmill'&&e.level<=3)??wave[0];
+      const focus=eventFocus(hero),arrival=hero.level===1;
+      const sandship=hero.idea==='workshop'&&arrival;
+      const gateMask=shownLevels.roads>=2?gameState.gateMask:0;
+      if(town){
+        desiredTarget.set(focus.x,town.environment.landscapeHeight(focus.x,focus.z)+(sandship?8:2),focus.z);
+        desiredDistance=hero.level>=4?145:hero.idea==='river'?130:105;
+        desiredElevation=.95;
+        desiredAzimuth=Math.atan2(-focus.z,-focus.x)+.4;
+      }
+      sceneCard.dataset.style=ACTIONS[hero.idea].style;
+      $('#scene-phase').textContent=`${arrival?'THE DECISION':'THE CONNECTION'} · ${index+1} / ${waves.length}`;
+      $('#scene-title').textContent=eventTitle(hero);
+      $('#scene-cause').textContent=explainEvent(hero);
+      $('#scene-chain').textContent=hero.sources.length?`${hero.sources.map(source=>IDEA_INFO[source.idea].name).filter((name,i,list)=>list.indexOf(name)===i).join(' + ')} → ${IDEA_INFO[hero.idea].name}`:ACTIONS[hero.idea].promise;
+      eventMessage=arrival?ACTIONS[hero.idea].need:`Because the supplies are ready, ${IDEA_INFO[hero.idea].name} can develop.`;
+      if(!reduced.matches&&town)reactions?.begin(hero);
+      if(hero.level<4&&hero.idea!=='river'){
+        const future={...shownLevels};for(const event of wave)future[event.idea]=event.level;
+        const crewSnapshot=snapshotForGame(future,performance.now()-sessionStart,gateMask);
+        const obstacles=town?[...town.environment.trees,...town.treeObstacles]:[];
+        const colliders=[...buildColliders(crewSnapshot,obstacles),...landscapeColliders(shownLevels),...moatColliders(shownLevels)];
+        residents?.startCue(hero.idea,focus,false,reduced.matches?.1:6,(x,z)=>!isBlocked(x,z,colliders,1.15));
+      }
       renderGameHud();
-      await delay(reduced.matches?40:690);
+      await waitForScene(reduced.matches||!town?300:arrival?650:1100,token);
       if(token!==animationToken)return;
-      shownLevels[key]=level;
-      eventMessage=descriptions[key][level-1];
-      if(failed)eventMessage+=` ${IDEA_INFO[key].hint}`;
-      if(key==='roads'&&level>=2&&shownLevels.walls>0&&gameState.gateMask===0)eventMessage='The road reaches the sealed wall and stops. The outside mill remains cut off.';
-      if(key==='windmill'&&level===1&&gameState.isolatedMill)eventMessage='The mill stands outside the wall. Without a gate, its waterworks cannot be built.';
-      refreshGameWorld();renderGameHud();
-      if(focus)scenery?.beginBeat(key,focus,failed);
-      if(key==='windmill'&&level===2&&!reduced.matches){
-        await delay(850);
-        if(token!==animationToken)return;
-        eventMessage='The sails catch wind. Water runs from the river through the new channel.';
-        renderGameHud();
-        await delay(1550);
-      }else if(key==='windmill'&&level===3&&!reduced.matches){
-        await delay(750);
-        if(token!==animationToken)return;
-        eventMessage='Green shoots spread from the water. The field turns gold.';
-        residents?.startCue('windmill',{x:34,z:-31},false,1.65);
-        renderGameHud();
-        await delay(1650);
-      }else await delay(reduced.matches?50:key==='roads'?1650:1450);
-      residents?.finishCue();scenery?.endBeat();
-      while(activePanel&&token===animationToken)await delay(150);
+      for(const event of wave)shownLevels[event.idea]=event.level;
+      refreshGameWorld(reduced.matches||!town);
+      if(!reduced.matches&&town)reactions?.reveal();
+      $('#scene-phase').textContent=`${arrival?'ESTABLISHED':'PAYOFF'} · ${index+1} / ${waves.length}`;
+      $('#scene-chain').textContent=MILESTONES[hero.idea][hero.level-1].description;
+      eventMessage=wave.map(event=>`${IDEA_INFO[event.idea].name}: ${eventTitle(event)}`).join(' · ');
+      renderGameHud();
+      const duration=sandship?SANDSHIP_ARRIVAL_MS+150:hero.idea==='river'&&hero.level===2?7500:hero.idea==='river'&&hero.level===3?7500:hero.idea==='windmill'&&hero.level===3?2900:2200;
+      await waitForScene(reduced.matches||!town?600:duration,token);
+      if(token!==animationToken)return;
+      residents?.finishCue();reactions?.clear();
     }
+    if(token!==animationToken)return;
+    finishDecision();
+  }catch(error){
+    console.error('Reaction playback interrupted',error);
+    if(token===animationToken){finishDecision(true);announce('Your decision is saved. The town journal records every change.');}
   }
-  if(token!==animationToken)return;
-  animating=false;shownLevels={...gameState.levels};
-  eventMessage=gameState.finished?'The nine choices are complete. Inspect the town, then try another order.':gameState.levels.walls>0&&gameState.gateMask===0?'The wall has no gate. Roads cannot connect the outside mill.':'What should arrive next?';
-  refreshGameWorld(true);renderGameHud();recenter();
 }
-gameCards.addEventListener('click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');if(button)void playChoice(button.dataset.idea as Idea);});
-gameResult.addEventListener('click',event=>{if((event.target as HTMLElement).closest('[data-replay]'))restart();});
+gameCards.addEventListener('click',event=>{
+  const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');
+  if(!button||animating)return;
+  selectedIdea=button.dataset.idea as Idea;needsContinue=false;showEnding=false;renderGameHud();
+  const level=shownLevels[selectedIdea];
+  if(level&&town){const focus=eventFocus({idea:selectedIdea,level:Math.min(level,3)});desiredTarget.set(focus.x,town.environment.landscapeHeight(focus.x,focus.z),focus.z);desiredDistance=110;desiredElevation=.95;}
+});
+decision.addEventListener('click',event=>{if((event.target as HTMLElement).closest('#game-commit'))void playChoice(selectedIdea);});
+gameResult.addEventListener('click',event=>{
+  if((event.target as HTMLElement).closest('[data-replay]'))restart();
+  if((event.target as HTMLElement).closest('[data-continue]')){needsContinue=false;selectedIdea=nextSuggestion(gameState)??selectedIdea;renderGameHud();gameCards.querySelector<HTMLButtonElement>(`[data-idea="${selectedIdea}"]`)?.focus({preventScroll:true});}
+});
 $('#game-restart').addEventListener('click',restart);
 gameSkip.addEventListener('click',skipAnimation);
 const weatherPreviewButton=$<HTMLButtonElement>('#weather-preview');
@@ -311,15 +324,6 @@ weatherPreviewButton.addEventListener('click',()=>{
   weatherPreviewButton.innerHTML=rainPreview?'Return to live weather <span aria-hidden="true">↗</span>':'Make it rain <span aria-hidden="true">↗</span>';
   town?.update(weatherSnapshot());updateReadouts();
 });
-function moveStick(event:PointerEvent){
-  const rect=joystick.getBoundingClientRect(),radius=rect.width*.34;
-  const dx=event.clientX-(rect.left+rect.width/2),dy=event.clientY-(rect.top+rect.height/2),length=Math.max(1,Math.hypot(dx,dy));
-  const factor=Math.min(1,radius/length),x=dx*factor,z=dy*factor;
-  joystickInput={x:x/radius,z:-z/radius};joystickStick.style.transform=`translate(${x}px,${z}px)`;
-}
-joystick.addEventListener('pointerdown',e=>{joystick.setPointerCapture(e.pointerId);moveStick(e);});
-joystick.addEventListener('pointermove',e=>{if(joystick.hasPointerCapture(e.pointerId))moveStick(e);});
-for(const type of ['pointerup','pointercancel'] as const)joystick.addEventListener(type,()=>{joystickInput={x:0,z:0};joystickStick.style.transform='translate(0,0)';});
 canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY*.025);},{passive:false});
 canvas.addEventListener('pointerdown',e=>{if(activePanel)return;canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});pointerStart={x:e.clientX,y:e.clientY,time:performance.now()};lastPointer={x:e.clientX,y:e.clientY};dragged=false;});
 canvas.addEventListener('pointermove',e=>{
@@ -330,8 +334,8 @@ canvas.addEventListener('pointermove',e=>{
   const dx=e.clientX-lastPointer.x,dy=e.clientY-lastPointer.y;
   if(pointerStart&&Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>5)dragged=true;
   if(dragged){
-    desiredAzimuth+=(roaming?dx:-dx)*.006;
-    desiredElevation=THREE.MathUtils.clamp(desiredElevation+(roaming?-dy:dy)*.005,roaming?.75:.38,roaming?2.15:1.42);
+    desiredAzimuth-=dx*.006;
+    desiredElevation=THREE.MathUtils.clamp(desiredElevation+dy*.005,.38,1.42);
     setIntroHidden(true);
   }
   lastPointer={x:e.clientX,y:e.clientY};
@@ -351,11 +355,10 @@ function positionLabels(){
   for(const p of snapshot.plots){
     if(!p.project)continue;
     const button=labelButtons.get(p.project)!;
-    projected.set(p.x,Math.max(3.5,2.6+p.stage*.62),p.z).project(town.camera);
+    projected.set(p.x,terrainHeight(p.x,p.z)+Math.max(3.5,2.6+p.stage*.62),p.z).project(town.camera);
     const x=(projected.x*.5+.5)*innerWidth,y=(-projected.y*.5+.5)*innerHeight;
     const behindIntro=introRect&&x>introRect.left-80&&x<introRect.right+80&&y>introRect.top-32&&y<introRect.bottom+32;
-    const nearby=!roaming||Math.hypot(roam.position.x-p.x,roam.position.z-p.z)<42;
-    const visible=p.stage>0&&nearby&&!behindIntro&&projected.z<1&&projected.z>-1&&projected.x>-(town.mobile?.86:1.02)&&projected.x<(town.mobile?.86:1.02)&&projected.y>-1.08&&projected.y<1.08;
+    const visible=p.stage>0&&!behindIntro&&projected.z<1&&projected.z>-1&&projected.x>-(town.mobile?.86:1.02)&&projected.x<(town.mobile?.86:1.02)&&projected.y>-1.08&&projected.y<1.08;
     button.style.display=visible?'flex':'none';button.style.left=`${x}px`;button.style.top=`${y}px`;
   }
 }
@@ -374,36 +377,27 @@ function stepCamera(dt:number){
   if(!town)return;
   const k=reduced.matches?1:1-Math.exp(-dt*8);
   azimuth+=(desiredAzimuth-azimuth)*k;elevation+=(desiredElevation-elevation)*k;
-  if(roaming){
-    const position=roam.position,eye=terrainHeight(position.x,position.z)+2.35;
-    roamEye.set(position.x,eye,position.z);
-    roamLook.set(position.x-Math.cos(azimuth)*Math.sin(elevation)*10,eye-Math.cos(elevation)*10,position.z-Math.sin(azimuth)*Math.sin(elevation)*10);
-    if(roamTransition<1){
-      roamTransition=Math.min(1,roamTransition+(reduced.matches?1:dt*3.5));
-      const blend=1-(1-roamTransition)**3;
-      town.camera.position.copy(roamStartPosition).lerp(roamEye,blend);
-      target.copy(roamStartLook).lerp(roamLook,blend);
-    }else{town.camera.position.copy(roamEye);target.copy(roamLook);}
-    town.camera.lookAt(target);return;
-  }
   target.lerp(desiredTarget,k);distance+=(desiredDistance-distance)*k;
-  const horizontal=Math.sin(elevation)*distance;
-  town.camera.position.set(target.x+Math.cos(azimuth)*horizontal,target.y+Math.cos(elevation)*distance,target.z+Math.sin(azimuth)*horizontal);
+  uiOffset+=(desiredUiOffset-uiOffset)*k;
+  const view=town.camera.view;
+  if(!view||Math.abs(view.offsetY-uiOffset)>.2||view.fullWidth!==innerWidth||view.fullHeight!==innerHeight)
+    town.camera.setViewOffset(innerWidth,innerHeight,0,uiOffset,innerWidth,innerHeight);
+  const cameraDistance=boundedOrbitDistance(target.x,target.z,azimuth,elevation,distance);
+  const fov=orbitFieldOfView(distance,cameraDistance);
+  if(Math.abs(town.camera.fov-fov)>.001){town.camera.fov=fov;town.camera.updateProjectionMatrix();}
+  const horizontal=Math.sin(elevation)*cameraDistance;
+  town.camera.position.set(target.x+Math.cos(azimuth)*horizontal,target.y+Math.cos(elevation)*cameraDistance,target.z+Math.sin(azimuth)*horizontal);
   town.camera.lookAt(target);
 }
 function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!town)return;const cap=town.mobile?30:60;if(now-lastFrame<1000/cap-1)return;const elapsed=lastFrame?now-lastFrame:1000/cap;lastFrame=now;
   snapshot.elapsed=now-sessionStart;
-  if(roaming){
-    const input={x:(heldKeys.has('KeyD')||heldKeys.has('ArrowRight')?1:0)-(heldKeys.has('KeyA')||heldKeys.has('ArrowLeft')?1:0)+joystickInput.x,z:(heldKeys.has('KeyW')||heldKeys.has('ArrowUp')?1:0)-(heldKeys.has('KeyS')||heldKeys.has('ArrowDown')?1:0)+joystickInput.z,sprint:heldKeys.has('ShiftLeft')||heldKeys.has('ShiftRight')};
-    roam.update(elapsed/1000,input,azimuth,colliders);
-  }
-  stepCamera(elapsed/1000);residents?.update(snapshot);positionLabels();scenery?.update(now/1000,elapsed/1000);town.render(weatherSnapshot(),roaming);
+  stepCamera(elapsed/1000);reactions?.update(elapsed/1000);residents?.update(snapshot);positionLabels();scenery?.update(now/1000,elapsed/1000);town.render(weatherSnapshot(),false);
   if(profile&&Math.floor(now/2000)!==Math.floor((now-elapsed)/2000)){document.body.dataset.drawCalls=String(town.renderer.info.render.calls);document.body.dataset.triangles=String(town.renderer.info.render.triangles);document.body.dataset.geometries=String(town.renderer.info.memory.geometries);document.body.dataset.textures=String(town.renderer.info.memory.textures);}
   if(profile){frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b);frameSamples=[];document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=sorted[Math.floor(sorted.length*.9)].toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}}
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.25);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
+  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.5);town.setPixelRatio(pixelRatio);residents=new Residents(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment);reactions=new ReactionEffects(town.scene);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,gameSave,gameState:()=>gameState,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();positionLabels();});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;labels.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}

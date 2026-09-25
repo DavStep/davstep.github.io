@@ -11,13 +11,18 @@
   font-synthesis: none;
 }
 
+.world-poster { background: linear-gradient(#80c9eb 0%, #d8f1de 62%, #a1ca78 100%); }
+.poster-hill { background: #75aa6b; }
+.poster-hill.back { background: #a9c985; }
+.poster-castle { color: #d4b38b; text-shadow: 0 10px 0 #916d62; }
+
 button:focus-visible, a:focus-visible {
   outline: 3px solid #e78f72;
   outline-offset: 3px;
 }
 
 .brand, .chrome nav, .intro, .status, .controls, .settings-panel,
-.world-label, .walk-hint, .joystick, .toast {
+.world-label, .toast {
   background: var(--ui-glass);
   color: var(--ui-ink);
   border: 1px solid var(--ui-line);
@@ -88,8 +93,6 @@ button:focus-visible, a:focus-visible {
 .controls { border-radius: 17px; }
 .controls button { border-radius: 11px; color: #31575b; }
 .controls button:hover { background: rgba(90, 153, 148, .17); }
-.controls #control-walk { border-radius: 11px; background: #194d53; color: white; }
-.controls #control-walk[aria-pressed=true] { background: #2f8c83; color: white; }
 .settings-panel { border-radius: 20px; color: var(--ui-ink); }
 .settings-panel strong { color: var(--ui-ink); font-family: 'Space Grotesk', sans-serif; }
 .settings-panel div { border-color: rgba(40, 101, 100, .17); }
@@ -114,10 +117,6 @@ button:focus-visible, a:focus-visible {
 }
 .settings-panel .weather-preview:hover,
 .settings-panel .weather-preview[aria-pressed=true] { background: #237f80; color: white; }
-.walk-hint { border-radius: 14px; color: var(--ui-ink); }
-.walk-hint span { color: var(--ui-accent); }
-.joystick { border-radius: 50%; }
-#joystick-stick { background: #237f80; border-color: #b7e9de; }
 
 .panel-backdrop {
   background: rgba(12, 31, 37, .56);

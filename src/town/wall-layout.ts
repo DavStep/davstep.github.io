@@ -1,5 +1,6 @@
 import { WALL_SEGMENTS } from './model';
 import { INFRASTRUCTURE } from './town-plan';
+import { MILL_POOL, millStreamDistance } from './game-path';
 
 export interface WallPoint {x:number;z:number}
 export const WALL_GATE_INTERVAL=INFRASTRUCTURE.wall.gateInterval;
@@ -14,4 +15,14 @@ export function wallSection(radius:number,index:number){
   const end={x:Math.cos(endAngle)*radius,z:Math.sin(endAngle)*radius};
   return {start,end,center:{x:(start.x+end.x)*.5,z:(start.z+end.z)*.5},angle:midAngle,
     length:Math.hypot(end.x-start.x,end.z-start.z),rotation:-midAngle-Math.PI/2};
+}
+
+export function wallSectionFlooded(radius:number,index:number,streamOpen:boolean):boolean{
+  if(!streamOpen)return false;
+  const section=wallSection(radius,index);
+  for(let sample=0;sample<=8;sample++){
+    const t=sample/8,x=section.start.x+(section.end.x-section.start.x)*t,z=section.start.z+(section.end.z-section.start.z)*t;
+    if(millStreamDistance(x,z)<4.1||Math.hypot(x-MILL_POOL.x,z-MILL_POOL.z)<MILL_POOL.radius+.6)return true;
+  }
+  return false;
 }

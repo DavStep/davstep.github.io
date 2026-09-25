@@ -1,7 +1,7 @@
 import type { TownSnapshot } from './model';
 import { INFRASTRUCTURE } from './town-plan';
-import { isWater } from './environment';
-import { wallIsGate, wallSection } from './wall-layout';
+import { isWater, terrainHeight } from './environment';
+import { wallIsGate, wallSection, wallSectionFlooded } from './wall-layout';
 
 export type Collider =
   | {kind:'box';x:number;z:number;hx:number;hz:number}
@@ -15,14 +15,16 @@ export function buildColliders(snapshot:TownSnapshot,trees:readonly {x:number;z:
     if(plot.stage<2)continue;
     const hx=plot.kind==='castle'?5.9:plot.kind==='project'?4.85:plot.kind==='home'?2.3:3;
     const hz=plot.kind==='castle'?5.5:plot.kind==='project'?4.35:plot.kind==='home'?2.15:2.75;
-    result.push({kind:'box',x:plot.x,z:plot.z,hx,hz});
+    if(plot.kind==='mill')result.push({kind:'circle',x:plot.x,z:plot.z,r:2.55});
+    else if(plot.kind==='castle'&&plot.stage>=5)result.push({kind:'box',x:plot.x-.9,z:plot.z,hx:7.65,hz:6.1});
+    else result.push({kind:'box',x:plot.x,z:plot.z,hx,hz});
     if(plot.kind==='home'&&plot.stage>=3&&(plot.variant??0)%4===2)result.push({kind:'box',x:plot.x,z:plot.z+hz+1.05,hx:1.45,hz:1.05});
     if(plot.kind!=='project'&&plot.stage>=5)result.push({kind:'box',x:plot.x+hx*.9,z:plot.z-.17,hx:1.1,hz:1.25});
     if(plot.kind!=='project'&&plot.stage>=6)result.push({kind:'box',x:plot.x-hx*1.17,z:plot.z-.8,hx:1.45,hz:1.65});
   }
   for(const [radius,count] of [[INFRASTRUCTURE.wall.innerRadius,snapshot.innerWood],[INFRASTRUCTURE.wall.outerRadius,snapshot.outerWood]]){
     for(let i=0;i<count;i++){
-      if(wallIsGate(i,snapshot.wallGates))continue;
+      if(wallIsGate(i,snapshot.wallGates)||wallSectionFlooded(radius,i,(snapshot.riverLevel??0)>=2))continue;
       const {start,end}=wallSection(radius,i);
       result.push({kind:'segment',ax:start.x,az:start.z,bx:end.x,bz:end.z,r:.58});
     }
@@ -51,13 +53,14 @@ export function isBlocked(x:number,z:number,colliders:readonly Collider[],radius
   }
   return false;
 }
+const climbable=(ax:number,az:number,bx:number,bz:number)=>Math.abs(terrainHeight(bx,bz)-terrainHeight(ax,az))<=Math.hypot(bx-ax,bz-az)*1.05+.015;
 export function moveWithCollisions(start:Point,delta:Point,colliders:readonly Collider[],radius=.75):Point{
   const steps=Math.max(1,Math.ceil(Math.hypot(delta.x,delta.z)/.38));
   let x=start.x,z=start.z;
   for(let i=0;i<steps;i++){
     const nx=x+delta.x/steps,nz=z+delta.z/steps;
-    if(!isBlocked(nx,z,colliders,radius))x=nx;
-    if(!isBlocked(x,nz,colliders,radius))z=nz;
+    if(!isBlocked(nx,z,colliders,radius)&&climbable(x,z,nx,z))x=nx;
+    if(!isBlocked(x,nz,colliders,radius)&&climbable(x,z,x,nz))z=nz;
   }
   return {x,z};
 }

@@ -38,14 +38,19 @@ test('all five landmarks retain stages 3–6 with bounded desktop and mobile geo
       assert.ok(prior.children.length > 0, `${family} stage 3 missing`);
       assert.ok(mature.children.length > 0, `${family} stage 6 missing`);
       assert.deepEqual(mature.position.toArray(), [18, 0, -12]);
-      const shared = new Set(prior.children.map(child => (child as THREE.Mesh).geometry));
-      assert.ok(mature.children.some(child => shared.has((child as THREE.Mesh).geometry)),
+      const meshes = (group: THREE.Group) => {
+        const result: THREE.Mesh[] = [];
+        group.traverse(child => { if (child instanceof THREE.Mesh) result.push(child); });
+        return result;
+      };
+      const shared = new Set(meshes(prior).map(child => child.geometry));
+      assert.ok(meshes(mature).some(child => shared.has(child.geometry)),
         `${family} lost all stable parts between stages`);
       for (let stage = 3; stage <= 6; stage++) {
         const group = authoredLandmarkBuilding(plot(family, stage), mobile);
         let triangles = 0;
         const bounds = new THREE.Box3();
-        for (const child of group.children) {
+        for (const child of meshes(group)) {
           assert.ok(child instanceof THREE.Mesh);
           assert.ok(AUTHORED_LANDMARK_SHARED_GEOMETRIES.has(child.geometry));
           assert.equal(child.geometry.getAttribute('normal').count,

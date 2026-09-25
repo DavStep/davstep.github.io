@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#14252a" />
-  <meta name="description" content="Choose nine ideas and watch Dav Stepanyan's 3D town react. Build roads and walls, bring water to the windmill, grow wheat, and explore his games." />
+  <meta name="description" content="Choose ten ideas and watch Dav Stepanyan's 3D town react. Build roads and walls, bring water to the windmill, grow wheat, and explore his games." />
   <title>Dav Stepanyan — A Town of Consequences</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,19 +20,30 @@
       <nav aria-label="Main navigation"><button data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav>
     </header>
     <main class="town-ui">
-      <section class="intro" id="intro" aria-label="Introduction"><div class="intro-kicker"><span class="pulse"></span> A TOWN OF CONSEQUENCES <span class="intro-index">01 / 09</span></div><h1>Build a world.<br><em>Watch it answer.</em></h1><p>Choose what arrives in this town. Every choice changes what can grow next. Can you help every part reach MAX?</p><div class="intro-actions"><button id="intro-start" type="button">Start game <span>✦</span></button><button id="intro-work" type="button">Explore my work <span>↗</span></button></div><div class="intro-foot">NINE IDEAS · EVERY ORDER HAS CONSEQUENCES</div></section>
-      <section id="game-hud" class="game-hud" aria-label="Town choice game" hidden><div class="game-hud-head"><span id="game-turn">TURN 0 / 9</span><span id="game-summary">Choose what enters the town.</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-restart" type="button">Restart</button></div><div id="game-cards" class="game-cards" role="group" aria-label="Choose the next idea"></div><p id="game-event" class="game-event" role="status" aria-live="polite"></p><div id="game-result" class="game-result" hidden></div></section>
+      <section class="intro" id="intro" aria-label="Introduction"><div class="intro-kicker"><span class="pulse"></span> A TOWN OF CONSEQUENCES <span class="intro-index">01 / 10</span></div><h1>Build a world.<br><em>Watch it answer.</em></h1><p>Give the town what it needs. Watch timber become tools, roads bring caravans, and water turn dry fields gold. Every change has a cause.</p><div class="intro-actions"><button id="intro-start" type="button">Start game <span>✦</span></button><button id="intro-work" type="button">Explore my work <span>↗</span></button></div><div class="intro-foot">TEN DECISIONS · ONE CONNECTED VALLEY</div></section>
+      <section id="game-hud" class="game-hud" aria-label="Town choice game" hidden>
+        <div class="game-hud-head">
+          <div class="game-hud-title"><span class="game-hud-kicker">✦ &nbsp; THE LIVING TOWN</span><strong id="game-summary">Choose what enters the town.</strong></div>
+          <div class="game-hud-actions"><span id="game-turn">DECISION 0 / 10</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-restart" type="button">↻ <span>Restart</span></button></div>
+        </div>
+        <div id="game-chapter" class="game-chapter"></div>
+        <div id="game-progress" class="game-progress" aria-hidden="true"></div>
+        <div id="game-cards" class="game-cards" role="group" aria-label="Choose the next idea"></div>
+        <div id="game-decision" class="game-decision"></div>
+        <section id="game-scene" class="game-scene" aria-label="Current reaction" hidden><span id="scene-phase" class="story-eyebrow"></span><h2 id="scene-title"></h2><p id="scene-cause"></p><div id="scene-chain"></div></section>
+        <p id="game-event" class="game-event" role="status" aria-live="polite"></p>
+        <details id="game-journal" class="game-journal"><summary>Town journal <span>Why things changed</span></summary><div id="journal-entries"></div></details>
+        <div id="game-result" class="game-result" hidden></div>
+      </section>
       <div class="world-labels" id="world-labels" aria-label="Project landmarks"></div>
       <div class="status" aria-live="off"><span class="status-mark">✦</span><span id="status-text">The settlement is waking up.</span></div>
-      <div class="controls"><button id="control-walk" type="button" aria-label="Roam through town" aria-pressed="false">Roam</button><button id="control-recenter" type="button" title="Recenter town" aria-label="Recenter town">⌖</button><button id="control-zoom-in" type="button" aria-label="Zoom in">+</button><button id="control-zoom-out" type="button" aria-label="Zoom out">−</button><button id="control-settings" type="button" aria-label="World settings" aria-expanded="false" aria-controls="settings-panel">⚙</button></div>
-      <div id="walk-hint" class="walk-hint" hidden>WASD / arrows to move · Shift to move faster · Drag to look · Esc for overview</div>
-      <div id="joystick" class="joystick" aria-label="Touch movement control" hidden><div id="joystick-stick"></div></div>
-      <div class="settings-panel" id="settings-panel" hidden><strong>World notes</strong><div><span>Season</span><b id="season-readout">SUMMER</b></div><div><span>Weather</span><b id="weather-readout">CLEAR</b></div><button id="weather-preview" class="weather-preview" type="button" aria-pressed="false">Make it rain <span aria-hidden="true">↗</span></button><div><span>Turn</span><b id="age-readout">0 / 8</b></div><div><span>Buildings improved</span><b id="building-readout">0</b></div><p>Choose an idea, watch the town react, then try another order.</p></div>
+      <div class="controls"><button id="control-recenter" type="button" title="Recenter town" aria-label="Recenter town">⌖</button><button id="control-zoom-in" type="button" aria-label="Zoom in">+</button><button id="control-zoom-out" type="button" aria-label="Zoom out">−</button><button id="control-settings" type="button" aria-label="World settings" aria-expanded="false" aria-controls="settings-panel">⚙</button></div>
+      <div class="settings-panel" id="settings-panel" hidden><strong>World notes</strong><div><span>Season</span><b id="season-readout">SUMMER</b></div><div><span>Weather</span><b id="weather-readout">CLEAR</b></div><button id="weather-preview" class="weather-preview" type="button" aria-pressed="false">Make it rain <span aria-hidden="true">↗</span></button><div><span>Turn</span><b id="age-readout">0 / 10</b></div><div><span>Buildings improved</span><b id="building-readout">0</b></div><p>Choose an idea, watch the town react, then try another order.</p></div>
       <button id="open-work-mobile" class="mobile-work" type="button">Explore work <span>↗</span></button>
     </main>
     <div class="panel-backdrop" id="panel-backdrop" hidden></div>
     <section id="content-panel" class="content-panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
-      <div class="panel-head"><span class="panel-mark">DS <small>/ WORLD ARCHIVE</small></span><nav aria-label="Panel sections"><button class="panel-tab" data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button class="panel-tab" data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button class="panel-tab" data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav><span id="panel-kicker"></span><button id="panel-close" type="button" aria-label="Close panel">×</button></div>
+      <aside class="panel-rail" aria-label="Panel controls"><button id="panel-close" type="button" aria-label="Close panel">×</button><nav aria-label="Panel sections"><button class="panel-tab" data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button class="panel-tab" data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button class="panel-tab" data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav><span class="panel-rail-mark" aria-hidden="true">DS</span></aside>
       <div id="panel-body"></div>
     </section>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

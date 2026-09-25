@@ -35,8 +35,8 @@ export class TownSky {
   }
   update(snapshot:TownSnapshot,night:number,sun:THREE.Vector3,camera:THREE.Vector3){
     const rainy=snapshot.weather==='rain',cloudy=snapshot.weather==='cloudy';
-    this.top.set(rainy?0x839aa9:cloudy?0x91adbb:0x72a9d1);
-    this.low.set(rainy?0xc1c1b7:cloudy?0xddd5c5:0xf1ddbd);
+    this.top.set(rainy?0x839aa9:cloudy?0x91adbb:0x5db6e8);
+    this.low.set(rainy?0xc1c1b7:cloudy?0xddd5c5:0xc9ecf2);
     if(snapshot.season==='winter'){this.top.lerp(winterZenith,.18);this.low.lerp(winterHorizon,.22);}
     this.zenith.value.copy(this.top).lerp(nightZenith,night*.83);
     this.horizon.value.copy(this.low).lerp(nightHorizon,night*.72);

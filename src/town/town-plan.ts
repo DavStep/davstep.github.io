@@ -1,4 +1,5 @@
 import type { Plot } from './model';
+import { MILL_SITE } from './windmill-layout';
 
 const MINUTE = 60_000;
 
@@ -20,7 +21,7 @@ const civicPlots: Plot[] = [
   { id: 'inn', kind: 'tavern', x: 18, z: 21, start: 13 * MINUTE, step: 90_000, variant: 1 },
   { id: 'forge', kind: 'forge', x: -12, z: -23, start: 11 * MINUTE, step: 80_000 },
   { id: 'workshop', kind: 'forge', x: -17, z: -24, start: 14 * MINUTE, step: 80_000, variant: 1 },
-  { id: 'mill', kind: 'mill', x: 17, z: -30, start: 14 * MINUTE, step: 95_000 },
+  { id: 'mill', kind: 'mill', ...MILL_SITE, start: 14 * MINUTE, step: 95_000 },
   { id: 'guild', kind: 'guild', x: 10, z: 28, start: 18 * MINUTE, step: 90_000 },
   { id: 'post', kind: 'post', x: 10, z: -8, start: 4 * MINUTE, step: 75_000 },
 ];
@@ -41,6 +42,7 @@ export const PLOTS: readonly Plot[] = [...projectPlots, ...civicPlots, ...homes]
 export const INFRASTRUCTURE = {
   squareRadius: 7.8,
   road: {
+    summitRadius: 11.8,
     spokeLength: 55,
     ringRadius: 31.5,
     ringSegments: 40,
@@ -88,6 +90,11 @@ export function accessPathFor(plot: Plot): { x1: number; z1: number; x2: number;
   if (plot.kind === 'castle') return null;
   const { x, z } = plot;
   const radius = Math.hypot(x, z);
+  // Approach the front door from the outer road without cutting through the grain sheds.
+  if (plot.kind === 'mill') {
+    const entranceZ = z + 3.4;
+    return { x1: x, z1: entranceZ, x2: Math.sqrt(INFRASTRUCTURE.road.outerRingRadius ** 2 - entranceZ ** 2), z2: entranceZ };
+  }
   // These closely spaced homes use the other approach to keep paths clear.
   if (plot.id === 'home-1') return { x1: x, z1: z, x2: x * INFRASTRUCTURE.road.ringRadius / radius, z2: z * INFRASTRUCTURE.road.ringRadius / radius };
   if (plot.id === 'home-3') return { x1: x, z1: z, x2: x, z2: 0 };
@@ -102,4 +109,16 @@ export function accessPathFor(plot: Plot): { x1: number; z1: number; x2: number;
       : { x1: x, z1: z, x2: x, z2: 0 };
   }
   return { x1: x, z1: z, x2: x * ringRadius / radius, z2: z * ringRadius / radius };
+}
+
+
+/** Reserve the mill's approach and its outer farm lane when scattering scenery. */
+export function millAccessDistance(x: number, z: number): number {
+  const path = accessPathFor(PLOTS.find(plot => plot.id === 'mill')!)!;
+  const dx = path.x2 - path.x1, dz = path.z2 - path.z1;
+  const t = Math.max(0, Math.min(1, ((x-path.x1)*dx + (z-path.z1)*dz)/(dx*dx+dz*dz)));
+  const straight = Math.hypot(x-path.x1-dx*t, z-path.z1-dz*t);
+  const angle = Math.atan2(z, x), startAngle = Math.atan2(path.z2, path.x2);
+  return angle >= startAngle && angle <= 0
+    ? Math.min(straight, Math.abs(Math.hypot(x,z)-INFRASTRUCTURE.road.outerRingRadius)) : straight;
 }

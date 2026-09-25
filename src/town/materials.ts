@@ -4,11 +4,11 @@ import * as THREE from 'three';
 // matte stone treatment in Drunk Dwarves. The marks use world coordinates, so
 // batched and instanced geometry shares one continuous material.
 export const C = {
-  grass: 0x789667, grassDark: 0x5a7b59, earth: 0x8d795f, path: 0xbda982,
-  wood: 0x80604b, woodLight: 0x9b7759, woodDark: 0x674d3d,
-  stone: 0xa7a195, stoneDark: 0x777b78, plaster: 0xe5c9a1,
-  roof: 0xa95745, roofDark: 0x765740, roofBlue: 0x657f8b,
-  gold: 0xe9c06c, window: 0x50433d, lamp: 0xffd390,
+  grass: 0x80b963, grassDark: 0x4f9257, earth: 0x9c805e, path: 0xd5bb84,
+  wood: 0x946345, woodLight: 0xb68458, woodDark: 0x704a37,
+  stone: 0xbab4a4, stoneDark: 0x858b84, plaster: 0xf0d7ac,
+  roof: 0xd76b4d, roofDark: 0x9e6345, roofBlue: 0x5e95ad,
+  gold: 0xf2ca63, window: 0x50433d, lamp: 0xffd390,
 } as const;
 
 export type Mat = THREE.Material;
@@ -62,11 +62,11 @@ export const MAT = {
   grass:painted(make(C.grass,1),'ground'),terrain:painted(new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1}),'ground'),grassDark:make(C.grassDark,1),earth:make(C.earth,1),path:make(C.path,1),
   wood:painted(make(C.wood,.88),'timber'),woodLight:painted(make(C.woodLight,.88),'timber'),woodDark:painted(make(C.woodDark,.92),'timber'),
   stone:painted(make(C.stone,1),'stone'),stoneDark:painted(make(C.stoneDark,1),'stone'),
-  plaster:painted(make(C.plaster,1),'plaster'),plasterIvory:painted(make(0xe1d2b4,1),'plaster'),plasterRose:painted(make(0xdab8a5,1),'plaster'),plasterSage:painted(make(0xbfc9af,1),'plaster'),
+  plaster:painted(make(C.plaster,1),'plaster'),plasterIvory:painted(make(0xf3e3c3,1),'plaster'),plasterRose:painted(make(0xe8b9a8,1),'plaster'),plasterSage:painted(make(0xc5dbb6,1),'plaster'),
   roof:painted(make(C.roof,.92),'roof'),roofDark:painted(make(C.roofDark,.92),'roof'),roofBlue:painted(make(C.roofBlue,.92),'roof'),
   roofTiles:painted(new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.96,side:THREE.DoubleSide}),'roof'),
   gold:make(C.gold,.68,.1),window:make(C.window,.88),glass:new THREE.MeshStandardMaterial({color:0x8db3ab,roughness:.25,metalness:.12,emissive:0x193633,emissiveIntensity:.22}),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
-  white:make(0xeae9dd),leaf:make(0x52775a,1),leafLight:make(0x709466,1),leafDark:make(0x456b5a,1),foliage:make(0xffffff,1),pine:make(0xffffff,1),
+  white:make(0xf5f0dd),leaf:make(0x5b995e,1),leafLight:make(0x84ba66,1),leafDark:make(0x3e7c57,1),foliage:make(0xffffff,1),pine:make(0xffffff,1),
   red:make(0xbe7062),purple:make(0x8d729e),blue:make(0x668db0),
   iron:make(0x576a72,.7,.28),copper:make(0xb8775d,.76,.22),olive:make(0x748568,.95),sand:make(0xc6a97e,1),
   cyan:new THREE.MeshStandardMaterial({color:0x62c4cc,roughness:.3,metalness:.18,emissive:0x249aab,emissiveIntensity:.65}),
