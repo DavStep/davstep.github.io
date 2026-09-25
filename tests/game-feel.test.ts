@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { BuildSequencer, buildStyle } from '../src/town/build-sequencer';
 import { Juice } from '../src/town/juice';
+import { IDEAS, type Levels } from '../src/town/game';
+import { snapshotForGame } from '../src/town/game-snapshot';
+import { upgradeFocus } from '../src/town/upgrade-focus';
+import { eventFocus } from '../src/town/reaction-effects';
 
 const house = (x: number) => {
   const g = new THREE.Group(); g.position.set(x, 2, 0);
@@ -66,4 +70,15 @@ test('juice particles are pooled, expire, and release everything on dispose', ()
   juice.sparkles(0, 0, 0, 0xffffff, 10_000);
   juice.dispose();
   assert.equal(scene.children.length, 0);
+});
+
+test('late district upgrades focus the newly built site', () => {
+  const levels=Object.fromEntries(IDEAS.map(idea=>[idea,0])) as Levels;
+  const before=snapshotForGame({...levels,market:3});
+  const after=snapshotForGame({...levels,market:4});
+  const event={idea:'market' as const,level:4,wave:1,sources:[]};
+  const newSite=after.plots.find(plot=>plot.id==='district-market-covered-stalls')!;
+  assert.deepEqual(upgradeFocus(event,before,after),{x:newSite.x,z:newSite.z});
+  const river={idea:'river' as const,level:4,wave:1,sources:[]};
+  assert.deepEqual(upgradeFocus(river,before,after),eventFocus(river));
 });

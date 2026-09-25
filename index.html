@@ -16,6 +16,14 @@
   <div id="app" class="app">
     <div class="world-poster" aria-hidden="true"><div class="poster-hill back"></div><div class="poster-hill front"></div><div class="poster-castle">♜</div></div>
     <canvas id="town-canvas" aria-hidden="true"></canvas>
+    <div class="camera-controls" aria-label="Town camera controls">
+      <button id="camera-left" type="button" aria-label="Rotate town left" title="Rotate left">↶</button>
+      <button id="camera-right" type="button" aria-label="Rotate town right" title="Rotate right">↷</button>
+      <button id="camera-zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+      <button id="camera-zoom-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+      <button id="camera-overview" type="button" aria-label="Show town overview" title="Town overview">⌂</button>
+      <span>Drag to rotate · scroll or pinch to zoom</span>
+    </div>
     <header class="chrome">
       <button id="brand" class="brand" type="button" aria-label="Return to town overview"><span class="brand-icon" aria-hidden="true">D<span>S</span></span><span class="brand-name">DAV STEPANYAN<small>GAME DEVELOPER · WORLD BUILDER</small></span></button>
       <nav aria-label="Main navigation"><button data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav>

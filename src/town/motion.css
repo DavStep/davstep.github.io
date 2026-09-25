@@ -15,6 +15,49 @@
   --hud-ink: #1d3439;
 }
 
+.camera-controls {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  right: clamp(12px, 2vw, 28px);
+  display: grid;
+  grid-template-columns: repeat(2, 38px);
+  gap: 6px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+}
+.camera-controls button {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 11px;
+  background: rgba(247,250,246,.8);
+  color: #214248;
+  box-shadow: 0 7px 18px rgba(18,47,51,.17), inset 0 1px #fff;
+  backdrop-filter: blur(12px);
+  font: 700 20px/1 'Space Grotesk', sans-serif;
+  transition: background .2s, transform .25s var(--ease-spring);
+}
+.camera-controls button:hover { background: #fff; transform: translateY(-2px); }
+.camera-controls button:active { transform: scale(.92); }
+.camera-controls span {
+  grid-column: 1 / -1;
+  width: 130px;
+  justify-self: end;
+  color: #f4faf3;
+  font: 700 10px/1.4 'DM Sans', sans-serif;
+  text-align: right;
+  text-shadow: 0 1px 5px #17363c, 0 2px 10px #17363c;
+  pointer-events: none;
+}
+body.no-webgl .camera-controls { display: none; }
+@media (max-width: 700px) {
+  .camera-controls { top: 74px; right: 10px; grid-template-columns: repeat(5, 34px); transform: none; }
+  .camera-controls button { width: 34px; height: 34px; font-size: 18px; }
+  .camera-controls span { display: none; }
+}
+
 /* ---------- Brand + navigation ---------- */
 .brand-icon {
   grid-auto-flow: column;
@@ -233,6 +276,7 @@ html.returning .intro { opacity: 0; visibility: hidden; }
 .game-card.chosen .game-card-icon { border-color: var(--idea-color); background: color-mix(in srgb, var(--idea-color) 24%, #fff); }
 .game-card.chosen .game-card-icon img { opacity: 1; }
 .game-card.chosen .game-card-label { background: rgba(255, 255, 255, .72); }
+.game-hud:not(.is-finished) .game-card.chosen { filter: grayscale(1); }
 
 /* While the town reacts, open cards rest. */
 .game-hud.is-busy .game-card:not(.chosen) { opacity: .6; filter: saturate(.5); }

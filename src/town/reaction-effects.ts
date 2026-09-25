@@ -34,6 +34,7 @@ export class ReactionEffects {
   private curves: THREE.QuadraticBezierCurve3[] = [];
   private readonly dummy = new THREE.Object3D();
   private arrived = 0;
+  private site: { x: number; z: number } | null = null;
   /** Fired once per source when its orbs reach the destination. */
   onArrive: ((x: number, y: number, z: number) => void) | null = null;
 
@@ -46,13 +47,13 @@ export class ReactionEffects {
   /** Seconds until partner supplies arrive (0 when the event has no sources). */
   get travelTime(): number { return this.curves.length ? ORB_TRAVEL + .15 : 0; }
 
-  begin(event: TownEvent,clickedIdea:Idea=event.idea): void {
+  begin(event: TownEvent,clickedIdea:Idea=event.idea,site?:{x:number;z:number}): void {
     this.clear();
     this.event = event;
     this.elapsed = 0;
     this.revealed = false;
     this.arrived = 0;
-    const dest = eventFocus(event);
+    const dest = this.site = site ?? eventFocus(event);
     const color = this.color = IDEA_COLORS[clickedIdea];
     for (const source of event.sources.slice(0, 3)) {
       const from = eventFocus(source);
@@ -93,7 +94,7 @@ export class ReactionEffects {
     this.revealed = true;
     this.elapsed = 0;
     this.trails.visible = false;
-    const site = eventFocus(this.event);
+    const site = this.site ?? eventFocus(this.event);
     const color = this.color;
     const y = terrainHeight(site.x, site.z);
     this.payoff.position.set(site.x, y + .28, site.z);
@@ -206,6 +207,7 @@ export class ReactionEffects {
     this.motes = null;
     this.orbs = null;
     this.curves = [];
+    this.site = null;
     this.group.visible = false;
     this.event = null;
   }
