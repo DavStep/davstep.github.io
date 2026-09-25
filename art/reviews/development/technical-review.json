@@ -1,0 +1,76 @@
+{
+  "home": {
+    "sourceTriangles": 36412,
+    "degenerateTriangles": 0
+  },
+  "civic": {
+    "sourceTriangles": 56676,
+    "degenerateTriangles": 0
+  },
+  "exports": {
+    "home_A_LOD0": {
+      "triangles": 5416,
+      "matchesRuntime": true
+    },
+    "home_A_LOD1": {
+      "triangles": 2660,
+      "matchesRuntime": true
+    },
+    "home_B_LOD0": {
+      "triangles": 5404,
+      "matchesRuntime": true
+    },
+    "home_B_LOD1": {
+      "triangles": 2672,
+      "matchesRuntime": true
+    },
+    "home_C_LOD0": {
+      "triangles": 5416,
+      "matchesRuntime": true
+    },
+    "home_C_LOD1": {
+      "triangles": 2540,
+      "matchesRuntime": true
+    },
+    "civic_market_LOD0": {
+      "triangles": 5056,
+      "matchesRuntime": true
+    },
+    "civic_market_LOD1": {
+      "triangles": 2412,
+      "matchesRuntime": true
+    },
+    "civic_tavern_LOD0": {
+      "triangles": 4996,
+      "matchesRuntime": true
+    },
+    "civic_tavern_LOD1": {
+      "triangles": 2316,
+      "matchesRuntime": true
+    },
+    "civic_forge_LOD0": {
+      "triangles": 4216,
+      "matchesRuntime": true
+    },
+    "civic_forge_LOD1": {
+      "triangles": 1924,
+      "matchesRuntime": true
+    },
+    "civic_guild_LOD0": {
+      "triangles": 5044,
+      "matchesRuntime": true
+    },
+    "civic_guild_LOD1": {
+      "triangles": 2376,
+      "matchesRuntime": true
+    },
+    "civic_post_LOD0": {
+      "triangles": 5336,
+      "matchesRuntime": true
+    },
+    "civic_post_LOD1": {
+      "triangles": 2532,
+      "matchesRuntime": true
+    }
+  }
+}

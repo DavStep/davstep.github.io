@@ -53,10 +53,12 @@ world=bpy.data.worlds.new('World_Review_Sky');world.use_nodes=True;world.node_tr
 lightdata=bpy.data.lights.new('World_Key','SUN');lightdata.energy=2.3;lightdata.angle=.12;light=bpy.data.objects.new('World_Key',lightdata);collection.objects.link(light);light.rotation_euler=(.6,-.5,-.6)
 camd=bpy.data.cameras.new('World_Review_Camera');cam=bpy.data.objects.new('World_Review_Camera',camd);collection.objects.link(cam);scene.camera=cam;camd.type='ORTHO'
 scene.render.engine='CYCLES';scene.cycles.samples=24;scene.cycles.use_denoising=True;scene.render.resolution_x=1600;scene.render.resolution_y=1200;scene.render.resolution_percentage=100;scene.view_settings.view_transform='AgX'
-for name,loc,target,scale in [('town',(73,-87,79),(0,0,3),128),('square',(33,-48,36),(0,0,6),54)]:
+views=[('town',(73,-87,79),(0,0,3),128),('square',(33,-48,36),(0,0,6),54)]
+if source.get('gameMode'):views=[('windmill-site',(58,-12,36),(30,24,3),43)]
+for name,loc,target,scale in views:
     cam.location=loc;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();camd.ortho_scale=scale
     scene.render.filepath=ROOT+'/art/reviews/world/'+name+'.png';bpy.ops.render.render(write_still=True)
 for area in bpy.context.screen.areas:
     if area.type=='VIEW_3D':area.spaces.active.region_3d.view_perspective='CAMERA'
-bpy.ops.wm.save_as_mainfile(filepath=ROOT+'/art/blender/world-review.blend')
+if not source.get('gameMode'):bpy.ops.wm.save_as_mainfile(filepath=ROOT+'/art/blender/world-review.blend')
 print('WORLD_REVIEW_READY',len(source['objects']))

@@ -38,7 +38,7 @@ for i,pal in enumerate(palettes):
 scene=bpy.data.scenes.new('Cottage_Library');bpy.context.window.scene=scene
 scene.unit_settings.system='METRIC'
 parts=[];active=None;meta={}
-def group(name,family,lod,lo=3,hi=6,porch=False):
+def group(name,family,lod,lo=3,hi=8,porch=False):
     global active,meta
     active=bpy.data.collections.new(name);scene.collection.children.link(active)
     meta=dict(name=name,family=family,lod=lod,minStage=lo,maxStage=hi,porchOnly=porch)
@@ -107,18 +107,8 @@ def planter(cx,cy,z,lod):
         for x in [-.28,0,.28]:
             ob=box('plant',(cx+x,cy,z+.17),(.24,.25,.25),'leafLight');
 
-def build(pi,lod):
-    fam='ABC'[pi];prefix='ENV_Cottage_'+fam+'_LOD'+str(lod);eave=[2.55,3.1,2.65][pi];rise=[1.75,1.9,1.6][pi];wall=['plaster','plasterIvory','plasterRose'][pi]
-    group(prefix+'_foundation',fam,lod,1)
-    box('foundation',(0,0,.13),(3.95,3.65,.26),'stoneDark')
-    if lod==0:
-        for yy in [-1.78,1.78]:
-            for i in range(6):box('footing_stone',(-1.64+i*.65,yy,.20),(.61,.19,.30),'stone',.015)
-    group(prefix+'_construction_posts',fam,lod,1,2)
-    for x in [-1.79,1.79]:
-        for y in [-1.64,1.64]:box('construction_post',(x,y,.99),(.19,.19,1.8),'woodDark')
-    group(prefix+'_half_walls',fam,lod,2,2);box('half_walls',(0,0,.74),(3.8,3.5,1.02),wall)
-    group(prefix+'_shell',fam,lod)
+def cottage_shell(pi,lod,fam,prefix,eave,rise,wall,lo=3,hi=6):
+    group(prefix+'_shell'+('_upper' if lo==7 else ''),fam,lod,lo,hi)
     box('wall_plaster',(0,0,(eave+.25)/2),(3.8,3.5,eave-.25),wall)
     gable('wall_gable',0,0,3.8,3.5,eave,rise,wall)
     for x in [-1.84,1.84]:
@@ -149,9 +139,23 @@ def build(pi,lod):
     else:
         box('attic_vent',(0,-1.78,eave+.5),(.39,.05,.48),'woodDark')
         for x in ([-.105,.105] if lod==0 else []):box('attic_slat',(x,-1.82,eave+.5),(.045,.04,.46),'woodLight')
-    group(prefix+'_roof',fam,lod);roof(0,0,4.50,4.10,eave,rise,pi,lod)
+    group(prefix+'_roof'+('_upper' if lo==7 else ''),fam,lod,lo,hi);roof(0,0,4.50,4.10,eave,rise,pi,lod)
+
+def build(pi,lod):
+    fam='ABC'[pi];prefix='ENV_Cottage_'+fam+'_LOD'+str(lod);eave=[2.55,3.1,2.65][pi];rise=[1.75,1.9,1.6][pi];wall=['plaster','plasterIvory','plasterRose'][pi]
+    group(prefix+'_foundation',fam,lod,1)
+    box('foundation',(0,0,.13),(3.95,3.65,.26),'stoneDark')
+    if lod==0:
+        for yy in [-1.78,1.78]:
+            for i in range(6):box('footing_stone',(-1.64+i*.65,yy,.20),(.61,.19,.30),'stone',.015)
+    group(prefix+'_construction_posts',fam,lod,1,2)
+    for x in [-1.79,1.79]:
+        for y in [-1.64,1.64]:box('construction_post',(x,y,.99),(.19,.19,1.8),'woodDark')
+    group(prefix+'_half_walls',fam,lod,2,2);box('half_walls',(0,0,.74),(3.8,3.5,1.02),wall)
+    cottage_shell(pi,lod,fam,prefix,eave,rise,wall)
     group(prefix+'_occupied',fam,lod,4)
     for x in [-1.13,1.13]:planter(x,-1.94,1.03,lod)
+    group(prefix+'_chimney',fam,lod,4,6)
     # Masonry chimney seated through roof slope, capped with dark flue.
     x=-1.03;y=.72;top=eave+rise*.69+.63
     box('chimney',(x,y,(eave+top)/2),(.45,.47,top-eave),'stoneDark')
@@ -173,9 +177,29 @@ def build(pi,lod):
         for yy in [-.48,2.08]:box('wing_timber',(xx,yy,1.08),(.14,.14,1.88),'woodDark')
     window(-2.7,-.51,1.25,shutters=False)
     roof(-2.69,.8,2.63,2.99,1.96,.81,pi,lod,'wing_roof')
+    # A full extra storey replaces the original shell and roof at stage seven.
+    cottage_shell(pi,lod,fam,prefix,eave+1.20,rise,wall,7,8)
+    group(prefix+'_upper_rooms',fam,lod,7)
+    for y in [-1.81,1.81]:box('upper_floor_beam',(0,y,eave-.02),(3.82,.16,.19),'woodDark')
+    for x in [-1.13,1.13]:window(x,-1.80,eave+.54,shutters=False)
+    window(1.96,0,eave+.54,side=True,shutters=False)
+    for x in [-1.87,1.87]:box('upper_side_floor',(x,0,eave-.02),(.17,3.55,.19),'woodDark')
+    top=eave+1.2+rise*.69+.63
+    box('raised_chimney',(-1.03,.72,(eave+1.2+top)/2),(.45,.47,top-eave-1.2),'stoneDark')
+    box('raised_chimney_cap',(-1.03,.72,top),(.62,.64,.17),'stone')
+    box('raised_flue',(-1.03,.72,top+.09),(.31,.33,.018),'window')
+    group(prefix+'_master_gable',fam,lod,8)
+    bay_eave=eave+rise+.65
+    box('projecting_attic',(0,-1.39,eave+(rise+1.34)/2),(1.40,1.14,rise-.04),wall)
+    gable('attic_bay_gable',0,-1.39,1.40,1.14,bay_eave,.78,wall)
+    roof(0,-1.36,1.62,1.38,bay_eave,.78,pi,lod,'master_gable_roof')
+    for x in [-.68,.68]:box('attic_bay_post',(x,-1.98,eave+(rise+1.34)/2),(.11,.12,rise+.03),'woodDark')
+    box('bay_sill',(0,-1.99,eave+.69),(1.46,.16,.14),'woodDark')
+    window(0,-1.98,eave+rise+.03,shutters=False)
+
 for lod in [0,1]:
     for pi in range(3):build(pi,lod)
-    group('ENV_Cottage_COMMON_LOD'+str(lod)+'_porch','COMMON',lod,3,6,True)
+    group('ENV_Cottage_COMMON_LOD'+str(lod)+'_porch','COMMON',lod,3,8,True)
     box('porch_platform',(0,-3.0,.16),(2.42,2.0,.32),'stoneDark')
     box('porch_step',(0,-4.09,.08),(1.58,.31,.16),'stone')
     for x in [-1.08,1.08]:box('porch_post',(x,-3.88,1.23),(.16,.16,2.14),'woodDark')
@@ -208,7 +232,7 @@ def bake(o):
             if key not in lookup:
                 lookup[key]=len(positions)//3;positions.extend(ps);normals.extend(ns);colors.extend(color)
             indices.append(lookup[key])
-    out=dict(name=o.name,material=o['runtime_material'],positions=positions,normals=normals,indices=indices)
+    out=dict(name=o['name']+'_'+o['runtime_material'],material=o['runtime_material'],positions=positions,normals=normals,indices=indices)
     if o['runtime_material']=='roofTiles':out['colors']=colors
     return out
 payload={'version':1,'coordinates':'three-y-up','parts':[]}
@@ -223,7 +247,7 @@ for lod in [0,1]:
     for family in 'ABC':
         bpy.ops.object.select_all(action='DESELECT')
         for col,meta in parts:
-            if meta['family']==family and meta['lod']==lod and meta['minStage']<=6<=meta['maxStage']:
+            if meta['family']==family and meta['lod']==lod and meta['minStage']<=8<=meta['maxStage']:
                 for o in col.objects:o.select_set(True)
         bpy.ops.export_scene.gltf(filepath=OUT+'/ENV_Cottage_'+family+'_LOD'+str(lod)+'.glb',use_selection=True,use_active_scene=True,export_format='GLB',export_yup=True,export_cameras=False,export_lights=False)
 for lod in [0,1]:
@@ -246,7 +270,7 @@ placements=[('A',(-5,-1,0),0),('B',(4,2,0),-.16),('C',(-1,8,0),.08)]
 for family,loc,rot in placements:
     parent=bpy.data.objects.new('Review_'+family,None);active.objects.link(parent);parent.location=loc;parent.rotation_euler.z=rot
     for col,meta in parts:
-        if (meta['family']==family or (meta['family']=='COMMON' and family=='C')) and meta['lod']==0 and meta['minStage']<=6<=meta['maxStage']:
+        if (meta['family']==family or (meta['family']=='COMMON' and family=='C')) and meta['lod']==0 and meta['minStage']<=8<=meta['maxStage']:
             for src in col.objects:
                 o=src.copy();o.data=src.data;o.parent=parent;active.objects.link(o)
 # Restrained review set dressing, clearly excluded from runtime exports.
@@ -273,11 +297,11 @@ for area in bpy.context.screen.areas:
     if area.type=='CONSOLE':area.type='VIEW_3D'
     if area.type=='VIEW_3D':
         area.spaces.active.region_3d.view_perspective='CAMERA';area.spaces.active.shading.type='MATERIAL'
-bpy.ops.wm.save_as_mainfile(filepath=OUT+'/cottages.blend')
+bpy.data.libraries.write(OUT+'/cottages.blend',{scene,review,original},fake_user=True)
 counts={}
 for lod in [0,1]:
     for fam in 'ABC':
-        subset=[p for p in payload['parts'] if p['lod']==lod and p['family']==fam and p['minStage']<=6<=p['maxStage']]
+        subset=[p for p in payload['parts'] if p['lod']==lod and p['family']==fam and p['minStage']<=8<=p['maxStage']]
         counts[fam+'_LOD'+str(lod)]=sum(len(p['indices'])//3 for p in subset)
 with open(ROOT+'/art/reviews/cottages/triangle-report.json','w') as f:json.dump(counts,f,indent=2)
 print('COTTAGE_EXPORT',json.dumps(counts),'parts',len(payload['parts']))

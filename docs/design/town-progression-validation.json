@@ -1,0 +1,6060 @@
+{
+  "rulesVersion": "town-redesign-1",
+  "scenarios": {
+    "perfect": {
+      "order": [
+        "settlers",
+        "forest",
+        "workshop",
+        "roads",
+        "archive",
+        "quarry",
+        "waterworks",
+        "walls",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 3,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 1,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "market",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 3,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 10,
+          "perfect": true,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 3,
+          "observatory": 3
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 10,
+        "perfect": true,
+        "secret": false
+      }
+    },
+    "earlyObservatory": {
+      "order": [
+        "settlers",
+        "forest",
+        "workshop",
+        "roads",
+        "market",
+        "observatory",
+        "archive",
+        "quarry",
+        "waterworks",
+        "walls"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 3,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 1,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 2,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 2,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 7,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 3
+            },
+            {
+              "id": "market",
+              "from": 2,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 3,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 10,
+          "perfect": true,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 3,
+          "observatory": 3
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 10,
+        "perfect": true,
+        "secret": false
+      }
+    },
+    "secret": {
+      "order": [
+        "settlers",
+        "forest",
+        "archive",
+        "roads",
+        "workshop",
+        "quarry",
+        "waterworks",
+        "walls",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 1,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 0,
+            "archive": 1,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            },
+            {
+              "id": "roads",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "archive",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 4,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 7,
+          "perfect": false,
+          "secret": true
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 2,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 2,
+          "observatory": 2
+        },
+        "layouts": {
+          "roads": "packbridge",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": true
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 7,
+        "perfect": false,
+        "secret": true
+      }
+    },
+    "secondSecret": {
+      "order": [
+        "archive",
+        "forest",
+        "roads",
+        "settlers",
+        "workshop",
+        "quarry",
+        "waterworks",
+        "market",
+        "observatory",
+        "walls"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 1,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 1,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 1,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 1,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 0,
+            "archive": 1,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            },
+            {
+              "id": "forest",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 0,
+            "archive": 1,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            },
+            {
+              "id": "roads",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "archive",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 4,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 4,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 7,
+          "perfect": false,
+          "secret": true
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 2,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 2,
+          "observatory": 2
+        },
+        "layouts": {
+          "roads": "packbridge",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": true
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 7,
+        "perfect": false,
+        "secret": true
+      }
+    },
+    "earlyWater": {
+      "order": [
+        "settlers",
+        "forest",
+        "workshop",
+        "roads",
+        "waterworks",
+        "quarry",
+        "archive",
+        "walls",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            },
+            {
+              "id": "waterworks",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 2,
+            "archive": 0,
+            "waterworks": 2,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "overtopped",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 1,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "overtopped",
+              "recovered": true
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 3,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "overtopped",
+              "recovered": true
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 3,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "overtopped",
+              "recovered": true
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 3,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "market",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 3,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "overtopped",
+              "recovered": true
+            },
+            "drought": "buffered"
+          },
+          "finished": true,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 2,
+          "forest": 2,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 2,
+          "walls": 2,
+          "market": 3,
+          "observatory": 3
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "run-of-river",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "slipped",
+            "recovered": true,
+            "slipScarReclaimed": true
+          },
+          "flood": {
+            "firstOutcome": "overtopped",
+            "recovered": true
+          },
+          "drought": "buffered"
+        },
+        "finished": true,
+        "maxCount": 6,
+        "perfect": false,
+        "secret": false
+      }
+    },
+    "plansBeforeWaterCommission": {
+      "order": [
+        "settlers",
+        "forest",
+        "workshop",
+        "waterworks",
+        "roads",
+        "archive",
+        "quarry",
+        "walls",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 1,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 3,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 3,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 3,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "market",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 3,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "run-of-river",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "buffered"
+          },
+          "finished": true,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 2,
+          "forest": 2,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 2,
+          "walls": 2,
+          "market": 3,
+          "observatory": 3
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "run-of-river",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "buffered"
+        },
+        "finished": true,
+        "maxCount": 6,
+        "perfect": false,
+        "secret": false
+      }
+    },
+    "earlyWalls": {
+      "order": [
+        "settlers",
+        "forest",
+        "workshop",
+        "walls",
+        "roads",
+        "archive",
+        "quarry",
+        "waterworks",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 1,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 1,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 1,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            },
+            {
+              "id": "walls",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 3,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 1,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 3
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 1,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 2,
+          "waterworks": 3,
+          "walls": 2,
+          "market": 1,
+          "observatory": 1
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "reservoir",
+          "walls": "wicket",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 6,
+        "perfect": false,
+        "secret": false
+      }
+    },
+    "earlyQuarry": {
+      "order": [
+        "settlers",
+        "forest",
+        "workshop",
+        "roads",
+        "quarry",
+        "archive",
+        "waterworks",
+        "walls",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 2,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 3,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 1,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "market",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 3,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "slipped",
+              "recovered": true,
+              "slipScarReclaimed": true
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 10,
+          "perfect": true,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 3,
+          "observatory": 3
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "slipped",
+            "recovered": true,
+            "slipScarReclaimed": true
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 10,
+        "perfect": true,
+        "secret": false
+      }
+    },
+    "earlyTower": {
+      "order": [
+        "observatory",
+        "settlers",
+        "forest",
+        "workshop",
+        "roads",
+        "archive",
+        "quarry",
+        "waterworks",
+        "walls",
+        "market"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 3,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 1,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 0,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 6,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "market",
+              "from": 0,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 1,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 3,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 3,
+            "observatory": 3
+          },
+          "layouts": {
+            "roads": "engineered",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 10,
+          "perfect": true,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 3,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 3,
+          "observatory": 3
+        },
+        "layouts": {
+          "roads": "engineered",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 10,
+        "perfect": true,
+        "secret": false
+      }
+    },
+    "packbridgeWithoutStories": {
+      "order": [
+        "settlers",
+        "forest",
+        "roads",
+        "workshop",
+        "archive",
+        "quarry",
+        "waterworks",
+        "walls",
+        "market",
+        "observatory"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 2
+            },
+            {
+              "id": "roads",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 0,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 1,
+            "forest": 2,
+            "workshop": 2,
+            "roads": 2,
+            "quarry": 2,
+            "archive": 2,
+            "waterworks": 0,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "unbuilt",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "workshop",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "quarry",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 3
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 0,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "unbuilt",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 4,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 3,
+            "walls": 2,
+            "market": 2,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 5,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "walls",
+              "from": 2,
+              "to": 3
+            },
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 3,
+            "forest": 3,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 3,
+            "waterworks": 3,
+            "walls": 3,
+            "market": 2,
+            "observatory": 2
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "reservoir",
+            "walls": "wagon-gates",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "protected"
+          },
+          "finished": true,
+          "maxCount": 7,
+          "perfect": false,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 3,
+          "forest": 3,
+          "workshop": 3,
+          "roads": 2,
+          "quarry": 3,
+          "archive": 3,
+          "waterworks": 3,
+          "walls": 3,
+          "market": 2,
+          "observatory": 2
+        },
+        "layouts": {
+          "roads": "packbridge",
+          "waterworks": "reservoir",
+          "walls": "wagon-gates",
+          "folklore": false
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "protected"
+        },
+        "finished": true,
+        "maxCount": 7,
+        "perfect": false,
+        "secret": false
+      }
+    },
+    "shortage": {
+      "order": [
+        "walls",
+        "waterworks",
+        "market",
+        "roads",
+        "observatory",
+        "quarry",
+        "workshop",
+        "archive",
+        "forest",
+        "settlers"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "chosen": "walls",
+          "upgrades": [
+            {
+              "id": "walls",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 0,
+            "walls": 1,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "unbuilt",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 2,
+          "chosen": "waterworks",
+          "upgrades": [
+            {
+              "id": "waterworks",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 0,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 3,
+          "chosen": "market",
+          "upgrades": [
+            {
+              "id": "market",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 0,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "unbuilt",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 4,
+          "chosen": "roads",
+          "upgrades": [
+            {
+              "id": "roads",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 0
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 5,
+          "chosen": "observatory",
+          "upgrades": [
+            {
+              "id": "observatory",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 0,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 6,
+          "chosen": "quarry",
+          "upgrades": [
+            {
+              "id": "quarry",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 0,
+            "roads": 1,
+            "quarry": 1,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 7,
+          "chosen": "workshop",
+          "upgrades": [
+            {
+              "id": "workshop",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 1,
+            "roads": 1,
+            "quarry": 1,
+            "archive": 0,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": false
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 8,
+          "chosen": "archive",
+          "upgrades": [
+            {
+              "id": "archive",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 0,
+            "workshop": 1,
+            "roads": 1,
+            "quarry": 1,
+            "archive": 1,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 9,
+          "chosen": "forest",
+          "upgrades": [
+            {
+              "id": "forest",
+              "from": 0,
+              "to": 1
+            }
+          ],
+          "levels": {
+            "settlers": 0,
+            "forest": 1,
+            "workshop": 1,
+            "roads": 1,
+            "quarry": 1,
+            "archive": 1,
+            "waterworks": 1,
+            "walls": 1,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "pending",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "pending",
+              "recovered": false
+            },
+            "drought": "pending"
+          },
+          "finished": false,
+          "maxCount": 0,
+          "perfect": false,
+          "secret": false
+        },
+        {
+          "turn": 10,
+          "chosen": "settlers",
+          "upgrades": [
+            {
+              "id": "settlers",
+              "from": 0,
+              "to": 2
+            },
+            {
+              "id": "forest",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "workshop",
+              "from": 1,
+              "to": 3
+            },
+            {
+              "id": "roads",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "quarry",
+              "from": 1,
+              "to": 3
+            },
+            {
+              "id": "archive",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "waterworks",
+              "from": 1,
+              "to": 2
+            },
+            {
+              "id": "walls",
+              "from": 1,
+              "to": 2
+            }
+          ],
+          "levels": {
+            "settlers": 2,
+            "forest": 2,
+            "workshop": 3,
+            "roads": 2,
+            "quarry": 3,
+            "archive": 2,
+            "waterworks": 2,
+            "walls": 2,
+            "market": 1,
+            "observatory": 1
+          },
+          "layouts": {
+            "roads": "packbridge",
+            "waterworks": "run-of-river",
+            "walls": "wicket",
+            "folklore": true
+          },
+          "events": {
+            "quarry": {
+              "firstOutcome": "protected",
+              "recovered": false,
+              "slipScarReclaimed": false
+            },
+            "flood": {
+              "firstOutcome": "protected",
+              "recovered": false
+            },
+            "drought": "shortage"
+          },
+          "finished": true,
+          "maxCount": 2,
+          "perfect": false,
+          "secret": false
+        }
+      ],
+      "result": {
+        "levels": {
+          "settlers": 2,
+          "forest": 2,
+          "workshop": 3,
+          "roads": 2,
+          "quarry": 3,
+          "archive": 2,
+          "waterworks": 2,
+          "walls": 2,
+          "market": 1,
+          "observatory": 1
+        },
+        "layouts": {
+          "roads": "packbridge",
+          "waterworks": "run-of-river",
+          "walls": "wicket",
+          "folklore": true
+        },
+        "events": {
+          "quarry": {
+            "firstOutcome": "protected",
+            "recovered": false,
+            "slipScarReclaimed": false
+          },
+          "flood": {
+            "firstOutcome": "protected",
+            "recovered": false
+          },
+          "drought": "shortage"
+        },
+        "finished": true,
+        "maxCount": 2,
+        "perfect": false,
+        "secret": false
+      }
+    }
+  },
+  "exhaustive": {
+    "orders": 3628800,
+    "perfect": 47520,
+    "secret": 103680,
+    "both": 0,
+    "drought": {
+      "protected": 604800,
+      "buffered": 535680,
+      "shortage": 2488320
+    },
+    "maxHistogram": [
+      0,
+      0,
+      1866240,
+      1023840,
+      0,
+      311040,
+      237600,
+      142560,
+      0,
+      0,
+      47520
+    ],
+    "uniqueStates": 1416,
+    "transitions": 5992,
+    "levelCoverage": {
+      "settlers": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "forest": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "workshop": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "roads": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "quarry": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "archive": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "waterworks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "walls": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "market": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "observatory": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "independent": {
+    "orders": 3628800,
+    "perfect": 47520,
+    "secret": 103680
+  }
+}

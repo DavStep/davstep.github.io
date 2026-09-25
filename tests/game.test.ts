@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { MAX_LEVEL, IDEAS, SECRET_ORDER, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, upgradeBlocker } from '../src/town/game';
+import { MAX_LEVEL, IDEAS, SECRET_ORDER, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame } from '../src/town/game';
 import { snapshotForGame } from '../src/town/game-snapshot';
 import { millStreamPoint } from '../src/town/game-path';
 import { streamSurfaceHeight } from '../src/town/game-scenery';
@@ -8,67 +8,63 @@ import { naturalTerrainHeight, riverCenter, riverHalfWidth, riverSurfaceHeight, 
 import { buildColliders, isBlocked } from '../src/town/collision';
 import { CARDINAL_GATE_MASK, wallIsGate } from '../src/town/wall-layout';
 
-test('a connected order can raise all ten ideas to MAX', () => {
+test('the valley order completes every collaboration and reaches all eighty levels', () => {
+  const state = evaluate(IDEAS);
   assert.equal(IDEAS.length, 10);
-  assert.equal(evaluate(IDEAS).perfect, true);
-  assert.equal(evaluate(['walls', ...IDEAS.filter(idea => idea !== 'walls')]).perfect, true);
+  assert.equal(state.perfect, true);
+  assert.equal(state.secret, false);
+  assert.equal(state.score, 80);
+  assert.equal(state.projects.length, 28);
+  assert.deepEqual(state.faults, []);
 });
 
-test('storybook night is a distinct secret ending', () => {
+test('Archive first opens a distinct complete Storybook Night route', () => {
   const state = evaluate(SECRET_ORDER);
+  assert.equal(state.route, 'storybook');
   assert.equal(state.secret, true);
   assert.equal(state.perfect, true);
-  assert.equal(state.levels.archive, MAX_LEVEL);
-  assert.equal(state.levels.windmill, MAX_LEVEL);
+  assert.equal(state.score, 80);
+  assert.equal(state.projects.length, 28);
 });
 
-test('every choice retries blocked options and recovers chains of earlier buildings', () => {
-  const waiting = evaluate(['archive','windmill','market','roads','workshop','grove']);
-  assert.ok(['archive','windmill','market','roads','workshop','grove'].every(key => waiting.levels[key as keyof typeof waiting.levels] === 1));
-  const recovered = evaluate([...waiting.order, 'settlers', 'river']);
-  assert.ok(recovered.levels.grove >= 3);
-  assert.ok(recovered.levels.workshop >= 3);
-  assert.ok(recovered.levels.roads >= 3);
-  assert.ok(recovered.levels.market >= 3);
-  assert.ok(recovered.levels.windmill >= 3);
-  assert.ok(recovered.levels.archive >= 3);
-  assert.equal(recovered.levels.walls, 0, 'unchosen options stay absent');
-  assert.ok(recovered.levels.workshop>1, 'the old workshop blocker is cleared');
-  assert.equal(evaluate([...recovered.order, 'walls', 'observatory']).perfect, true);
+test('reversing a pair misses only its collaboration; later partners still grow', () => {
+  const state = evaluate(['walls', ...IDEAS.filter(idea => idea !== 'walls')]);
+  assert.equal(state.perfect, false);
+  assert.equal(state.gateMask, 0);
+  assert.ok(state.faults.some(fault => fault.project === 'road-gates'));
+  assert.ok(state.faults.some(fault => fault.project === 'gate-fittings'));
+  assert.equal(state.levels.walls, 4);
+  assert.equal(state.levels.settlers, MAX_LEVEL);
+  assert.equal(state.levels.river, MAX_LEVEL);
+  assert.ok(state.score < 80);
 });
 
-test('every unfinished placed option has a real blocker after each choice', () => {
-  // Many different orders exercise recovery and sealed routes at every prefix.
-  let seed = 71829;
-  for (let run = 0; run < 100; run++) {
-    const order = [...IDEAS];
-    for (let i = order.length - 1; i > 0; i--) {
-      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-      const j = seed % (i + 1); [order[i], order[j]] = [order[j], order[i]];
+test('each choice upgrades only itself and already selected project partners', () => {
+  const order: typeof IDEAS[number][] = ['settlers', 'grove', 'workshop', 'roads', 'walls', 'market', 'windmill', 'archive', 'river', 'observatory'];
+  let before = evaluate([]);
+  for (const idea of order) {
+    const after = evaluate([...before.order, idea]);
+    assert.equal(after.events.filter(event => event.level === 1).length, 1);
+    assert.equal(after.events[0].idea, idea);
+    for (const previous of IDEAS) {
+      if (previous !== idea && after.levels[previous] > before.levels[previous])
+        assert.ok(after.events.some(event => event.idea === previous && event.project));
+      if (!after.order.includes(previous)) assert.equal(after.levels[previous], 0);
     }
-    let before = evaluate([]);
-    for (let turn = 1; turn <= order.length; turn++) {
-      const after = evaluate(order.slice(0, turn));
-      for (const idea of IDEAS) {
-        assert.ok(after.levels[idea] >= before.levels[idea]);
-        if (after.levels[idea] > 0 && after.levels[idea] < MAX_LEVEL)
-          assert.ok(upgradeBlocker(idea, after.levels, after.gateMask), `${idea} was eligible but did not upgrade`);
-      }
-      before = after;
-    }
+    before = after;
   }
+  assert.equal(before.perfect, true);
 });
 
-test('new ideas upgrade earlier buildings and their surroundings', () => {
-  const before = evaluate(IDEAS.slice(0, 6));
-  assert.equal(before.levels.windmill, 0);
-  const after = evaluate([...IDEAS.slice(0, 7), 'river']);
-  assert.ok(after.levels.windmill >= 3);
-  assert.ok(after.levels.grove >= 3);
-  assert.ok(after.levels.workshop >= 3);
-  const snapshot = snapshotForGame(after.levels);
+test('a late river advances earlier sites and the scene reflects their new levels', () => {
+  const before = evaluate(IDEAS.slice(0, 8));
+  const after = evaluate([...before.order, 'river']);
+  assert.ok(after.levels.grove > before.levels.grove);
+  assert.ok(after.levels.workshop > before.levels.workshop);
+  assert.ok(after.levels.windmill > before.levels.windmill);
+  const snapshot = snapshotForGame(after.levels, 0, after.gateMask);
   assert.equal(snapshot.plots.find(plot => plot.id === 'mill')?.stage, 6);
-  assert.equal(snapshot.plots.find(plot => plot.id === 'forge')?.stage, 6);
+  assert.equal(snapshot.plots.find(plot => plot.id === 'forge')?.stage, 8);
   assert.equal(snapshot.plots.find(plot => plot.id === 'home-12')?.stage, 0);
 });
 
@@ -85,47 +81,31 @@ test('the opening landscape has no sites or roads until those ideas arrive', () 
   assert.ok(firstRoad.roads < snapshotForGame(evaluate(IDEAS.slice(0, 4)).levels).roads);
 });
 
-test('early walls gain walkable gates when road builders arrive', () => {
-  const waiting = evaluate(['settlers','grove','workshop','walls']);
-  assert.equal(waiting.gateMask, 0);
-  assert.equal(waiting.levels.walls, 1);
-  assert.ok(isBlocked(34, 0, buildColliders(snapshotForGame(waiting.levels, 0, waiting.gateMask))));
-  const repaired = evaluate([...waiting.order,'roads','market','windmill']);
-  assert.equal(repaired.levels.walls, 2);
-  assert.equal(repaired.gateMask, CARDINAL_GATE_MASK);
-  assert.equal(repaired.isolatedMill, false);
-  assert.equal(isBlocked(34, 0, buildColliders(snapshotForGame(repaired.levels, 0, repaired.gateMask))), false);
-  assert.match(upgradeBlocker('windmill', repaired.levels, repaired.gateMask)!, /River/);
+test('mapped gates require the Roads–Walls collaboration', () => {
+  const missed = evaluate(['settlers', 'grove', 'workshop', 'walls', 'roads', 'market', 'windmill']);
+  assert.equal(missed.gateMask, 0);
+  assert.ok(missed.faults.some(fault => fault.project === 'road-gates'));
+  assert.ok(isBlocked(34, 0, buildColliders(snapshotForGame(missed.levels, 0, missed.gateMask))));
+  const linked = evaluate(['settlers', 'grove', 'workshop', 'roads', 'walls', 'market', 'windmill']);
+  assert.equal(linked.gateMask, CARDINAL_GATE_MASK);
+  assert.ok(linked.projects.includes('road-gates'));
+  assert.equal(isBlocked(34, 0, buildColliders(snapshotForGame(linked.levels, 0, linked.gateMask))), false);
+  for (const sector of [0, 7, 8, 15, 16, 23, 24, 31]) assert.ok(wallIsGate(sector, linked.gateMask));
 });
 
-test('roads laid before walls leave aligned, walkable gates and supply the mill', () => {
-  const state = evaluate(['settlers','grove','workshop','roads','walls','market','windmill','river']);
-  assert.ok(state.levels.walls >= 3);
-  assert.ok(state.levels.windmill >= 3);
-  assert.equal(state.gateMask, CARDINAL_GATE_MASK);
-  for(const sector of [0,7,8,15,16,23,24,31])assert.ok(wallIsGate(sector,state.gateMask));
-  const snapshot = snapshotForGame(state.levels, 0, state.gateMask);
-  assert.equal(snapshot.innerStone, 32);
-  assert.equal(snapshot.outerWood, 32);
-  assert.equal(isBlocked(34, 0, buildColliders(snapshot)), false);
-});
-
-test('save resumes, rejects corrupt choices, and preserves discoveries on restart', () => {
+test('save resumes new rules, rejects old and corrupt choices, and preserves discoveries', () => {
   const save = newGameSave();
   chooseIdea(save, 'settlers');
   assert.deepEqual(parseGameSave(JSON.stringify(save)).order, ['settlers']);
   assert.deepEqual(parseGameSave('{').order, []);
-  assert.deepEqual(parseGameSave('{"version":1,"order":["grove","grove"]}').order, []);
+  assert.deepEqual(parseGameSave('{"version":2,"order":["grove","grove"]}').order, []);
+  assert.deepEqual(parseGameSave('{"version":1,"order":["settlers"]}').order, []);
   assert.throws(() => chooseIdea(save, 'settlers'));
   save.secretFound = true;
   restartGame(save);
   assert.deepEqual(save.order, []);
   assert.equal(save.secretFound, true);
-  const oldEight=['settlers','grove','workshop','roads','market','windmill','archive','observatory'];
-  const migrated=parseGameSave(JSON.stringify({version:1,started:true,order:oldEight,bestMax:8,secretFound:false}));
-  assert.equal(migrated.order.length,8);
-  assert.equal(evaluate(migrated.order).finished,false);
-  assert.equal(evaluate(migrated.order).levels.walls,0);
+  assert.equal(save.bestScore, 0);
 });
 
 test('upgraded stream starts inside the main river and stays above its carved bed', () => {

@@ -1,3 +1,4 @@
+import { isRegularBuilding, regularBuildingStage } from './building-development';
 import { PLOTS, INFRASTRUCTURE } from './town-plan';
 import type { Plot, TownSnapshot } from './model';
 import type { Idea, Levels } from './game';
@@ -29,7 +30,7 @@ export function snapshotForGame(levels: Levels, elapsed = 0, gateMask = levels.w
     // An unchosen idea has no visible construction site. Each later level
     // reveals a distinct authored silhouette.
     const stages=plot.kind==='project'?[0,3,4,6]:CIVIC_IDS.has(plot.id)?[0,4,5,6]:[0,2,4,6];
-    const stage = tier === null ? 0 : stages[Math.min(3,tier)];
+    const stage = tier === null ? 0 : isRegularBuilding(plot) ? regularBuildingStage(plot,tier) : stages[Math.min(3,tier)];
     return { ...relocateGamePlot(plot), stage, renovation: 0 };
   });
   plots.push(...districtExpansionPlots(levels));
@@ -37,6 +38,8 @@ export function snapshotForGame(levels: Levels, elapsed = 0, gateMask = levels.w
   return {
     elapsed,
     riverLevel: levels.river,
+    groveLevel: levels.grove,
+    wallLevel: levels.walls,
     districtConnections: districtConnections(levels,gateMask),
     plots,
     innerWood: levels.walls >= 1 ? wallSegments : 0,

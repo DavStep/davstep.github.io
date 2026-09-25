@@ -1,3 +1,4 @@
+import { isRegularBuilding } from './building-development';
 import type { ProjectKey } from './projects';
 import { PLOTS, MERGES, MILESTONES, INFRASTRUCTURE } from './town-plan';
 
@@ -10,6 +11,8 @@ export interface TownSave { version: 3; createdAt: number; lastSeenAt: number; e
 export interface TownSnapshot {
   districtConnections?: string[];
   riverLevel?: number;
+  groveLevel?: number;
+  wallLevel?: number;
   elapsed: number;
   plots: PlotState[];
   innerWood: number;
@@ -51,9 +54,9 @@ export function milestoneRecap(save: TownSave, now: number): string[] {
 export function townAt(save: TownSave, now: number): TownSnapshot {
   const elapsed = Math.max(0, now - save.createdAt, save.elapsedFloorMs);
   const plots: PlotState[] = PLOTS.map(p => {
-    let stage = p.kind === 'project' ? Math.min(6, 3 + Math.floor(elapsed / (8 * MINUTE))) : elapsed < p.start ? 0 : Math.min(6, 1 + Math.floor((elapsed - p.start) / p.step));
+    let stage = p.kind === 'project' ? Math.min(6, 3 + Math.floor(elapsed / (8 * MINUTE))) : elapsed < p.start ? 0 : Math.min(isRegularBuilding(p)?8:6, 1 + Math.floor((elapsed - p.start) / p.step));
     if (p.kind === 'castle') stage = elapsed < 16 * MINUTE ? 2 : Math.min(6, 3 + Math.floor((elapsed - 16 * MINUTE) / (3 * MINUTE)));
-    const renovation = p.kind === 'home' && stage === 6 ? (p.variant ?? 0) % 4 : 0;
+    const renovation = p.kind === 'home' && stage >= 6 ? (p.variant ?? 0) % 4 : 0;
     const complexId = MERGES.find(m => elapsed >= m.at && m.children.includes(p.id))?.id;
     return { ...p, stage, renovation, complexId };
   });

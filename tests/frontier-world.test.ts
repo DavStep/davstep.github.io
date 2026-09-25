@@ -8,15 +8,16 @@ import { snapshotForGame } from '../src/town/game-snapshot';
 import { FrontierWorld } from '../src/town/frontier-world';
 import { Environment } from '../src/town/environment';
 import { MAT } from '../src/town/materials';
+import { isRegularBuilding, REGULAR_BUILDING_STAGES } from '../src/town/building-development';
 
 test('all eighty milestones have distinct named events and a valid world destination',()=>{
   assert.equal(MAX_LEVEL,8);const names=new Set<string>();
   for(const key of IDEAS){assert.equal(MILESTONES[key].length,8);for(const m of MILESTONES[key]){assert.ok(m.description.length>20);assert.ok(Number.isFinite(m.x)&&Number.isFinite(m.z));names.add(m.name);}}
   assert.equal(names.size,80);const full=evaluate(IDEAS);assert.ok(Object.values(full.levels).every(l=>l===8));assert.equal(full.maxCount,10);
-  assert.ok(snapshotForGame(full.levels).plots.every(p=>Number.isFinite(p.stage)&&p.stage<=6),'authored building tiers remain bounded');
+  assert.ok(snapshotForGame(full.levels).plots.every(p=>Number.isFinite(p.stage)&&p.stage<=(isRegularBuilding(p)?REGULAR_BUILDING_STAGES:6)),'authored building tiers remain bounded');
   const before=evaluate(IDEAS.slice(0,-1)),beats=choiceBeats(before.levels,full.levels,'observatory');
-  assert.ok(beats.filter(b=>b.kind==='max').every(b=>b.level===8));assert.equal(beats.filter(b=>b.kind==='max').length,10);
-  assert.deepEqual(evaluate(parseGameSave(JSON.stringify({version:1,order:IDEAS})).order).levels,full.levels);
+  assert.ok(beats.filter(b=>b.kind==='max').every(b=>b.level===8));assert.equal(beats.filter(b=>b.kind==='max').length,IDEAS.filter(idea=>before.levels[idea]<8).length);
+  assert.deepEqual(evaluate(parseGameSave(JSON.stringify({version:2,order:IDEAS})).order).levels,full.levels);
 });
 
 test('every advanced level reveals its own geometry and all regions reset in desktop and mobile',()=>{

@@ -1,0 +1,12 @@
+{
+  "LOD0": {
+    "triangles": 5380,
+    "degenerateTriangles": 0,
+    "meshes": 36
+  },
+  "LOD1": {
+    "triangles": 2244,
+    "degenerateTriangles": 0,
+    "meshes": 35
+  }
+}

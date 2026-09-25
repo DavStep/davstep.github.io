@@ -4,7 +4,7 @@ import { MAT } from './materials';
 import type { PlotKind, PlotState } from './model';
 import { MILL_ROTOR_SOCKET } from './windmill-layout';
 
-export type CivicFamily = Extract<PlotKind, 'market' | 'tavern' | 'forge' | 'mill' | 'guild' | 'post'>;
+export type CivicFamily = Extract<PlotKind, 'market' | 'tavern' | 'forge' | 'mill' | 'guild' | 'post'> | 'archive';
 type CivicPart = {
   name: string;
   family: CivicFamily;
@@ -43,11 +43,16 @@ export const CIVIC_SHARED_GEOMETRIES: ReadonlySet<THREE.BufferGeometry> = new Se
   parts.map(part => part.geometry),
 );
 
+export function civicFamilyFor(plot: Pick<PlotState, 'id' | 'kind'>): CivicFamily {
+  return plot.id === 'post' || plot.id === 'district-archive-great-library'
+    ? 'archive' : plot.kind as CivicFamily;
+}
+
 export function civicBuilding(plot: PlotState, mobile: boolean, animateMillSails = false): THREE.Group {
   const group = new THREE.Group();
   group.position.set(plot.x, .48, plot.z);
   if (plot.stage <= 0) return group;
-  const family = plot.kind as CivicFamily;
+  const family = civicFamilyFor(plot);
   const lod = mobile ? 1 : 0;
   for (const part of parts) {
     if (part.family !== family || part.lod !== lod

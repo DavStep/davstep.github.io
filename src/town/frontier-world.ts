@@ -24,11 +24,12 @@ export class FrontierWorld {
   private readonly cone=new THREE.ConeGeometry(1,1,8);
   private readonly cylinder=new THREE.CylinderGeometry(1,1,1,10);
   private readonly ball=new THREE.IcosahedronGeometry(1,1);
-  constructor(parent:THREE.Group,private readonly mobile:boolean,private readonly environment:Environment){
+  constructor(parent:THREE.Group,private readonly mobile:boolean,private readonly environment:Environment,riverOnly=false){
     this.group.name='Growing_valley_and_mountains';parent.add(this.group);
     [this.cube,this.cone,this.cylinder,this.ball].forEach(g=>this.owned.add(g));
     for(const idea of Object.keys(MILESTONES) as Idea[])for(let level=4;level<=8;level++){
       if(idea==='river'){this.waterway(level);continue;}
+      if(riverOnly)continue;
       const site=MILESTONES[idea][level-1],g=new THREE.Group();g.name=`${idea}_level_${level}_${site.name.replaceAll(' ','_')}`;g.position.set(site.x,this.height(site.x,site.z),site.z);
       this.build(g,idea,level,site.x,site.z);this.batch(g);g.visible=false;this.group.add(g);this.regions.push({idea,level,group:g,growth:0});
     }

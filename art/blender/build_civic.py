@@ -1,4 +1,4 @@
-"""Author six civic families in Blender and bake synchronous runtime geometry.
+"""Author civic families and the Archive landmark, then bake runtime geometry.
 
 Run through scripts/blender-mcp-run.py. Only Civic_* scenes are replaced; the
 other open scenes and their objects are preserved. Blender uses X/Y/Z with the
@@ -80,8 +80,9 @@ parts = []
 active = None
 meta = None
 
-def group(name, family, lod, lo=3, hi=6):
+def group(name, family, lod, lo=3, hi=8):
     global active, meta
+    if family in ('mill','archive') and hi==8:hi=6
     active = bpy.data.collections.new(name)
     library.collection.children.link(active)
     meta = dict(name=name, family=family, lod=lod, minStage=lo, maxStage=hi)
@@ -255,7 +256,7 @@ def add_stage_extensions(family,lod,wall,palette):
     for x in [1.88,3.68]:
         for y in [-.88,1.22]:box('shed_post',(x,y,.99),(.14,.14,1.72),'woodDark')
     roof(2.78,.17,1.90,2.34,1.84,.55,palette,lod,'shed_roof')
-    group(prefix+'_stage6_wing',family,lod,6)
+    group(prefix+'_stage6_wing',family,lod,6,6)
     # Existing collision proxy: runtime x [-4.96,-2.06], z [-2.45,.85].
     box('wing_footing',(-3.49,.80,.12),(2.72,2.91,.24),'stoneDark')
     box('wing_wall',(-3.49,.80,.99),(2.62,2.78,1.75),wall)
@@ -263,7 +264,7 @@ def add_stage_extensions(family,lod,wall,palette):
     for x in [-4.78,-2.20]:
         for y in [-.48,2.08]:box('wing_post',(x,y,1.04),(.14,.14,1.86),'woodDark')
     window(-3.49,-.65,1.22,lod)
-    roof(-3.49,.80,2.82,3.03,2.35,.80,palette,lod,'wing_roof')
+    roof(-3.49,.80,2.82,3.03,1.87,.80,palette,lod,'wing_roof')
 
 def chimney(x,y,eave,height=1.1,width=.62):
     box('chimney_stack',(x,y,eave+height*.5),(width,width,height),'stoneDark')
@@ -321,35 +322,88 @@ def forge(lod):
     add_stage_extensions(family,lod,wall,1)
 
 def mill(lod):
-    family='mill';wall='plaster'
-    prefix=foundation_and_stages(family,lod,wall)
-    common_shell(family,lod,2.93,1.78,wall,2)
+    """Tapered masonry mill, slate cap, four framed cloth sails; front is -Y."""
+    family='mill'; prefix=f'ENV_Civic_mill_LOD{lod}'; n=12 if lod==0 else 8
+    # Preserve the palette sequence of following families when replacing the
+    # former gable (118 desktop / 26 mobile shingles).
+    for _ in range(118 if lod==0 else 26):random.randrange(4)
+    def ring(name,z0,z1,r0,r1,mat):
+        angles=[2*math.pi*i/n-math.pi/2-math.pi/n for i in range(n)]
+        verts=[(r*math.cos(a),r*math.sin(a),z) for z,r in [(z0,r0),(z1,r1)] for a in angles]
+        faces=[tuple(reversed(range(n))),tuple(range(n,2*n))]
+        faces += [(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)]
+        return mesh(name,verts,faces,mat)
+    def timber(name,p,q,width,mat='woodDark'):
+        p,q=Vector(p),Vector(q); axis=(q-p).normalized()
+        u=Vector((0,1,0))*width/2; v=axis.cross(u)
+        verts=[tuple(c+i*u+j*v) for c in [p,q] for i,j in [(-1,-1),(1,-1),(1,1),(-1,1)]]
+        return mesh(name,verts,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],mat)
+    group(prefix+'_foundation',family,lod,1)
+    ring('round_stone_plinth',0,.32,2.55,2.48,'stoneDark')
+    ring('foundation_lip',.28,.47,2.49,2.49,'stone')
+    group(prefix+'_construction_posts',family,lod,1,2)
+    for x in [-1.4,1.4]:
+        for y in [-1.4,1.4]:box('temporary_frame',(x,y,1.2),(.18,.18,1.7),'woodDark')
+    group(prefix+'_half_walls',family,lod,2,2)
+    ring('unfinished_round_wall',.4,2.2,2.22,2.02,'stone')
+    group(prefix+'_shell',family,lod)
+    ring('tower_masonry',.4,2.4,2.22,2.01,'stone')
+    ring('limewashed_tower',2.4,7.05,2.01,1.48,'plasterIvory')
+    for z,r in [(2.38,2.08),(4.57,1.83),(6.94,1.58)]:
+        ring('tower_belt',z,z+.13,r,r-.015,'stoneDark' if z<3 else 'woodDark')
+    # Ground courses and scattered exposed masonry keep the tapered shell readable.
+    for row in range(4 if lod==0 else 2):
+        z=.66+row*.44; radius=2.22-(z-.4)*.105
+        for i in range(n):
+            a=2*math.pi*(i+.5)/n-math.pi/2-math.pi/n
+            if math.sin(a)<-.8:continue
+            ob=box('foundation_block',(math.cos(a)*radius*.968,math.sin(a)*radius*.968,z),(.60,.10,.27),'stoneDark' if (i+row)%4==0 else 'stone')
+            # Box starts aligned with tangent at the front; rotate vertices about its center.
+            center=Vector((math.cos(a)*radius*.968,math.sin(a)*radius*.968,z))
+            from mathutils import Matrix
+            rot=Matrix.Rotation(a+math.pi/2,3,'Z')
+            for v in ob.data.vertices:v.co=center+rot@(v.co-center)
+    doorway(-2.06)
+    window(0,-1.83,3.55,lod)
+    window(0,-1.59,5.65,lod)
+    window(1.82,0,3.65,lod,side=True)
+    box('axle_bearing',(0,-1.59,6.45),(.66,.34,.64),'woodDark')
+    box('fixed_windshaft',(0,-2.02,6.45),(.27,1.10,.27),'iron')
+    group(prefix+'_roof',family,lod)
+    ring('cap_underlay',7.05,9.05,1.96,.08,'woodDark')
+    # Overlapping wedge shingles follow the cone, with restrained slate variation.
+    rows=5 if lod==0 else 3
+    for row in range(rows):
+        t0=row/rows; t1=min(1,(row+1.13)/rows)
+        z0=7.02+t0*2.0; z1=7.02+t1*2.0
+        r0=2.02*(1-t0)+.08; r1=2.02*(1-t1)+.08
+        for i in range(n):
+            a=2*math.pi*i/n; b=2*math.pi*(i+.975)/n
+            verts=[(r*math.cos(angle),r*math.sin(angle),z+lift) for lift in [0,.085]
+                   for r,z,angle in [(r0,z0,a),(r0,z0,b),(r1,z1,b),(r1,z1,a)]]
+            mesh('cap_shingle',verts,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],tile_mats[2][(row*3+i)%4])
+    ring('cap_finial',9.02,9.43,.13,.035,'gold')
     group(prefix+'_mill_sails',family,lod,4)
-    # Front-facing central axle. All four swept sails stay within x +/-2.75.
-    hub=Vector((0,-2.62,3.40))
-    box('axle',(0,-2.46,3.40),(.32,.33,.32),'iron')
+    # Socket matches MILL_ROTOR_SOCKET in windmill-layout.ts. Rotor clears the
+    # doorway at every angle; complete blade sweep stays above avatar height.
+    hub=Vector((0,-2.65,6.45))
     for i in range(4):
         a=math.pi*i/2+math.pi/4
-        direction=Vector((math.cos(a),0,math.sin(a)))
-        tangent=Vector((-math.sin(a),0,math.cos(a)))
-        # One tapered canvas plane on each radial spar, with a thin closed edge.
-        corners=[hub+direction*.55+tangent*.10,
-                 hub+direction*.55+tangent*.34,
-                 hub+direction*2.23+tangent*.73,
-                 hub+direction*2.23+tangent*.08]
-        vertices=[tuple(p+Vector((0,dy,0))) for dy in [.035,-.035] for p in corners]
-        mesh('sail_canvas',vertices,
-             [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),
-              (2,3,7,6),(3,0,4,7)],'plasterIvory')
-        spar_hub=hub+Vector((0,-.06,0))
-        beam('sail_spar',spar_hub+direction*.25,
-             spar_hub+direction*2.34,.14,'woodDark')
-        for radius in ([.95,1.55] if lod==0 else [1.30]):
-            spread=.34+(radius-.55)/1.68*.39
-            beam('sail_rib',spar_hub+direction*radius+tangent*.09,
-                 spar_hub+direction*radius+tangent*(spread-.04),.07,'wood')
-    box('hub_plate',(0,-2.69,3.40),(.37,.10,.37),'woodDark')
-    add_stage_extensions(family,lod,wall,2)
+        d=Vector((math.cos(a),0,math.sin(a))); t=Vector((-math.sin(a),0,math.cos(a)))
+        def point(radius,spread,depth=0):return hub+d*radius+t*spread+Vector((0,depth,0))
+        timber('main_spar',point(.12,0),point(4.08,0),.17)
+        timber('outer_frame',point(1.05,.64),point(4.08,.88),.10,'wood')
+        for r,w in [(1.05,.64),(4.08,.88)]:timber('end_frame',point(r,0),point(r,w),.10,'wood')
+        # Slight billow, inset from the frame. Closed panel gives both faces normals.
+        corners=[point(1.18,.13,.025),point(1.18,.56,.025),point(3.96,.77,.025),point(3.96,.13,.025)]
+        verts=[tuple(p+Vector((0,dy,0))) for dy in [-.025,.025] for p in corners]
+        mesh('linen_sail',verts,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],'plaster')
+        for rib in range(1,7 if lod==0 else 4):
+            r=1.05+rib*3.03/(7 if lod==0 else 4); w=.64+(r-1.05)*.24/3.03
+            timber('lattice_rib',point(r,.04,-.06),point(r,w,-.06),.065,'woodLight')
+    box('hub_block',tuple(hub),(.55,.36,.55),'woodDark')
+    box('iron_hub_pin',(0,-2.87,6.45),(.22,.12,.22),'iron')
+    add_stage_extensions(family,lod,'plasterIvory',2)
 
 def guild(lod):
     family='guild';wall='stone'
@@ -385,11 +439,145 @@ def post(lod):
     box('banner',(1.87,-1.02,5.37),(.54,.08,.49),'red')
     add_stage_extensions(family,lod,wall,0)
 
+def archive(lod):
+    """Dedicated library landmark: stepped gable, glazed reading hall and book crest."""
+    family='archive';prefix=foundation_and_stages(family,lod,'stone')
+    # Closed extruded pointed arches, with a separate stone surround.
+    def arch(name,cx,y,z,w,h,depth,mat):
+        outline=[(-w/2,0),(w/2,0),(w/2,h-w*.42),(w*.34,h-w*.17),(0,h),(-w*.34,h-w*.17),(-w/2,h-w*.42)]
+        verts=[(cx+x,y+dy,z+zz) for dy in [-depth/2,depth/2] for x,zz in outline]
+        n=len(outline)
+        return mesh(name,verts,[tuple(reversed(range(n))),tuple(range(n,2*n))]+[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)],mat)
+    def book(cx,y,z,scale=1):
+        # Open pages are a shallow V in the facade plane, framed by dark covers.
+        for side in [-1,1]:
+            x0=cx; x1=cx+side*.84*scale
+            pts=[(x0,y,z-.36*scale),(x1,y+.06,z-.48*scale),(x1,y+.06,z+.48*scale),(x0,y,z+.36*scale)]
+            for name,offset,mat in [('book_cover',0,'woodDark'),('book_pages',-.055*scale,'plasterIvory')]:
+                verts=[(x,yy+offset+dy,zz) for dy in [0,.07*scale] for x,yy,zz in pts]
+                mesh(name,verts,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],mat)
+            if lod==0:
+                for line in range(3):box('page_ink',(cx+side*.46*scale,y-.065*scale,z+(.19-line*.18)*scale),(.46*scale,.022,.025*scale),'gold')
+        box('book_spine',(cx,y-.09*scale,z),(.08*scale,.10*scale,.82*scale),'gold')
+        box('ribbon_bookmark',(cx+.28*scale,y-.09*scale,z-.52*scale),(.13*scale,.035,.28*scale),'red')
+    group(prefix+'_reading_hall',family,lod)
+    box('masonry_hall',(0,0,2.56),(4.82,4.30,4.52),'plasterIvory')
+    gable('hall_gables',0,0,4.82,4.30,4.82,2.35,'stone')
+    for z in [.50,2.65,4.77]:box('stone_string_course',(0,0,z),(4.96,4.43,.17),'stoneDark')
+    # Broad corner buttresses and their sloped shoulders anchor the taller hall.
+    for x in [-2.40,2.40]:
+        for y in [-2.15,2.15]:
+            box('buttress',(x,y,2.15),(.34,.36,3.65),'stone')
+            box('buttress_plinth',(x,y,.58),(.48,.46,.42),'stoneDark')
+            box('buttress_cap',(x,y,4.06),(.48,.48,.17),'stoneDark')
+    arch('door_surround',0,-2.28,.29,1.69,2.42,.16,'stoneDark')
+    arch('double_door',0,-2.39,.35,1.33,2.13,.10,'woodDark')
+    for x in [-.32,.32]:
+        box('door_panel',(x,-2.46,1.20),(.52,.07,1.42),'wood')
+        box('door_handle',(x*.35,-2.51,1.12),(.09,.06,.21),'gold')
+    box('front_step',(0,-2.39,.20),(2.04,.60,.25),'stone')
+    # Large lancet glazing and deep mullions replace the cottage-sized window pair.
+    arch('great_window_stone',0,-2.23,2.96,2.08,3.05,.18,'woodDark')
+    arch('great_window_glass',0,-2.35,3.11,1.76,2.73,.08,'glass')
+    for x in [-.57,0,.57]:box('window_mullion',(x,-2.42,4.09),(.08,.08,1.94),'gold' if x==0 else 'woodLight')
+    box('great_window_transom',(0,-2.43,4.58),(1.73,.10,.10),'woodLight')
+    for x in [-1.73,1.73]:
+        arch('side_lancet_frame',x,-2.25,1.14,.61,1.24,.12,'woodDark')
+        arch('side_lancet',x,-2.34,1.23,.43,1.03,.07,'glass')
+    # Two bays on each side give the reading hall a recognisable long elevation.
+    for side in [-1,1]:
+        for y in ([-.98,1.02] if lod==0 else [-.98]):
+            box('reading_window_recess',(side*2.43,y,3.55),(.10,.88,1.52),'woodDark')
+            box('reading_window_glass',(side*2.49,y,3.55),(.05,.66,1.31),'glass')
+            box('reading_window_mullion',(side*2.53,y,3.55),(.08,.07,1.36),'woodLight')
+            box('reading_window_sill',(side*2.49,y,2.76),(.25,1.01,.14),'stone')
+    group(prefix+'_stepped_roof',family,lod)
+    roof(0,0,5.24,4.71,4.82,2.35,2,lod,'library_roof')
+    # The stepped parapet projects in front of the roof; it is solid all the way
+    # down to the gable so the silhouette has no floating blocks or open seams.
+    for y in ([-2.41,2.41] if lod==0 else [-2.41]):
+        for side in [-1,1]:
+            for i in range(4):
+                x=side*(2.21-i*.61); base=4.82+2.35*(1-abs(x)/2.41)
+                box('gable_step',(x,y,base+.16),(.63,.25,.55),'stone')
+                box('gable_step_cap',(x,y,base+.45),(.69,.31,.13),'stoneDark')
+        box('gable_crown',(0,y,7.38),(.62,.30,.54),'stone')
+        box('crown_cap',(0,y,7.68),(.75,.36,.13),'gold')
+    group(prefix+'_archive_identity',family,lod,4)
+    # Oversized book crest reads as knowledge even from the game camera.
+    box('crest_backing',(0,-2.45,2.81),(2.06,.18,.94),'blue')
+    book(0,-2.59,2.84,1.0)
+    for x in [-1.80,1.80]:
+        box('banner_bracket',(x,-2.43,4.35),(.76,.20,.11),'gold')
+        box('blue_pennant',(x,-2.45,3.69),(.48,.07,1.20),'blue')
+        box('banner_gold_stripe',(x,-2.50,3.69),(.06,.025,.94),'gold')
+    # Visible book spines in the lower side bays communicate the interior use.
+    for side in [-1,1]:
+        for y in ([-.97,1.00] if lod==0 else [-.97]):
+            box('shelf_recess',(side*2.44,y,1.45),(.10,1.05,1.43),'woodDark')
+            for row in range(2 if lod==0 else 1):
+                box('shelf_board',(side*2.52,y,.92+row*.63),(.19,1.07,.10),'wood')
+                for j in range(4 if lod==0 else 3):
+                    yy=y-.36+j*(.24 if lod==0 else .34)
+                    box('bound_volume',(side*2.53,yy,1.16+row*.63),(.13,.15,.35+(j%2)*.08),['blue','red','woodLight','gold'][j])
+    group(prefix+'_stage5_scriptorium',family,lod,5)
+    box('scriptorium_base',(2.79,.17,.16),(1.88,2.24,.32),'stoneDark')
+    box('scriptorium_wall',(2.79,.17,1.51),(1.80,2.16,2.70),'plasterIvory')
+    gable('scriptorium_gable',2.79,.17,1.80,2.16,2.86,.89,'stone')
+    roof(2.79,.17,1.86,2.34,2.86,.89,2,lod,'scriptorium_roof')
+    arch('scriptorium_window_frame',2.79,-.95,.86,1.13,1.71,.13,'woodDark')
+    arch('scriptorium_window',2.79,-1.04,.98,.88,1.42,.07,'glass')
+    box('scriptorium_mullion',(2.79,-1.10,1.59),(.075,.06,1.23),'woodLight')
+    group(prefix+'_stage6_map_room',family,lod,6)
+    box('map_room_base',(-3.49,.80,.15),(2.72,2.91,.30),'stoneDark')
+    box('map_room_wall',(-3.49,.80,1.45),(2.62,2.78,2.60),'plasterIvory')
+    gable('map_room_gable',-3.49,.80,2.62,2.78,2.75,1.08,'stone')
+    roof(-3.49,.80,2.78,3.03,2.75,1.08,2,lod,'map_room_roof')
+    arch('map_room_window_frame',-3.49,-.64,.97,1.68,1.92,.13,'woodDark')
+    arch('map_room_window',-3.49,-.75,1.10,1.39,1.61,.07,'glass')
+    for x in [-3.90,-3.49,-3.08]:box('map_room_mullion',(x,-.80,1.70),(.07,.07,1.17),'woodLight')
+
+def developed_civic(family,lod):
+    palette={'market':0,'tavern':1,'forge':1,'guild':2,'post':0}[family]
+    wall={'market':'plaster','tavern':'plasterIvory','forge':'stone','guild':'stone','post':'plaster'}[family]
+    prefix=f'ENV_Civic_{family}_LOD{lod}'
+    group(prefix+'_stage7_upper_wing',family,lod,7)
+    box('upper_wing_footing',(-3.49,.80,.12),(2.72,2.91,.24),'stoneDark')
+    box('two_storey_wing',(-3.49,.80,1.83),(2.62,2.78,3.43),wall)
+    gable('upper_wing_gable',-3.49,.80,2.62,2.78,3.55,.80,wall)
+    for x in [-4.78,-2.20]:
+        for y in [-.48,2.08]:box('tall_corner_post',(x,y,1.89),(.14,.14,3.54),'woodDark')
+    for y in [-.63,2.21]:box('wing_floor_beam',(-3.49,y,2.05),(2.64,.14,.18),'woodDark')
+    window(-3.49,-.65,1.22,lod)
+    window(-3.49,-.65,2.81,lod)
+    roof(-3.49,.80,2.82,3.03,3.55,.80,palette,lod,'upper_wing_roof')
+    group(prefix+'_stage8_roof_lantern',family,lod,8)
+    # A family-specific roof feature makes the final upgrade legible at town scale.
+    if family=='forge':
+        chimney(-1.20,.55,2.90,2.65,.76)
+        for z in [4.25,5.20]:box('kiln_iron_band',(-1.20,.55,z),(.82,.82,.15),'iron')
+    else:
+        peak={'market':4.37,'tavern':4.99,'guild':4.86,'post':4.18}[family]
+        base=peak-.40
+        box('clerestory_body',(0,.65,base+.45),(1.12,1.18,.90),wall)
+        for x in [-.56,.56]:
+            for y in [.07,1.23]:box('lantern_corner',(x,y,base+.45),(.12,.12,1.00),'woodDark')
+        box('lantern_window',(0,.015,base+.52),(.76,.10,.57),'glass')
+        box('lantern_mullion',(0,-.05,base+.52),(.075,.08,.59),'woodLight')
+        gable('lantern_gable',0,.65,1.12,1.18,base+.9,.69,wall)
+        roof(0,.65,1.48,1.55,base+.9,.69,palette,lod,'lantern_roof')
+        if family in ('market','guild'):
+            box('civic_finial',(0,.65,base+1.86),(.12,.12,.47),'gold')
+
 BUILDERS = dict(market=market,tavern=tavern,forge=forge,
-                mill=mill,guild=guild,post=post)
+                mill=mill,guild=guild,post=post,archive=archive)
 for lod in [0,1]:
-    for build in BUILDERS.values():
+    for name,build in BUILDERS.items():
+        state=random.getstate()
         build(lod)
+        if name=='archive':random.setstate(state)  # New family leaves legacy palettes stable.
+        if name in ('market','tavern','forge','guild','post'):
+            after=random.getstate();developed_civic(name,lod);random.setstate(after)
 
 # Each stage collection becomes one mesh per material. This is the runtime draw
 # grouping; roof tile face colors are retained only for MAT.roofTiles.
@@ -428,7 +616,7 @@ def bake(ob):
                 normals.extend(nor)
                 colors.extend(color)
             indices.append(lookup[key])
-    payload=dict(name=ob.name,material=ob['runtime_material'],
+    payload=dict(name=ob['name']+'_'+ob['runtime_material'],material=ob['runtime_material'],
                  positions=positions,normals=normals,indices=indices)
     if ob['runtime_material']=='roofTiles':payload['colors']=colors
     return payload
@@ -446,7 +634,7 @@ for lod in [0,1]:
     for family in BUILDERS:
         bpy.ops.object.select_all(action='DESELECT')
         for col,data in parts:
-            if data['family']==family and data['lod']==lod and data['minStage']<=6<=data['maxStage']:
+            if data['family']==family and data['lod']==lod and data['minStage']<=(6 if family in ('mill','archive') else 8)<=data['maxStage']:
                 for ob in col.objects:ob.select_set(True)
         bpy.ops.export_scene.gltf(
             filepath=f'{OUT}/ENV_Civic_{family}_LOD{lod}.glb',
@@ -476,7 +664,7 @@ if os.path.exists(original_path):
         parent.location=(index*12+5,0,0)
         for col,data in parts:
             if (data['family']==family and data['lod']==0
-                and data['minStage']<=6<=data['maxStage']):
+                and data['minStage']<=(6 if family in ('mill','archive') else 8)<=data['maxStage']):
                 for source in col.objects:
                     ob=source.copy();ob.data=source.data;ob.parent=parent
                     comparison_col.objects.link(ob)
@@ -486,13 +674,13 @@ bpy.context.window.scene=review
 active=bpy.data.collections.new('Review_Assembly')
 review.collection.children.link(active)
 positions={'market':(-10,-8,0),'tavern':(-2,-8,0),'forge':(7,-8,0),
-           'mill':(-10,4,0),'guild':(-2,4,0),'post':(7,4,0)}
+           'mill':(-10,4,0),'guild':(-2,4,0),'archive':(7,4,0)}
 for family,loc in positions.items():
     parent=bpy.data.objects.new('Review_'+family,None)
     active.objects.link(parent)
     parent.location=loc
     for col,data in parts:
-        if data['family']==family and data['lod']==0 and data['minStage']<=6<=data['maxStage']:
+        if data['family']==family and data['lod']==0 and data['minStage']<=(6 if family in ('mill','archive') else 8)<=data['maxStage']:
             for source in col.objects:
                 ob=source.copy();ob.data=source.data;ob.parent=parent;active.objects.link(ob)
 box('Review_Ground',(-1,0,-.21),(31,26,.35),'earth')
@@ -522,14 +710,14 @@ review.render.resolution_percentage=100
 review.view_settings.view_transform='AgX'
 review.render.image_settings.file_format='PNG'
 review.render.filepath=REVIEW_OUT+'/families-review.png'
-bpy.ops.wm.save_as_mainfile(filepath=OUT+'/civic.blend')
+bpy.data.libraries.write(OUT+'/civic.blend', {library, review, comparison}, fake_user=True)
 
 report={}
 for family in BUILDERS:
     for lod in [0,1]:
         relevant=[part for part in payload['parts']
                   if part['family']==family and part['lod']==lod
-                  and part['minStage']<=6<=part['maxStage']]
+                  and part['minStage']<=(6 if family in ('mill','archive') else 8)<=part['maxStage']]
         tri=sum(len(part['indices'])//3 for part in relevant)
         coords=[v for part in relevant for v in part['positions']]
         bounds={'min':[min(coords[i::3]) for i in range(3)],

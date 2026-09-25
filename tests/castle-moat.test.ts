@@ -22,7 +22,8 @@ test('river, crossings and gatehouses each follow their own progression threshol
   assert.equal(isBlocked(MOAT_RADIUS,0,crossed),false);
   assert.equal(isBlocked(42.43,42.43,crossed),true);
   const repaired=evaluate(['walls',...IDEAS.filter(x=>x!=='walls')]);
-  assert.equal(isBlocked(34,0,[...buildColliders(snapshotForGame(repaired.levels,0,repaired.gateMask)),...moatColliders(repaired.levels)]),false);
+  assert.equal(repaired.gateMask,0);
+  assert.equal(isBlocked(34,0,[...buildColliders(snapshotForGame(repaired.levels,0,repaired.gateMask)),...moatColliders(repaired.levels)]),true);
 });
 
 test('moat bed is below the entire water circuit and feeder, away from occupied plots',()=>{

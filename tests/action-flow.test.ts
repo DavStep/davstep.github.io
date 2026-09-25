@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { evaluate, IDEAS, chooseIdea, newGameSave, parseGameSave, type Idea } from '../src/town/game';
-import { requirements } from '../src/town/action-rules';
-import { ACTIONS, eventWaves, forecast, GUIDED_ORDER, nextSuggestion } from '../src/town/action-story';
-import { decisionMarkup, journalMarkup } from '../src/town/decision-panel';
+import { JOINT_PROJECTS, projectStages } from '../src/town/action-rules';
+import { eventWaves } from '../src/town/action-story';
 import { ReactionEffects, eventFocus } from '../src/town/reaction-effects';
+import { IDEA_COLORS } from '../src/town/idea-colors';
 
-test('every rendered reaction has its prerequisites in an earlier wave', () => {
-  const orders: Idea[][] = [[...GUIDED_ORDER], [...IDEAS].reverse(), ['walls', ...IDEAS.filter(i => i !== 'walls')]];
+test('every rendered reaction names a placed partner from an earlier wave', () => {
+  const orders: Idea[][] = [[...IDEAS], [...IDEAS].reverse(), ['walls', ...IDEAS.filter(i => i !== 'walls')]];
   let seed = 7128;
   for (let n = 0; n < 80; n++) {
     const order = [...IDEAS];
@@ -23,46 +23,48 @@ test('every rendered reaction has its prerequisites in an earlier wave', () => {
       for (const wave of eventWaves(after)) {
         for (const event of wave) {
           assert.equal(event.level, shown[event.idea] + 1);
-          for (const req of requirements(event.idea, event.level)) assert.ok(shown[req.idea] >= req.level, `${event.idea} happened before ${req.idea}`);
+          for (const source of event.sources) assert.ok(shown[source.idea] >= source.level, `${event.idea} happened before ${source.idea}`);
+          if (event.project) assert.ok(JOINT_PROJECTS.some(project => project.id === event.project && project.ideas.includes(event.idea)));
         }
         for (const event of wave) shown[event.idea] = event.level;
       }
       assert.deepEqual(shown, after.levels, 'skipping and normal playback converge');
       before = after;
     }
-    assert.equal(before.perfect, true, 'every early decision remains recoverable');
+    assert.equal(before.perfect, before.faults.length === 0, 'all collaborations are required for MAX');
+    assert.equal(before.score, Object.values(before.levels).reduce((sum, level) => sum + level, 0));
   }
 });
 
-test('preview is read-only and exactly predicts the committed result', () => {
+test('each direct choice commits once and survives reload', () => {
   const save = newGameSave();
-  for (const idea of GUIDED_ORDER) {
-    const before = evaluate(save.order), serialized = JSON.stringify(save);
-    assert.equal(nextSuggestion(before), idea);
-    const predicted = forecast(before, idea);
-    assert.equal(JSON.stringify(save), serialized);
-    assert.match(decisionMarkup(before, idea), new RegExp(ACTIONS[idea].verb));
-    assert.deepEqual(chooseIdea(save, idea), predicted);
-    assert.deepEqual(evaluate(parseGameSave(JSON.stringify(save)).order), predicted);
+  for (const idea of IDEAS) {
+    const predicted = evaluate([...save.order, idea]);
+    const state = chooseIdea(save, idea);
+    assert.deepEqual(state, predicted);
+    assert.equal(state.events.filter(event => event.level === 1).length, 1);
+    assert.throws(() => chooseIdea(save, idea));
+    assert.deepEqual(evaluate(parseGameSave(JSON.stringify(save)).order), state);
   }
-  assert.equal(nextSuggestion(evaluate(save.order)), undefined);
-  assert.match(journalMarkup(evaluate(save.order)), /forged tools for the crossings/);
 });
 
-test('expansion needs actual water, harvests, defenses and surveys, never an idea count', () => {
-  const noWater = evaluate(IDEAS.filter(i => i !== 'river'));
-  assert.ok(Object.values(noWater.levels).every(level => level < 4));
-  const noWalls = evaluate(IDEAS.filter(i => i !== 'walls'));
-  assert.ok(Object.values(noWalls.levels).every(level => level < 5));
-  const noSurveys = evaluate(IDEAS.filter(i => i !== 'observatory'));
-  assert.ok(Object.values(noSurveys.levels).every(level => level < 7));
-  assert.equal(evaluate(IDEAS).perfect, true);
+test('each project rewards both partners and a missed project cannot be rebuilt', () => {
+  for (const idea of IDEAS) {
+    const rewards = JOINT_PROJECTS.filter(project => project.ideas.includes(idea))
+      .reduce((sum, project) => sum + projectStages(project, idea), 0);
+    assert.equal(rewards, 7, `${idea} should have seven upgrades after arrival`);
+  }
+  const missed = evaluate(['roads', 'settlers', ...IDEAS.filter(i => i !== 'roads' && i !== 'settlers')]);
+  assert.ok(missed.faults.some(fault => fault.project === 'street-plan'));
+  assert.ok(!missed.projects.includes('street-plan'));
+  assert.ok(missed.levels.roads < 8);
+  assert.ok(missed.levels.settlers < 8);
 });
 
 test('causal effects support every action and release resources on interruption', () => {
   const scene = new THREE.Scene(), fx = new ReactionEffects(scene);
   for (const idea of IDEAS) {
-    const event = { idea, level: 2, wave: 1, sources: requirements(idea, 2) };
+    const event = { idea, level: 2, wave: 1, sources: [] };
     fx.begin(event); fx.update(.2);
     assert.equal(fx.group.visible, true);
     fx.reveal(); fx.update(.2);
@@ -72,6 +74,11 @@ test('causal effects support every action and release resources on interruption'
     assert.ok(disposed > 0);
     assert.equal(fx.group.visible, false);
   }
-  assert.notDeepEqual(eventFocus({ idea: 'workshop', level: 4 }), eventFocus({ idea: 'workshop', level: 2 }));
+  assert.deepEqual(eventFocus({ idea: 'workshop', level: 4 }), eventFocus({ idea: 'workshop', level: 2 }), 'local upgrades stay focused on the town');
+  assert.notDeepEqual(eventFocus({ idea: 'river', level: 4 }), eventFocus({ idea: 'river', level: 2 }), 'regional channels keep their own focus');
+  fx.begin({idea:'grove',level:2,wave:1,sources:[]},'river');fx.reveal();
+  const ring=fx.group.getObjectByProperty('type','Mesh') as THREE.Mesh;
+  assert.equal((ring.material as THREE.MeshBasicMaterial).color.getHex(),IDEA_COLORS.river,'partner upgrades retain the clicked idea color');
+  fx.clear();
   fx.dispose(); assert.equal(scene.children.length, 0);
 });

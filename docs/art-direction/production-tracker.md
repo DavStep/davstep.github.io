@@ -15,9 +15,10 @@ Coverage: **92 inventory entries** — KEEP: 5, MISSING: 12, REBUILD: 16, REDESI
 | B03 Market / annex, S `building(market)` | ART REVIEW | GPT-6 Sol High civic | Authored LODs and growth stages wired into runtime | Neutral art review, mesh checks and tests pass | Live gameplay visual approval |
 | B04 Tavern / inn, S `building(tavern)` | ART REVIEW | GPT-6 Sol High civic | Authored LODs and growth stages wired into runtime | Neutral art review, mesh checks and tests pass | Live gameplay visual approval |
 | B05 Forge / workshop, S `building(forge)` | ART REVIEW | GPT-6 Sol High civic | Authored LODs and growth stages wired into runtime | Neutral art review, mesh checks and tests pass | Live gameplay visual approval |
-| B06 Mill, S `building(mill)` | ART REVIEW | GPT-6 Sol High civic | Authored LODs and growth stages wired into runtime | Neutral art review, mesh checks and tests pass | Live gameplay visual approval |
+| B06 Mill, S `building(mill)` | INTEGRATED | Parent | Rebuilt tower windmill, shared animated sails, relocated outside inner wall | [Windmill model/site review and regression checks](windmill-production.md) | Live browser visual review not captured |
 | B07 Guild, S `building(guild)` | ART REVIEW | GPT-6 Sol High civic | Authored LODs and growth stages wired into runtime | Neutral art review, mesh checks and tests pass | Live gameplay visual approval |
 | B08 Post, S `building(post)` | ART REVIEW | GPT-6 Sol High civic | Authored LODs and growth stages wired into runtime | Neutral art review, mesh checks and tests pass | Live gameplay visual approval |
+| B08a Archive hero / Great Library | INTEGRATED | Parent | Dedicated reading hall, stepped gables, book crest, scriptorium and map room | [Archive production evidence](archive-production.md) | Live browser screenshot not captured |
 | B09 Construction kit, S stages 1–2 | ART REVIEW | Parent / cottage batch | Cottage/civic components authored and wired | Blender technical + visual review passed | Live gameplay visual approval |
 | B10 Cottage roof kit, S `gableRoof`, `hipRoof`, `tiledRoof`, `roofDetail`, `roofEdges` | ART REVIEW | Parent / cottage batch | Cottage/civic components authored and wired | Blender technical + visual review passed | Live gameplay visual approval |
 | B11 Timber facade / gables, S `beam`, `building` | ART REVIEW | Parent / cottage batch | Cottage/civic components authored and wired | Blender technical + visual review passed | Live gameplay visual approval |
@@ -117,3 +118,7 @@ Coverage: **92 inventory entries** — KEEP: 5, MISSING: 12, REBUILD: 16, REDESI
 - Live desktop/mobile roam, night/rain and performance review remains open: browser screenshots failed and later browser-control calls timed out.
 - Complete the still-queued merged complexes, terrain and shoreline detail, grass/reeds and character families.
 - Validate concurrent atmosphere/contact-shadow work against the final assets and optimize the combined asset bundle.
+
+## Regular-building development pass
+
+Homes and regular civic families now have eight authored development states, with growing district buildings and derived progression. See [development evidence](building-development.md).

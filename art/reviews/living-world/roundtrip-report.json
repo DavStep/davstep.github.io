@@ -1,0 +1,12 @@
+{
+  "0": {
+    "triangles": 1214,
+    "meshes": 61,
+    "result": "pass"
+  },
+  "1": {
+    "triangles": 890,
+    "meshes": 58,
+    "result": "pass"
+  }
+}

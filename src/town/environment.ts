@@ -8,9 +8,7 @@ import { channelFront } from './river-works';
 import { MILL_POOL, millStreamDistance, millStreamParameter } from './game-path';
 import { isLivingWorldSite } from './living-world-state';
 import { isMountWorksite } from './landscape-state';
-import { isFrontierSite } from './milestones';
-import { isFrontierCorridor, routeNearest, type RegionPoint } from './frontier-layout';
-import { isOutskirtSite } from './outskirts-state';
+import { isRegionalRiverCorridor, routeNearest, type RegionPoint } from './frontier-layout';
 import { isDistrictSite } from './idea-districts';
 import { landHeight, terrainGridCoordinate, terrainGridDivisions } from './topography';
 import { riverCenter, riverHalfWidth, riverSurfaceHeight } from './river-layout';
@@ -63,6 +61,11 @@ function waterMaterial(time:{value:number},light:{value:number},pond=false):THRE
 export class Environment {
   readonly group=new THREE.Group();
   readonly trees:{x:number;z:number;r:number}[]=[];
+  readonly activeTrees:{x:number;z:number;r:number}[]=[];
+  private readonly forestLayers:THREE.Group[]=[];
+  private readonly mainWater=new THREE.Group();
+  private riverLevel=0;
+  private groveLevel=0;
   private readonly grassPaint=new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true});
   private readonly wind={value:0};
   private readonly waterTime={value:0};
@@ -76,13 +79,15 @@ export class Environment {
   private readonly regionalCuts=new Map<string,{progress:number;vertices:{geometry:THREE.BufferGeometry;index:number;base:number;target:number;t:number}[]}>();
   private readonly regionalOriginal=new Map<THREE.BufferGeometry,Map<number,number>>();
   private townSquare:THREE.Mesh|null=null;
-  private streamVertices:{index:number;x:number;z:number;natural:number;carved:number;streamT:number;moatT:number}[]=[];
+  private streamVertices:{index:number;x:number;z:number;base:number;natural:number;carved:number;streamT:number;moatT:number}[]=[];
+  private readonly streamVertexByIndex=new Map<number,(typeof this.streamVertices)[number]>();
   private streamStep=-1;
   private moatStep=0;
   private riverBankGeometry:THREE.BufferGeometry|null=null;
   private closedRiverBankIndices:number[]=[];
   private openRiverBankIndices:number[]=[];
   constructor(scene:THREE.Scene,private mobile:boolean,private gameMode=false){
+    this.mainWater.name='Main_river_and_ponds';
     this.buildTerrain();this.buildWater();this.buildMountains();this.buildForest();this.buildGrass();this.buildFlowers();
     scene.add(this.group);
   }
@@ -108,8 +113,11 @@ export class Environment {
   }
   setRegionalChannelProgress(id:string,progress:number){
     const cut=this.regionalCuts.get(id);if(!cut)return;const step=Math.round(THREE.MathUtils.clamp(progress,0,1)*32)/32;if(step===cut.progress)return;cut.progress=step;
-    for(const [geometry,original] of this.regionalOriginal){const p=geometry.getAttribute('position');for(const [i,y] of original)p.setY(i,y);}
-    for(const {progress,vertices} of this.regionalCuts.values())for(const v of vertices){const p=v.geometry.getAttribute('position');p.setY(v.index,Math.min(p.getY(v.index),THREE.MathUtils.lerp(v.base,v.target,channelFront(progress,v.t))));}
+    this.applyRegionalCuts();
+  }
+  private applyRegionalCuts():void{
+    for(const [geometry,original] of this.regionalOriginal){const p=geometry.getAttribute('position');for(const [i,y] of original){const stream=geometry===this.terrainGeometry?this.streamVertexByIndex.get(i):undefined;p.setY(i,stream?this.channelGround(stream):y);}}
+    for(const {progress,vertices} of this.regionalCuts.values())for(const v of vertices){const p=v.geometry.getAttribute('position'),base=p.getY(v.index);p.setY(v.index,Math.min(base,THREE.MathUtils.lerp(base,v.target,channelFront(progress,v.t))));}
     for(const geometry of this.regionalOriginal.keys()){geometry.getAttribute('position').needsUpdate=true;geometry.computeVertexNormals();}
   }
   createRiverMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight);}
@@ -121,6 +129,18 @@ export class Environment {
     this.townSquare.scale.set(Math.max(.001,size),1,Math.max(.001,size));
   }
   setRoadCenterVisible(visible:boolean):void{this.setRoadCenterProgress(visible?1:0);}
+  setRiverLevel(level:number):void{
+    if(!this.gameMode||level===this.riverLevel)return;
+    this.riverLevel=level;
+    this.mainWater.visible=level>0;
+    this.refreshChannels();
+  }
+  setGroveLevel(level:number):void{
+    if(!this.gameMode||level===this.groveLevel)return;
+    this.groveLevel=level;
+    this.forestLayers.forEach((layer,index)=>layer.visible=level>index);
+    this.activeTrees.splice(0,this.activeTrees.length,...this.trees.filter((_,index)=>index%8<level));
+  }
   setStreamProgress(progress:number):void{
     if(!this.gameMode||!this.terrainGeometry)return;
     const step=Math.round(THREE.MathUtils.clamp(progress,0,1)*64);
@@ -137,13 +157,16 @@ export class Environment {
   private refreshChannels():void{
     if(!this.terrainGeometry)return;
     const positions=this.terrainGeometry.getAttribute('position');
-    for(const v of this.streamVertices){
-      const ground=THREE.MathUtils.lerp(v.natural,v.carved,channelFront(Math.max(0,this.streamStep)/64,v.streamT));
-      positions.setY(v.index,THREE.MathUtils.lerp(ground,moatBedHeight(v.x,v.z,ground),channelFront(this.moatStep/64,v.moatT)));
-    }
+    for(const v of this.streamVertices)positions.setY(v.index,this.channelGround(v));
+    if(this.regionalOriginal.size){this.applyRegionalCuts();return;}
     positions.needsUpdate=true;
     this.terrainGeometry.computeVertexNormals();
     this.terrainGeometry.getAttribute('normal').needsUpdate=true;
+  }
+  private channelGround(v:(typeof this.streamVertices)[number]):number{
+    const plain=this.riverLevel>0?v.natural:v.base;
+    const ground=plain-(v.natural-v.carved)*channelFront(Math.max(0,this.streamStep)/64,v.streamT);
+    return THREE.MathUtils.lerp(ground,moatBedHeight(v.x,v.z,ground),channelFront(this.moatStep/64,v.moatT));
   }
   private buildTerrain(){
     const divisions=terrainGridDivisions(this.mobile);
@@ -154,9 +177,9 @@ export class Environment {
     for(let i=0;i<positions.count;i++){
       const x=terrainGridCoordinate(positions.getX(i)/350),z=terrainGridCoordinate(positions.getZ(i)/350),r=Math.hypot(x,z);
       positions.setX(i,x);positions.setZ(i,z);
-      const carved=terrainHeight(x,z),natural=this.gameMode?naturalTerrainHeight(x,z):carved;
-      positions.setY(i,natural);
-      if(this.gameMode&&(natural-carved>.001||moatDistance(x,z)<6))this.streamVertices.push({index:i,x,z,natural,carved,streamT:millStreamParameter(x,z),moatT:moatRouteParameter(x,z)});
+      const carved=terrainHeight(x,z),natural=this.gameMode?naturalTerrainHeight(x,z):carved,base=this.gameMode?baseTerrainHeight(x,z):natural;
+      positions.setY(i,base);
+      if(this.gameMode&&(base-natural>.001||natural-carved>.001||moatDistance(x,z)<6)){const vertex={index:i,x,z,base,natural,carved,streamT:millStreamParameter(x,z),moatT:moatRouteParameter(x,z)};this.streamVertices.push(vertex);this.streamVertexByIndex.set(i,vertex);}
       const c=low.clone().lerp(high,THREE.MathUtils.smoothstep(r,70,220)*.8).lerp(sand,rand(i*741)*.13);
       if(isWater(x,z,2.5))c.lerp(shoreColor,.2);
       colors.push(c.r,c.g,c.b);
@@ -199,7 +222,7 @@ export class Environment {
     const riverBanks=new THREE.Mesh(bankGeometry,bankMaterial);riverBanks.receiveShadow=true;
     const waterGeometry=new THREE.BufferGeometry();waterGeometry.setAttribute('position',new THREE.Float32BufferAttribute(water,3));waterGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(waterUv,2));waterGeometry.computeVertexNormals();
     const river=new THREE.Mesh(waterGeometry,waterMaterial(this.waterTime,this.waterLight));
-    this.group.add(riverBanks,river);
+    this.mainWater.add(riverBanks,river);
     for(const p of PONDS){
       const y=baseTerrainHeight(p.x,p.z)-.72,slope:number[]=[];
       for(let j=0;j<40;j++){
@@ -211,18 +234,20 @@ export class Environment {
       const shoreGeometry=new THREE.BufferGeometry();shoreGeometry.setAttribute('position',new THREE.Float32BufferAttribute(slope,3));shoreGeometry.computeVertexNormals();
       const shore=new THREE.Mesh(shoreGeometry,bankMaterial);shore.receiveShadow=true;
       const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,40),waterMaterial(this.waterTime,this.waterLight,true));pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y,p.z);
-      this.group.add(shore,pond);
-      for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45,x=p.x+Math.cos(a)*rr,z=p.z+Math.sin(a)*rr;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(x,terrainHeight(x,z)+.75,z);this.group.add(reed);}
+      this.mainWater.add(shore,pond);
+      for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45,x=p.x+Math.cos(a)*rr,z=p.z+Math.sin(a)*rr;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(x,terrainHeight(x,z)+.75,z);this.mainWater.add(reed);}
     }
     const stones:NaturePlacement[]=[];
-    const count=this.mobile?28:52;
+    const count=this.gameMode?(this.mobile?10:18):(this.mobile?28:52);
     for(let i=0;i<count;i++){
       const x=-205+i*410/count+rand(i*43)*3,side=i%2?1:-1,z=riverCenter(x)+side*(riverHalfWidth(x)+2.7+rand(i*19)*1.8);
       if(millStreamDistance(x,z)<5.5||moatDistance(x,z)<4)continue;
       stones.push({family:i%2?'Rock_A':'Rock_B',x,y:terrainHeight(x,z)-.045,z,rotation:i*2.4,
         sx:.72+rand(i*17)*1.04,sy:.45+rand(i*29)*.52,sz:.68+rand(i*13)*.8});
     }
-    addNatureInstances(this.group,stones,this.mobile,false);
+    addNatureInstances(this.mainWater,stones,this.mobile,false);
+    this.mainWater.visible=!this.gameMode;
+    this.group.add(this.mainWater);
   }
   private buildMountains(){
     // A connected ridge replaces the detached boulders. Its spine wanders in
@@ -294,23 +319,29 @@ export class Environment {
     ridge.receiveShadow=true;this.mountainMesh=ridge;this.group.add(ridge);
   }
   private buildForest(){
-    const count=this.mobile?250:520;
+    const count=this.gameMode?(this.mobile?110:220):(this.mobile?250:520);
     for(let i=0;i<count;i++){
       const a=rand(i*311+9)*Math.PI*2,r=69+Math.sqrt(rand(i*797+18))*90,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isOutskirtSite(x,z)||isFrontierSite(x,z)||isFrontierCorridor(x,z))))||isLivingWorldSite(x,z)||isWater(x,z)||millStreamDistance(x,z)<7.4||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3.8||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3.5||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<4))continue;
+      if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isRegionalRiverCorridor(x,z))))||isLivingWorldSite(x,z)||isWater(x,z)||millStreamDistance(x,z)<7.4||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.6))||r<67&&(Math.abs(x)<3.5||Math.abs(z)<3.5||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3.8||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3.5||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<4))continue;
       this.trees.push({x,z,r:.7+rand(i*27)*.5});
     }
     const pineFamilies=['Pine_A','Pine_B','Pine_C'] as const;
-    addNatureInstances(this.group,this.trees.map((t,i)=>{
-      const scale=.86+rand(i*83)*.9;
-      return {family:pineFamilies[i%3],x:t.x,y:terrainHeight(t.x,t.z)-.03,z:t.z,
-        sx:3.6*scale,sy:5.1*scale,sz:3.6*scale,rotation:rand(i*5)*Math.PI*2};
-    }),this.mobile);
+    for(let tier=0;tier<8;tier++){
+      const layer=new THREE.Group();layer.name=`Grove_outer_trees_${tier+1}`;
+      addNatureInstances(layer,this.trees.flatMap((t,i)=>{
+        if(i%8!==tier)return [];
+        const scale=.86+rand(i*83)*.9;
+        return [{family:pineFamilies[i%3],x:t.x,y:terrainHeight(t.x,t.z)-.03,z:t.z,
+          sx:3.6*scale,sy:5.1*scale,sz:3.6*scale,rotation:rand(i*5)*Math.PI*2}];
+      }),this.mobile);
+      layer.visible=!this.gameMode;this.group.add(layer);this.forestLayers.push(layer);
+    }
+    if(!this.gameMode)this.activeTrees.push(...this.trees);
     const rocks:NaturePlacement[]=[];
     const rockFamilies=['Rock_A','Rock_B','Rock_C'] as const;
-    for(let i=0;i<(this.mobile?50:95);i++){
+    for(let i=0;i<(this.gameMode?(this.mobile?14:26):(this.mobile?50:95));i++){
       const a=i*2.399,r=70+rand(i*313)*92,x=Math.cos(a)*r,z=Math.sin(a)*r;
-      if(isLivingWorldSite(x,z)||isWater(x,z,2)||millStreamDistance(x,z)<5||(this.gameMode&&(moatDistance(x,z)<4||isDistrictSite(x,z)||isOutskirtSite(x,z)||isFrontierSite(x,z)||isFrontierCorridor(x,z))))continue;
+      if(isLivingWorldSite(x,z)||isWater(x,z,2)||millStreamDistance(x,z)<5||(this.gameMode&&(moatDistance(x,z)<4||isDistrictSite(x,z)||isRegionalRiverCorridor(x,z))))continue;
       rocks.push({family:rockFamilies[i%3],x,y:terrainHeight(x,z)-.06,z,rotation:a,
         sx:1+rand(i*13)*2.4,sy:.5+rand(i*19)*1.2,sz:1.2+rand(i*23)*2.2});
     }
@@ -356,7 +387,7 @@ export class Environment {
     for(let i=0;i<attempts;i++){
       const a=rand(i*167+2)*Math.PI*2,r=i%2===0?Math.sqrt(rand(i*911+9))*71:71+Math.sqrt(rand(i*911+9))*75,x=Math.cos(a)*r,z=Math.sin(a)*r;
       const meadow=Math.sin(x*.045)*Math.sin(z*.059);
-      if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isOutskirtSite(x,z)||isFrontierSite(x,z)||isFrontierCorridor(x,z))))||isLivingWorldSite(x,z)||isMountWorksite(x,z)||rand(i*631+5)>.72+meadow*.24||isWater(x,z)||millStreamDistance(x,z)<7.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<2.3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<2.3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<2.5))continue;
+      if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isRegionalRiverCorridor(x,z))))||isLivingWorldSite(x,z)||isMountWorksite(x,z)||rand(i*631+5)>.72+meadow*.24||isWater(x,z)||millStreamDistance(x,z)<7.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?6.7:3.8))||r<67&&(Math.abs(x)<2.7||Math.abs(z)<2.7||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<2.3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<2.3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<2.5))continue;
       positions.push({x,z,s:.68+rand(i*13)*.72,a:rand(i*27)*6.28,color:i%5});
     }
     const grass=new THREE.InstancedMesh(geometry,this.grassPaint,positions.length),d=new THREE.Object3D();
@@ -379,14 +410,14 @@ export class Environment {
     petals.forEach(petal=>petal.dispose());
     const blooms:{x:number;z:number;size:number;color:number}[]=[];
     const palette=[0xffd35c,0xff8177,0xf5a4cb,0xb3a4ec,0xfff0ba];
-    for(let i=0;i<(this.mobile?350:850);i++){
+    for(let i=0;i<(this.gameMode?(this.mobile?90:150):(this.mobile?350:850));i++){
       const cluster=Math.floor(rand(i*79+17)*22);
       const angle=cluster*2.399,radius=32+(cluster%5)*23;
       const centerX=Math.cos(angle)*radius,centerZ=Math.sin(angle)*radius;
       const spread=2+Math.sqrt(rand(i*41+8))*11;
       const direction=rand(i*113+3)*Math.PI*2;
       const x=centerX+Math.cos(direction)*spread,z=centerZ+Math.sin(direction)*spread,r=Math.hypot(x,z);
-      if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isOutskirtSite(x,z)||isFrontierSite(x,z)||isFrontierCorridor(x,z))))||isLivingWorldSite(x,z)||isMountWorksite(x,z)||r>153||isWater(x,z,2.2)||millStreamDistance(x,z)<8||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:6))||r<67&&(Math.abs(x)<4||Math.abs(z)<4||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3))continue;
+      if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isRegionalRiverCorridor(x,z))))||isLivingWorldSite(x,z)||isMountWorksite(x,z)||r>153||isWater(x,z,2.2)||millStreamDistance(x,z)<8||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:6))||r<67&&(Math.abs(x)<4||Math.abs(z)<4||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3))continue;
       blooms.push({x,z,size:.75+rand(i*37+11)*.65,color:Math.floor(rand(i*67+19)*palette.length)});
     }
     const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}),blooms.length);

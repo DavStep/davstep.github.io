@@ -1,0 +1,12 @@
+{
+  "0": {
+    "meshes": 53,
+    "triangles": 636,
+    "roundtrip": "pass"
+  },
+  "1": {
+    "meshes": 31,
+    "triangles": 372,
+    "roundtrip": "pass"
+  }
+}

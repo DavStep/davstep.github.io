@@ -9,11 +9,9 @@ import { MILL_POOL, STREAM_BRIDGES, millStreamDistance, millStreamPoint } from '
 import { riverAsset } from './river-assets';
 import { wheatSiteClear } from './wheat-layout';
 import { Environment, naturalTerrainHeight, riverCenter, riverHalfWidth, riverSurfaceHeight, terrainHeight } from './environment';
-import { LivingWorld } from './living-world';
 import { Hillside } from './hillside';
 import { RiverWorks } from './river-works';
 import { FrontierWorld } from './frontier-world';
-import { Outskirts } from './outskirts';
 import { CastleMoat } from './castle-moat';
 import wheatTile from './generated/wheat-tile.json';
 import { MOAT_WATER_Y } from './moat-layout';
@@ -79,8 +77,6 @@ export class GameScenery {
   readonly group = new THREE.Group();
   private readonly hillside: Hillside;
   private readonly moat: CastleMoat;
-  private readonly livingWorld: LivingWorld;
-  private readonly outskirts: Outskirts;
   private readonly frontier: FrontierWorld;
   private readonly districts: DistrictScenery;
   private readonly riverWorks: RiverWorks;
@@ -117,9 +113,7 @@ export class GameScenery {
   constructor(scene: THREE.Scene, mobile: boolean,private readonly environment:Environment) {
     this.hillside = new Hillside(this.group, mobile);
     this.moat = new CastleMoat(this.group,mobile,environment);
-    this.livingWorld = new LivingWorld(this.group,mobile);
-    this.outskirts = new Outskirts(this.group,mobile);
-    this.frontier = new FrontierWorld(this.group,mobile,environment);
+    this.frontier = new FrontierWorld(this.group,mobile,environment,true);
     this.districts = new DistrictScenery(this.group,mobile);
     this.riverWorks = new RiverWorks(this.group,mobile,millStreamPoint,naturalTerrainHeight,streamSurfaceHeight,7.6,[.22,.8]);
     this.riverBed=new THREE.Mesh(channelRibbon().translate(0,-.75,0),new THREE.MeshStandardMaterial({color:0x8e7354,roughness:1,side:THREE.DoubleSide}));
@@ -226,14 +220,12 @@ export class GameScenery {
     this.levels = levels;
     this.hillside.setLevels(levels);
     this.moat.setLevels(levels,instant||this.reduced.matches);
-    this.livingWorld.setLevels(levels);
-    this.outskirts.setLevels(levels);
     this.frontier.setLevels(levels,instant||this.reduced.matches);
     this.districts.setLevels(levels,instant||this.reduced.matches);
     this.waterTarget = levels.river >= 2 ? 1 : 0;
     this.riverWorks.setActive(levels.river>=2,instant||this.reduced.matches);
     this.riverWorks.markers.visible=levels.river===1;
-    this.wheatTarget = levels.windmill >= 3 ? 1 : levels.windmill >= 2 ? .18 : 0;
+    this.wheatTarget = levels.windmill > 0 ? Math.min(1,Math.max(.08,(levels.windmill-1)/7)) : 0;
     this.rotor.visible = levels.windmill >= 2;
     this.bridges.visible = levels.river >= 2 && levels.roads >= 2;
     this.grove.visible = levels.grove > 0;
@@ -290,8 +282,6 @@ export class GameScenery {
     const immediate = this.reduced.matches;
     this.moat.update(dt,immediate);
     this.hillside.update(seconds, immediate);
-    this.livingWorld.update(seconds, immediate);
-    this.outskirts.update(seconds, immediate);
     this.frontier.update(dt,immediate);
     this.districts.update(dt,immediate);
     const approach = (value: number, target: number, rate: number) => immediate ? target : value < target ? Math.min(target, value + dt * rate) : Math.max(target, value - dt * rate);
@@ -377,8 +367,6 @@ export class GameScenery {
   dispose(): void {
     this.hillside.dispose();
     this.moat.dispose();
-    this.livingWorld.dispose();
-    this.outskirts.dispose();
     this.frontier.dispose();
     this.districts.dispose();
     this.riverWorks.dispose();

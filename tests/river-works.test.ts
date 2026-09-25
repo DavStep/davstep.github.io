@@ -1,27 +1,34 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { IDEAS,evaluate,parseGameSave,chooseIdea,upgradeBlocker } from '../src/town/game';
+import { IDEAS,evaluate,parseGameSave,chooseIdea } from '../src/town/game';
 import { RiverWorks,riverWorkProgress,channelFront,RIVER_WORK_SECONDS } from '../src/town/river-works';
 import { millStreamPoint,millStreamParameter } from '../src/town/game-path';
-import { naturalTerrainHeight,Environment,isWater } from '../src/town/environment';
+import { naturalTerrainHeight,Environment } from '../src/town/environment';
 import { streamSurfaceHeight } from '../src/town/game-scenery';
 import { moatRoutePoint,moatRouteParameter } from '../src/town/moat-layout';
 import { MAT } from '../src/town/materials';
 
-test('River waits for workers and tools, then water rescues earlier options automatically',()=>{
-  const waiting=evaluate(['windmill','river']);assert.equal(waiting.levels.river,1);assert.match(upgradeBlocker('river',waiting.levels,0)!,/Settlers/);
-  const channel=evaluate(['windmill','river','settlers','grove','workshop']);
-  assert.equal(channel.levels.river,2);assert.equal(channel.levels.windmill,1);assert.equal(channel.levels.grove,3);
-  const connected=evaluate([...channel.order,'roads','market']);assert.ok(connected.levels.river>=3);assert.ok(connected.levels.windmill>=3);
+test('River builds a mill race with an earlier mill and can advance other sites later',()=>{
+  const first=evaluate(['windmill','river']);
+  assert.ok(first.projects.includes('mill-race'));
+  assert.equal(first.levels.river,2);
+  assert.equal(first.levels.windmill,2);
+  const later=evaluate(['windmill','river','settlers','grove','workshop','roads','market']);
+  assert.ok(later.levels.river>=first.levels.river);
+  assert.ok(later.levels.grove>0);
+  assert.ok(later.faults.some(fault=>fault.project==='grove-irrigation'));
   assert.equal(evaluate(IDEAS).perfect,true);
-  assert.equal(evaluate(['walls',...IDEAS.filter(x=>x!=='walls')]).levels.river,8);
 });
 
-test('nine-choice saves retain their choices and can select the new River',()=>{
-  const old=IDEAS.filter(x=>x!=='river');const save=parseGameSave(JSON.stringify({version:1,started:true,order:old,bestMax:9}));
-  assert.deepEqual(save.order,old);assert.equal(evaluate(save.order).finished,false);
-  const state=chooseIdea(save,'river');assert.equal(state.finished,true);assert.equal(state.perfect,true);
+test('version two nine-choice saves retain their route and can choose River',()=>{
+  const order=IDEAS.filter(idea=>idea!=='river');
+  const save=parseGameSave(JSON.stringify({version:2,started:true,order,bestMax:9}));
+  assert.deepEqual(save.order,order);
+  const state=chooseIdea(save,'river');
+  assert.equal(state.finished,true);
+  assert.equal(state.perfect,false);
+  assert.ok(state.faults.some(fault=>fault.project==='waterway-map'));
 });
 
 test('excavation finishes before the fluid front advances',()=>{
@@ -35,18 +42,17 @@ test('excavation finishes before the fluid front advances',()=>{
   for(const t of [.02,.07,.2,.5,.9]){const p=moatRoutePoint(t);assert.ok(Math.abs(moatRouteParameter(p.x,p.z)-t)<.002);}
 });
 
-test('diggers animate, water follows, and skip/reload/restart release temporary effects in both tiers',()=>{
+test('river excavation advances without spawning a separate crew, and resets in both tiers',()=>{
   for(const mobile of [false,true]){
     const parent=new THREE.Group(),works=new RiverWorks(parent,mobile,millStreamPoint,naturalTerrainHeight,streamSurfaceHeight,7.6,[.22,.8]);
     works.setActive(true);works.update(1);
-    const worker=works.group.getObjectByName('River_digger_0')!;assert.equal(worker.visible,true);for(const w of works.group.children.filter(o=>o.name.startsWith('River_digger_'))){assert.equal(isWater(w.position.x,w.position.z,.6),false);assert.ok(Math.hypot(w.position.x-29,w.position.z+31)>3.2,'crew clears the cistern');}
-    const position=worker.position.clone();
-    works.update(1);assert.ok(worker.position.distanceTo(position)>.5);assert.equal(works.flowProgress,0);
-    works.update(3.5);assert.equal(worker.visible,false);assert.ok(works.flowProgress>0&&works.flowProgress<1);
+    assert.equal(works.group.children.filter(o=>o.name.startsWith('River_digger_')).length,0);
+    works.update(1);assert.equal(works.flowProgress,0);
+    works.update(3.5);assert.ok(works.flowProgress>0&&works.flowProgress<1);
     works.setActive(true);assert.ok(works.flowProgress>0,'other choices must not restart digging');
     works.setActive(true,true);assert.equal(works.flowProgress,1);assert.equal(works.working,false);
     works.setActive(false,true);assert.equal(works.digProgress,0);assert.equal(works.flowProgress,0);
-    works.setActive(true);works.update(.01,true);assert.equal(works.flowProgress,1);assert.equal(worker.visible,false);
+    works.setActive(true);works.update(.01,true);assert.equal(works.flowProgress,1);
     let sharedDisposed=false;const onDispose=()=>sharedDisposed=true;MAT.earth.addEventListener('dispose',onDispose);
     works.dispose();MAT.earth.removeEventListener('dispose',onDispose);assert.equal(parent.children.length,0);assert.equal(sharedDisposed,false);
   }

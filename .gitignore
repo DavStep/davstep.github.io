@@ -7,3 +7,17 @@ dist/
 art/blender/*.blend1
 art/reviews/world/runtime-geometry.json
 art/blender/__pycache__/
+
+art/reviews/castle-mount/runtime-geometry.json
+art/reviews/living-world/runtime-geometry.json
+art/reviews/parachute/runtime-geometry.json
+art/reviews/moat/runtime-geometry.json
+art/reviews/roads/runtime-geometry.json
+
+art/reviews/outskirts/runtime-geometry.json
+
+art/reviews/river/runtime-*.json
+
+# Generated Blender scene exports; keep review images and reports in Git.
+art/reviews/**/runtime-*.json
+art/reviews/districts/market-first.json

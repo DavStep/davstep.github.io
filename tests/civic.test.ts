@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as THREE from 'three';
-import { CIVIC_SHARED_GEOMETRIES, civicBuilding, millRotor } from '../src/town/civic';
+import { CIVIC_SHARED_GEOMETRIES, civicBuilding, millRotor, civicFamilyFor } from '../src/town/civic';
 import data from '../src/town/generated/civic.json';
 import { MILL_ROTOR_SOCKET } from '../src/town/windmill-layout';
 import { PLOTS, INFRASTRUCTURE, accessPathFor } from '../src/town/town-plan';
 import { terrainHeight } from '../src/town/environment';
 import type { PlotState } from '../src/town/model';
+import { evaluate } from '../src/town/game';
+import { snapshotForGame } from '../src/town/game-snapshot';
 
 const families = ['market', 'tavern', 'forge', 'mill', 'guild', 'post'] as const;
 const plot = (kind: typeof families[number], stage: number): PlotState => ({
@@ -39,7 +41,7 @@ test('civic stages stay inside the existing collider envelopes and triangle ceil
   for (const kind of families) {
     for (const mobile of [false, true]) {
       const lod = mobile ? 1 : 0;
-      const parts = data.parts.filter(part => part.family === kind && part.lod === lod
+      const parts = data.parts.filter(part => part.family === civicFamilyFor(plot(kind, 6)) && part.lod === lod
         && part.minStage <= 6 && part.maxStage >= 6);
       const triangles = parts.reduce((sum, part) => sum + part.indices.length / 3, 0);
       assert.ok(triangles <= (mobile ? 2300 : 5500), `${kind} LOD${lod}: ${triangles} triangles`);
@@ -144,5 +146,21 @@ test('mill entrance lane stays walkable through the mature farm site', async () 
   for (let i = 0; i <= 40; i++) {
     const a = angle * (1-i/40);
     assert.equal(isBlocked(Math.cos(a)*INFRASTRUCTURE.road.outerRingRadius, Math.sin(a)*INFRASTRUCTURE.road.outerRingRadius, colliders), false);
+  }
+});
+
+
+test('archive gets a dedicated library model while district offices retain their post model', () => {
+  for (const mobile of [false, true]) {
+    const firstArchive = snapshotForGame(evaluate(['archive']).levels).plots.find(p => p.id === 'post')!;
+    const archive = civicBuilding(firstArchive, mobile);
+    assert.ok(archive.children.every(child => child.name.startsWith('ENV_Civic_archive_')));
+    assert.ok(archive.children.some(child => child.name.includes('_archive_identity_')));
+    assert.ok(new THREE.Box3().setFromObject(archive).max.y > 8, 'tall reading-hall silhouette at the first playable tier');
+    const office = civicBuilding({ ...plot('post', 6), id: 'district-market-trade-office' }, mobile);
+    assert.ok(office.children.every(child => child.name.startsWith('ENV_Civic_post_')));
+    const library = civicBuilding({ ...plot('guild', 6), id: 'district-archive-great-library' }, mobile);
+    assert.ok(library.children.every(child => child.name.startsWith('ENV_Civic_archive_')));
+    assert.ok(library.children.some(child => child.name.includes('_stage6_map_room_')));
   }
 });

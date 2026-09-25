@@ -18,6 +18,9 @@ for old in list(bpy.data.scenes):
         bpy.data.batch_remove(ids=[obj for obj in owned if not obj.users_scene])
         for col in cols:
             if col.users==0:bpy.data.collections.remove(col)
+# Rebuilding in the same Blender session can leave unreferenced meshes behind.
+unused_meshes=[mesh for mesh in bpy.data.meshes if mesh.users==0]
+if unused_meshes:bpy.data.batch_remove(ids=unused_meshes)
 for old in list(bpy.data.materials):
     if old.name.startswith('MAT_Castle_') and old.users==0:bpy.data.materials.remove(old)
 
@@ -29,7 +32,7 @@ COLORS={'stone':'a7a195','stoneDark':'777b78','wood':'80604b','woodDark':'674d3d
 mats={}
 for k,h in COLORS.items():
     m=bpy.data.materials.new('MAT_Castle_'+k);m.diffuse_color=(*rgb(h),1);m.use_nodes=True
-    p=m.node_tree.nodes.get('Principled BSDF');p.inputs['Base Color'].default_value=m.diffuse_color;p.inputs['Roughness'].default_value=.93
+    p=next(n for n in m.node_tree.nodes if n.type=='BSDF_PRINCIPLED');p.inputs['Base Color'].default_value=m.diffuse_color;p.inputs['Roughness'].default_value=.93
     m['runtime']='roofTiles' if k.startswith('tile_') else k;mats[k]=m
 
 library=bpy.data.scenes.new('Castle_Library');bpy.context.window.scene=library
@@ -108,16 +111,27 @@ def tower(cx,cy,h,lod,roofed):
         frustum('roof_ledge',cx,cy,h+.5,h+.63,1.27,1.31,n,'stone')
         cone_tiles('orange_tower_tiles',cx,cy,h+.61,h+2.65,1.40,lod)
         frustum('gold_finial',cx,cy,h+2.64,h+3.0,.11,.055,8,'gold')
-def wall_stones(lod):
-    if lod:return
-    # A few projecting blocks at corners and beside the gate add depth without dense noise.
+def arched_front_wall(lod):
+    # The wall has a real one-unit-deep entrance cavity. Its inner silhouette
+    # follows the gate voussoirs; the dark backing sits at the rear of the cavity.
+    z0=.125;ztop=4.515;outer=5.125;half=1.20
+    yfront=-4.90;yback=-3.95;depth=yback-yfront
+    pier_w=outer-half
     for side in [-1,1]:
-        for row,z in enumerate([.45,1.45,2.45,3.45]):
-            for i in range(3):
-                x=side*(2.1+i*.82+(row%2)*.18)
-                box('projecting_stone',(x,-5.02,z),(.62,.12,.25),'stoneDark' if (i+row)%4==0 else 'stone')
-        for i in range(3):
-            box('return_masonry',(side*5.34,-3.5+i*2.4,1.2+i*.67),(.10,.65,.29),'stone')
+        box('gate_wall_pier',(side*(outer+half)/2,(yfront+yback)/2,(z0+ztop)/2),
+            (pier_w,depth,ztop-z0),'stone')
+    n=12 if lod==0 else 8
+    vs=[]
+    for i in range(n+1):
+        x=-half+2*half*i/n
+        z=2.0+1.20*math.sqrt(max(0,1-(x/half)**2))
+        vs.extend([(x,yfront,z),(x,yback,z),(x,yfront,ztop),(x,yback,ztop)])
+    fs=[]
+    for i in range(n):
+        a=i*4;b=(i+1)*4
+        fs.extend([(a,b,b+2,a+2),(a+1,a+3,b+3,b+1),
+                   (a,a+1,b+1,b),(a+2,b+2,b+3,a+3)])
+    mesh('arched_gate_wall',vs,fs,'stone')
 def battlement(lod):
     for x in range(-4,5):
         if abs(x)<2:continue
@@ -170,6 +184,42 @@ def great_hall(lod):
                 vs=[tuple(p+Vector((0,0,.055+row*.012))) for p in top]+[tuple(p+Vector((0,0,-.03))) for p in top]
                 mesh('hall_shoulder_tile',vs,[(0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)],'tile_'+str((side+row+col)%4))
 
+def early_hip_roof(lod):
+    # Stage 4 needs a complete roof: the stage-5 great hall replaces this mass.
+    # Keep the eaves just inside the parapet and below the four corner spires.
+    lower=[Vector(v) for v in [(-4.80,-4.25,4.81),(4.80,-4.25,4.81),
+                              (4.80,4.25,4.81),(-4.80,4.25,4.81)]]
+    upper=[Vector(v) for v in [(-2.25,-.18,6.30),(2.25,-.18,6.30),
+                              (2.25,.18,6.30),(-2.25,.18,6.30)]]
+    box('early_roof_support',(0,0,4.65),(9.55,8.45,.29),'woodDark')
+    mesh('early_roof_underlay',[tuple(p) for p in lower+upper],
+         [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),
+          (2,3,7,6),(3,0,4,7)],'woodDark')
+    rows=6 if lod==0 else 4
+    for side in range(4):
+        a,b=lower[side],lower[(side+1)%4]
+        d,c=upper[side],upper[(side+1)%4]
+        normal=(b-a).cross(d-a).normalized()
+        columns=(12 if lod==0 else 7) if side%2==0 else (9 if lod==0 else 5)
+        for row in range(rows):
+            t0=row/rows;t1=min(1,(row+1.08)/rows)
+            left0=a.lerp(d,t0);right0=b.lerp(c,t0)
+            left1=a.lerp(d,t1);right1=b.lerp(c,t1)
+            shift=.5/columns if row%2 else 0
+            for col in range(-1,columns+1):
+                u0=max(0,(col+shift)/columns)
+                u1=min(1,(col+1+shift)/columns-.006)
+                if u1-u0<.025:continue
+                top=[left0.lerp(right0,u0),left0.lerp(right0,u1),
+                     left1.lerp(right1,u1),left1.lerp(right1,u0)]
+                top=[p+normal*(.055+row*.008) for p in top]
+                back=[p-normal*.065 for p in top]
+                mesh('early_overlapping_tile',[tuple(p) for p in top+back],
+                     [(0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),
+                      (2,6,7,3),(3,7,4,0)],'tile_'+str((side+row+col)%4))
+        beam('early_eave_trim',a,b,.11,'woodDark')
+    beam('early_ridge',(-2.25,0,6.33),(2.25,0,6.33),.14,'roof')
+
 def build(lod):
     pre='ENV_Castle_LOD'+str(lod)
     group(pre+'_foundation',lod,1)
@@ -187,25 +237,33 @@ def build(lod):
         for y in [-4.36,4.36]:box('scaffold_post',(x,y,1.48),(.21,.21,2.38),'woodDark')
     for y in [-4.36,4.36]:box('scaffold_beam',(0,y,2.55),(9.85,.17,.20),'wood')
     group(pre+'_walls',lod,3)
-    box('curtain_core',(0,0,2.32),(10.25,9.25,4.39),'stone')
+    arched_front_wall(lod)
+    box('curtain_rear',(0,4.425,2.32),(10.25,.95,4.39),'stone')
+    for side in [-1,1]:
+        box('curtain_side',(side*4.65,0,2.32),(.95,9.80,4.39),'stone')
     for yy in [-4.83,4.83]:
         box('parapet_course',(0,yy,4.45),(10.45,.50,.33),'stoneDark')
     for xx in [-5.22,5.22]:box('side_parapet_course',(xx,0,4.45),(.52,9.62,.33),'stoneDark')
-    wall_stones(lod)
-    arch_shape('arched_gate_recess',-4.851,.30,2.38,1.86,1.11,'window',lod)
-    for x in [-1.36,1.36]:box('gate_jamb',(x,-4.94,1.56),(.28,.30,2.40),'stoneDark')
+    arch_shape('arched_gate_recess',-3.94,.30,2.40,1.70,1.20,'window',lod)
+    for x in [-1.32,1.32]:
+        box('gate_jamb',(x,-4.97,1.15),(.25,.20,1.70),'stoneDark')
     for sx in [-1,1]:
         for sy in [-1,1]:tower(sx*5.17,sy*4.7,4.65,lod,False)
     group(pre+'_early_roofs',lod,4,4)
     # The stage-4 spires sit on the same round tower footprint as the old castle.
     for sx in [-1,1]:
         for sy in [-1,1]:cone_tiles('stage4_spire',sx*5.17,sy*4.7,5.24,7.00,1.39,lod)
+    early_hip_roof(lod)
     group(pre+'_gate',lod,4)
     # Segmental arch voussoirs read from the front at a distance.
     for i in range(8 if lod==0 else 5):
         count=8 if lod==0 else 5;a=math.pi*i/count;b=math.pi*(i+1)/count
-        def p(rad,angle):return (math.cos(angle)*rad,-5.025,2.0+math.sin(angle)*rad)
-        mesh('arch_voussoir',[p(1.20,a),p(1.20,b),p(1.45,b),p(1.45,a)],[(0,1,2,3)],'stoneDark' if i%3==0 else 'stone')
+        def p(rad,angle,y):return (math.cos(angle)*rad,y,2.0+math.sin(angle)*rad)
+        vs=[p(rad,angle,y) for y in [-5.04,-4.83]
+            for rad,angle in [(1.20,a),(1.20,b),(1.45,b),(1.45,a)]]
+        mesh('arch_voussoir',vs,[(0,1,2,3),(4,7,6,5),(0,4,5,1),
+                                  (1,5,6,2),(2,6,7,3),(3,7,4,0)],
+             'stoneDark' if i%3==0 else 'stone')
     for x in [-.84,-.42,0,.42,.84]:box('portcullis_bar',(x,-5.08,1.25),(.075,.12,1.75),'iron')
     box('portcullis_crossbar',(0,-5.10,.8),(2.15,.12,.10),'iron')
     box('portcullis_crossbar',(0,-5.10,1.55),(2.15,.12,.10),'iron')
@@ -344,8 +402,9 @@ if os.path.exists(before):
         mesh('BEFORE_Original_%03d'%mi,vs,fs,item['material'] if item['material'] in mats else 'stone')
 box('Review_ground',(9.5,0,-.19),(39,25,.34),'woodDark')
 world=bpy.data.worlds.new('Castle_Studio_Sky');world.use_nodes=True
-world.node_tree.nodes['Background'].inputs[0].default_value=(.40,.53,.67,1)
-world.node_tree.nodes['Background'].inputs[1].default_value=.65;review.world=world
+bg=next(n for n in world.node_tree.nodes if n.type=='BACKGROUND')
+bg.inputs['Color'].default_value=(.40,.53,.67,1)
+bg.inputs['Strength'].default_value=.65;review.world=world
 ld=bpy.data.lights.new('Castle_Review_Sun','SUN');ld.energy=2.8;ld.angle=.13
 light=bpy.data.objects.new('Castle_Review_Sun',ld);active.objects.link(light);light.rotation_euler=(.5,-.55,-.5)
 camd=bpy.data.cameras.new('Castle_Review_Camera');cam=bpy.data.objects.new('Castle_Review_Camera',camd);active.objects.link(cam)
@@ -359,6 +418,41 @@ bpy.ops.render.render(write_still=True)
 for o in review.objects:
     if o.name.startswith('BEFORE_'):o.hide_render=False
 
+# Keep a review of the roofed stage the player sees before the taller keep grows.
+stage4=bpy.data.scenes.new('Castle_Stage4_Review');bpy.context.window.scene=stage4
+for col,m in parts:
+    if m['lod']==0 and m['minStage']<=4<=m['maxStage']:
+        for src in col.objects:
+            o=src.copy();o.data=src.data;stage4.collection.objects.link(o)
+stage4.world=world
+stage4_light=bpy.data.lights.new('Castle_Stage4_Sun','SUN');stage4_light.energy=2.8;stage4_light.angle=.15
+stage4_sun=bpy.data.objects.new('Castle_Stage4_Sun',stage4_light)
+stage4.collection.objects.link(stage4_sun);stage4_sun.rotation_euler=(.5,-.55,-.5)
+stage4_camd=bpy.data.cameras.new('Castle_Stage4_Camera')
+stage4_cam=bpy.data.objects.new('Castle_Stage4_Camera',stage4_camd)
+stage4.collection.objects.link(stage4_cam);stage4_cam.location=(16,-20,15)
+stage4_target=Vector((0,0,3.1))
+stage4_cam.rotation_euler=(stage4_target-stage4_cam.location).to_track_quat('-Z','Y').to_euler()
+stage4_camd.type='ORTHO';stage4_camd.ortho_scale=17;stage4.camera=stage4_cam
+stage4.render.engine=review.render.engine
+stage4.render.resolution_x=1100;stage4.render.resolution_y=950
+stage4.render.resolution_percentage=100
+stage4.render.image_settings.file_format='PNG'
+stage4.render.filepath=REV+'/castle-stage4.png'
+bpy.ops.render.render(write_still=True)
+stage4_cam.location=(8,-18,8.2)
+detail_target=Vector((0,-4.5,2.2))
+stage4_cam.rotation_euler=(detail_target-stage4_cam.location).to_track_quat('-Z','Y').to_euler()
+stage4_camd.ortho_scale=8.5
+stage4.render.resolution_x=1050;stage4.render.resolution_y=850
+stage4.render.filepath=REV+'/castle-entrance-detail.png'
+bpy.ops.render.render(write_still=True)
+stage4_cam.location=(16,-20,15)
+stage4_cam.rotation_euler=(stage4_target-stage4_cam.location).to_track_quat('-Z','Y').to_euler()
+stage4_camd.ortho_scale=17
+stage4.render.resolution_x=1100;stage4.render.resolution_y=950
+stage4.render.filepath=REV+'/castle-stage4.png'
+
 # Round-trip imports to separate scene; validate material and geometry presence.
 roundtrip=bpy.data.scenes.new('Castle_Export_RoundTrip');bpy.context.window.scene=roundtrip
 roundtrip_counts={}
@@ -368,6 +462,6 @@ for lod in [0,1]:
     roundtrip_counts[f'LOD{lod}']=sum(len(o.data.polygons) for o in imported)
     for o in imported:o.hide_render=True
 with open(REV+'/technical-report.json','w') as f:json.dump({'triangles':counts,'roundTripPolygons':roundtrip_counts,'parts':len(payload['parts'])},f,indent=2)
-bpy.context.window.scene=review
+bpy.context.window.scene=stage4
 bpy.ops.wm.save_as_mainfile(filepath=OUT+'/castle.blend')
 print('CASTLE_EXPORT',json.dumps(counts),'parts',len(payload['parts']),'roundtrip',roundtrip_counts)

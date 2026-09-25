@@ -12,7 +12,7 @@ const plot = (stage: number, variant: number, renovation = 0): PlotState => ({
 
 test('every cottage family and construction stage has desktop and mobile geometry', () => {
   for (const mobile of [false, true]) {
-    for (let stage = 1; stage <= 6; stage++) {
+    for (let stage = 1; stage <= 8; stage++) {
       for (let variant = 0; variant < 3; variant++) {
         const group = cottageBuilding(plot(stage, variant), mobile);
         assert.ok(group.children.length > 0, `missing stage ${stage}, family ${variant}, mobile ${mobile}`);

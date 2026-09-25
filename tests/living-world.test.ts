@@ -13,9 +13,9 @@ test('habitat, husbandry and trade have distinct progression requirements',()=>{
   assert.deepEqual(livingWorldForLevels(empty),{birds:0,deer:0,sheep:0,port:0,ships:0});
   assert.equal(livingWorldForLevels(evaluate(['grove']).levels).birds,4);
   assert.equal(livingWorldForLevels(evaluate(['grove']).levels).deer,0);
-  assert.equal(livingWorldForLevels(evaluate(['settlers','grove']).levels).deer,2);
-  assert.equal(livingWorldForLevels(evaluate(['settlers','grove']).levels).sheep,0);
-  assert.equal(livingWorldForLevels(evaluate(IDEAS.slice(0,4)).levels).sheep,3);
+  assert.equal(livingWorldForLevels(evaluate(['settlers','grove']).levels).deer,4);
+  assert.equal(livingWorldForLevels(evaluate(['settlers','grove']).levels).sheep,5);
+  assert.equal(livingWorldForLevels(evaluate(IDEAS.slice(0,4)).levels).sheep,5);
   assert.deepEqual(livingWorldForLevels(full),{birds:10,deer:4,sheep:7,port:3,ships:2});
   const sealed=evaluate(['walls','settlers','grove','workshop','roads','market','windmill','archive','observatory']).levels;
   assert.equal(livingWorldForLevels(sealed).ships,0,'sealed or failed supply route cannot produce river trade');

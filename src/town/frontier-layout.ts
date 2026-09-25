@@ -36,3 +36,6 @@ export function regionalRiverWidth(index:number,t:number){return index===3?2.5+5
 export function isFrontierCorridor(x:number,z:number){
   return FRONTIER_ROADS.some(r=>routeNearest(r,x,z).distance<5)||FRONTIER_RIVERS.some((r,i)=>{const n=routeNearest(r,x,z);return n.distance<regionalRiverWidth(i,n.t)+5;});
 }
+export function isRegionalRiverCorridor(x:number,z:number){
+  return FRONTIER_RIVERS.some((route,index)=>{const near=routeNearest(route,x,z);return near.distance<regionalRiverWidth(index,near.t)+5;});
+}

@@ -1,3 +1,4 @@
+import { isRegularBuilding } from './building-development';
 import type { Idea, Levels } from './game';
 import type { Plot, PlotState } from './model';
 
@@ -34,7 +35,7 @@ const EXPANSIONS:Record<DistrictIdea,readonly [Plot['kind'],number,number,string
 export function districtExpansionPlots(levels:Levels):PlotState[]{
   return DISTRICT_IDEAS.flatMap(idea=>EXPANSIONS[idea].map(([kind,dx,dz,name],i)=>({
     id:`district-${idea}-${name}`,kind,x:IDEA_DISTRICTS[idea].x+dx,z:IDEA_DISTRICTS[idea].z+dz,
-    start:0,step:1,variant:i%3,stage:levels[idea]>=i+4?6:0,renovation:0,
+    start:0,step:1,variant:i%3,stage:levels[idea]<i+4?0:isRegularBuilding({id:`district-${idea}-${name}`,kind})?Math.min(8,3+(levels[idea]-i-4)*2):6,renovation:0,
   })));
 }
 export function districtConnections(levels:Levels,gateMask:number):DistrictIdea[]{

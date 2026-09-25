@@ -228,6 +228,9 @@ export class TownScene {
   readonly renderer:THREE.WebGLRenderer;
   readonly pickBoxes=new Map<ProjectKey,THREE.Box3>();
   readonly treeObstacles:{x:number;z:number;r:number}[]=[];
+  private readonly allTreeObstacles:{x:number;z:number;r:number;tier:number}[]=[];
+  private readonly treeLayers:THREE.Group[]=[];
+  private groveLevel=-1;
   private readonly land=new THREE.Group();
   readonly environment:Environment;
   private readonly sky:TownSky;
@@ -254,7 +257,7 @@ export class TownScene {
   private previousStructureMaterials:THREE.Material[]=[];
   private wallMaterials:THREE.Material[]=[];
   private previousWallMaterials:THREE.Material[]=[];
-  private structureTransition:{started:number;plots:PlotState[];height:number}|null=null;
+  private structureTransition:{started:number;plots:PlotState[];base:number;height:number}|null=null;
   private constructionEffects:ConstructionEffects|null=null;
   private wallEffects:ConstructionEffects|null=null;
   private wallTransition:{started:number;snapshot:TownSnapshot}|null=null;
@@ -296,7 +299,7 @@ export class TownScene {
     this.rain=new Rain(this.scene,this.mobile);
     this.contactShadows=new ContactShadows(this.scene,terrainHeight);
     this.camera.position.set(95,106,108);this.camera.lookAt(0,0,0);
-    this.createDecor();this.contactShadows.setTrees([...this.environment.trees,...this.treeObstacles]);this.resize();
+    this.createDecor();this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);this.resize();
   }
   resize(){const w=innerWidth,h=innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
   setPixelRatio(r:number){this.renderer.setPixelRatio(r);this.resize();}
@@ -316,20 +319,25 @@ export class TownScene {
     for(const [material,geometries] of patches){const merged=mergeGeometries(geometries);geometries.forEach(g=>g.dispose());if(merged)this.land.add(new THREE.Mesh(merged,material));}
   }
   private createDecor(){
-    const trees:{x:number;z:number;scale:number;shape:number}[]=[];
-    for(let i=0;i<150;i++){
+    const trees:{x:number;z:number;scale:number;shape:number;tier:number}[]=[];
+    for(let i=0;i<(this.gameMode?(this.mobile?36:65):150);i++){
       const angle=hash(i*397)%6283/1000,r=8+(hash(i*193+8)%580)/10;
       const x=Math.cos(angle)*r,z=Math.sin(angle)*r;
       if(r<16||(this.gameMode&&moatDistance(x,z)<7)||isLivingWorldSite(x,z)||isMountWorksite(x,z)||r>66||millAccessDistance(x,z)<2.3||this.gameMode&&(millStreamDistance(x,z)<8||x>29&&x<45&&z>-43&&z<-23||x>6&&x<17&&z>-43&&z<-24)||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3.5||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5))||Math.abs(x)<2.2||Math.abs(z)<2.2)continue;
-      trees.push({x,z,scale:.75+(hash(i*411)%75)/100,shape:i%3});
-      this.treeObstacles.push({x,z,r:.8});
+      const tier=trees.length%8;
+      trees.push({x,z,scale:.75+(hash(i*411)%75)/100,shape:i%3,tier});
+      this.allTreeObstacles.push({x,z,r:.8,tier});
     }
-    const dummy=new THREE.Object3D();
     const pineFamilies=['Pine_A','Pine_B','Pine_C'] as const;
-    addNatureInstances(this.land,trees.map((t,i)=>({family:pineFamilies[t.shape],x:t.x,y:terrainHeight(t.x,t.z)-.03,z:t.z,
-      sx:3.45*t.scale,sy:5.1*t.scale,sz:3.45*t.scale,rotation:i*2.4})),this.mobile);
+    for(let tier=0;tier<8;tier++){
+      const layer=new THREE.Group();layer.name=`Grove_town_trees_${tier+1}`;
+      addNatureInstances(layer,trees.filter(tree=>tree.tier===tier).map((t,i)=>({family:pineFamilies[t.shape],x:t.x,y:terrainHeight(t.x,t.z)-.03,z:t.z,
+        sx:3.45*t.scale,sy:5.1*t.scale,sz:3.45*t.scale,rotation:i*2.4})),this.mobile);
+      layer.visible=!this.gameMode;this.land.add(layer);this.treeLayers.push(layer);
+    }
+    if(!this.gameMode)this.treeObstacles.push(...this.allTreeObstacles);
     const stones:{x:number;z:number;s:number}[]=[],shrubs:{x:number;z:number;s:number}[]=[];
-    for(let i=0;i<(this.mobile?250:480);i++){
+    for(let i=0;i<(this.gameMode?(this.mobile?45:85):(this.mobile?250:480));i++){
       const angle=(hash(i*293)%6283)/1000,r=8+(hash(i*719+3)%570)/10,x=Math.cos(angle)*r,z=Math.sin(angle)*r;
       if((this.gameMode&&moatDistance(x,z)<7)||isLivingWorldSite(x,z)||isMountWorksite(x,z)||millAccessDistance(x,z)<2.3||this.gameMode&&(millStreamDistance(x,z)<8||x>29&&x<45&&z>-43&&z<-23||x>6&&x<17&&z>-43&&z<-24)||Math.abs(r-INFRASTRUCTURE.wall.innerRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3||Math.abs(x)<2.1||Math.abs(z)<2.1||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:5.4)))continue;
       const item={x,z,s:.28+(hash(i*133+5)%80)/100};
@@ -349,6 +357,15 @@ export class TownScene {
       return {x,y:terrainHeight(x,z),z};
     });
     if(!this.gameMode)placeLanterns(this.land,lamps,this.mobile);
+  }
+
+  private setGroveLevel(level:number){
+    if(!this.gameMode||this.groveLevel===level)return;
+    this.groveLevel=level;
+    this.environment.setGroveLevel(level);
+    this.treeLayers.forEach((layer,index)=>layer.visible=level>index);
+    this.treeObstacles.splice(0,this.treeObstacles.length,...this.allTreeObstacles.filter(tree=>tree.tier<level));
+    this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);
   }
 
   private clear(group:THREE.Group){const dispose=(object:THREE.Object3D)=>{if(object instanceof THREE.InstancedMesh)object.dispose();if(object instanceof THREE.Mesh&&object.geometry!==boxGeometry&&object.geometry!==plainBoxGeometry&&object.geometry!==sphereGeometry&&object.geometry!==coneGeometry&&!COTTAGE_SHARED_GEOMETRIES.has(object.geometry)&&!CASTLE_SHARED_GEOMETRIES.has(object.geometry)&&!CIVIC_SHARED_GEOMETRIES.has(object.geometry)&&!NATURE_SHARED_GEOMETRIES.has(object.geometry)&&!PROPS_SHARED_GEOMETRIES.has(object.geometry)&&!AUTHORED_LANDMARK_SHARED_GEOMETRIES.has(object.geometry))object.geometry.dispose();for(const child of object.children)dispose(child);};for(const child of [...group.children]){group.remove(child);dispose(child);}}
@@ -587,6 +604,44 @@ export class TownScene {
         gates.updateMatrixWorld(true);this.walls.add(gates);
       }
     }
+    if(this.gameMode)this.buildTownWallDetails(snapshot.wallLevel??0);
+  }
+  private buildTownWallDetails(level:number){
+    const radius=INFRASTRUCTURE.wall.innerRadius;
+    const detail=(name:string,angle:number,inset=0)=>{
+      const group=new THREE.Group();group.name=name;
+      const distance=radius+inset,x=Math.cos(angle)*distance,z=Math.sin(angle)*distance;
+      group.position.set(x,terrainHeight(x,z),z);group.rotation.y=-angle;
+      this.walls.add(group);return group;
+    };
+    if(level>=4){
+      const posts=detail('Town_watch_posts',0);
+      for(const side of [-1,1]){
+        box(posts,0,3.2,side*4.6,1.15,6.4,1.15,MAT.stoneDark,0,false);
+        box(posts,0,6.55,side*4.6,1.75,.55,1.75,MAT.stone,0,false);
+      }
+    }
+    if(level>=5){
+      const parapet=detail('Repaired_parapet',Math.PI/4);
+      for(const offset of [-3,0,3])box(parapet,0,5.1,offset,1.2,1.5,1.35,MAT.stone,0,false);
+    }
+    if(level>=6){
+      const guard=detail('Town_guard_station',Math.PI/2,-5);
+      box(guard,0,1.2,0,3.4,2.4,3.2,MAT.woodDark);
+      box(guard,0,2.65,0,4,.5,3.8,MAT.roof);
+    }
+    if(level>=7){
+      const banners=detail('Gate_banners',Math.PI);
+      for(const side of [-1,1]){
+        box(banners,0,7,side*4.6,.16,4,.16,MAT.woodDark,0,false);
+        box(banners,.08,6.5,side*4.6,1.05,2.25,.1,MAT.roofBlue,0,false);
+      }
+    }
+    if(level>=8){
+      const crest=detail('Town_defense_crest',0);
+      box(crest,0,7.1,0,2.2,1.1,.28,MAT.stoneDark,0,false);
+      ball(crest,0,7.15,0,.6,.6,.38,MAT.gold);
+    }
   }
   private clipGroup(group:THREE.Group,plane:THREE.Plane):THREE.Material[]{
     const clones=new Map<THREE.Material,THREE.Material>();
@@ -632,8 +687,9 @@ export class TownScene {
     if(this.structureTransition){
       const elapsed=now-this.structureTransition.started;
       const t=THREE.MathUtils.smoothstep(elapsed/1650,0,1);
-      this.structurePlane.constant=.48+t*this.structureTransition.height;
-      this.previousStructurePlane.constant=.48-t*this.structureTransition.height;
+      const front=this.structureTransition.base+t*this.structureTransition.height;
+      this.structurePlane.constant=front;
+      this.previousStructurePlane.constant=-front;
       this.constructionEffects?.update(t);
       this.parachuteArrival?.update(elapsed/SANDSHIP_ARRIVAL_MS);
       if(t>=1&&(!this.parachuteArrival||elapsed>=SANDSHIP_ARRIVAL_MS))this.finishStructureTransition();
@@ -656,10 +712,11 @@ export class TownScene {
     }
   }
   update(snapshot:TownSnapshot,animate=false){
+    if(this.gameMode){this.environment.setRiverLevel(snapshot.riverLevel??0);this.setGroveLevel(snapshot.groveLevel??0);}
     if(!animate)this.finishTransitions();
     if(!this.roadTransition)this.environment.setRoadCenterProgress(snapshot.roads>0?1:0);
     const structureSignature=snapshot.plots.map(p=>`${p.stage}${p.renovation}${p.complexId?'c':''}`).join('');
-    const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}/${snapshot.wallGates??'auto'}/${(snapshot.riverLevel??0)>=2}`;
+    const wallSignature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}/${snapshot.wallGates??'auto'}/${(snapshot.riverLevel??0)>=2}/${snapshot.wallLevel??0}`;
     if(structureSignature!==this.structureSignature){
       this.finishStructureTransition();this.structureSignature=structureSignature;
       if(animate&&this.gameMode&&this.lastPlots.length){
@@ -673,6 +730,7 @@ export class TownScene {
           this.buildStructures(snapshot.plots.filter(plot=>!changedIds.has(plot.id)));
           this.clear(this.structureReveal);this.clear(this.previousStructures);
           const transitionContacts:ContactFootprint[]=[];
+          const transitionBounds=new THREE.Box3();
           const effectPlots:{bounds:THREE.Box3;kind:string}[]=[];
           for(const plot of changed){
             const old=previous.get(plot.id)!;
@@ -689,17 +747,20 @@ export class TownScene {
               }
             }
             if(!bounds.isEmpty()){
+              transitionBounds.union(bounds);
               const size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
               transitionContacts.push({x:center.x,z:center.z,width:size.x+2,depth:size.z+2});
             }
             if(plot.project)this.pickBoxes.set(plot.project,projectPickBox(plot));
           }
           this.contactShadows.setBuildings([...this.structureContacts,...transitionContacts]);
-          this.structurePlane.constant=.48;this.previousStructurePlane.constant=.48;
+          const base=transitionBounds.isEmpty()?.48:transitionBounds.min.y-.25;
+          const height=transitionBounds.isEmpty()?4:Math.max(4,transitionBounds.max.y-base+1);
+          this.structurePlane.constant=base;this.previousStructurePlane.constant=-base;
           this.structureMaterials=this.clipGroup(this.structureReveal,this.structurePlane);
           this.previousStructureMaterials=this.clipGroup(this.previousStructures,this.previousStructurePlane);
-          this.constructionEffects=new ConstructionEffects(this.scene,effectPlots,this.mobile);
-          this.structureTransition={started:performance.now(),plots:snapshot.plots,height:Math.max(4,...effectPlots.map(effect=>effect.bounds.max.y+1))};
+          this.constructionEffects=new ConstructionEffects(this.scene,effectPlots,this.mobile,{base,height});
+          this.structureTransition={started:performance.now(),plots:snapshot.plots,base,height};
         }else this.buildStructures(snapshot.plots);
       }else this.buildStructures(snapshot.plots);
       this.lastPlots=snapshot.plots.map(plot=>({...plot}));

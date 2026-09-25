@@ -1,6 +1,6 @@
 {
   "market_LOD0": {
-    "triangles": 4420,
+    "triangles": 5056,
     "bounds": {
       "min": [
         -4.96656,
@@ -9,12 +9,13 @@
       ],
       "max": [
         3.79705,
-        4.575,
+        6.065,
         2.73
       ]
     },
     "materials": [
       "glass",
+      "gold",
       "iron",
       "plaster",
       "plasterIvory",
@@ -29,7 +30,7 @@
     ]
   },
   "market_LOD1": {
-    "triangles": 1948,
+    "triangles": 2412,
     "bounds": {
       "min": [
         -4.96656,
@@ -38,12 +39,13 @@
       ],
       "max": [
         3.79705,
-        4.575,
+        6.065,
         2.73
       ]
     },
     "materials": [
       "glass",
+      "gold",
       "iron",
       "plaster",
       "plasterIvory",
@@ -58,7 +60,7 @@
     ]
   },
   "tavern_LOD0": {
-    "triangles": 4372,
+    "triangles": 4996,
     "bounds": {
       "min": [
         -4.96656,
@@ -67,7 +69,7 @@
       ],
       "max": [
         3.79705,
-        5.195,
+        6.385,
         2.71
       ]
     },
@@ -86,7 +88,7 @@
     ]
   },
   "tavern_LOD1": {
-    "triangles": 1864,
+    "triangles": 2316,
     "bounds": {
       "min": [
         -4.96656,
@@ -95,7 +97,7 @@
       ],
       "max": [
         3.79705,
-        5.195,
+        6.385,
         2.71
       ]
     },
@@ -113,7 +115,7 @@
     ]
   },
   "forge_LOD0": {
-    "triangles": 4072,
+    "triangles": 4216,
     "bounds": {
       "min": [
         -4.96656,
@@ -122,7 +124,7 @@
       ],
       "max": [
         3.79705,
-        5.065,
+        5.685,
         2.72
       ]
     },
@@ -139,7 +141,7 @@
     ]
   },
   "forge_LOD1": {
-    "triangles": 1792,
+    "triangles": 1924,
     "bounds": {
       "min": [
         -4.96656,
@@ -148,7 +150,7 @@
       ],
       "max": [
         3.79705,
-        5.065,
+        5.685,
         2.72
       ]
     },
@@ -165,21 +167,22 @@
     ]
   },
   "mill_LOD0": {
-    "triangles": 4372,
+    "triangles": 3712,
     "bounds": {
       "min": [
         -4.96656,
         0.0,
-        -2.50563
+        -2.46311
       ],
       "max": [
         3.79705,
-        5.49304,
-        2.74
+        9.99261,
+        2.93
       ]
     },
     "materials": [
       "glass",
+      "gold",
       "iron",
       "plaster",
       "plasterIvory",
@@ -193,21 +196,22 @@
     ]
   },
   "mill_LOD1": {
-    "triangles": 1852,
+    "triangles": 2144,
     "bounds": {
       "min": [
         -4.96656,
         0.0,
-        -2.50563
+        -2.35589
       ],
       "max": [
         3.79705,
-        5.49304,
-        2.74
+        9.99261,
+        2.93
       ]
     },
     "materials": [
       "glass",
+      "gold",
       "iron",
       "plaster",
       "plasterIvory",
@@ -221,7 +225,7 @@
     ]
   },
   "guild_LOD0": {
-    "triangles": 4408,
+    "triangles": 5044,
     "bounds": {
       "min": [
         -4.96656,
@@ -230,7 +234,7 @@
       ],
       "max": [
         3.79705,
-        5.065,
+        6.555,
         2.71
       ]
     },
@@ -249,7 +253,7 @@
     ]
   },
   "guild_LOD1": {
-    "triangles": 1912,
+    "triangles": 2376,
     "bounds": {
       "min": [
         -4.96656,
@@ -258,7 +262,7 @@
       ],
       "max": [
         3.79705,
-        5.065,
+        6.555,
         2.71
       ]
     },
@@ -277,7 +281,7 @@
     ]
   },
   "post_LOD0": {
-    "triangles": 4712,
+    "triangles": 5336,
     "bounds": {
       "min": [
         -4.96656,
@@ -306,7 +310,7 @@
     ]
   },
   "post_LOD1": {
-    "triangles": 2080,
+    "triangles": 2532,
     "bounds": {
       "min": [
         -4.96656,
@@ -329,6 +333,62 @@
       "stone",
       "stoneDark",
       "window",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "archive_LOD0": {
+    "triangles": 5380,
+    "bounds": {
+      "min": [
+        -4.954,
+        0.0,
+        -2.59
+      ],
+      "max": [
+        3.79837,
+        7.745,
+        2.73
+      ]
+    },
+    "materials": [
+      "blue",
+      "glass",
+      "gold",
+      "plasterIvory",
+      "red",
+      "roofTiles",
+      "stone",
+      "stoneDark",
+      "wood",
+      "woodDark",
+      "woodLight"
+    ]
+  },
+  "archive_LOD1": {
+    "triangles": 2244,
+    "bounds": {
+      "min": [
+        -4.954,
+        0.0,
+        -2.39
+      ],
+      "max": [
+        3.79837,
+        7.745,
+        2.73
+      ]
+    },
+    "materials": [
+      "blue",
+      "glass",
+      "gold",
+      "plasterIvory",
+      "red",
+      "roofTiles",
+      "stone",
+      "stoneDark",
       "wood",
       "woodDark",
       "woodLight"

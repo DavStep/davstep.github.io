@@ -87,6 +87,14 @@ export function gameCottageBuilding(plot: PlotState, mobile: boolean): THREE.Gro
     rectangle('twin-right', 1.05, -.35, 1.8, 2.7, 2.35, 'woodLight');
     block('twin-bridge', 0, .24, 1.35, 1.4, .18, 1.1, 'woodDark');
   }
+  if (plot.stage === 1) {
+    // Surveyed footing and short starter posts; the full frame rises at stage 2.
+    for (const child of group.children) {
+      if (!child.name.includes('floor') && !child.name.includes('entry') && !child.name.includes('doorstep')) {
+        child.position.y *= .35; child.scale.y *= .35;
+      }
+    }
+  }
   return group;
 }
 

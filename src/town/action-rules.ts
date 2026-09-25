@@ -1,36 +1,50 @@
-import type { Idea, Levels } from './game';
-import { ADVANCED_PARTNERS } from './milestones';
+import type { Idea } from './game';
 
 export interface Requirement { idea: Idea; level: number; purpose: string }
-const expansionSupply: Record<Idea, string> = { settlers: 'workers to staff the new district', grove: 'timber for the next construction phase', workshop: 'machinery for larger building sites', roads: 'routes for heavy supply deliveries', walls: 'protection for outlying settlements', market: 'stored goods for the new district', windmill: 'food for a larger workforce', archive: 'shared plans for the next construction phase', river: 'water for outlying settlements', observatory: 'surveys of the surrounding hills' };
-const need = (idea: Idea, level: number, purpose: string): Requirement => ({ idea, level, purpose });
-/** The simulation, previews and event explanations all read this same rulebook. */
-export function requirements(idea: Idea, target: number): Requirement[] {
-  if (target <= 1) return [];
-  if (target >= 4) {
-    const infrastructure: Record<number, Requirement[]> = {
-      4: [need('river', 2, 'water for new districts'), need('market', 2, 'construction supplies')],
-      5: [need('windmill', 3, 'a harvest to feed new workers'), need('walls', 2, 'protected supply routes')],
-      6: [need('archive', 3, 'surveyed expansion plans')],
-      7: [need('observatory', 2, 'precise surveys of the hills')],
-      8: [need('observatory', 3, 'a complete map of the valley')],
-    };
-    return [...infrastructure[target], ...ADVANCED_PARTNERS[idea].map(partner => need(partner, target - 2, expansionSupply[partner]))];
-  }
-  const rules: Record<Idea, [Requirement[], Requirement[]]> = {
-    settlers: [[need('roads', 2, 'streets connecting the homes')], [need('market', 2, 'food and household supplies'), need('walls', 2, 'protection for the neighborhood')]],
-    grove: [[need('settlers', 1, 'gardeners to tend the saplings')], [need('river', 2, 'irrigation for the roots')]],
-    workshop: [[need('grove', 2, 'timber for tools and machinery')], [need('roads', 2, 'a route for heavy equipment'), need('windmill', 2, 'grain to feed the machine-yard crew')]],
-    roads: [[need('workshop', 2, 'forged tools for the crossings')], [need('market', 2, 'caravans to supply paving stone')]],
-    walls: [[need('roads', 2, 'surveyed gate positions')], [need('market', 2, 'stone deliveries'), need('windmill', 2, 'food for the masons')]],
-    market: [[need('roads', 2, 'a crossing for merchant caravans')], [need('archive', 2, 'trade records and delivery plans')]],
-    windmill: [[need('market', 2, 'millwright supplies'), need('river', 2, 'irrigation for the grain fields')], [need('workshop', 2, 'harvesting tools'), need('grove', 2, 'timber for field fences')]],
-    archive: [[need('roads', 2, 'a route for messengers'), need('settlers', 1, 'scribes to collect the plans')], [need('settlers', 2, 'a settled community to map'), need('market', 2, 'trade records from the outpost')]],
-    river: [[need('settlers', 1, 'a crew to dig the channel'), need('workshop', 2, 'picks and sluice tools')], [need('roads', 2, 'access along the riverbank'), need('market', 2, 'stone for the castle waterway')]],
-    observatory: [[need('archive', 2, 'survey notes for aligning the lens')], [need('settlers', 3, 'a settled town to chart'), need('grove', 3, 'mapped irrigated gardens'), need('workshop', 3, 'precision instruments'), need('roads', 3, 'survey routes'), need('walls', 3, 'protected observation posts'), need('market', 3, 'trade-route records'), need('windmill', 3, 'harvest calendars'), need('archive', 3, 'the town atlas'), need('river', 3, 'waterway charts')]],
-  };
-  return rules[idea][target - 2];
+
+export interface JointProject {
+  id: string;
+  name: string;
+  ideas: readonly [Idea, Idea];
+  result: string;
 }
-export function missingRequirements(idea: Idea, target: number, levels: Levels): Requirement[] {
-  return requirements(idea, target).filter(req => levels[req.idea] < req.level);
+
+/** A project can be built once, when its second idea arrives. Its two sites grow together. */
+export const JOINT_PROJECTS: readonly JointProject[] = [
+  { id: 'garden-crew', name: 'Garden crew', ideas: ['settlers', 'grove'], result: 'The settlers tend the grove, and its gardens feed their homes.' },
+  { id: 'forge-crew', name: 'Forge crew', ideas: ['settlers', 'workshop'], result: 'New workers staff the forge and build better homes.' },
+  { id: 'street-plan', name: 'Street plan', ideas: ['settlers', 'roads'], result: 'Streets connect the homes and give the road builders a town to serve.' },
+  { id: 'first-customers', name: 'First customers', ideas: ['settlers', 'market'], result: 'The market gains customers and the homes gain supplies.' },
+  { id: 'town-records', name: 'Town records', ideas: ['settlers', 'archive'], result: 'The archive records the town and gives its people a shared plan.' },
+  { id: 'channel-crew', name: 'Channel crew', ideas: ['settlers', 'river'], result: 'The settlers dig channels and the water reaches their gardens.' },
+  { id: 'living-timber', name: 'Living timber', ideas: ['grove', 'workshop'], result: 'The grove supplies timber and the workshop makes tools to tend it.' },
+  { id: 'field-frames', name: 'Field frames', ideas: ['grove', 'windmill'], result: 'Grove timber frames the mill and the harvest expands the grove.' },
+  { id: 'grove-irrigation', name: 'Grove irrigation', ideas: ['grove', 'river'], result: 'Channels water the grove and roots steady the riverbank.' },
+  { id: 'forged-crossings', name: 'Forged crossings', ideas: ['workshop', 'roads'], result: 'The forge makes bridge fittings and the roads deliver its materials.' },
+  { id: 'gate-fittings', name: 'Gate fittings', ideas: ['workshop', 'walls'], result: 'The forge fits stronger gates and the walls protect its workers.' },
+  { id: 'mill-gears', name: 'Mill gears', ideas: ['workshop', 'windmill'], result: 'Forged gears turn the mill and the harvest feeds the forge crew.' },
+  { id: 'sluice-machinery', name: 'Sluice machinery', ideas: ['workshop', 'river'], result: 'The workshop makes sluices and the water powers its machinery.' },
+  { id: 'precision-instruments', name: 'Precision instruments', ideas: ['workshop', 'observatory'], result: 'The forge builds instruments and the observatory improves its measurements.' },
+  { id: 'road-gates', name: 'Mapped gates', ideas: ['roads', 'walls'], result: 'Road builders mark the crossings and masons open matching gates.' },
+  { id: 'caravan-route', name: 'Caravan route', ideas: ['roads', 'market'], result: 'The crossing brings caravans and their trade funds better roads.' },
+  { id: 'messenger-route', name: 'Messenger route', ideas: ['roads', 'archive'], result: 'The roads carry records and the archive maps better routes.' },
+  { id: 'canal-access', name: 'Canal access', ideas: ['roads', 'river'], result: 'Paths reach the waterworks and the canal carries road supplies.' },
+  { id: 'stone-delivery', name: 'Stone delivery', ideas: ['walls', 'market'], result: 'Merchants deliver stone and the walls protect their stalls.' },
+  { id: 'protected-lookout', name: 'Protected lookout', ideas: ['walls', 'observatory'], result: 'The walls secure the tower and its view helps watch the gates.' },
+  { id: 'harvest-trade', name: 'Harvest trade', ideas: ['market', 'windmill'], result: 'The mill feeds the market and merchants supply its builders.' },
+  { id: 'trade-records', name: 'Trade records', ideas: ['market', 'archive'], result: 'The archive tracks trade and the market funds its records.' },
+  { id: 'route-charts', name: 'Route charts', ideas: ['market', 'observatory'], result: 'The observatory charts trade routes and merchants support the tower.' },
+  { id: 'mill-race', name: 'Mill race', ideas: ['windmill', 'river'], result: 'River water turns the mill and its grain feeds the channel crew.' },
+  { id: 'harvest-calendar', name: 'Harvest calendar', ideas: ['windmill', 'observatory'], result: 'The tower predicts seasons and the mill supplies its observers.' },
+  { id: 'canal-charts', name: 'Canal charts', ideas: ['archive', 'river'], result: 'The archive charts the canal and the water connects its districts.' },
+  { id: 'star-plans', name: 'Star plans', ideas: ['archive', 'observatory'], result: 'The archive provides star plans and the tower writes new findings.' },
+  { id: 'waterway-map', name: 'Waterway map', ideas: ['river', 'observatory'], result: 'The tower maps the waterway and the river opens the valley to study.' },
+];
+
+/** Each site has seven growth stages after arrival. Every project grants both partners a share. */
+export function projectStages(project: JointProject, idea: Idea): number {
+  const partners = JOINT_PROJECTS.filter(candidate => candidate.ideas.includes(idea));
+  const index = partners.indexOf(project);
+  if (index < 0) return 0;
+  return Math.floor(7 / partners.length) + Number(index < 7 % partners.length);
 }
