@@ -474,7 +474,7 @@ export class TownScene {
     }
     for(const plot of roadTier>=2?snapshot.plots:[]){
       if(plot.stage===0)continue;
-      if(this.gameMode&&districtForPlot(plot.id))continue;
+      if(this.gameMode&&districtForPlot(plot.id)&&Math.hypot(plot.x,plot.z)>INFRASTRUCTURE.wall.innerRadius)continue;
       const access=accessPathFor(plot);if(!access)continue;
       // The older mill plot sits just beyond the inner wall. Its farm lane
       // approaches the east crossing from outside, where a sealed wall can
