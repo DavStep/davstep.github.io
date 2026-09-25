@@ -8,15 +8,6 @@
 .game-card.chosen { opacity:.55; }
 .game-card.missed { border-color:rgba(185,83,52,.9); background:rgba(251,210,186,.72); opacity:1; }
 .game-card.missed .game-card-level { color:#8d3527; background:#fff3dd; }
-.game-result { display:flex; align-items:center; justify-content:space-between; gap:18px; max-height:38svh; overflow-y:auto; }
-.game-result-copy { min-width:0; }
-.game-result strong,.game-result button { margin:0; }
-.game-result-copy>span { display:block; font-size:10px; }
-.game-result details { margin-top:5px; font-size:11px; }
-.game-result summary { cursor:pointer; font-weight:800; }
-.game-result ul { margin:5px 0 0; padding-left:17px; }
-.game-result li+li { margin-top:3px; }
-.game-result button { flex:none; }
 #town-canvas { cursor:default; }
 @media(max-width:760px) {
   .game-hud { bottom:12px; width:calc(100vw - 20px); max-height:calc(100svh - 90px); }
@@ -29,7 +20,6 @@
   #game-summary { font-size:14px; }
   .game-hud-head button { min-height:36px; }
   .game-event { font-size:10px; }
-  .game-result { gap:12px; align-items:flex-start; }
   body.game-running .controls { top:80px; }
   body.no-webgl.game-running .fallback { display:none; }
 }

@@ -213,7 +213,6 @@ const gameHud=$<HTMLElement>('#game-hud');
 const gameCards=$<HTMLDivElement>('#game-cards');
 const gameProgress=$<HTMLDivElement>('#game-progress');
 const gameEvent=$<HTMLParagraphElement>('#game-event');
-const gameResult=$<HTMLDivElement>('#game-result');
 const gameSkip=$<HTMLButtonElement>('#game-skip');
 const CARD_ORDER:readonly Idea[]=['windmill','archive','market','settlers','observatory','roads','walls','grove','river','workshop'];
 let animating=false,animationToken=0;
@@ -228,7 +227,7 @@ new ResizeObserver(()=>{
 
 const IDEA_HEX=Object.fromEntries(IDEAS.map(idea=>[idea,`#${IDEA_COLORS[idea].toString(16).padStart(6,'0')}`])) as Record<Idea,string>;
 const HOTKEYS=['1','2','3','4','5','6','7','8','9','0'];
-let lastEventMessage='',revealDone=false,revealPending=false,lastResult='';
+let lastEventMessage='',revealDone=false,revealPending=false;
 let hudRendered=false;
 function renderGameHud(){
   gameHud.hidden=!gameSave.started;
@@ -291,14 +290,6 @@ function renderGameHud(){
     if(hudRendered&&!reducedMotion())revealCards();
     else{gameCards.querySelectorAll('.game-card').forEach(card=>card.classList.add('revealed'));renderGameHud();}
   }
-  gameResult.hidden=!showResults||!revealDone||revealPending;
-  if(!gameResult.hidden){
-    const diagnosis=gameState.faults.length
-      ?`<details><summary>Missed collaborations (${gameState.faults.length})</summary><ul>${gameState.faults.map(fault=>`<li>${fault.reason}</li>`).join('')}</ul></details>`
-      :`<span>All ${JOINT_PROJECTS.length} collaborations completed.</span>`;
-    const result=`<div class="game-result-copy"><strong>${gameState.secret?'Storybook Night':gameState.perfect?'Every idea reached MAX':`${gameState.score} / ${IDEAS.length*MAX_LEVEL} levels reached`}</strong><span>Best: ${gameSave.bestScore} / ${IDEAS.length*MAX_LEVEL}</span>${diagnosis}</div>`;
-    if(result!==lastResult){gameResult.innerHTML=result;lastResult=result;}
-  }
   hudRendered=true;
 }
 /** Flips every card, left to right, to show the level each idea reached. */
@@ -353,7 +344,6 @@ function startGame(){
 function restart(){
   animationToken++;animating=false;restartGame(gameSave);gameState=evaluate([]);shownLevels={...gameState.levels};
   shownProjects=new Set();
-  lastResult='';gameResult.innerHTML='';
   worker?.finishCue(true);scenery?.endBeat();reactions?.clear();juice?.clear();clearFloats();
   eventMessage='';persist();renderGameHud();refreshGameWorld(true);recenter();
   stagger(gameCards.children,[{scale:.9,opacity:.4},{scale:1,opacity:1}],{duration:EASE.spring.duration,easing:EASE.spring.easing,gap:30});
