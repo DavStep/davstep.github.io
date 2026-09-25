@@ -222,6 +222,7 @@ function wallSectorGeometry(radius:number):THREE.BufferGeometry{
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.computeVertexNormals();
   return geometry;
 }
+import { BuildSequencer, type BuildImpact, type BuildItem } from './build-sequencer';
 export class TownScene {
   readonly scene=new THREE.Scene();
   readonly camera=new THREE.PerspectiveCamera(43,1,.1,650);
@@ -258,6 +259,12 @@ export class TownScene {
   private wallMaterials:THREE.Material[]=[];
   private previousWallMaterials:THREE.Material[]=[];
   private structureTransition:{started:number;plots:PlotState[];base:number;height:number}|null=null;
+  private buildSequencer:BuildSequencer|null=null;
+  private lastTransitionFrame=0;
+  /** Called when an animated building lands (for dust, shake and sound). */
+  onBuildImpact:((impact:BuildImpact)=>void)|null=null;
+  /** Called when a replaced building vanishes. */
+  onBuildPuff:((x:number,y:number,z:number,size:number)=>void)|null=null;
   private constructionEffects:ConstructionEffects|null=null;
   private wallEffects:ConstructionEffects|null=null;
   private wallTransition:{started:number;snapshot:TownSnapshot}|null=null;
@@ -660,6 +667,7 @@ export class TownScene {
     if(!this.structureTransition)return;
     const plots=this.structureTransition.plots;
     this.parachuteArrival?.dispose();this.parachuteArrival=null;
+    this.buildSequencer?.finish();this.buildSequencer=null;
     this.clear(this.arrivalStructures);
     this.constructionEffects?.dispose();this.constructionEffects=null;
     this.clear(this.structureReveal);this.structureMaterials.forEach(material=>material.dispose());this.structureMaterials=[];
@@ -683,16 +691,23 @@ export class TownScene {
   }
   finishTransitions(){this.finishStructureTransition();this.finishWallTransition();this.finishRoadTransition();}
   private updateTransitions(now:number){
+    const frameNow=now;
     const ease=(t:number)=>1-Math.pow(1-THREE.MathUtils.clamp(t,0,1),2);
     if(this.structureTransition){
       const elapsed=now-this.structureTransition.started;
-      const t=THREE.MathUtils.smoothstep(elapsed/1650,0,1);
-      const front=this.structureTransition.base+t*this.structureTransition.height;
-      this.structurePlane.constant=front;
-      this.previousStructurePlane.constant=-front;
-      this.constructionEffects?.update(t);
+      const dt=this.lastTransitionFrame?Math.max(0,(now-this.lastTransitionFrame)/1000):0;
       this.parachuteArrival?.update(elapsed/SANDSHIP_ARRIVAL_MS);
-      if(t>=1&&(!this.parachuteArrival||elapsed>=SANDSHIP_ARRIVAL_MS))this.finishStructureTransition();
+      if(this.buildSequencer){
+        this.buildSequencer.update(dt);
+        if(this.buildSequencer.finished&&(!this.parachuteArrival||elapsed>=SANDSHIP_ARRIVAL_MS))this.finishStructureTransition();
+      }else{
+        const t=THREE.MathUtils.smoothstep(elapsed/1650,0,1);
+        const front=this.structureTransition.base+t*this.structureTransition.height;
+        this.structurePlane.constant=front;
+        this.previousStructurePlane.constant=-front;
+        this.constructionEffects?.update(t);
+        if(t>=1&&(!this.parachuteArrival||elapsed>=SANDSHIP_ARRIVAL_MS))this.finishStructureTransition();
+      }
     }
     if(this.wallTransition){
       const t=THREE.MathUtils.smoothstep((now-this.wallTransition.started)/1650,0,1);
@@ -710,6 +725,7 @@ export class TownScene {
       if(this.roadTransition.firstRoad)this.environment.setRoadCenterProgress(t);
       if(t>=1)this.finishRoadTransition();
     }
+    this.lastTransitionFrame=frameNow;
   }
   update(snapshot:TownSnapshot,animate=false){
     if(this.gameMode){this.environment.setRiverLevel(snapshot.riverLevel??0);this.setGroveLevel(snapshot.groveLevel??0);}
@@ -732,20 +748,25 @@ export class TownScene {
           const transitionContacts:ContactFootprint[]=[];
           const transitionBounds=new THREE.Box3();
           const effectPlots:{bounds:THREE.Box3;kind:string}[]=[];
+          const buildItems:BuildItem[]=[];
+          const springy=!this.reducedMotion.matches;
           for(const plot of changed){
             const old=previous.get(plot.id)!;
             const bounds=new THREE.Box3();
-            if(old.stage>0){const oldGroup=building(old,this.gameMode);this.previousStructures.add(oldGroup);bounds.expandByObject(oldGroup);}
+            let oldGroup:THREE.Group|undefined,newGroup:THREE.Group|undefined;
+            if(old.stage>0){oldGroup=building(old,this.gameMode);this.previousStructures.add(oldGroup);bounds.expandByObject(oldGroup);}
             if(plot.stage>0){
-              const newGroup=building(plot,this.gameMode);bounds.expandByObject(newGroup);
+              newGroup=building(plot,this.gameMode);bounds.expandByObject(newGroup);
               if(isSandshipArrival(old,plot)&&!this.reducedMotion.matches){
                 this.arrivalStructures.add(newGroup);
                 this.parachuteArrival=new ParachuteArrival(newGroup,this.mobile);
+                newGroup=undefined;
               }else{
                 this.structureReveal.add(newGroup);
                 effectPlots.push({bounds:new THREE.Box3().setFromObject(newGroup),kind:plot.kind});
               }
             }
+            if(springy&&(oldGroup||newGroup))buildItems.push({kind:plot.kind,previous:oldGroup,next:newGroup});
             if(!bounds.isEmpty()){
               transitionBounds.union(bounds);
               const size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
@@ -756,10 +777,15 @@ export class TownScene {
           this.contactShadows.setBuildings([...this.structureContacts,...transitionContacts]);
           const base=transitionBounds.isEmpty()?.48:transitionBounds.min.y-.25;
           const height=transitionBounds.isEmpty()?4:Math.max(4,transitionBounds.max.y-base+1);
-          this.structurePlane.constant=base;this.previousStructurePlane.constant=-base;
-          this.structureMaterials=this.clipGroup(this.structureReveal,this.structurePlane);
-          this.previousStructureMaterials=this.clipGroup(this.previousStructures,this.previousStructurePlane);
-          this.constructionEffects=new ConstructionEffects(this.scene,effectPlots,this.mobile,{base,height});
+          if(springy){
+            this.buildSequencer=new BuildSequencer(buildItems,impact=>this.onBuildImpact?.(impact),(x,y,z,size)=>this.onBuildPuff?.(x,y,z,size));
+          }else{
+            this.structurePlane.constant=base;this.previousStructurePlane.constant=-base;
+            this.structureMaterials=this.clipGroup(this.structureReveal,this.structurePlane);
+            this.previousStructureMaterials=this.clipGroup(this.previousStructures,this.previousStructurePlane);
+            this.constructionEffects=new ConstructionEffects(this.scene,effectPlots,this.mobile,{base,height});
+          }
+          this.lastTransitionFrame=0;
           this.structureTransition={started:performance.now(),plots:snapshot.plots,base,height};
         }else this.buildStructures(snapshot.plots);
       }else this.buildStructures(snapshot.plots);

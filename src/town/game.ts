@@ -12,17 +12,20 @@ export type Idea = typeof IDEAS[number];
 export type Levels = Record<Idea, number>;
 export type Route = 'valley' | 'storybook';
 
+/** Card art rendered from the town's own 3D builders (scripts/render-idea-icons.mjs). */
+export const ideaIcon = (idea: string, level: number) => `/assets/idea-icons/3d/${idea}-${Math.max(1, Math.min(8, level))}.webp`;
+
 export const IDEA_INFO: Record<Idea, { name: string; icon: string; place: string; hint: string }> = {
-  settlers: { name: 'Settlers', icon: '/assets/idea-icons/settlers.webp', place: 'Homes', hint: 'Their crew can help the grove, forge, streets, market, archive and river.' },
-  grove: { name: 'Grove', icon: '/assets/idea-icons/grove.webp', place: 'Gardens', hint: 'Gardens can grow with settlers, the forge, mill and river.' },
-  workshop: { name: 'Workshop', icon: '/assets/idea-icons/workshop.webp', place: 'Forge', hint: 'The forge makes fittings, gears, sluices and instruments with its partners.' },
-  roads: { name: 'Roads', icon: '/assets/idea-icons/roads.webp', place: 'Bridge', hint: 'Crossings connect homes, workshops, gates, caravans, messengers and canals.' },
-  walls: { name: 'Walls', icon: '/assets/idea-icons/walls.webp', place: 'Town Wall', hint: 'The walls can gain forge fittings, mapped gates, deliveries and a lookout.' },
-  market: { name: 'Market', icon: '/assets/idea-icons/market.webp', place: 'Idle Outpost market', hint: 'Trade grows with residents, roads, walls, the mill, archive and tower.' },
-  windmill: { name: 'Windmill', icon: '/assets/idea-icons/windmill.webp', place: 'River Mill', hint: 'The mill needs partners for timber, gears, trade, water and seasons.' },
-  archive: { name: 'Archive', icon: '/assets/idea-icons/archive.webp', place: 'Grand Archive', hint: 'Records connect residents, messengers, trade, waterways and stars.' },
-  river: { name: 'River', icon: '/assets/idea-icons/river.svg', place: 'Waterworks', hint: 'Water can help homes, gardens, machinery, roads, the mill and maps.' },
-  observatory: { name: 'Observatory', icon: '/assets/idea-icons/observatory.webp', place: 'Star Tower', hint: 'The tower grows with instruments, walls, trade, seasons, plans and waterways.' },
+  settlers: { name: 'Settlers', icon: ideaIcon('settlers', 8), place: 'Homes', hint: 'Their crew can help the grove, forge, streets, market, archive and river.' },
+  grove: { name: 'Grove', icon: ideaIcon('grove', 8), place: 'Gardens', hint: 'Gardens can grow with settlers, the forge, mill and river.' },
+  workshop: { name: 'Workshop', icon: ideaIcon('workshop', 8), place: 'Forge', hint: 'The forge makes fittings, gears, sluices and instruments with its partners.' },
+  roads: { name: 'Roads', icon: ideaIcon('roads', 8), place: 'Bridge', hint: 'Crossings connect homes, workshops, gates, caravans, messengers and canals.' },
+  walls: { name: 'Walls', icon: ideaIcon('walls', 8), place: 'Town Wall', hint: 'The walls can gain forge fittings, mapped gates, deliveries and a lookout.' },
+  market: { name: 'Market', icon: ideaIcon('market', 8), place: 'Idle Outpost market', hint: 'Trade grows with residents, roads, walls, the mill, archive and tower.' },
+  windmill: { name: 'Windmill', icon: ideaIcon('windmill', 8), place: 'River Mill', hint: 'The mill needs partners for timber, gears, trade, water and seasons.' },
+  archive: { name: 'Archive', icon: ideaIcon('archive', 8), place: 'Grand Archive', hint: 'Records connect residents, messengers, trade, waterways and stars.' },
+  river: { name: 'River', icon: ideaIcon('river', 8), place: 'Waterworks', hint: 'Water can help homes, gardens, machinery, roads, the mill and maps.' },
+  observatory: { name: 'Observatory', icon: ideaIcon('observatory', 8), place: 'Star Tower', hint: 'The tower grows with instruments, walls, trade, seasons, plans and waterways.' },
 };
 
 export interface TownEvent {

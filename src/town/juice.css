@@ -1,0 +1,113 @@
+/* Game-feel layer: floating world labels, card feedback, collaboration banner. */
+.float-layer { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.float-label {
+  position: absolute; left: 0; top: 0; will-change: transform;
+}
+.float-label > * { display: block; }
+.float-label::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+}
+.float-label {
+  --idea-color: #ffd66b;
+}
+.float-label small,
+.float-label strong,
+.float-label em {
+  position: relative; left: -50%; width: max-content; margin: 0 auto;
+  text-align: center; white-space: nowrap;
+  animation: float-rise 1.8s cubic-bezier(.2, .9, .3, 1) both;
+  animation-delay: inherit;
+}
+.float-label small {
+  font: 800 10px/1 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  color: #fff; text-shadow: 0 1px 2px rgba(20, 40, 45, .6), 0 0 8px var(--idea-color);
+}
+.float-label strong {
+  margin-top: 3px; padding: 4px 10px 5px; border-radius: 999px;
+  font: 900 17px/1 system-ui, sans-serif; color: #fff;
+  background: var(--idea-color);
+  border: 2px solid #fff;
+  box-shadow: 0 6px 18px rgba(20, 40, 45, .3), 0 0 22px var(--idea-color);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+}
+.float-label.big strong { font-size: 22px; padding: 5px 14px 6px; }
+.float-label em {
+  font: italic 900 22px/1 Georgia, 'Times New Roman', serif; color: #fff;
+  padding: 7px 16px 8px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--idea-color), color-mix(in srgb, var(--idea-color), #fff 35%));
+  border: 2px solid #fff;
+  box-shadow: 0 10px 30px rgba(20, 40, 45, .32), 0 0 34px var(--idea-color);
+  animation-name: float-banner;
+}
+@keyframes float-rise {
+  0% { opacity: 0; transform: translateY(18px) scale(.3); }
+  14% { opacity: 1; transform: translateY(-8px) scale(1.18); }
+  24% { transform: translateY(-4px) scale(.94); }
+  34% { transform: translateY(-10px) scale(1); }
+  78% { opacity: 1; transform: translateY(-44px) scale(1); }
+  100% { opacity: 0; transform: translateY(-62px) scale(.9); }
+}
+@keyframes float-banner {
+  0% { opacity: 0; transform: translateY(0) scale(.2) rotate(-8deg); }
+  16% { opacity: 1; transform: translateY(-14px) scale(1.2) rotate(3deg); }
+  28% { transform: translateY(-10px) scale(.95) rotate(-1deg); }
+  40% { transform: translateY(-14px) scale(1) rotate(0); }
+  80% { opacity: 1; transform: translateY(-30px) scale(1); }
+  100% { opacity: 0; transform: translateY(-42px) scale(.94); }
+}
+
+/* Cards: squash when picked, bounce when their level rises, shake on a miss. */
+.game-card.picked { animation: card-picked .42s cubic-bezier(.3, 1.6, .5, 1); }
+.game-card.bump { animation: card-bump .55s cubic-bezier(.3, 1.8, .5, 1); }
+.game-card.bump .game-card-level { animation: level-pop .55s cubic-bezier(.3, 1.8, .5, 1); background: var(--idea-color); color: #fff; }
+.game-card.bump::after { animation: card-glow .7s ease-out; }
+.game-card.shake { animation: card-shake .5s ease; }
+@keyframes card-picked {
+  0% { transform: scale(1); }
+  30% { transform: scale(.86, .8) translateY(4px); }
+  65% { transform: scale(1.08, 1.12) translateY(-6px); }
+  100% { transform: scale(1); }
+}
+@keyframes card-bump {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-12px) scale(1.1); }
+  70% { transform: translateY(1px) scale(.97); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes level-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.6); }
+  100% { transform: scale(1); }
+}
+@keyframes card-glow {
+  0% { box-shadow: 0 0 0 0 var(--idea-color); background: radial-gradient(circle, color-mix(in srgb, var(--idea-color), transparent 30%), transparent 70%); }
+  100% { box-shadow: 0 0 0 18px transparent; }
+}
+@keyframes card-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-3deg); }
+  40% { transform: translateX(5px) rotate(2deg); }
+  60% { transform: translateX(-4px) rotate(-1deg); }
+  80% { transform: translateX(2px); }
+}
+
+/* Collaboration caption glows and slides in. */
+.game-event.collab {
+  animation: collab-in .5s cubic-bezier(.3, 1.6, .5, 1);
+  border-color: #fff;
+  background: linear-gradient(135deg, rgba(255, 236, 170, .92), rgba(255, 255, 255, .6));
+  box-shadow: 0 0 0 2px rgba(255, 214, 107, .6), 0 10px 34px rgba(255, 196, 60, .35);
+  color: #4a3a12;
+}
+.game-event.collab::before { content: '✦ COLLAB'; font-size: 9px; letter-spacing: .12em; color: #9a6b08; line-height: 1; }
+@keyframes collab-in {
+  0% { transform: translateY(12px) scale(.8); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+#game-sound { min-width: 31px; font-size: 15px; line-height: 1; }
+#game-sound[aria-pressed="false"] { opacity: .6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card.picked, .game-card.bump, .game-card.shake, .game-event.collab, .float-label * { animation: none !important; }
+}

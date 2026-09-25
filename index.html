@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#14252a" />
   <meta name="description" content="An order puzzle in a 3D town. Choose ten ideas, learn their dependencies, and find the sequence that grows every idea to MAX." />
   <title>Dav Stepanyan — A Town of Consequences</title>
+  <script>try{if(JSON.parse(localStorage.getItem('davstep.choice-town.v2')||'{}').started)document.documentElement.classList.add('returning')}catch(e){}</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,15 +17,15 @@
     <div class="world-poster" aria-hidden="true"><div class="poster-hill back"></div><div class="poster-hill front"></div><div class="poster-castle">♜</div></div>
     <canvas id="town-canvas" aria-hidden="true"></canvas>
     <header class="chrome">
-      <button id="brand" class="brand" type="button" aria-label="Return to town overview"><span class="brand-icon">D<span>S</span></span><span class="brand-name">DAV STEPANYAN<small>GAME DEVELOPER · WORLD BUILDER</small></span></button>
+      <button id="brand" class="brand" type="button" aria-label="Return to town overview"><span class="brand-icon" aria-hidden="true">D<span>S</span></span><span class="brand-name">DAV STEPANYAN<small>GAME DEVELOPER · WORLD BUILDER</small></span></button>
       <nav aria-label="Main navigation"><button data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav>
     </header>
     <main class="town-ui">
-      <section class="intro" id="intro" aria-label="Introduction"><div class="intro-kicker"><span class="pulse"></span> A TOWN OF CONSEQUENCES <span class="intro-index">01 / 10</span></div><h1>Choose the order.<br><em>Grow every idea.</em></h1><p>Place ten ideas, one at a time. Each new idea can advance ideas already in town. The right order completes their collaborations; a reversed pair misses its chance. Reach MAX in every idea to win.</p><div class="intro-actions"><button id="intro-start" type="button">Start puzzle <span>✦</span></button><button id="intro-work" type="button">Explore my work <span>↗</span></button></div><div class="intro-foot">TEN IDEAS · ONE SEQUENCE AT A TIME</div></section>
+      <section class="intro" id="intro" aria-labelledby="intro-title"><div class="intro-kicker"><span class="pulse"></span> A TOWN OF CONSEQUENCES <span class="intro-index">01 / 10</span></div><h1 id="intro-title"><span class="mask-line"><span>Choose the order.</span></span><span class="mask-line"><span><em>Grow every idea.</em></span></span></h1><p class="intro-lead">Ten ideas, one valley. Place them one at a time and watch the town answer.</p><ol class="intro-steps"><li><span><b>Pick</b> any idea. It arrives right away.</span></li><li><span><b>Pair up.</b> Ideas already in town collaborate with it and grow.</span></li><li><span><b>Mind the order.</b> A reversed pair misses its chance. Get all ten to MAX.</span></li></ol><div class="intro-actions"><button id="intro-start" type="button">Start puzzle <span>✦</span></button><button id="intro-work" type="button">Explore my work <span>↗</span></button></div><div class="intro-foot">TEN IDEAS · ONE SEQUENCE AT A TIME</div></section>
       <section id="game-hud" class="game-hud" aria-label="Town choice game" hidden>
         <div class="game-hud-head">
           <div class="game-hud-title"><span class="game-hud-kicker">✦ &nbsp; THE ORDER PUZZLE</span><strong id="game-summary">Get every idea to MAX.</strong></div>
-          <div class="game-hud-actions"><span id="game-turn">0 / 10</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-restart" type="button">↻ <span>Restart</span></button></div>
+          <div class="game-hud-actions"><span id="game-turn">0 / 10</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-sound" type="button" aria-pressed="true" title="Sound on">♪</button><button id="game-restart" type="button"><b aria-hidden="true">↻</b> <span>Restart</span></button></div>
         </div>
         <div id="game-progress" class="game-progress" aria-hidden="true"></div>
         <div id="game-cards" class="game-cards" role="group" aria-label="Choose the next idea"></div>

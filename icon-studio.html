@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Idea icon studio</title>
+  <style>
+    body{margin:0;padding:24px;font:13px/1.4 system-ui,sans-serif;background:#cfe0d4;color:#183238}
+    h1{font-size:18px;margin:0 0 4px}p{margin:0 0 16px;color:#46636a}
+    .grid{display:grid;grid-template-columns:110px repeat(8,112px);gap:8px;align-items:center}
+    .grid img{width:112px;height:112px;background:#e8f1ea;border-radius:12px}
+    .grid b{text-transform:capitalize}
+  </style>
+</head>
+<body>
+  <h1>Idea icon studio</h1>
+  <p>Development tool. Renders every idea at levels 1–8 with the town's builders and lighting. <code>node scripts/render-idea-icons.mjs</code> saves them to <code>assets/idea-icons/3d/</code>.</p>
+  <div id="grid" class="grid"></div>
+  <script type="module" src="/src/icon-studio/main.ts"></script>
+</body>
+</html>

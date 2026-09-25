@@ -4,7 +4,7 @@ import { ChoiceWorker } from './choice-worker';
 import { terrainHeight } from './environment';
 import type { TownSnapshot } from './model';
 import { PROJECTS, PROJECT_BY_KEY, type ProjectKey } from './projects';
-import { GAME_SAVE_KEY, IDEAS, IDEA_INFO, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, type Idea, type Levels } from './game';
+import { GAME_SAVE_KEY, IDEAS, IDEA_INFO, ideaIcon, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, type Idea, type Levels } from './game';
 import { JOINT_PROJECTS } from './action-rules';
 import { snapshotForGame } from './game-snapshot';
 import { MAX_LEVEL } from './milestones';
@@ -17,6 +17,10 @@ import { buildColliders, isBlocked } from './collision';
 import { landscapeColliders } from './landscape-state';
 import { IDEA_COLORS } from './idea-colors';
 import { boundedOrbitDistance, orbitFieldOfView } from './camera-bounds';
+import { Juice } from './juice';
+import { Sfx } from './sfx';
+import type { BuildImpact } from './build-sequencer';
+import './juice.css';
 import './style.css';
 import './style-2.css';
 import './style-3.css';
@@ -25,6 +29,8 @@ import './game.css';
 import './glass.css';
 import './panel-rail.css';
 import './story-flow.css';
+import './motion.css';
+import { EASE, burst, confetti, installMotionTokens, magnetic, play, pointerLight, reducedMotion, retrigger, rise, stagger, tweenText } from './ui-motion';
 
 const $ = <T extends HTMLElement>(selector:string) => document.querySelector(selector) as T;
 const canvas=$<HTMLCanvasElement>('#town-canvas');
@@ -37,6 +43,7 @@ const toast=$<HTMLDivElement>('#toast');
 const intro=$<HTMLElement>('#intro');
 const fallback=$<HTMLDivElement>('#fallback');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+installMotionTokens();
 const profile=import.meta.env.DEV||new URLSearchParams(location.search).has('profile');
 if(profile&&'PerformanceObserver'in window){
   let layoutShift=0;
@@ -59,9 +66,11 @@ let shownProjects=new Set(gameState.projects);
 const sessionStart=performance.now();
 function persist(){try{localStorage.setItem(storageKey,JSON.stringify(gameSave));}catch{}}
 let snapshot:TownSnapshot=snapshotForGame(shownLevels,0,shownProjects.has('road-gates')?gameState.gateMask:0);
-let town:TownScene|null=null,worker:ChoiceWorker|null=null,scenery:GameScenery|null=null,reactions:ReactionEffects|null=null;
+let town:TownScene|null=null,worker:ChoiceWorker|null=null,scenery:GameScenery|null=null,reactions:ReactionEffects|null=null,juice:Juice|null=null;
+const sfx=new Sfx();
 let target=new THREE.Vector3(0,terrainHeight(0,0)*.55,0),desiredTarget=target.clone();
-const townOverviewDistance=(levels:Levels)=>148+Math.min(24,Object.values(levels).filter(level=>level>0).length*2.4);
+// Start close so the first buildings read; pull back as the valley fills.
+const townOverviewDistance=(levels:Levels)=>112+Math.min(48,Object.values(levels).filter(level=>level>0).length*4.8);
 let azimuth=.72,elevation=Math.max(...Object.values(shownLevels))>3?.38:1.05,distance=townOverviewDistance(shownLevels),desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
 let lastFrame=0,lastModel=0,frameSamples:number[]=[],pixelRatio=1;
 let activePanel:string|null=null,lastFocus:HTMLElement|null=null,toastTimer=0;
@@ -91,12 +100,14 @@ function validPanel(id:string|null):string|null{return id&&(id==='work'||id==='a
 function openPanel(id:string,updateHistory=true){
   const valid=validPanel(id);if(!valid)return;
   if(activePanel===valid)return;
+  const switching=Boolean(activePanel),previousPanel=activePanel;
   if(!activePanel)lastFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   activePanel=valid;
   panel.dataset.view=valid.startsWith('project-')?'project':valid;
   panel.querySelectorAll<HTMLButtonElement>('.panel-tab').forEach(button=>button.setAttribute('aria-current',String(button.dataset.panel===valid||(valid.startsWith('project-')&&button.dataset.panel==='work'))));
   panelBody.innerHTML=valid.startsWith('project-')?projectMarkup(valid.slice(8) as ProjectKey):valid==='work'?workMarkup():valid==='about'?aboutMarkup():contactMarkup();
   panelBody.scrollTop=0;
+  choreographPanel(switching,previousPanel,valid);
   panel.hidden=false;backdrop.hidden=false;$('.chrome').inert=true;$('.town-ui').inert=true;fallback.inert=true;
   requestAnimationFrame(()=>{panel.classList.add('open');backdrop.classList.add('open');closeButton.focus();});
   document.body.classList.add('panel-open');
@@ -108,6 +119,21 @@ function openPanel(id:string,updateHistory=true){
   panelBody.querySelectorAll<HTMLButtonElement>('[data-project-link]').forEach(button=>button.addEventListener('click',()=>openPanel(`project-${button.dataset.projectLink}`)));
   panelBody.querySelector<HTMLButtonElement>('[data-back-work]')?.addEventListener('click',()=>openPanel('work'));
   panelBody.querySelector<HTMLButtonElement>('#copy-discord')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText('step_dev');announce('Discord name copied.');}catch{announce('Discord: step_dev');}});
+}
+const PANEL_ORDER=['work','project','about','contact'];
+function choreographPanel(switching:boolean,previous:string|null,next:string){
+  if(reducedMotion())return;
+  const rank=(id:string|null)=>PANEL_ORDER.indexOf(id?.startsWith('project-')?'project':id??'');
+  if(switching){
+    const dir=Math.sign(rank(next)-rank(previous))||1;
+    play(panelBody,[{opacity:0,translate:`${dir*28}px 0`},{opacity:1,translate:'0 0'}],{duration:520,easing:EASE.outExpo});
+  }else{
+    play(panel,[{opacity:0,scale:.94,translate:'0 22px'},{opacity:1,scale:1,translate:'0 0'}],{duration:760,easing:EASE.outExpo,delay:16});
+  }
+  const base=switching?60:180;
+  play(panelBody.querySelector('.project-visual img, .about-mosaic, .postcard'),[{scale:1.12,opacity:.2},{scale:1,opacity:1}],{duration:1300,easing:EASE.outExpo,delay:base-60,fill:'backwards'});
+  stagger(panelBody.querySelectorAll('.panel-copy > *, .work-intro > div > *, .work-count, .project-visual-index, .project-visual-footer, .editorial-cover-caption'),rise(16,5),{duration:720,easing:EASE.outExpo,delay:base,gap:45});
+  stagger(panelBody.querySelectorAll('.work-card'),[{opacity:0,translate:'0 40px',scale:.94},{opacity:1,translate:'0 0',scale:1}],{duration:900,easing:EASE.outExpo,delay:base+100,gap:70});
 }
 function closePanel(updateHistory=true){
   if(!activePanel)return;
@@ -122,6 +148,55 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Tab'&&activePanel){const items=[...panel.querySelectorAll<HTMLElement>('button,a[href]')].filter(el=>!el.hasAttribute('disabled'));if(!items.length)return;const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
 });
 window.addEventListener('popstate',()=>{const id=validPanel(location.hash.slice(1));if(id)openPanel(id,false);else closePanel(false);});
+
+// ---------- Game feel: sound, floating labels, card feedback ----------
+const soundButton=$<HTMLButtonElement>('#game-sound');
+function renderSound(){soundButton.textContent=sfx.muted?'♪ Off':'♪';soundButton.setAttribute('aria-pressed',String(!sfx.muted));soundButton.setAttribute('aria-label',sfx.muted?'Sound off':'Sound on');soundButton.title=sfx.muted?'Sound off':'Sound on';}
+soundButton.addEventListener('click',()=>{sfx.unlock();sfx.setMuted(!sfx.muted);renderSound();if(!sfx.muted)sfx.click();});
+renderSound();
+const floatLayer=document.createElement('div');floatLayer.className='float-layer';floatLayer.setAttribute('aria-hidden','true');document.body.append(floatLayer);
+interface FloatLabel{el:HTMLElement;pos:THREE.Vector3;born:number}
+const floats:FloatLabel[]=[];
+const projected=new THREE.Vector3();
+function floatLabel(html:string,x:number,y:number,z:number,color:number,big=false,delay=0){
+  if(reduced.matches||!town)return;
+  const el=document.createElement('div');
+  el.className=`float-label${big?' big':''}`;
+  el.style.setProperty('--idea-color',`#${color.toString(16).padStart(6,'0')}`);
+  el.style.animationDelay=`${delay}ms`;
+  el.innerHTML=html;floatLayer.append(el);
+  floats.push({el,pos:new THREE.Vector3(x,y,z),born:performance.now()+delay});
+}
+function updateFloats(now:number){
+  if(!town)return;
+  for(let i=floats.length-1;i>=0;i--){
+    const f=floats[i];
+    if(now-f.born>1900){f.el.remove();floats.splice(i,1);continue;}
+    projected.copy(f.pos).project(town.camera);
+    const visible=projected.z<1;
+    f.el.style.transform=`translate(${((projected.x+1)/2*innerWidth).toFixed(1)}px,${((1-projected.y)/2*innerHeight).toFixed(1)}px)`;
+    f.el.style.visibility=visible?'visible':'hidden';
+  }
+}
+function clearFloats(){for(const f of floats)f.el.remove();floats.length=0;}
+function bumpCard(idea:Idea,cls='bump'){
+  const card=gameCards.querySelector<HTMLElement>(`[data-idea="${idea}"]`);
+  if(!card||reduced.matches)return;
+  card.classList.remove(cls);void card.offsetWidth;card.classList.add(cls);
+  card.addEventListener('animationend',()=>card.classList.remove(cls),{once:true});
+}
+const DEBRIS:Record<string,readonly number[]>={home:[0xc98f62,0x9b6b48,0xe7d3b1,0xb6573f],wall:[0xb4aa96,0x8f8779,0xa49b89],project:[0xd2b48c,0x8c6e54,0x7e9bbf],castle:[0xb9b4aa,0x8f8a80,0xc0663f]};
+let waveImpacts=0;
+function onBuildImpact(impact:BuildImpact){
+  if(!juice)return;
+  const size=THREE.MathUtils.clamp(impact.height/7,.6,1.8);
+  juice.dustRing(impact.x,impact.y,impact.z,Math.max(2.5,impact.radius*1.15),Math.round(12+size*8),.8+size*.3);
+  juice.debris(impact.x,impact.y,impact.z,impact.radius,DEBRIS[impact.kind]??[0xc9b28e,0x9a826a,0xb8a590],Math.round(6+size*6));
+  juice.addShake(waveImpacts===0?.35+size*.2:.12);
+  if(waveImpacts<4)sfx.thud(size);
+  if(waveImpacts===0)worker?.celebrate();
+  waveImpacts++;
+}
 
 function recenter(){desiredTarget.set(0,terrainHeight(0,0)*.55,0);desiredDistance=townOverviewDistance(shownLevels);desiredAzimuth=.72;desiredElevation=Math.max(...Object.values(shownLevels))>3?.38:1.05;}
 const gameHud=$<HTMLElement>('#game-hud');
@@ -141,44 +216,117 @@ new ResizeObserver(()=>{
   desiredUiOffset=gameHud.hidden?0:Math.max(0,Math.min(innerHeight*.32,innerHeight/2-(90+top)/2));
 }).observe(gameHud);
 
+const IDEA_HEX=Object.fromEntries(IDEAS.map(idea=>[idea,`#${IDEA_COLORS[idea].toString(16).padStart(6,'0')}`])) as Record<Idea,string>;
+const HOTKEYS=['1','2','3','4','5','6','7','8','9','0'];
+let lastEventMessage='',revealDone=false,revealPending=false,lastResult='';
+let hudRendered=false;
 function renderGameHud(){
   gameHud.hidden=!gameSave.started;
+  gameHud.classList.toggle('is-busy',animating);
+  const showResults=gameState.finished&&!animating;
+  gameHud.classList.toggle('is-finished',showResults);
   $('#fallback-start').hidden=gameSave.started;
   document.body.classList.toggle('game-running',gameSave.started);
-  $('#game-turn').textContent=`${gameSave.order.length} / ${IDEAS.length}`;
-  $('.game-hud-kicker').textContent=gameSave.order.length&&gameState.route==='storybook'?'✦  STORYBOOK ROUTE':'✦  THE ORDER PUZZLE';
-  if(!gameProgress.children.length)gameProgress.innerHTML=IDEAS.map(()=>'<span></span>').join('');
-  for(const [index,mark] of [...gameProgress.children].entries())mark.classList.toggle('filled',index<gameSave.order.length);
-  $('#game-summary').textContent=gameState.finished&&!animating
-    ?gameState.perfect?'All ideas at MAX':`${gameState.score} / ${IDEAS.length*MAX_LEVEL} levels reached`
-    :`${gameState.projects.length} / ${JOINT_PROJECTS.length} collaborations · ${gameState.score} / ${IDEAS.length*MAX_LEVEL} levels`;
+  tweenText($('#game-turn'),`${gameSave.order.length} / ${IDEAS.length}`,420);
+  // Choices stay neutral during play: the town reacts, but levels and
+  // verdicts are revealed only when all ten ideas are placed.
+  const maxCount=IDEAS.filter(idea=>gameState.levels[idea]===MAX_LEVEL).length;
+  const remaining=IDEAS.length-gameSave.order.length;
+  $('.game-hud-kicker').textContent=showResults?'✦  RESULTS':'✦  THE ORDER PUZZLE';
+  $('#game-summary').textContent=showResults
+    ?revealPending?'Revealing the town…':gameState.secret?'Storybook Night · Complete':gameState.perfect?'Complete · Every idea at MAX':`${maxCount} of ${IDEAS.length} ideas reached MAX`
+    :animating?'The town is answering…':remaining===IDEAS.length?'Place your first idea':remaining===1?'Place your last idea':`${remaining} ideas left to place`;
+  if(!gameProgress.children.length)gameProgress.innerHTML=IDEAS.map(()=>'<span><i></i></span>').join('');
+  for(const [index,mark] of [...gameProgress.children].entries()){
+    const placed=gameSave.order[index];
+    mark.classList.toggle('filled',Boolean(placed));
+    if(placed)(mark as HTMLElement).style.setProperty('--seg',IDEA_HEX[placed]);else (mark as HTMLElement).style.removeProperty('--seg');
+  }
   gameSkip.hidden=!animating;
-  gameEvent.textContent=eventMessage;
+  const restartLabel=restartButton.querySelector('span')!;
+  if(!restartArmed)restartLabel.textContent=showResults?'Play again':'Restart';
+  restartButton.classList.toggle('primary',showResults);
+  if(eventMessage!==lastEventMessage){
+    gameEvent.textContent=eventMessage;
+    if(eventMessage)play(gameEvent,[{opacity:0,translate:'0 10px',filter:'blur(5px)'},{opacity:1,translate:'0 0',filter:'blur(0px)'}],{duration:520,easing:EASE.outExpo});
+    lastEventMessage=eventMessage;
+  }
   gameEvent.hidden=!eventMessage;
-  if(!gameCards.children.length)gameCards.innerHTML=CARD_ORDER.map(idea=>{
+  if(!gameCards.children.length)gameCards.innerHTML=CARD_ORDER.map((idea,index)=>{
     const info=IDEA_INFO[idea];
-    return `<button type="button" class="game-card" data-idea="${idea}" style="--idea-color:#${IDEA_COLORS[idea].toString(16).padStart(6,'0')}"><span class="game-card-icon" aria-hidden="true"><img src="${info.icon}" alt="" draggable="false" /></span><span class="game-card-label">${info.name}</span><span class="game-card-level"></span></button>`;
+    return `<button type="button" class="game-card" data-idea="${idea}" aria-keyshortcuts="${HOTKEYS[index]}" style="--idea-color:${IDEA_HEX[idea]};--i:${index}"><span class="game-card-sheen" aria-hidden="true"></span><kbd class="game-card-key" aria-hidden="true">${HOTKEYS[index]}</kbd><span class="game-card-icon" aria-hidden="true"><img src="${info.icon}" alt="" draggable="false" /><span class="game-card-result"><b></b><small></small></span></span><span class="game-card-label">${info.name}</span><span class="game-card-meter" aria-hidden="true">${'<i></i>'.repeat(MAX_LEVEL)}</span></button>`;
   }).join('');
   for(const idea of CARD_ORDER){
     const info=IDEA_INFO[idea],chosen=gameSave.order.includes(idea);
     const button=gameCards.querySelector<HTMLButtonElement>(`[data-idea="${idea}"]`)!;
-    const level=shownLevels[idea];
-    const fault=gameState.faults.find(item=>item.idea===idea||item.partner===idea);
+    const level=gameState.levels[idea],max=level===MAX_LEVEL;
     button.classList.toggle('chosen',chosen);
-    button.classList.toggle('missed',Boolean(fault));
-    button.querySelector('.game-card-level')!.textContent=level===MAX_LEVEL?'MAX':level?`${level} / ${MAX_LEVEL}`:'';
-    button.title=fault?.reason??info.hint;
+    button.classList.toggle('is-max',max);
+    if(!showResults)button.classList.remove('revealed');
+    button.querySelector('.game-card-result b')!.textContent=max?'MAX':String(level);
+    button.querySelector('.game-card-result small')!.textContent=max?'':`/ ${MAX_LEVEL}`;
+    button.querySelectorAll('.game-card-meter i').forEach((pip,k)=>pip.classList.toggle('on',k<level));
+    // The front shows the idea fully grown; the revealed side shows the stage it reached.
+    const art=button.querySelector<HTMLImageElement>('.game-card-icon img')!,wanted=showResults&&button.classList.contains('revealed')?ideaIcon(idea,level):info.icon;
+    if(art.getAttribute('src')!==wanted)art.src=wanted;
+    button.title=showResults?'':info.hint;
     button.disabled=chosen||animating||gameState.finished;
-    button.setAttribute('aria-label',chosen?`${info.name}, chosen${level?`, level ${level} of ${MAX_LEVEL}`:''}${fault?`, missed collaboration: ${fault.reason}`:''}`:`${info.name}. ${info.hint}`);
+    button.setAttribute('aria-label',showResults
+      ?`${info.name}, reached ${max?'MAX':`level ${level} of ${MAX_LEVEL}`}`
+      :chosen?`${info.name}, placed`:`${info.name}. ${info.hint} Shortcut key ${HOTKEYS[CARD_ORDER.indexOf(idea)]}.`);
   }
-  gameResult.hidden=!gameState.finished||animating;
+  if(!showResults)revealDone=false;
+  else if(!revealDone){
+    revealDone=true;
+    if(hudRendered&&!reducedMotion())revealCards();
+    else{gameCards.querySelectorAll('.game-card').forEach(card=>card.classList.add('revealed'));renderGameHud();}
+  }
+  gameResult.hidden=!showResults||!revealDone||revealPending;
   if(!gameResult.hidden){
-    const title=gameState.secret?'Storybook Night':gameState.perfect?'Every idea reached MAX':`${gameState.score} / ${IDEAS.length*MAX_LEVEL} levels`;
     const diagnosis=gameState.faults.length
       ?`<details><summary>Missed collaborations (${gameState.faults.length})</summary><ul>${gameState.faults.map(fault=>`<li>${fault.reason}</li>`).join('')}</ul></details>`
       :`<span>All ${JOINT_PROJECTS.length} collaborations completed.</span>`;
-    gameResult.innerHTML=`<div class="game-result-copy"><strong>${title}</strong><span>Best: ${gameSave.bestScore} / ${IDEAS.length*MAX_LEVEL}</span>${diagnosis}</div><button type="button" data-replay>Try another order</button>`;
+    const result=`<div class="game-result-copy"><strong>${gameState.secret?'Storybook Night':gameState.perfect?'Every idea reached MAX':`${gameState.score} / ${IDEAS.length*MAX_LEVEL} levels reached`}</strong><span>Best: ${gameSave.bestScore} / ${IDEAS.length*MAX_LEVEL}</span>${diagnosis}</div>`;
+    if(result!==lastResult){gameResult.innerHTML=result;lastResult=result;}
   }
+  hudRendered=true;
+}
+/** Flips every card, left to right, to show the level each idea reached. */
+function revealCards(){
+  const token=animationToken,cards=[...gameCards.querySelectorAll<HTMLButtonElement>('.game-card')];
+  const start=320,gap=110,flat='perspective(700px) rotateY(0deg)';
+  revealPending=true;renderGameHud();
+  cards.forEach((card,i)=>window.setTimeout(()=>{
+    if(token!==animationToken)return;
+    const out=card.animate([{transform:flat},{transform:'perspective(700px) rotateY(90deg) scale(1.04)'}],{duration:190,easing:EASE.inQuart,fill:'forwards'});
+    out.finished.then(()=>{
+      if(token!==animationToken){out.cancel();return;}
+      card.classList.add('revealed');out.cancel();
+      const idea=card.dataset.idea as Idea;card.querySelector<HTMLImageElement>('.game-card-icon img')!.src=ideaIcon(idea,gameState.levels[idea]);
+      card.animate([{transform:'perspective(700px) rotateY(-90deg) scale(1.04)'},{transform:flat}],{duration:EASE.springSoft.duration,easing:EASE.springSoft.easing});
+      if(card.classList.contains('is-max'))burst(card,'#f2c24f',8);
+    },()=>{});
+  },start+i*gap));
+  window.setTimeout(()=>{
+    if(token!==animationToken)return;
+    revealPending=false;renderGameHud();
+    play($('#game-summary'),[{opacity:0,translate:'0 8px',scale:.96},{opacity:1,translate:'0 0',scale:1}],{duration:EASE.spring.duration,easing:EASE.spring.easing});
+    retrigger(gameHud,'finale');
+    if(gameState.perfect||gameState.secret){const r=gameCards.getBoundingClientRect();confetti(r.left+r.width/2,r.top,Object.values(IDEA_HEX),120);}
+  },start+cards.length*gap+420);
+}
+function enterHud(delay=0){
+  if(reducedMotion()||gameHud.hidden)return;
+  play($('.game-hud-head'),rise(26,8),{duration:760,easing:EASE.outExpo,delay,fill:'backwards'});
+  stagger(gameProgress.children,[{opacity:0,scale:'0 1'},{opacity:1,scale:'1 1'}],{duration:640,easing:EASE.outExpo,delay:delay+140,gap:32});
+  stagger(gameCards.children,[{translate:'0 44px',scale:.82},{translate:'0 0',scale:1}],{duration:EASE.spring.duration,easing:EASE.spring.easing,delay:delay+180,gap:40});
+  stagger(gameCards.children,[{opacity:0,filter:'blur(8px)'},{opacity:1,filter:'blur(0px)'}],{duration:520,easing:EASE.outQuart,delay:delay+180,gap:40});
+  stagger(gameCards.querySelectorAll('.game-card-icon'),[{scale:.4,rotate:'-12deg'},{scale:1,rotate:'0deg'}],{duration:EASE.springSnappy.duration,easing:EASE.springSnappy.easing,delay:delay+300,gap:40});
+}
+function readyRipple(){
+  const available=[...gameCards.querySelectorAll<HTMLButtonElement>('.game-card:not(:disabled)')];
+  stagger(available,[{translate:'0 0'},{translate:'0 -7px',offset:.35},{translate:'0 0'}],{duration:620,easing:EASE.inOut,gap:45});
+  available.forEach((card,i)=>{card.style.setProperty('--ready-delay',`${i*45}ms`);retrigger(card,'ready');});
 }
 function refreshGameWorld(instant=false){
   snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart,shownProjects.has('road-gates')?gameState.gateMask:0);
@@ -189,27 +337,29 @@ function refreshGameWorld(instant=false){
 function startGame(){
   gameSave.started=true;
   persist();setIntroHidden(true);renderGameHud();refreshGameWorld(true);recenter();
-  gameCards.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+  enterHud(220);
+  gameCards.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({preventScroll:true});
 }
 function restart(){
   animationToken++;animating=false;restartGame(gameSave);gameState=evaluate([]);shownLevels={...gameState.levels};
   shownProjects=new Set();
-  worker?.finishCue(true);scenery?.endBeat();reactions?.clear();
+  lastResult='';gameResult.innerHTML='';
+  worker?.finishCue(true);scenery?.endBeat();reactions?.clear();juice?.clear();clearFloats();
   eventMessage='';persist();renderGameHud();refreshGameWorld(true);recenter();
+  stagger(gameCards.children,[{scale:.9,opacity:.4},{scale:1,opacity:1}],{duration:EASE.spring.duration,easing:EASE.spring.easing,gap:30});
 }
 function finishDecision(instant=false){
   animating=false;shownLevels={...gameState.levels};shownProjects=new Set(gameState.projects);
   worker?.finishCue(instant);scenery?.endBeat();reactions?.clear();
   const last=gameSave.order.at(-1);
-  const newFaults=gameState.faults.filter(fault=>fault.idea===last);
-  const newProjects=[...new Set(gameState.events.map(event=>event.project).filter((id):id is string=>Boolean(id)))];
-  const firstProject=JOINT_PROJECTS.find(project=>project.id===newProjects[0]);
-  eventMessage=newFaults.length
-    ?`${newFaults.length} missed collaboration${newFaults.length===1?'':'s'}. ${newFaults[0].reason}`
-    :newProjects.length?`${newProjects.length} collaboration${newProjects.length===1?'':'s'} built. ${firstProject?.name}: ${firstProject?.result}`
-    :last?`${IDEA_INFO[last].name} arrived. Choose another idea to make a collaboration.`:'';
+  if(!instant&&gameState.finished&&gameState.perfect&&juice&&!reduced.matches){
+    sfx.fanfare();
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2;window.setTimeout(()=>{juice?.sparkles(Math.cos(a)*18,terrainHeight(Math.cos(a)*18,Math.sin(a)*18)+2,Math.sin(a)*18,[0xffd66b,0x8da9ee,0xe99a6f,0x6fc578,0xdd80aa,0x55c6d6][i],40,4,1.8);juice?.addShake(.2);},i*180);}
+  }
+  eventMessage=gameState.finished||!last?'':`${IDEA_INFO[last].name} placed. Choose the next idea.`;
   refreshGameWorld(instant);renderGameHud();recenter();
-  const next=gameState.finished?gameResult.querySelector<HTMLButtonElement>('button'):gameCards.querySelector<HTMLButtonElement>('button:not(:disabled)');
+  if(!gameState.finished)readyRipple();
+  const next=gameState.finished?restartButton:gameCards.querySelector<HTMLButtonElement>('button:not(:disabled)');
   next?.focus({preventScroll:true});
 }
 function skipAnimation(){
@@ -226,10 +376,13 @@ async function waitForScene(ms:number,token:number){
 }
 async function playChoice(idea:Idea){
   if(animating||gameState.finished||gameSave.order.includes(idea))return;
+  sfx.unlock();sfx.click();bumpCard(idea,'picked');
   shownProjects=new Set(gameState.projects);
   gameState=chooseIdea(gameSave,idea);persist();
+  if(gameState.finished)for(const item of IDEAS)new Image().src=ideaIcon(item,gameState.levels[item]);
   animating=true;const token=++animationToken;
   const waves=eventWaves(gameState);
+  const calm=reduced.matches||!town;
   renderGameHud();gameSkip.focus({preventScroll:true});
   try{
     if(town){
@@ -237,9 +390,10 @@ async function playChoice(idea:Idea){
       const future=snapshotForGame({...shownLevels,[idea]:1},performance.now()-sessionStart,shownProjects.has('road-gates')?gameState.gateMask:0);
       const obstacles=[...town.environment.activeTrees,...town.treeObstacles];
       const colliders=[...buildColliders(future,obstacles),...landscapeColliders(shownLevels),...moatColliders(shownLevels)];
-      worker?.startCue(idea,focus,(x,z)=>!isBlocked(x,z,colliders,1.15),reduced.matches);
+      const crew=gameState.events.some(event=>event.project)?4:3;
+      worker?.startCue(idea,focus,(x,z)=>!isBlocked(x,z,colliders,1.15),reduced.matches,performance.now()/1000,crew);
     }
-    for(const wave of waves){
+    for(const [index,wave] of waves.entries()){
       if(token!==animationToken)return;
       // Water release and the first harvest get the hero shot; other changes
       // in this causal wave happen together in the world.
@@ -248,27 +402,61 @@ async function playChoice(idea:Idea){
       const sandship=hero.idea==='workshop'&&arrival;
       if(town){
         desiredTarget.set(focus.x,town.environment.landscapeHeight(focus.x,focus.z)+(sandship?8:2),focus.z);
-        desiredDistance=hero.level>=4?145:hero.idea==='river'?130:105;
-        desiredElevation=.95;
+        // Frame the worksite closely; regional districts and the river need a wider view.
+        desiredDistance=hero.level>=4?118:hero.idea==='river'?112:hero.project?84:74;
+        desiredElevation=.92;
         desiredAzimuth=Math.atan2(-focus.z,-focus.x)+.4;
       }
       const project=JOINT_PROJECTS.find(item=>item.id===hero.project);
       eventMessage=project?`${project.name}: ${project.result}`:eventTitle(hero);
-      if(!reduced.matches&&town)reactions?.begin(hero,idea);
+      gameEvent.classList.toggle('collab',Boolean(project));
+      if(!calm){
+        reactions?.begin(hero,idea);
+        if(reactions?.travelTime)sfx.whoosh(.8);
+      }
       renderGameHud();
-      await waitForScene(reduced.matches||!town?250:arrival?650:450,token);
+      // Anticipation: the crew arrives and hammers, partner supplies fly in.
+      const travel=(reactions?.travelTime??0)*1000;
+      const anticipation=calm?250:Math.max(index===0&&arrival?1350:index===0?1000:700,travel+120);
+      await waitForScene(anticipation,token);
       if(token!==animationToken)return;
+      waveImpacts=0;
       for(const event of wave){shownLevels[event.idea]=event.level;if(event.project)shownProjects.add(event.project);}
-      refreshGameWorld(reduced.matches||!town);
-      if(!reduced.matches&&town)reactions?.reveal();
+      refreshGameWorld(calm);
+      if(!calm){
+        reactions?.reveal();
+        juice?.addShake(project?.45:.2);
+        if(project)sfx.collab();else sfx.levelUp(hero.level);
+        // Ideas without buildings (grove, river, roads) still get a crew cheer.
+        window.setTimeout(()=>{
+          if(token!==animationToken||waveImpacts>0)return;
+          worker?.celebrate();
+          const y=town?.environment.landscapeHeight(focus.x,focus.z)??0;
+          juice?.dustRing(focus.x,y,focus.z,5,16,1);
+          juice?.sparkles(focus.x,y+.5,focus.z,IDEA_COLORS[hero.idea],18,5,1.1);
+          juice?.addShake(.25);sfx.thud(.8);
+        },420);
+        const levelled=[...new Set(wave.map(event=>event.idea))];
+        levelled.forEach((item,i)=>{
+          const event=[...wave].reverse().find(e=>e.idea===item)!;
+          const at=eventFocus(event);
+          const y=(town?.environment.landscapeHeight(at.x,at.z)??0)+9+i*2.2;
+          // Levels stay hidden until the end-of-run card reveal; the label only says it grew.
+          floatLabel(`<small>${IDEA_INFO[item].name}</small><strong>▲ grows</strong>`,at.x,y,at.z,IDEA_COLORS[item],Boolean(project),i*120);
+          window.setTimeout(()=>bumpCard(item),250+i*120);
+        });
+        if(project)floatLabel(`<em>✦ ${project.name}</em>`,focus.x,(town?.environment.landscapeHeight(focus.x,focus.z)??0)+15,focus.z,IDEA_COLORS[idea],true,80);
+      }
       eventMessage=project?`${project.name} → ${eventTitle(hero)}`:eventTitle(hero);
       renderGameHud();
-      const duration=sandship?SANDSHIP_ARRIVAL_MS+150:hero.idea==='river'&&hero.level===2?7500:hero.idea==='river'&&hero.level===3?7500:hero.idea==='windmill'&&hero.level===3?2900:hero.project?1150:2200;
-      await waitForScene(reduced.matches||!town?450:duration,token);
+      const duration=sandship?SANDSHIP_ARRIVAL_MS+150:hero.idea==='river'&&hero.level===2?7500:hero.idea==='river'&&hero.level===3?7500:hero.idea==='windmill'&&hero.level===3?2900:hero.project?1750:1900;
+      await waitForScene(calm?450:duration,token);
       if(token!==animationToken)return;
       reactions?.clear();
+      worker?.resumeWork();
     }
     if(token!==animationToken)return;
+    gameEvent.classList.remove('collab');
     finishDecision();
   }catch(error){
     console.error('Reaction playback interrupted',error);
@@ -277,13 +465,32 @@ async function playChoice(idea:Idea){
 }
 gameCards.addEventListener('click',event=>{
   const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');
-  if(button&&!button.disabled)void playChoice(button.dataset.idea as Idea);
+  if(!button||button.disabled)return;
+  burst(button,IDEA_HEX[button.dataset.idea as Idea]);
+  void playChoice(button.dataset.idea as Idea);
 });
-gameResult.addEventListener('click',event=>{
-  if((event.target as HTMLElement).closest('[data-replay]'))restart();
+pointerLight(gameCards,'.game-card',7);
+pointerLight(panelBody,'.work-card',4);
+magnetic(document,'.intro-actions button, .panel-action, #game-restart.primary, .fallback button');
+document.addEventListener('keydown',event=>{
+  if(activePanel||!gameSave.started||event.metaKey||event.ctrlKey||event.altKey||event.repeat)return;
+  if((event.target as HTMLElement).closest('input,textarea,select,[contenteditable]'))return;
+  if(event.key==='Escape'&&animating){event.preventDefault();skipAnimation();return;}
+  const index=HOTKEYS.indexOf(event.key);if(index<0)return;
+  const button=gameCards.querySelector<HTMLButtonElement>(`[data-idea="${CARD_ORDER[index]}"]`);
+  if(button&&!button.disabled){event.preventDefault();button.focus({preventScroll:true});button.click();}
 });
-$('#game-restart').addEventListener('click',restart);
+const restartButton=$<HTMLButtonElement>('#game-restart');
+let restartArmed=0;
+function disarmRestart(){clearTimeout(restartArmed);restartArmed=0;restartButton.classList.remove('armed');restartButton.querySelector('span')!.textContent=gameState.finished&&!animating?'Play again':'Restart';restartButton.removeAttribute('aria-label');}
+restartButton.addEventListener('click',()=>{
+  // A finished or empty run restarts at once; a run in progress asks twice.
+  if(restartArmed||!gameSave.order.length||(gameState.finished&&!animating)){disarmRestart();restart();return;}
+  restartButton.classList.add('armed');restartButton.querySelector('span')!.textContent='Tap again';restartButton.setAttribute('aria-label','Tap again to confirm restart');
+  restartArmed=window.setTimeout(disarmRestart,2600);
+});
 gameSkip.addEventListener('click',skipAnimation);
+const shakeOffset=new THREE.Vector3(),shakeLook=new THREE.Vector3();
 function stepCamera(dt:number){
   if(!town)return;
   const k=reduced.matches?1:1-Math.exp(-dt*8);
@@ -298,17 +505,24 @@ function stepCamera(dt:number){
   if(Math.abs(town.camera.fov-fov)>.001){town.camera.fov=fov;town.camera.updateProjectionMatrix();}
   const horizontal=Math.sin(elevation)*cameraDistance;
   town.camera.position.set(target.x+Math.cos(azimuth)*horizontal,target.y+Math.cos(elevation)*cameraDistance,target.z+Math.sin(azimuth)*horizontal);
-  town.camera.lookAt(target);
+  if(juice&&juice.shake>0&&!reduced.matches){
+    juice.shakeOffset(performance.now()/1000,shakeOffset);
+    town.camera.position.add(shakeOffset);
+    town.camera.lookAt(shakeLook.copy(target).addScaledVector(shakeOffset,.4));
+  }else town.camera.lookAt(target);
 }
 function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!town)return;const cap=town.mobile?30:60;if(now-lastFrame<1000/cap-1)return;const elapsed=lastFrame?now-lastFrame:1000/cap;lastFrame=now;
   snapshot.elapsed=now-sessionStart;
-  stepCamera(elapsed/1000);reactions?.update(elapsed/1000);worker?.update();scenery?.update(now/1000,elapsed/1000);town.render(snapshot,false);
+  stepCamera(elapsed/1000);reactions?.update(elapsed/1000);juice?.update(elapsed/1000);updateFloats(now);worker?.update();scenery?.update(now/1000,elapsed/1000);town.render(snapshot,false);
   if(profile&&Math.floor(now/2000)!==Math.floor((now-elapsed)/2000)){document.body.dataset.drawCalls=String(town.renderer.info.render.calls);document.body.dataset.triangles=String(town.renderer.info.render.triangles);document.body.dataset.geometries=String(town.renderer.info.memory.geometries);document.body.dataset.textures=String(town.renderer.info.memory.textures);}
   if(profile){frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b);frameSamples=[];document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=sorted[Math.floor(sorted.length*.9)].toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}}
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.5);town.setPixelRatio(pixelRatio);worker=new ChoiceWorker(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment);reactions=new ReactionEffects(town.scene);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
+  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.5);town.setPixelRatio(pixelRatio);worker=new ChoiceWorker(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment);juice=new Juice(town.scene,town.mobile);reactions=new ReactionEffects(town.scene,juice);
+  town.onBuildImpact=onBuildImpact;town.onBuildPuff=(x,y,z,size)=>juice?.puff(x,y,z,size,10);
+  worker.hooks={strike:(x,y,z)=>{juice?.strike(x,y,z);sfx.tok();},pop:(x,y,z,appearing)=>{juice?.puff(x,y-.8,z,.9,7);sfx.pop(appearing?1.15:.8);},cheer:()=>sfx.cheer()};
+  reactions.onArrive=()=>sfx.pop(1.6);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,gameSave,gameState:()=>gameState,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}
@@ -317,4 +531,6 @@ canvas.addEventListener('webglcontextrestored',()=>location.reload());
 const initialPanel=validPanel(location.hash.slice(1));if(initialPanel)openPanel(initialPanel,false);
 setIntroHidden(gameSave.started);
 renderGameHud();
+document.documentElement.classList.remove('returning');
+if(gameSave.started)enterHud(350);
 persist();
