@@ -16,7 +16,8 @@ export class RiverWorks {
   readonly markers=new THREE.Group();
   private readonly foam:THREE.InstancedMesh;
   private readonly geometries=new Set<THREE.BufferGeometry>();
-  private readonly foamPaint=new THREE.MeshBasicMaterial({color:0xd6f7eb,transparent:true,opacity:.85,depthWrite:false});
+  // Lit so the working foam dims with the scene instead of glowing at night.
+  private readonly foamPaint=new THREE.MeshStandardMaterial({color:0xdfe8e2,roughness:1,metalness:0,transparent:true,opacity:.7,depthWrite:false});
   private readonly dummy=new THREE.Object3D();
   private active=false;
   private elapsed=0;

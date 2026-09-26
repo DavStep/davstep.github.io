@@ -14,6 +14,7 @@ import { landHeight, terrainGridCoordinate, terrainGridDivisions } from './topog
 import { riverCenter, riverHalfWidth, riverSurfaceHeight } from './river-layout';
 export { riverCenter, riverHalfWidth, riverSurfaceHeight } from './river-layout';
 import { moatBedHeight, moatDistance, moatRouteParameter, MOAT_FEED_X } from './moat-layout';
+import { ATMOSPHERE } from './atmosphere';
 
 const hash=(n:number)=>{let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;};
 const rand=(seed:number)=>hash(seed)/0xffffffff;
@@ -35,26 +36,133 @@ export function isWater(x:number,z:number,clearance=0):boolean{
   return Math.abs(z-riverCenter(x))<riverHalfWidth(x)+clearance||PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r+clearance);
 }
 
-function waterMaterial(time:{value:number},light:{value:number},pond=false):THREE.MeshBasicMaterial{
-  const material=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide});
+/** Linear-space water palette (hex values are sRGB and converted by THREE.Color). */
+const WATER_DEEP=new THREE.Color(0x1f5a6b),WATER_SHALLOW=new THREE.Color(0x579c95),WATER_BED=new THREE.Color(0x6f6650);
+/** Bank vertex colours: damp earth at the waterline, grass-tinted at the top. */
+const NIGHT_GRASS=new THREE.Color(0x8d9cc0);
+const BANK_WET=new THREE.Color(0x8c9a5f),BANK_TOP=new THREE.Color(0x88b165);
+/** Default world units per uv unit [across (uv.x is -1..1), along (uv.y)] for the main river ribbon. */
+const RIVER_FLOW_SCALE:readonly [number,number]=[4.4,1/.7];
+export type WaterMaterial=THREE.MeshStandardMaterial;
+/** Matte bank material driven by `pushBankColors` vertex colours. */
+export function createBankMaterial():THREE.MeshStandardMaterial{
+  const material=new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1,side:THREE.DoubleSide});
+  // Bend bank normals toward world up so slopes facing away from the sun read
+  // as a gentle dip instead of a black band along every moat and shore.
   material.onBeforeCompile=shader=>{
-    shader.uniforms.townWaterTime=time;shader.uniforms.townWaterLight=light;
-    shader.vertexShader='varying vec2 vTownWaterUv;\n'+shader.vertexShader;
-    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTownWaterUv=uv;');
-    shader.fragmentShader='uniform float townWaterTime; uniform float townWaterLight; varying vec2 vTownWaterUv;\n'+shader.fragmentShader;
-    shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-      float edge=${pond?'smoothstep(.63,.98,length((vTownWaterUv-.5)*2.0))':'smoothstep(.45,1.0,abs(vTownWaterUv.x))'};
-      float flow=${pond?'length((vTownWaterUv-.5)*2.0)*16.0-townWaterTime*.8':'vTownWaterUv.y*.82-townWaterTime*.55'};
-      float ripple=sin(flow+sin(vTownWaterUv.x*8.0+vTownWaterUv.y*.24)*.5);
-      float broken=smoothstep(.1,.7,sin(vTownWaterUv.y*1.7+vTownWaterUv.x*13.0));
-      float glint=smoothstep(.975,.999,ripple)*broken;
-      float foam=smoothstep(.92,.99,edge)*(.25+.15*sin(flow*1.3));
-      vec3 deep=vec3(.035,.31,.43),shallow=vec3(.16,.62,.65);
-      diffuseColor.rgb=(mix(deep,shallow,edge)+ripple*.012)*(townWaterLight);
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.76,.94,.89)*townWaterLight,glint*.4+foam*.55);
-    `);
+    shader.uniforms.townNight=ATMOSPHERE.night;shader.uniforms.townNightTint={value:NIGHT_GRASS};
+    shader.fragmentShader='uniform float townNight; uniform vec3 townNightTint;\n'+shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n      diffuseColor.rgb*=mix(vec3(1.0),townNightTint,townNight*.7);');
+    shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+      normal=normalize(mix(normal,(viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,.6));`);
   };
-  material.customProgramCacheKey=()=>pond?'town-pond-v1':'town-river-v1';
+  material.customProgramCacheKey=()=>'town-bank-soft-v2';
+  return material;
+}
+/**
+ * Vertex colours for one bank quad laid out as [inner0,outer0,inner1,outer1,outer1,inner1]
+ * (the order produced by pushing a,b,c,b,d,c with a/c at the water and b/d at the top).
+ */
+export function pushBankColors(target:number[],edge:number,wet:THREE.Color=BANK_WET,top:THREE.Color=BANK_TOP):void{
+  // Jitter per cross-section (edge, edge+1) so neighbouring quads share colours.
+  const shade=(e:number,outer:boolean)=>.95+rand(Math.floor(e)*977+(outer?31:7))*.1;
+  for(const [outer,next] of [[false,0],[true,0],[false,1],[true,0],[true,1],[false,1]] as const){
+    const c=outer?top:wet,s=shade(edge+next,outer);target.push(c.r*s,c.g*s,c.b*s);
+  }
+}
+
+// Lit, shadow-receiving stylised water shared by the river, ponds, moat and
+// channels. Ribbons carry uv.x=-1..1 across and uv.y along the flow; ponds use
+// a 0..1 disc uv and stay still. No extra passes or render targets.
+function waterMaterial(time:{value:number},pond=false,flowScale:readonly [number,number]=RIVER_FLOW_SCALE):WaterMaterial{
+  const material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.22,metalness:0,side:THREE.DoubleSide});
+  const scale=new THREE.Vector2(flowScale[0],flowScale[1]);
+  material.onBeforeCompile=shader=>{
+    Object.assign(shader.uniforms,{townWaterTime:time,townFlowScale:{value:scale},
+      townWaterDeep:{value:WATER_DEEP},townWaterShallow:{value:WATER_SHALLOW},townWaterBed:{value:WATER_BED},
+      townSunDir:ATMOSPHERE.sunDirection,townSkyHorizon:ATMOSPHERE.skyHorizon,townSkyZenith:ATMOSPHERE.skyZenith,townNight:ATMOSPHERE.night});
+    shader.vertexShader='varying vec2 vTownWaterUv;\nvarying vec3 vTownWaterWorld;\n'+shader.vertexShader;
+    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTownWaterUv=uv;\nvTownWaterWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    shader.fragmentShader=`uniform float townWaterTime; uniform vec2 townFlowScale;
+uniform vec3 townWaterDeep; uniform vec3 townWaterShallow; uniform vec3 townWaterBed;
+uniform vec3 townSunDir; uniform vec3 townSkyHorizon; uniform vec3 townSkyZenith; uniform float townNight;
+varying vec2 vTownWaterUv; varying vec3 vTownWaterWorld;
+// Dave Hoskins hash12: no sin(), stable at large inputs and on mobile GPUs.
+float townWaterHash(vec2 p){vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
+// Value noise with analytic derivatives: x=value, yz=d/dp.
+vec3 townWaterNoise(vec2 p){
+  vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f),du=6.0*f*(1.0-f);
+  float a=townWaterHash(i),b=townWaterHash(i+vec2(1,0)),c=townWaterHash(i+vec2(0,1)),d=townWaterHash(i+vec2(1,1));
+  float k1=b-a,k2=c-a,k4=a-b-c+d;
+  return vec3(a+k1*u.x+k2*u.y+k4*u.x*u.y,du*vec2(k1+k4*u.y,k2+k4*u.x));
+}
+`+shader.fragmentShader;
+    shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+      float townT=townWaterTime;
+      ${pond?`
+      // Still water: two slow, low-amplitude noise layers in world space.
+      vec2 townW=vTownWaterWorld.xz;
+      float townAcross=length((vTownWaterUv-.5)*2.0);
+      vec3 townNa=townWaterNoise(townW*.34+vec2(townT*.035,townT*.022));
+      vec3 townNb=townWaterNoise(mat2(.8,-.6,.6,.8)*townW*.9-vec2(townT*.02,townT*.045));
+      vec2 townGrad=vec2(townNa.y*.34+townNb.y*.9*.5,townNa.z*.34+townNb.z*.9*.5)*.55;
+      float townSpark=townWaterNoise(mat2(.8,-.6,.6,.8)*townW*2.8+vec2(townT*.06,0.)).x;
+      `:`
+      // Flowing water: streaks stretched along the current plus a faster
+      // cross-rippled layer at another angle, both advected downstream.
+      vec2 townQ=vec2(vTownWaterUv.x*townFlowScale.x,vTownWaterUv.y*townFlowScale.y);
+      float townAcross=abs(vTownWaterUv.x);
+      vec3 townNa=townWaterNoise(vec2(townQ.x*.8+townQ.y*.1,townQ.y*.24-townT*.5));
+      vec2 townPb=mat2(.83,-.56,.56,.83)*vec2(townQ.x,townQ.y-townT*1.05);
+      vec3 townNb=townWaterNoise(townPb*.62+vec2(townT*.08,0.));
+      vec2 townGb=mat2(.83,.56,-.56,.83)*townNb.yz*.62;
+      vec2 townGrad=vec2(townNa.y*.8,townNa.y*.1+townNa.z*.24)*.9+townGb*.75;
+      float townSpark=townWaterNoise(mat2(.8,-.6,.6,.8)*vec2(townQ.x*3.1,townQ.y*2.2-townT*1.4)).x;
+      `}
+      float townH=townNa.x*.6+townNb.x*.4;
+      // Depth: dark in the middle, lighter towards the shore, then the bed shows through.
+      float townDepth=clamp(1.0-smoothstep(.12,.96,townAcross)+(townH-.5)*.3,0.0,1.0);
+      vec3 townCol=mix(townWaterShallow,townWaterDeep,townDepth);
+      float townBed=smoothstep(.8,1.0,townAcross+(townNb.x-.5)*.1);
+      townCol=mix(townCol,mix(townWaterBed,townWaterShallow,.3),townBed*.6);
+      townCol*=.84+.32*townH;
+      // Broken, soft foam hugging the waterline instead of a drawn outline.
+      float townFoam=smoothstep(.9,1.0,townAcross)*smoothstep(.5,.85,townSpark*.6+townNa.x*.4)*${pond?'.12':'.3'};
+      townCol=mix(townCol,vec3(.56,.64,.6),townFoam);
+      diffuseColor.rgb=townCol;
+    `);
+    // Replace the geometry normal with a world-up normal tilted by the noise
+    // gradient; this is independent of ribbon winding and breaks the sun
+    // highlight into sparkles.
+    shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`
+      vec3 townWn=normalize(vec3(-townGrad.y*${pond?'.12':'.32'},1.0,-townGrad.x*${pond?'.12':'.32'}));
+      normal=normalize((viewMatrix*vec4(townWn,0.0)).xyz);
+    `);
+    shader.fragmentShader=shader.fragmentShader.replace('#include <lights_fragment_begin>',`#include <lights_fragment_begin>
+      vec3 townSunLit=vec3(0.0);
+      #if NUM_DIR_LIGHTS > 0
+      townSunLit=directLight.color; // includes the sun's shadow term
+      #endif
+    `);
+    shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+      {
+        // Fresnel from a calmer normal so the sky tint stays a soft gradient, not blotches.
+        vec3 townCalm=normalize(mix((viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,normal,.35));
+        float townNv=saturate(dot(townCalm,geometryViewDir)),townGraze=1.0-townNv;
+        vec3 townSky=mix(townSkyZenith,townSkyHorizon,townGraze*townGraze)*(1.0-.55*townNight);
+        townSky=mix(vec3(dot(townSky,vec3(.2126,.7152,.0722))),townSky,.7); // muted reflection
+        float townFres=.04+.22*townGraze*townGraze*townGraze*townGraze;
+        outgoingLight=mix(outgoingLight,townSky,townFres*(1.0-townFoam));
+        vec3 townSunV=normalize((viewMatrix*vec4(townSunDir,0.0)).xyz);
+        // Wide Blinn lobe gated by fine noise: sparse sun sparkles that also read from
+        // the high game camera, and vanish in shadow (townSunLit carries the shadow term).
+        float townGlint=pow(saturate(dot(normal,normalize(townSunV+geometryViewDir))),24.0);
+        // Two overlapping noise masks give small, rounded, sparse sparkles instead of lattice-shaped flakes.
+        float townSparkle=smoothstep(.66,.92,townSpark)*smoothstep(.5,.8,townNb.x);
+        outgoingLight+=townSunLit*townGlint*townSparkle*${pond?'.16':'.26'};
+      }
+      #include <opaque_fragment>`);
+  };
+  material.customProgramCacheKey=()=>pond?'town-pond-v3':'town-river-v3';
   return material;
 }
 
@@ -66,10 +174,9 @@ export class Environment {
   private readonly mainWater=new THREE.Group();
   private riverLevel=0;
   private groveLevel=0;
-  private readonly grassPaint=new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true});
+  private readonly grassPaint=new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,roughness:1,metalness:0});
   private readonly wind={value:0};
   private readonly waterTime={value:0};
-  private readonly waterLight={value:1};
   private readonly reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   private currentSeason='';
   private terrainGeometry:THREE.PlaneGeometry|null=null;
@@ -120,8 +227,9 @@ export class Environment {
     for(const {progress,vertices} of this.regionalCuts.values())for(const v of vertices){const p=v.geometry.getAttribute('position'),base=p.getY(v.index);p.setY(v.index,Math.min(base,THREE.MathUtils.lerp(base,v.target,channelFront(progress,v.t))));}
     for(const geometry of this.regionalOriginal.keys()){geometry.getAttribute('position').needsUpdate=true;geometry.computeVertexNormals();}
   }
-  createRiverMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight);}
-  createPondMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight,true);}
+  /** `flowScale`: world units per uv unit [across, along] of the caller's ribbon, so ripples keep one size everywhere. */
+  createRiverMaterial(flowScale?:readonly [number,number]):WaterMaterial{return waterMaterial(this.waterTime,false,flowScale);}
+  createPondMaterial():WaterMaterial{return waterMaterial(this.waterTime,true);}
   setRoadCenterProgress(progress:number):void{
     if(!this.gameMode||!this.townSquare)return;
     const size=THREE.MathUtils.clamp(progress,0,1);
@@ -173,7 +281,7 @@ export class Environment {
     const g=new THREE.PlaneGeometry(700,700,divisions,divisions);g.rotateX(-Math.PI/2);
     this.terrainGeometry=g;
     const positions=g.getAttribute('position'),colors:number[]=[];
-    const low=new THREE.Color(0x83bb65),high=new THREE.Color(0x72a66e),sand=new THREE.Color(0xa9c77a),shoreColor=new THREE.Color(0x8d9670);
+    const low=new THREE.Color(0x88b165),high=new THREE.Color(0x79a165),sand=new THREE.Color(0xaabd78),shoreColor=new THREE.Color(0x8fa366);
     for(let i=0;i<positions.count;i++){
       const x=terrainGridCoordinate(positions.getX(i)/350),z=terrainGridCoordinate(positions.getZ(i)/350),r=Math.hypot(x,z);
       positions.setX(i,x);positions.setZ(i,z);
@@ -190,7 +298,7 @@ export class Environment {
     const square=new THREE.Mesh(new THREE.CylinderGeometry(INFRASTRUCTURE.squareRadius,INFRASTRUCTURE.squareRadius,.08,32),MAT.path);square.position.y=terrainHeight(0,0)+.07;square.receiveShadow=true;square.visible=!this.gameMode;this.townSquare=square;this.group.add(square);
   }
   private buildWater(){
-    const water:number[]=[],waterUv:number[]=[],banks:number[]=[];
+    const water:number[]=[],waterUv:number[]=[],banks:number[]=[],bankColors:number[]=[];
     const steps=140,first=-225,last=225,bankWidth=2.6;
     const frame=(i:number,side:number,margin=0)=>{
       const x=first+(last-first)*i/steps,z=riverCenter(x)+side*(riverHalfWidth(x)+margin);
@@ -200,6 +308,8 @@ export class Environment {
     const quad=(target:number[],a:[number,number,number],b:[number,number,number],c:[number,number,number],d:[number,number,number])=>{
       for(const p of [a,b,c,b,d,c])target.push(...p);
     };
+    // Bank quads are (inner0,outer0,inner1,outer1): wet earth at the water, grass at the top.
+    const bankShade=(target:number[],seed:number)=>pushBankColors(target,seed);
     for(let i=0;i<steps;i++){
       const x0=first+(last-first)*i/steps,x1=first+(last-first)*(i+1)/steps;
       const a=frame(i,-1),b=frame(i,1),c=frame(i+1,-1),d=frame(i+1,1);
@@ -213,27 +323,28 @@ export class Environment {
         if(!streamMouth&&!moatMouth)for(let j=0;j<6;j++)this.openRiverBankIndices.push(banks.length/3+j);
         quad(banks,[inner0.x,waterY(x0)-.025,inner0.z],[outer0.x,baseTerrainHeight(outer0.x,outer0.z)+.04,outer0.z],
           [inner1.x,waterY(x1)-.025,inner1.z],[outer1.x,baseTerrainHeight(outer1.x,outer1.z)+.04,outer1.z]);
+        bankShade(bankColors,i+(side>0?1000:0));
       }
     }
-    const bankGeometry=new THREE.BufferGeometry();bankGeometry.setAttribute('position',new THREE.Float32BufferAttribute(banks,3));bankGeometry.computeVertexNormals();
+    const bankGeometry=new THREE.BufferGeometry();bankGeometry.setAttribute('position',new THREE.Float32BufferAttribute(banks,3));bankGeometry.setAttribute('color',new THREE.Float32BufferAttribute(bankColors,3));bankGeometry.computeVertexNormals();
     bankGeometry.setIndex(this.closedRiverBankIndices);
     this.riverBankGeometry=bankGeometry;
-    const bankMaterial=new THREE.MeshStandardMaterial({color:0xa69b78,roughness:1,side:THREE.DoubleSide});
+    const bankMaterial=createBankMaterial();
     const riverBanks=new THREE.Mesh(bankGeometry,bankMaterial);riverBanks.receiveShadow=true;
     const waterGeometry=new THREE.BufferGeometry();waterGeometry.setAttribute('position',new THREE.Float32BufferAttribute(water,3));waterGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(waterUv,2));waterGeometry.computeVertexNormals();
-    const river=new THREE.Mesh(waterGeometry,waterMaterial(this.waterTime,this.waterLight));
+    const river=new THREE.Mesh(waterGeometry,waterMaterial(this.waterTime));river.receiveShadow=true;
     this.mainWater.add(riverBanks,river);
     for(const p of PONDS){
-      const y=baseTerrainHeight(p.x,p.z)-.72,slope:number[]=[];
+      const y=baseTerrainHeight(p.x,p.z)-.72,slope:number[]=[],slopeColors:number[]=[];
       for(let j=0;j<40;j++){
         const a=j*Math.PI*2/40,b=(j+1)*Math.PI*2/40;
         const inner=(t:number):[number,number,number]=>[p.x+Math.cos(t)*p.r,y-.025,p.z+Math.sin(t)*p.r];
         const outer=(t:number):[number,number,number]=>{const x=p.x+Math.cos(t)*(p.r+2.2),z=p.z+Math.sin(t)*(p.r+2.2);return [x,baseTerrainHeight(x,z)+.04,z];};
-        quad(slope,inner(a),outer(a),inner(b),outer(b));
+        quad(slope,inner(a),outer(a),inner(b),outer(b));bankShade(slopeColors,(j%40)+p.x*100);
       }
-      const shoreGeometry=new THREE.BufferGeometry();shoreGeometry.setAttribute('position',new THREE.Float32BufferAttribute(slope,3));shoreGeometry.computeVertexNormals();
+      const shoreGeometry=new THREE.BufferGeometry();shoreGeometry.setAttribute('position',new THREE.Float32BufferAttribute(slope,3));shoreGeometry.setAttribute('color',new THREE.Float32BufferAttribute(slopeColors,3));shoreGeometry.computeVertexNormals();
       const shore=new THREE.Mesh(shoreGeometry,bankMaterial);shore.receiveShadow=true;
-      const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,40),waterMaterial(this.waterTime,this.waterLight,true));pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y,p.z);
+      const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,40),waterMaterial(this.waterTime,true));pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y,p.z);pond.receiveShadow=true;
       this.mainWater.add(shore,pond);
       for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45,x=p.x+Math.cos(a)*rr,z=p.z+Math.sin(a)*rr;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(x,terrainHeight(x,z)+.75,z);this.mainWater.add(reed);}
     }
@@ -351,7 +462,7 @@ export class Environment {
     // Each instance is a small tuft. Five tapered leaves share a root and
     // sway at their tips, so grass reads as continuous ground cover up close.
     const vertices:number[]=[],colors:number[]=[];
-    const root=new THREE.Color(0x5e9c51),middle=new THREE.Color(0x83be5c),tip=new THREE.Color(0xb2d877);
+    const root=new THREE.Color(0x5b844a),middle=new THREE.Color(0x86b05a),tip=new THREE.Color(0xb4cf76);
     const add=(x:number,y:number,z:number,c:THREE.Color)=>{vertices.push(x,y,z);colors.push(c.r,c.g,c.b);};
     for(let blade=0;blade<5;blade++){
       const a=blade*2.399,dx=Math.cos(a),dz=Math.sin(a),sideX=-dz,sideZ=dx;
@@ -381,7 +492,7 @@ export class Environment {
         #endif
       `);
     };
-    this.grassPaint.customProgramCacheKey=()=> 'town-lit-wind-grass-v3';
+    this.grassPaint.customProgramCacheKey=()=> 'town-lit-wind-grass-v4';
     const positions:{x:number;z:number;s:number;a:number;color:number}[]=[];
     const attempts=this.mobile?6500:17000;
     for(let i=0;i<attempts;i++){
@@ -391,7 +502,7 @@ export class Environment {
       positions.push({x,z,s:.68+rand(i*13)*.72,a:rand(i*27)*6.28,color:i%5});
     }
     const grass=new THREE.InstancedMesh(geometry,this.grassPaint,positions.length),d=new THREE.Object3D();
-    positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.015,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0xe1f4c3,0xd5edb0,0xf0f5cb,0xc2e79e,0xe5f2b8][p.color]));});
+    positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.015,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0xf0f2dc,0xe6ecd0,0xfaf6de,0xdce6c4,0xf2f0d4][p.color]));});
     grass.instanceMatrix.needsUpdate=true;if(grass.instanceColor)grass.instanceColor.needsUpdate=true;grass.frustumCulled=false;grass.receiveShadow=true;
     this.group.add(grass);
   }
@@ -420,7 +531,7 @@ export class Environment {
       if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isRegionalRiverCorridor(x,z))))||isLivingWorldSite(x,z)||isMountWorksite(x,z)||r>153||isWater(x,z,2.2)||millStreamDistance(x,z)<8||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:6))||r<67&&(Math.abs(x)<4||Math.abs(z)<4||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3))continue;
       blooms.push({x,z,size:.75+rand(i*37+11)*.65,color:Math.floor(rand(i*67+19)*palette.length)});
     }
-    const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}),blooms.length);
+    const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,roughness:1,metalness:0}),blooms.length);
     const transform=new THREE.Object3D();
     blooms.forEach((flower,i)=>{
       transform.position.set(flower.x,terrainHeight(flower.x,flower.z)+.45*flower.size,flower.z);
@@ -437,8 +548,7 @@ export class Environment {
   update(seconds:number,season:string,night:number){
     this.wind.value=seconds;
     this.waterTime.value=this.reducedMotion.matches?0:seconds;
-    this.waterLight.value=1-night*.38;
     if(season!==this.currentSeason)this.currentSeason=season;
-    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff);
+    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff).lerp(NIGHT_GRASS,night*.7);
   }
 }

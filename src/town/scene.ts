@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
 import { INFRASTRUCTURE, accessPathFor, millAccessDistance } from './town-plan';
@@ -9,6 +8,7 @@ import { C, MAT, type Mat } from './materials';
 import { Environment, terrainHeight, naturalTerrainHeight, isWater } from './environment';
 import { ContactShadows, type ContactFootprint } from './contact-shadows';
 import { TownSky } from './sky';
+import { ATMOSPHERE } from './atmosphere';
 import { Rain } from './rain';
 import { ConstructionEffects } from './construction-effects';
 import { ParachuteArrival, isSandshipArrival, SANDSHIP_ARRIVAL_MS } from './parachute-arrival';
@@ -35,9 +35,15 @@ const sphereGeometry = new THREE.IcosahedronGeometry(1,1);
 const coneGeometry = new THREE.ConeGeometry(1,1,6);
 const towerBodyGeometry=new THREE.CylinderGeometry(1.02,1.18,1,10);
 const towerRingGeometry=new THREE.CylinderGeometry(1.3,1.22,.23,10);
-const daylightSun=new THREE.Color(0xfff2d7),overcastSun=new THREE.Color(0xdce5f0),nightSun=new THREE.Color(0x9bb6e2);
-const overcastFill=new THREE.Color(0xd0d7e4),nightFill=new THREE.Color(0x8198c4),nightGround=new THREE.Color(0x59657d);
-const overcastFog=new THREE.Color(0xbac5ce),nightFog=new THREE.Color(0x52647c);
+// Warm key light, cool sky fill: lit planes read warm, shadow masses read blue.
+const lowSun=new THREE.Color(0xffc68c),daylightSun=new THREE.Color(0xffe0ad),overcastSun=new THREE.Color(0xdce5f0),nightSun=new THREE.Color(0x8aa6e0);
+const daylightFill=new THREE.Color(0xa9c1e8),daylightGround=new THREE.Color(0xa39f7c);
+const overcastFill=new THREE.Color(0xc4ccd8),overcastGround=new THREE.Color(0x959487),nightFill=new THREE.Color(0x5d74a8),nightGround=new THREE.Color(0x323a4a);
+/** Reference sun intensity: ATMOSPHERE.sunColor is the sun colour scaled by intensity/this. */
+const SUN_REFERENCE=3.4;
+const NIGHT_TINT=new THREE.Color(0x8d9cc0);
+const SHADOW_MIN_HALF=45,SHADOW_MAX_HALF=MOBILE?100:120,SHADOW_STEP=8;
+const shadowNdc:[number,number][]=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]];
 function box(parent: THREE.Group, x:number,y:number,z:number,w:number,h:number,d:number,material:Mat, rotateY=0, rounded=true): THREE.Mesh {
   const mesh = new THREE.Mesh(rounded&&!MOBILE ? boxGeometry : plainBoxGeometry, material);
   mesh.position.set(x,y,z); mesh.scale.set(w,h,d); mesh.rotation.y=rotateY;
@@ -271,9 +277,20 @@ export class TownScene {
   private roadTransition:{started:number;firstRoad:boolean;draws:{geometry:THREE.BufferGeometry;count:number}[];instances:{mesh:THREE.InstancedMesh;count:number}[]}|null=null;
   private lastPlots:PlotState[]=[];
   private structureContacts:ContactFootprint[]=[];
-  private readonly sun=new THREE.DirectionalLight(0xffdfad,3.05);
-  private readonly fill=new THREE.HemisphereLight(0xb8c8eb,0x9d806a,.68);
-  private readonly environmentMap:THREE.WebGLRenderTarget;
+  private readonly sun=new THREE.DirectionalLight(0xffe0ad,SUN_REFERENCE);
+  private readonly fill=new THREE.HemisphereLight(0xa9c1e8,0xa39f7c,.85);
+  private readonly pmrem:THREE.PMREMGenerator;
+  private environmentMap:THREE.WebGLRenderTarget|null=null;
+  private environmentKey='';
+  private readonly sunDirection=new THREE.Vector3(-.6,.6,.4).normalize();
+  private readonly lightBasis=new THREE.Matrix4();
+  private readonly lightAxisX=new THREE.Vector3();
+  private readonly lightAxisY=new THREE.Vector3();
+  private readonly lightAxisZ=new THREE.Vector3();
+  private readonly scratch=new THREE.Vector3();
+  private readonly ray=new THREE.Vector3();
+  private shadowHalf=0;
+  private shadowDepth=0;
   private readonly materials=new Set<Mat>();
   private structureSignature='';
   private wallSignature='';
@@ -284,23 +301,20 @@ export class TownScene {
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.NeutralToneMapping;
-    this.renderer.toneMappingExposure=1.05;
+    this.renderer.toneMappingExposure=1.12;
     this.renderer.shadowMap.enabled=true;
     this.renderer.shadowMap.type=THREE.PCFShadowMap;
     this.renderer.localClippingEnabled=true;
-    const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(this.renderer);
-    this.environmentMap=pmrem.fromScene(room,.02);
-    this.scene.environment=this.environmentMap.texture;this.scene.environmentIntensity=.09;
-    room.dispose();pmrem.dispose();
-    this.scene.background=new THREE.Color(0xbad6dc);
-    this.scene.fog=new THREE.Fog(0xd4e8d6,170,440);
+    // Reflections come from a PMREM of the sky dome, built on the first frame
+    // and again only when the sky palette changes (see updateEnvironment).
+    this.pmrem=new THREE.PMREMGenerator(this.renderer);
+    this.scene.environmentIntensity=.12;
+    this.scene.background=this.fogColor.set(0xc9ecf2);
+    this.scene.fog=new THREE.Fog(0xc9ecf2,170,440);
     this.sun.position.set(-70,65,45);this.sun.castShadow=true;
     this.sun.shadow.mapSize.setScalar(this.mobile?1024:4096);
-    this.sun.shadow.camera.left=-88;this.sun.shadow.camera.right=88;this.sun.shadow.camera.top=88;this.sun.shadow.camera.bottom=-88;
-    this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=270;
-    this.sun.shadow.bias=-.00008;
-    this.sun.shadow.normalBias=.035;this.sun.shadow.radius=this.mobile?1.25:2.5;
-    this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.arrivalStructures,this.previousStructures,this.previousRoads,this.previousWalls);
+    this.sun.shadow.radius=this.mobile?1.25:2.5;
+    this.scene.add(this.sun,this.sun.target,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.arrivalStructures,this.previousStructures,this.previousRoads,this.previousWalls);
     this.environment=new Environment(this.scene,this.mobile,this.gameMode);
     this.sky=new TownSky(this.scene);
     this.rain=new Rain(this.scene,this.mobile);
@@ -840,25 +854,91 @@ export class TownScene {
     this.currentNight=night;
     const rainy=snapshot.weather==='rain',overcast=rainy?1:snapshot.weather==='cloudy'?.5:0;
     this.rain.setWeather(rainy,this.reducedMotion.matches);
-    this.scene.environmentIntensity=.14*(1-.2*night);
     const daylight=Math.max(0,Math.sin(t*Math.PI*2));
-    this.sun.color.set(0xffedcb).lerp(daylightSun,daylight*.45)
+    this.sun.color.copy(lowSun).lerp(daylightSun,Math.min(1,daylight*1.08))
       .lerp(overcastSun,overcast*.85).lerp(nightSun,night);
-    this.sun.intensity=(3.15-overcast*1.75)*(1-.82*night);
-    this.fill.color.set(0xd4edfa).lerp(overcastFill,overcast*.6).lerp(nightFill,night*.7);
-    this.fill.groundColor.set(0xb3a282).lerp(nightGround,night*.8);
-    this.fill.intensity=(.88+overcast*.2)*(1-.12*night);
-    // Keep a readable, raking sun throughout the cycle. Distance also keeps
-    // tall roofs inside the shadow camera at dawn and dusk.
-    this.sun.position.set(-70+Math.cos(t*Math.PI*2)*28,46+daylight*28,45);
+    this.sun.intensity=(SUN_REFERENCE-overcast*1.9)*(1-.8*night);
+    this.fill.color.copy(daylightFill).lerp(overcastFill,overcast*.7).lerp(nightFill,night*.8);
+    this.fill.groundColor.copy(daylightGround).lerp(overcastGround,overcast*.6).lerp(nightGround,night*.8);
+    // Low ambient keeps shadow masses readable. Overcast lifts it because the
+    // sun is weaker; night keeps enough cool fill for the moonlit town to read.
+    this.fill.intensity=(.85+overcast*.35)*(1-.12*night);
+    // A raking sun from the camera's left: ~33° at the game's fixed morning
+    // (dayFraction .19), lower at dawn/dusk, a ~30° moon at night.
+    const elevation=THREE.MathUtils.degToRad(THREE.MathUtils.lerp(14+20*daylight,30,night));
+    const hx=-58+Math.cos(t*Math.PI*2)*20,hz=81,horizontal=Math.hypot(hx,hz);
+    this.sunDirection.set(hx/horizontal*Math.cos(elevation),Math.sin(elevation),hz/horizontal*Math.cos(elevation));
     this.sun.shadow.intensity=1-overcast*.28;
-    this.fogColor.set(0xd4e8d6).lerp(overcastFog,overcast).lerp(nightFog,night*.78);
+    this.sky.update(snapshot,night,this.sunDirection,this.camera.position);
+    // Fog and background use the sky's horizon, so the land melts into the sky.
+    this.fogColor.copy(this.sky.horizonColor).lerp(this.sky.zenithColor,.05);
     this.scene.background=this.fogColor;this.scene.fog?.color.copy(this.fogColor);
-    MAT.grass.color.set(snapshot.season==='winter'?0xb9cabe:snapshot.season==='autumn'?0xb3a15e:snapshot.season==='spring'?0x79be66:C.grass);
-    MAT.leaf.color.set(snapshot.season==='autumn'?0xc28b4b:snapshot.season==='winter'?0x829985:0x5b995e);
-    this.renderer.toneMappingExposure=1.05-.08*night;
-    this.sky.update(snapshot,night,this.sun.position,this.camera.position);
+    this.updateEnvironment(snapshot,night);
+    ATMOSPHERE.sunDirection.value.copy(this.sunDirection);
+    ATMOSPHERE.sunColor.value.copy(this.sun.color).multiplyScalar(this.sun.intensity/SUN_REFERENCE);
+    ATMOSPHERE.skyHorizon.value.copy(this.sky.horizonColor);
+    ATMOSPHERE.skyZenith.value.copy(this.sky.zenithColor);
+    ATMOSPHERE.night.value=night;
+    MAT.grass.color.set(snapshot.season==='winter'?0xb9c4b8:snapshot.season==='autumn'?0xb09e5e:snapshot.season==='spring'?0x82b163:C.grass);
+    MAT.leaf.color.set(snapshot.season==='autumn'?0xbc8a4b:snapshot.season==='winter'?0x84937f:C.leaf);
+    // Moonlight: pull vegetation albedo toward a cool grey so night reads blue, not saturated green.
+    const moon=night*.7;MAT.leaf.color.lerp(NIGHT_TINT,moon);for(const m of [MAT.terrain,MAT.foliage,MAT.pine])m.color.set(0xffffff).lerp(NIGHT_TINT,moon);
+    this.renderer.toneMappingExposure=1.12-.1*night;
   }
-  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
-  dispose(){this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
+  /** Rebuilds the sky reflection PMREM only when the palette bucket changes. */
+  private updateEnvironment(snapshot:TownSnapshot,night:number){
+    const key=`${snapshot.weather}/${snapshot.season}/${Math.round(night*6)}`;
+    if(key===this.environmentKey&&this.environmentMap)return;
+    this.environmentKey=key;
+    const target=this.pmrem.fromScene(this.sky.environment(),0,.1,100,{size:this.mobile?64:128});
+    this.environmentMap?.dispose();this.environmentMap=target;
+    this.scene.environment=target.texture;
+  }
+  /**
+   * Fits the sun's orthographic shadow box to the ground the camera sees and
+   * snaps it to whole shadow texels in light space, so shadows follow the view
+   * into the outer districts without shimmering as the camera moves.
+   */
+  private updateShadowFrustum(){
+    const camera=this.camera,shadow=this.sun.shadow;
+    camera.updateMatrixWorld();
+    this.lightBasis.lookAt(this.sunDirection,this.scratch.set(0,0,0),THREE.Object3D.DEFAULT_UP);
+    this.lightBasis.extractBasis(this.lightAxisX,this.lightAxisY,this.lightAxisZ);
+    const origin=camera.position,maxReach=170;
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,nearX=0,nearY=0;
+    for(const [nx,ny] of shadowNdc){
+      this.ray.set(nx,ny,.5).unproject(camera).sub(origin).normalize();
+      // Where the view ray meets the ground (y≈0); rays near the horizon stop at maxReach.
+      const reach=this.ray.y<-1e-3?Math.min(maxReach,-origin.y/this.ray.y):maxReach;
+      this.scratch.copy(origin).addScaledVector(this.ray,reach);this.scratch.y=Math.max(0,Math.min(this.scratch.y,origin.y));
+      const lx=this.scratch.dot(this.lightAxisX),ly=this.scratch.dot(this.lightAxisY);
+      minX=Math.min(minX,lx);maxX=Math.max(maxX,lx);minY=Math.min(minY,ly);maxY=Math.max(maxY,ly);
+      if(nx===0&&ny===-1){nearX=lx;nearY=ly;}
+    }
+    const extent=Math.max(maxX-minX,maxY-minY)*.5+6;
+    const half=THREE.MathUtils.clamp(Math.ceil(extent/SHADOW_STEP)*SHADOW_STEP,SHADOW_MIN_HALF,SHADOW_MAX_HALF);
+    // If the view is larger than the box, keep the foreground covered.
+    const inset=Math.max(0,half-10);
+    let cx=THREE.MathUtils.clamp((minX+maxX)*.5,nearX-inset,nearX+inset);
+    let cy=THREE.MathUtils.clamp((minY+maxY)*.5,nearY-inset,nearY+inset);
+    const texel=2*half/shadow.mapSize.x;
+    cx=Math.round(cx/texel)*texel;cy=Math.round(cy/texel)*texel;
+    // Put the box centre on the ground plane: y = cx*X.y + cy*Y.y + cz*Z.y = 0.
+    const cz=-(cx*this.lightAxisX.y+cy*this.lightAxisY.y)/Math.max(.05,this.lightAxisZ.y);
+    const depth=half*this.lightAxisY.y/Math.max(.05,this.lightAxisZ.y)+48;
+    this.sun.target.position.set(0,0,0).addScaledVector(this.lightAxisX,cx).addScaledVector(this.lightAxisY,cy).addScaledVector(this.lightAxisZ,cz);
+    this.sun.position.copy(this.sun.target.position).addScaledVector(this.sunDirection,depth+12);
+    this.sun.target.updateMatrixWorld();
+    if(half!==this.shadowHalf||Math.abs(depth-this.shadowDepth)>.5){
+      this.shadowHalf=half;this.shadowDepth=depth;
+      const cam=shadow.camera;
+      cam.left=-half;cam.right=half;cam.top=half;cam.bottom=-half;
+      cam.near=1;cam.far=depth*2+12;
+      cam.updateProjectionMatrix();
+      shadow.bias=-.00006;
+      shadow.normalBias=THREE.MathUtils.clamp(texel*.75,.03,this.mobile?.12:.07);
+    }
+  }
+  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.updateShadowFrustum();this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
+  dispose(){this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap?.dispose();this.pmrem.dispose();this.sky.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
 }

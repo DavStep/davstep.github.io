@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import civicData from './generated/civic.json';
+import identityData from './generated/civic-identity.json';
 import { MAT } from './materials';
 import type { PlotKind, PlotState } from './model';
 import { MILL_ROTOR_SOCKET } from './windmill-layout';
@@ -11,7 +12,7 @@ type CivicPart = {
   lod: 0 | 1;
   minStage: number;
   maxStage: number;
-  material: keyof typeof MAT;
+  material: keyof typeof MAT | 'ember';
   positions: number[];
   normals: number[];
   indices: number[];
@@ -23,7 +24,15 @@ if (data.version !== 1 || data.coordinates !== 'three-y-up') {
   throw new Error('Unsupported civic geometry format');
 }
 
-const parts = data.parts.map(part => {
+// Forge embers and furnace mouths are self-lit so they glow in shade and at dusk.
+const EMBER = new THREE.MeshStandardMaterial({ color: 0xff9a4a, roughness: .5, emissive: 0xff5a14, emissiveIntensity: 1.1 });
+const identity = identityData as { version: number; coordinates: string; parts: CivicPart[] };
+if (identity.version !== 1 || identity.coordinates !== 'three-y-up') {
+  throw new Error('Unsupported civic identity geometry format');
+}
+// Identity kits (art/blender/build_civic_identity.py) give each family a readable
+// silhouette: market canopies, tavern sign, forge stack, guild belfry, office cupola.
+const parts = [...data.parts, ...identity.parts].map(part => {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(part.positions, 3));
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(part.normals, 3));
@@ -34,7 +43,7 @@ const parts = data.parts.map(part => {
     }
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(part.colors, 3));
   }
-  return { ...part, geometry, materialObject: MAT[part.material] };
+  return { ...part, geometry, materialObject: part.material === 'ember' ? EMBER : MAT[part.material] };
 });
 
 // buildStructures clones these buffers into its material batches. The originals

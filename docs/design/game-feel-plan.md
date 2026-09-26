@@ -67,12 +67,27 @@ Files: `build-sequencer.ts` (new), `juice.ts` (new), `sfx.ts` (new), `juice.css`
 
 ### P2 — 3D model pass (Blender)
 
-The Blender MCP isn't connected in this session. The repo already has reproducible build scripts (`art/blender/build_*.py`), so the pass can run through them once Blender is available:
+The Blender MCP is configured in Codex (`uvx mcp-for-blender` → Blender on `localhost:9876`), so a Claude cloud session can't reach it. The build scripts work the same way in headless Blender (`pip install bpy==4.2.0`, then `python -c "import bpy, runpy; runpy.run_path('art/blender/<script>.py')"`), and that's how this pass was authored.
+
+**Done (Sep 26):**
+- **Chibi worker** (`build_residents.py`): big head with eyes, cheeks, hair and ears, a tinted tunic and sleeves, and untinted skin, belt, trousers and boots (as vertex colours in `residents.json` under `detail`). Pivots are unchanged; the crew adds a wide-brim hat in the idea colour. Review: `art/reviews/residents/chibi-worker.png`.
+- **Civic identity kits** (`build_civic_identity.py` → `generated/civic-identity.json`). Each family gains one readable feature per stage, inside the tested footprint:
+  - market: striped awning and flag, then bunting, signboard and more;
+  - tavern: hanging mug sign and chimney, then barrels and lanterns;
+  - forge: tall stone stack with glowing embers, then a giant cog, iron smokestack, anvil and glowing windows;
+  - guild: belfry with a bell and spire, then a shield, flags, clock and taller spire;
+  - offices: domed cupola, then a letterbox and a clock;
+  - mill: grain sacks and a hay bale.
+
+  Preview every family and stage at `/art/reviews/models/gallery.html?row=civic` (or `?row=projects`, `&close=<row>`).
+- **Homes (settlers) are unchanged by request:** only their animation was changed, not the model.
+
+Remaining:
 
 14. **Chunkier toy proportions:** roofs about 1.3× taller with deeper overhangs, thicker walls and trims, bigger doors and windows. Grow-style buildings read as toys, not scale models.
 15. **Consistent palette:** 3 roof colours × 2 wall tones, with gradient-mapped vertex colours instead of flat greys.
 16. **Hero landmark per idea** at levels 3 and 8, with a unique silhouette (mill with big sails, archive dome, star tower with a telescope, forge with a glowing furnace).
-17. **Worker model:** larger head (chibi 1:2.5 ratio), a hat per idea (hard hat, gardener's hat, blacksmith apron…), a tool in hand, and vertex-coloured faces.
+17. ~~**Worker model**~~: done (see above). Next: a distinct hat or prop per idea (hard hat, gardener's hat, blacksmith apron…).
 18. **Scaffolding and construction kit:** poles, planks, ladder and crane, to show under construction for about 0.6 s before the reveal.
 19. **Props that sell each idea:** hay bales, crates, barrels, market carts, a boat on the river, sheep in the fields.
 20. **LOD and budget:** keep the current mobile LOD path; check the triangle budget with `scripts/audit-town-assets.mjs`.

@@ -60,7 +60,7 @@ for (const part of data.parts) {
   geometry.setIndex(part.indices);
   if (part.colors?.length === part.positions.length) {
     const colors = part.family.startsWith('Pine_') && part.role === 'canopy'
-      ? part.colors.map((channel, index) => Math.min(1, channel * [.88, 1.22, 1.55][index % 3]))
+      ? part.colors.map((channel, index) => Math.min(1, channel * [.9, 1.14, 1.28][index % 3]))
       : part.colors;
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   }

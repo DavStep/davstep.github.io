@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { Levels } from './game';
 import type { Environment } from './environment';
-import { naturalTerrainHeight } from './environment';
+import { createBankMaterial, naturalTerrainHeight, pushBankColors } from './environment';
 import { RiverWorks } from './river-works';
 import { MAT } from './materials';
 import { MOAT_RADIUS, MOAT_HALF_WIDTH, MOAT_FEED_X, MOAT_FEED_START, MOAT_FEED_END, moatForLevels, moatSurfaceHeight, moatRoutePoint, MOAT_START_ANGLE, MOAT_FEED_SHARE } from './moat-layout';
@@ -15,19 +15,21 @@ export class CastleMoat {
   private readonly channel=new THREE.Group();
   private readonly geometries=new Set<THREE.BufferGeometry>();
   private readonly waterMaterial:THREE.Material;
+  private readonly bankMaterial=createBankMaterial();
   private readonly works:RiverWorks;
   private readonly ribbons:{mesh:THREE.Mesh;ring:boolean;bank:boolean;count:number}[]=[];
   constructor(parent:THREE.Group,mobile:boolean,private readonly environment:Pick<Environment,'createRiverMaterial'|'setMoatProgress'>){
     this.group.name='Castle_moat';this.channel.name='River_fed_channel';this.crossings.name='Moat_bridges';this.gates.name='Moat_gatehouses';
     this.group.add(this.channel,this.crossings,this.gates);parent.add(this.group);
-    this.waterMaterial=environment.createRiverMaterial();
+    // Ribbon uv: x=-1..1 across the half width, y=1.7 per ring segment.
+    this.waterMaterial=environment.createRiverMaterial([MOAT_HALF_WIDTH,Math.PI*2*MOAT_RADIUS/(mobile?128:192)/1.7]);
     this.works=new RiverWorks(this.group,mobile,moatRoutePoint,naturalTerrainHeight,t=>{const p=moatRoutePoint(t);return moatSurfaceHeight(p.x,p.z);},7);
     const mesh=(geometry:THREE.BufferGeometry,material:THREE.Material,group:THREE.Group)=>{
       this.geometries.add(geometry);const object=new THREE.Mesh(geometry,material);object.receiveShadow=true;group.add(object);return object;
     };
     const ribbon=(points:[number,number][],ring:boolean)=>{
       for(const bank of [0,-1,1]){
-        const positions:number[]=[],uv:number[]=[];
+        const positions:number[]=[],uv:number[]=[],colors:number[]=[];
         const edge=(i:number,side:number,outer=false):[number,number,number]=>{
           const [x,z]=points[i];const length=Math.hypot(x,z);
           const nx=ring?x/length:1,nz=ring?z/length:0;
@@ -46,13 +48,21 @@ export class CastleMoat {
           if(bank&&!ring&&points[i][1]>MOAT_FEED_START-5)continue;
           const a=edge(i,bank||-1),b=edge(i,bank||1,!!bank),c=edge(i+1,bank||-1),d=edge(i+1,bank||1,!!bank);
           for(const p of [a,b,c,b,d,c])positions.push(...p);
+          if(bank)pushBankColors(colors,i+(bank>0?5000:0)+(ring?0:9000));
           for(const [side,t] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])uv.push(side,t*1.7);
         }
         const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.computeVertexNormals();
         // Banks follow the slope on both sides; shared stone is double-sided via
         // triangle orientation below, avoiding a second material allocation.
-        if(bank){const indices:number[]=[];for(let i=0;i<positions.length/3;i+=3)indices.push(i,i+1,i+2,i+2,i+1,i);geometry.setIndex(indices);}
-        const object=mesh(geometry,bank?MAT.sand:this.waterMaterial,this.channel);
+        if(bank){
+          geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+          // One side's winding faces down; both windings are drawn, so point every normal up
+          // or that bank renders unlit (the dark ring outside the moat).
+          const normal=geometry.getAttribute('normal');for(let i=0;i<normal.count;i++)if(normal.getY(i)<0)normal.setXYZ(i,-normal.getX(i),-normal.getY(i),-normal.getZ(i));
+          const indices:number[]=[];for(let i=0;i<positions.length/3;i+=3)indices.push(i,i+1,i+2,i+2,i+1,i);geometry.setIndex(indices);
+        }
+        const object=mesh(geometry,bank?this.bankMaterial:this.waterMaterial,this.channel);
+        object.name=bank?'Moat_bank':'Moat_water';
         this.ribbons.push({mesh:object,ring,bank:!!bank,count:geometry.index?.count??positions.length/3});
         if(!bank){
           const bed=mesh(geometry.clone().translate(0,-.8,0),MAT.earth,this.channel);
@@ -120,7 +130,7 @@ export class CastleMoat {
     }
   }
   dispose(){
-    this.works.dispose();this.group.removeFromParent();this.geometries.forEach(g=>g.dispose());this.waterMaterial.dispose();this.group.clear();
+    this.works.dispose();this.group.removeFromParent();this.geometries.forEach(g=>g.dispose());this.waterMaterial.dispose();this.bankMaterial.dispose();this.group.clear();
     this.environment.setMoatProgress?.(0);
   }
 }

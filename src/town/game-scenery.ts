@@ -52,6 +52,12 @@ function streamEdge(t:number,side:number):[number,number,number]{
   }
   return [x,streamSurfaceHeight(t)+.012,z];
 }
+/** World length of the mill stream; its ribbon uv.y runs 0..36 along it. */
+function streamLength(): number {
+  let length = 0;
+  for (let i = 0; i < 64; i++) { const a = millStreamPoint(i / 64), b = millStreamPoint((i + 1) / 64); length += Math.hypot(b.x - a.x, b.z - a.z); }
+  return length;
+}
 function channelRibbon(): THREE.BufferGeometry {
   const positions: number[] = [],uvs:number[]=[];
   const steps = 72;
@@ -116,9 +122,10 @@ export class GameScenery {
     this.frontier = new FrontierWorld(this.group,mobile,environment,true);
     this.districts = new DistrictScenery(this.group,mobile);
     this.riverWorks = new RiverWorks(this.group,mobile,millStreamPoint,naturalTerrainHeight,streamSurfaceHeight,7.6,[.22,.8]);
-    this.riverBed=new THREE.Mesh(channelRibbon().translate(0,-.75,0),new THREE.MeshStandardMaterial({color:0x8e7354,roughness:1,side:THREE.DoubleSide}));
+    this.riverBed=new THREE.Mesh(channelRibbon().translate(0,-.75,0),new THREE.MeshStandardMaterial({color:0x5f5645,roughness:1,side:THREE.DoubleSide}));
     this.riverBed.geometry.setDrawRange(0,0);this.group.add(this.riverBed);
-    this.water = new THREE.Mesh(channelRibbon(),environment.createRiverMaterial());
+    this.water = new THREE.Mesh(channelRibbon(),environment.createRiverMaterial([3.55,streamLength()/36]));
+    this.water.receiveShadow = true;
     this.water.geometry.setDrawRange(0, 0);
     this.group.add(this.water);
     this.pool=riverAsset('pool',environment.createPondMaterial());
@@ -174,7 +181,7 @@ export class GameScenery {
 
     const treeTrunk = new THREE.CylinderGeometry(.24, .38, 2.2, 6);
     const treeCrown = new THREE.IcosahedronGeometry(1, 1);
-    const leaf = new THREE.MeshStandardMaterial({ color: 0x5b9d60, roughness: 1 });
+    const leaf = new THREE.MeshStandardMaterial({ color: 0x64844b, roughness: 1 });
     for (const [x, z] of [[-42, 0], [-38, 24], [-20, 40], [2, 43], [28, 36], [43, 18], [43, -6], [-40, -22]]) {
       const tree = new THREE.Group(); tree.position.set(x, terrainHeight(x, z), z);
       const trunk = new THREE.Mesh(treeTrunk, wood); trunk.position.y = 1.1; tree.add(trunk);

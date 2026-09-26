@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { Idea } from './game';
 import { terrainHeight } from './environment';
 import { IDEA_COLORS } from './idea-colors';
-import { bodyGeometry, limbGeometries, planConstructionCrew } from './residents';
+import { bodyDetailGeometry, bodyGeometry, limbDetailGeometries, limbGeometries, planConstructionCrew } from './residents';
 import { easeOutBack, smooth } from './juice';
 import residentData from './generated/residents.json';
 
@@ -25,13 +25,15 @@ const lerp=THREE.MathUtils.lerp;
 // Shared cartoon props: a carried plank or stone, a hat and a mallet.
 const plankGeometry=new THREE.BoxGeometry(1.5,.18,.5);
 const stoneGeometry=new THREE.BoxGeometry(.72,.5,.6);
-const hatGeometry=new THREE.CylinderGeometry(.34,.5,.24,10).translate(0,.12,0);
-const brimGeometry=new THREE.CylinderGeometry(.62,.62,.05,12);
+const hatGeometry=new THREE.CylinderGeometry(.36,.56,.3,14).translate(0,.15,0);
+const brimGeometry=new THREE.CylinderGeometry(.74,.74,.06,16);
 const handleGeometry=new THREE.CylinderGeometry(.05,.05,.95,6).rotateX(Math.PI/2).translate(0,0,.42);
 const malletGeometry=new THREE.BoxGeometry(.34,.26,.26).translate(0,0,.9);
 const woodPaint=new THREE.MeshStandardMaterial({color:0xa66e3f,roughness:.8});
 const stonePaint=new THREE.MeshStandardMaterial({color:0xb9b2a4,roughness:.9});
 const ironPaint=new THREE.MeshStandardMaterial({color:0x4d5561,roughness:.5,metalness:.4});
+// Skin, face, hair, trousers and boots keep their own colors; only the tunic is tinted.
+const detailPaint=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.78});
 const STONE_IDEAS=new Set<Idea>(['walls','roads','archive','observatory','river']);
 
 class Worker {
@@ -55,19 +57,23 @@ class Worker {
 
   constructor(paint:THREE.Material,hatPaint:THREE.Material,shadowGeometry:THREE.BufferGeometry,shadowPaint:THREE.Material){
     const torso=new THREE.Mesh(bodyGeometry,paint);torso.castShadow=true;this.body.add(torso);
+    if(bodyDetailGeometry){const face=new THREE.Mesh(bodyDetailGeometry,detailPaint);face.castShadow=true;this.body.add(face);}
     const limb=(name:LimbName)=>{
       const pivot=new THREE.Group();pivot.position.fromArray(residentData.parts[name].pivot);
-      const mesh=new THREE.Mesh(limbGeometries[name],paint);mesh.castShadow=true;pivot.add(mesh);this.body.add(pivot);
+      if(limbGeometries[name].getAttribute('position').count){const mesh=new THREE.Mesh(limbGeometries[name],paint);mesh.castShadow=true;pivot.add(mesh);}
+      const detail=limbDetailGeometries?.[name];
+      if(detail){const mesh=new THREE.Mesh(detail,detailPaint);mesh.castShadow=true;pivot.add(mesh);}
+      this.body.add(pivot);
       return pivot;
     };
     this.arms=[limb('arm_left'),limb('arm_right')];
     this.legs=[limb('leg_left'),limb('leg_right')];
-    this.hat=new THREE.Mesh(hatGeometry,hatPaint);this.hat.position.y=2.36;this.hat.castShadow=true;
-    this.brim=new THREE.Mesh(brimGeometry,hatPaint);this.brim.position.y=2.38;
+    this.hat=new THREE.Mesh(hatGeometry,hatPaint);this.hat.position.set(0,2.5,.05);this.hat.rotation.x=-.12;this.hat.castShadow=true;
+    this.brim=new THREE.Mesh(brimGeometry,hatPaint);this.brim.position.set(0,2.5,.05);this.brim.rotation.x=-.12;
     this.body.add(this.hat,this.brim);
     this.plank=new THREE.Mesh(plankGeometry,woodPaint);this.plank.castShadow=true;
     this.stone=new THREE.Mesh(stoneGeometry,stonePaint);this.stone.castShadow=true;
-    this.carried.add(this.plank,this.stone);this.carried.position.y=2.95;this.body.add(this.carried);
+    this.carried.add(this.plank,this.stone);this.carried.position.y=3.1;this.body.add(this.carried);
     // The mallet sits in the right hand (end of the horizontal arm mesh).
     const handle=new THREE.Mesh(handleGeometry,woodPaint),head=new THREE.Mesh(malletGeometry,ironPaint);
     handle.castShadow=head.castShadow=true;
@@ -219,9 +225,9 @@ export class ChoiceWorker {
       // Toss the carried material onto the site, then swing the mallet.
       if(worker.carried.visible){
         const toss=t/.25;
-        worker.carried.position.set(0,2.95+Math.sin(Math.min(1,toss)*Math.PI)*.8,Math.min(1,toss)*1.4);
+        worker.carried.position.set(0,3.1+Math.sin(Math.min(1,toss)*Math.PI)*.8,Math.min(1,toss)*1.4);
         worker.carried.scale.setScalar(Math.max(.001,1-smooth(toss)));
-        if(toss>=1){worker.carried.visible=false;worker.carried.position.set(0,2.95,0);}
+        if(toss>=1){worker.carried.visible=false;worker.carried.position.set(0,3.1,0);}
       }
       worker.mallet.visible=true;
       const phase=(t*2.9+worker.delay*3)%1;

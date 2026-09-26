@@ -41,16 +41,19 @@ export function routeBetween(a: { x: number; z: number }, b: { x: number; z: num
   return [new THREE.Vector3(a.x, terrainHeight(a.x,a.z)+.1, a.z), ...mid, new THREE.Vector3(b.x, terrainHeight(b.x,b.z)+.1, b.z)];
 }
 
-type ResidentGeometry = { positions: number[]; normals?: number[]; indices: number[] };
+type ResidentGeometry = { positions: number[]; normals?: number[]; indices: number[]; colors?: number[] };
 const meshGeometry = (data: ResidentGeometry) => {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(data.positions, 3));
   geometry.setIndex(data.indices);
   if (data.normals) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(data.normals, 3));
   else geometry.computeVertexNormals();
+  if (data.colors?.length) geometry.setAttribute('color', new THREE.Float32BufferAttribute(data.colors, 3));
   geometry.computeBoundingSphere();
   return geometry;
 };
+type ResidentData = typeof residentData & { detail?: { body: ResidentGeometry; parts: Record<'arm_left'|'arm_right'|'leg_left'|'leg_right', ResidentGeometry> } };
+const detailData = (residentData as ResidentData).detail;
 if (residentData.version !== 3 || residentData.coordinates !== 'three-y-up') throw new Error('Unsupported resident geometry');
 export const bodyGeometry = meshGeometry(residentData.body);
 export const limbGeometries = {
@@ -59,6 +62,14 @@ export const limbGeometries = {
   leg_left: meshGeometry(residentData.parts.leg_left),
   leg_right: meshGeometry(residentData.parts.leg_right),
 };
+/** Fixed-color surfaces (skin, face, hair, belt, trousers, boots) as vertex colors; absent in older exports. */
+export const bodyDetailGeometry = detailData ? meshGeometry(detailData.body) : null;
+export const limbDetailGeometries = detailData ? {
+  arm_left: meshGeometry(detailData.parts.arm_left),
+  arm_right: meshGeometry(detailData.parts.arm_right),
+  leg_left: meshGeometry(detailData.parts.leg_left),
+  leg_right: meshGeometry(detailData.parts.leg_right),
+} : null;
 type WorkPoint = { x: number; z: number };
 export interface WorkRoute { origin: WorkPoint; spot: WorkPoint }
 

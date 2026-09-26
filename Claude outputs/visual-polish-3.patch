@@ -1,0 +1,44 @@
+diff --git a/src/town/environment.ts b/src/town/environment.ts
+index 82900a6..5723516 100644
+--- a/src/town/environment.ts
++++ b/src/town/environment.ts
+@@ -40,7 +40,7 @@ export function isWater(x:number,z:number,clearance=0):boolean{
+ const WATER_DEEP=new THREE.Color(0x1f5a6b),WATER_SHALLOW=new THREE.Color(0x579c95),WATER_BED=new THREE.Color(0x6f6650);
+ /** Bank vertex colours: damp earth at the waterline, grass-tinted at the top. */
+ const NIGHT_GRASS=new THREE.Color(0x8d9cc0);
+-const BANK_WET=new THREE.Color(0x8c9a5f),BANK_TOP=new THREE.Color(0x8ab763);
++const BANK_WET=new THREE.Color(0x8c9a5f),BANK_TOP=new THREE.Color(0x88b165);
+ /** Default world units per uv unit [across (uv.x is -1..1), along (uv.y)] for the main river ribbon. */
+ const RIVER_FLOW_SCALE:readonly [number,number]=[4.4,1/.7];
+ export type WaterMaterial=THREE.MeshStandardMaterial;
+@@ -150,7 +150,7 @@ vec3 townWaterNoise(vec2 p){
+         float townNv=saturate(dot(townCalm,geometryViewDir)),townGraze=1.0-townNv;
+         vec3 townSky=mix(townSkyZenith,townSkyHorizon,townGraze*townGraze)*(1.0-.55*townNight);
+         townSky=mix(vec3(dot(townSky,vec3(.2126,.7152,.0722))),townSky,.7); // muted reflection
+-        float townFres=.04+.32*townGraze*townGraze*townGraze*townGraze;
++        float townFres=.04+.22*townGraze*townGraze*townGraze*townGraze;
+         outgoingLight=mix(outgoingLight,townSky,townFres*(1.0-townFoam));
+         vec3 townSunV=normalize((viewMatrix*vec4(townSunDir,0.0)).xyz);
+         // Wide Blinn lobe gated by fine noise: sparse sun sparkles that also read from
+@@ -281,7 +281,7 @@ export class Environment {
+     const g=new THREE.PlaneGeometry(700,700,divisions,divisions);g.rotateX(-Math.PI/2);
+     this.terrainGeometry=g;
+     const positions=g.getAttribute('position'),colors:number[]=[];
+-    const low=new THREE.Color(0x8ab763),high=new THREE.Color(0x7aa564),sand=new THREE.Color(0xaabd78),shoreColor=new THREE.Color(0x8fa366);
++    const low=new THREE.Color(0x88b165),high=new THREE.Color(0x79a165),sand=new THREE.Color(0xaabd78),shoreColor=new THREE.Color(0x8fa366);
+     for(let i=0;i<positions.count;i++){
+       const x=terrainGridCoordinate(positions.getX(i)/350),z=terrainGridCoordinate(positions.getZ(i)/350),r=Math.hypot(x,z);
+       positions.setX(i,x);positions.setZ(i,z);
+diff --git a/src/town/materials.ts b/src/town/materials.ts
+index f95db94..79a3946 100644
+--- a/src/town/materials.ts
++++ b/src/town/materials.ts
+@@ -4,7 +4,7 @@ import * as THREE from 'three';
+ // matte stone treatment in Drunk Dwarves. The marks use world coordinates, so
+ // batched and instanced geometry shares one continuous material.
+ export const C = {
+-  grass: 0x86b463, grassDark: 0x58784a, leaf: 0x64844b, earth: 0x9c805e, path: 0xd5bb84,
++  grass: 0x85ae64, grassDark: 0x58784a, leaf: 0x64844b, earth: 0x9c805e, path: 0xd5bb84,
+   wood: 0x946345, woodLight: 0xb68458, woodDark: 0x704a37,
+   stone: 0xbab4a4, stoneDark: 0x858b84, plaster: 0xf0d7ac,
+   roof: 0xd76b4d, roofDark: 0x9e6345, roofBlue: 0x5e95ad,

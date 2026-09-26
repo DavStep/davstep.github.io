@@ -56,7 +56,8 @@ test('the mill stream passes through both moat banks without a sand wall',()=>{
     moat.setLevels(full,true);
     root.updateMatrixWorld(true);
     const banks:THREE.Object3D[]=[];
-    moat.group.traverse(object=>{if(object instanceof THREE.Mesh&&object.material===MAT.sand)banks.push(object);});
+    moat.group.traverse(object=>{if(object instanceof THREE.Mesh&&object.name==='Moat_bank')banks.push(object);});
+    assert.ok(banks.length>0,'moat banks are found');
     for(const z of [-58.5,-46]){
       const hits=new THREE.Raycaster(new THREE.Vector3(28.2,10,z),new THREE.Vector3(0,-1,0),0,20).intersectObjects(banks);
       assert.equal(hits.length,0,`raised moat bank crosses the mill stream at z=${z}, mobile=${mobile}`);

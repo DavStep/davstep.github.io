@@ -1,0 +1,106 @@
+diff --git a/src/town/environment.ts b/src/town/environment.ts
+index 96fe74d..82900a6 100644
+--- a/src/town/environment.ts
++++ b/src/town/environment.ts
+@@ -39,13 +39,24 @@ export function isWater(x:number,z:number,clearance=0):boolean{
+ /** Linear-space water palette (hex values are sRGB and converted by THREE.Color). */
+ const WATER_DEEP=new THREE.Color(0x1f5a6b),WATER_SHALLOW=new THREE.Color(0x579c95),WATER_BED=new THREE.Color(0x6f6650);
+ /** Bank vertex colours: damp earth at the waterline, grass-tinted at the top. */
++const NIGHT_GRASS=new THREE.Color(0x8d9cc0);
+ const BANK_WET=new THREE.Color(0x8c9a5f),BANK_TOP=new THREE.Color(0x8ab763);
+ /** Default world units per uv unit [across (uv.x is -1..1), along (uv.y)] for the main river ribbon. */
+ const RIVER_FLOW_SCALE:readonly [number,number]=[4.4,1/.7];
+ export type WaterMaterial=THREE.MeshStandardMaterial;
+ /** Matte bank material driven by `pushBankColors` vertex colours. */
+ export function createBankMaterial():THREE.MeshStandardMaterial{
+-  return new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1,side:THREE.DoubleSide});
++  const material=new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1,side:THREE.DoubleSide});
++  // Bend bank normals toward world up so slopes facing away from the sun read
++  // as a gentle dip instead of a black band along every moat and shore.
++  material.onBeforeCompile=shader=>{
++    shader.uniforms.townNight=ATMOSPHERE.night;shader.uniforms.townNightTint={value:NIGHT_GRASS};
++    shader.fragmentShader='uniform float townNight; uniform vec3 townNightTint;\n'+shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n      diffuseColor.rgb*=mix(vec3(1.0),townNightTint,townNight*.7);');
++    shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
++      normal=normalize(mix(normal,(viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,.6));`);
++  };
++  material.customProgramCacheKey=()=>'town-bank-soft-v2';
++  return material;
+ }
+ /**
+  * Vertex colours for one bank quad laid out as [inner0,outer0,inner1,outer1,outer1,inner1]
+@@ -94,7 +105,7 @@ vec3 townWaterNoise(vec2 p){
+       vec3 townNa=townWaterNoise(townW*.34+vec2(townT*.035,townT*.022));
+       vec3 townNb=townWaterNoise(mat2(.8,-.6,.6,.8)*townW*.9-vec2(townT*.02,townT*.045));
+       vec2 townGrad=vec2(townNa.y*.34+townNb.y*.9*.5,townNa.z*.34+townNb.z*.9*.5)*.55;
+-      float townSpark=townWaterNoise(townW*2.1+vec2(townT*.06,0.)).x;
++      float townSpark=townWaterNoise(mat2(.8,-.6,.6,.8)*townW*2.8+vec2(townT*.06,0.)).x;
+       `:`
+       // Flowing water: streaks stretched along the current plus a faster
+       // cross-rippled layer at another angle, both advected downstream.
+@@ -105,7 +116,7 @@ vec3 townWaterNoise(vec2 p){
+       vec3 townNb=townWaterNoise(townPb*.62+vec2(townT*.08,0.));
+       vec2 townGb=mat2(.83,.56,-.56,.83)*townNb.yz*.62;
+       vec2 townGrad=vec2(townNa.y*.8,townNa.y*.1+townNa.z*.24)*.9+townGb*.75;
+-      float townSpark=townWaterNoise(vec2(townQ.x*2.3,townQ.y*1.6-townT*1.4)).x;
++      float townSpark=townWaterNoise(mat2(.8,-.6,.6,.8)*vec2(townQ.x*3.1,townQ.y*2.2-townT*1.4)).x;
+       `}
+       float townH=townNa.x*.6+townNb.x*.4;
+       // Depth: dark in the middle, lighter towards the shore, then the bed shows through.
+@@ -145,11 +156,13 @@ vec3 townWaterNoise(vec2 p){
+         // Wide Blinn lobe gated by fine noise: sparse sun sparkles that also read from
+         // the high game camera, and vanish in shadow (townSunLit carries the shadow term).
+         float townGlint=pow(saturate(dot(normal,normalize(townSunV+geometryViewDir))),24.0);
+-        outgoingLight+=townSunLit*townGlint*smoothstep(.74,.93,townSpark)*${pond?'.35':'.6'};
++        // Two overlapping noise masks give small, rounded, sparse sparkles instead of lattice-shaped flakes.
++        float townSparkle=smoothstep(.66,.92,townSpark)*smoothstep(.5,.8,townNb.x);
++        outgoingLight+=townSunLit*townGlint*townSparkle*${pond?'.16':'.26'};
+       }
+       #include <opaque_fragment>`);
+   };
+-  material.customProgramCacheKey=()=>pond?'town-pond-v2':'town-river-v2';
++  material.customProgramCacheKey=()=>pond?'town-pond-v3':'town-river-v3';
+   return material;
+ }
+ 
+@@ -536,6 +549,6 @@ export class Environment {
+     this.wind.value=seconds;
+     this.waterTime.value=this.reducedMotion.matches?0:seconds;
+     if(season!==this.currentSeason)this.currentSeason=season;
+-    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff);
++    this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff).lerp(NIGHT_GRASS,night*.7);
+   }
+ }
+diff --git a/src/town/scene.ts b/src/town/scene.ts
+index e6da88b..dbec39d 100644
+--- a/src/town/scene.ts
++++ b/src/town/scene.ts
+@@ -38,9 +38,10 @@ const towerRingGeometry=new THREE.CylinderGeometry(1.3,1.22,.23,10);
+ // Warm key light, cool sky fill: lit planes read warm, shadow masses read blue.
+ const lowSun=new THREE.Color(0xffc68c),daylightSun=new THREE.Color(0xffe0ad),overcastSun=new THREE.Color(0xdce5f0),nightSun=new THREE.Color(0x8aa6e0);
+ const daylightFill=new THREE.Color(0xa9c1e8),daylightGround=new THREE.Color(0xa39f7c);
+-const overcastFill=new THREE.Color(0xc4ccd8),overcastGround=new THREE.Color(0x959487),nightFill=new THREE.Color(0x6f88bf),nightGround=new THREE.Color(0x3c4658);
++const overcastFill=new THREE.Color(0xc4ccd8),overcastGround=new THREE.Color(0x959487),nightFill=new THREE.Color(0x5d74a8),nightGround=new THREE.Color(0x323a4a);
+ /** Reference sun intensity: ATMOSPHERE.sunColor is the sun colour scaled by intensity/this. */
+ const SUN_REFERENCE=3.4;
++const NIGHT_TINT=new THREE.Color(0x8d9cc0);
+ const SHADOW_MIN_HALF=45,SHADOW_MAX_HALF=MOBILE?100:120,SHADOW_STEP=8;
+ const shadowNdc:[number,number][]=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]];
+ function box(parent: THREE.Group, x:number,y:number,z:number,w:number,h:number,d:number,material:Mat, rotateY=0, rounded=true): THREE.Mesh {
+@@ -861,7 +862,7 @@ export class TownScene {
+     this.fill.groundColor.copy(daylightGround).lerp(overcastGround,overcast*.6).lerp(nightGround,night*.8);
+     // Low ambient keeps shadow masses readable. Overcast lifts it because the
+     // sun is weaker; night keeps enough cool fill for the moonlit town to read.
+-    this.fill.intensity=(.85+overcast*.35)*(1+.1*night);
++    this.fill.intensity=(.85+overcast*.35)*(1-.12*night);
+     // A raking sun from the camera's left: ~33° at the game's fixed morning
+     // (dayFraction .19), lower at dawn/dusk, a ~30° moon at night.
+     const elevation=THREE.MathUtils.degToRad(THREE.MathUtils.lerp(14+20*daylight,30,night));
+@@ -880,6 +881,8 @@ export class TownScene {
+     ATMOSPHERE.night.value=night;
+     MAT.grass.color.set(snapshot.season==='winter'?0xb9c4b8:snapshot.season==='autumn'?0xb09e5e:snapshot.season==='spring'?0x82b163:C.grass);
+     MAT.leaf.color.set(snapshot.season==='autumn'?0xbc8a4b:snapshot.season==='winter'?0x84937f:C.leaf);
++    // Moonlight: pull vegetation albedo toward a cool grey so night reads blue, not saturated green.
++    const moon=night*.7;MAT.leaf.color.lerp(NIGHT_TINT,moon);for(const m of [MAT.terrain,MAT.foliage,MAT.pine])m.color.set(0xffffff).lerp(NIGHT_TINT,moon);
+     this.renderer.toneMappingExposure=1.12-.1*night;
+   }
+   /** Rebuilds the sky reflection PMREM only when the palette bucket changes. */

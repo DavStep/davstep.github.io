@@ -7,7 +7,7 @@ import { placeProp } from './prop-placement';
 import { MILESTONES } from './milestones';
 import { FRONTIER_RIVERS,FRONTIER_ROADS,routeSample,routeNearest,regionalRiverWidth,isFrontierCorridor,type RegionPoint } from './frontier-layout';
 import { RiverWorks } from './river-works';
-import { naturalTerrainHeight,type Environment } from './environment';
+import { createBankMaterial,naturalTerrainHeight,pushBankColors,type Environment } from './environment';
 import type { Idea,Levels } from './game';
 
 interface Region { idea:Idea;level:number;group:THREE.Group;growth:number }
@@ -140,16 +140,19 @@ export class FrontierWorld {
     if(index===4)for(let i=1;i<heights.length;i++)heights[i]=Math.min(heights[i-1],heights[i]);
     const surface=(t:number)=>{const k=Math.min(79,Math.floor(t*80)),f=t*80-k;return heights[k]+(heights[k+1]-heights[k])*f;};
     this.environment.registerRegionalChannel?.(id,route,width,surface);
+    let routeLength=0;for(let i=0;i<80;i++){const a=sample(i/80),b=sample((i+1)/80);routeLength+=Math.hypot(b.x-a.x,b.z-a.z);}
     const make=(bank:boolean,bed=false)=>{
-      const positions:number[]=[],uv:number[]=[];
+      const positions:number[]=[],uv:number[]=[],colors:number[]=[];
       const edge=(t:number,side:number,outer=false)=>{const p=sample(t),a=sample(Math.max(0,t-.002)),b=sample(Math.min(1,t+.002)),dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1,w=width(t)+(outer?3.5:0),x=p.x+dz/len*w*side,z=p.z-dx/len*w*side;return [x,outer?this.height(x,z)+.025:surface(t)-(bed?.85:0),z];};
       for(let i=0;i<80;i++)for(const side of bank?[-1,1]:[0]){
         const a=edge(i/80,side||-1),b=edge(i/80,side||1,bank),c=edge((i+1)/80,side||-1),d=edge((i+1)/80,side||1,bank);
-        for(const p of [a,b,c,b,d,c])positions.push(...p);for(const [s,t] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])uv.push(s,t*1.5);
+        for(const p of [a,b,c,b,d,c])positions.push(...p);if(bank)pushBankColors(colors,i+(side>0?500:0)+level*1000);for(const [s,t] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])uv.push(s,t*1.5);
       }
-      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.computeVertexNormals();this.owned.add(geo);
-      const mat=bank?new THREE.MeshStandardMaterial({color:0xbaa782,roughness:1,side:THREE.DoubleSide}):bed?new THREE.MeshStandardMaterial({color:0x876e50,roughness:1,side:THREE.DoubleSide}):this.environment.createRiverMaterial();this.paints.add(mat);
-      const mesh=new THREE.Mesh(geo,mat);mesh.name=bank?'Regional_banks':bed?'Regional_bed':'Regional_flow';g.add(mesh);return mesh;
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));if(bank)geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeVertexNormals();this.owned.add(geo);
+      // Ribbon uv: x=-1..1 across the local half width, y=1.5 per 1/80 of the route.
+      const flowScale:[number,number]=[width(.5),routeLength/80/1.5];
+      const mat=bank?createBankMaterial():bed?new THREE.MeshStandardMaterial({color:0x5f5645,roughness:1,side:THREE.DoubleSide}):this.environment.createRiverMaterial(flowScale);this.paints.add(mat);
+      const mesh=new THREE.Mesh(geo,mat);mesh.receiveShadow=true;mesh.name=bank?'Regional_banks':bed?'Regional_bed':'Regional_flow';g.add(mesh);return mesh;
     };
     const water=make(false),bed=make(false,true),bank=make(true),works=new RiverWorks(g,this.mobile,sample,(x,z)=>this.height(x,z),surface,index===3?14:7,[.15,.85]);
     this.waterways.push({works,group:g,water,bed,bank,level,id});g.visible=false;

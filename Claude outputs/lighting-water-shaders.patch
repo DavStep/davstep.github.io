@@ -1,0 +1,899 @@
+diff --git a/src/town/atmosphere.ts b/src/town/atmosphere.ts
+new file mode 100644
+index 0000000..f9f7a0e
+--- /dev/null
++++ b/src/town/atmosphere.ts
+@@ -0,0 +1,20 @@
++import * as THREE from 'three';
++
++/**
++ * Per-frame atmosphere values shared between the scene lighting (writer:
++ * TownScene.updateAtmosphere) and custom shaders such as water (readers).
++ * Uniform objects are shared by reference, so shaders see updates without
++ * recompiling.
++ */
++export const ATMOSPHERE = {
++  /** Normalised world-space direction pointing from the ground towards the sun. */
++  sunDirection: { value: new THREE.Vector3(-.6, .7, .4).normalize() },
++  /** Linear sun colour multiplied by its intensity scale (0..~1.2). */
++  sunColor: { value: new THREE.Color(0xffe0ad) },
++  /** Sky colour at the horizon (matches fog). */
++  skyHorizon: { value: new THREE.Color(0xc9ecf2) },
++  /** Sky colour overhead. */
++  skyZenith: { value: new THREE.Color(0x5db6e8) },
++  /** 0 = day, 1 = full night. */
++  night: { value: 0 },
++};
+diff --git a/src/town/castle-moat.ts b/src/town/castle-moat.ts
+index 94e82c3..2f4d478 100644
+--- a/src/town/castle-moat.ts
++++ b/src/town/castle-moat.ts
+@@ -2,7 +2,7 @@ import * as THREE from 'three';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+ import type { Levels } from './game';
+ import type { Environment } from './environment';
+-import { naturalTerrainHeight } from './environment';
++import { createBankMaterial, naturalTerrainHeight, pushBankColors } from './environment';
+ import { RiverWorks } from './river-works';
+ import { MAT } from './materials';
+ import { MOAT_RADIUS, MOAT_HALF_WIDTH, MOAT_FEED_X, MOAT_FEED_START, MOAT_FEED_END, moatForLevels, moatSurfaceHeight, moatRoutePoint, MOAT_START_ANGLE, MOAT_FEED_SHARE } from './moat-layout';
+@@ -15,19 +15,21 @@ export class CastleMoat {
+   private readonly channel=new THREE.Group();
+   private readonly geometries=new Set<THREE.BufferGeometry>();
+   private readonly waterMaterial:THREE.Material;
++  private readonly bankMaterial=createBankMaterial();
+   private readonly works:RiverWorks;
+   private readonly ribbons:{mesh:THREE.Mesh;ring:boolean;bank:boolean;count:number}[]=[];
+   constructor(parent:THREE.Group,mobile:boolean,private readonly environment:Pick<Environment,'createRiverMaterial'|'setMoatProgress'>){
+     this.group.name='Castle_moat';this.channel.name='River_fed_channel';this.crossings.name='Moat_bridges';this.gates.name='Moat_gatehouses';
+     this.group.add(this.channel,this.crossings,this.gates);parent.add(this.group);
+-    this.waterMaterial=environment.createRiverMaterial();
++    // Ribbon uv: x=-1..1 across the half width, y=1.7 per ring segment.
++    this.waterMaterial=environment.createRiverMaterial([MOAT_HALF_WIDTH,Math.PI*2*MOAT_RADIUS/(mobile?128:192)/1.7]);
+     this.works=new RiverWorks(this.group,mobile,moatRoutePoint,naturalTerrainHeight,t=>{const p=moatRoutePoint(t);return moatSurfaceHeight(p.x,p.z);},7);
+     const mesh=(geometry:THREE.BufferGeometry,material:THREE.Material,group:THREE.Group)=>{
+       this.geometries.add(geometry);const object=new THREE.Mesh(geometry,material);object.receiveShadow=true;group.add(object);return object;
+     };
+     const ribbon=(points:[number,number][],ring:boolean)=>{
+       for(const bank of [0,-1,1]){
+-        const positions:number[]=[],uv:number[]=[];
++        const positions:number[]=[],uv:number[]=[],colors:number[]=[];
+         const edge=(i:number,side:number,outer=false):[number,number,number]=>{
+           const [x,z]=points[i];const length=Math.hypot(x,z);
+           const nx=ring?x/length:1,nz=ring?z/length:0;
+@@ -46,13 +48,21 @@ export class CastleMoat {
+           if(bank&&!ring&&points[i][1]>MOAT_FEED_START-5)continue;
+           const a=edge(i,bank||-1),b=edge(i,bank||1,!!bank),c=edge(i+1,bank||-1),d=edge(i+1,bank||1,!!bank);
+           for(const p of [a,b,c,b,d,c])positions.push(...p);
++          if(bank)pushBankColors(colors,i+(bank>0?5000:0)+(ring?0:9000));
+           for(const [side,t] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])uv.push(side,t*1.7);
+         }
+         const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.computeVertexNormals();
+         // Banks follow the slope on both sides; shared stone is double-sided via
+         // triangle orientation below, avoiding a second material allocation.
+-        if(bank){const indices:number[]=[];for(let i=0;i<positions.length/3;i+=3)indices.push(i,i+1,i+2,i+2,i+1,i);geometry.setIndex(indices);}
+-        const object=mesh(geometry,bank?MAT.sand:this.waterMaterial,this.channel);
++        if(bank){
++          geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
++          // One side's winding faces down; both windings are drawn, so point every normal up
++          // or that bank renders unlit (the dark ring outside the moat).
++          const normal=geometry.getAttribute('normal');for(let i=0;i<normal.count;i++)if(normal.getY(i)<0)normal.setXYZ(i,-normal.getX(i),-normal.getY(i),-normal.getZ(i));
++          const indices:number[]=[];for(let i=0;i<positions.length/3;i+=3)indices.push(i,i+1,i+2,i+2,i+1,i);geometry.setIndex(indices);
++        }
++        const object=mesh(geometry,bank?this.bankMaterial:this.waterMaterial,this.channel);
++        object.name=bank?'Moat_bank':'Moat_water';
+         this.ribbons.push({mesh:object,ring,bank:!!bank,count:geometry.index?.count??positions.length/3});
+         if(!bank){
+           const bed=mesh(geometry.clone().translate(0,-.8,0),MAT.earth,this.channel);
+@@ -120,7 +130,7 @@ export class CastleMoat {
+     }
+   }
+   dispose(){
+-    this.works.dispose();this.group.removeFromParent();this.geometries.forEach(g=>g.dispose());this.waterMaterial.dispose();this.group.clear();
++    this.works.dispose();this.group.removeFromParent();this.geometries.forEach(g=>g.dispose());this.waterMaterial.dispose();this.bankMaterial.dispose();this.group.clear();
+     this.environment.setMoatProgress?.(0);
+   }
+ }
+diff --git a/src/town/environment.ts b/src/town/environment.ts
+index 3201a4e..79e5c34 100644
+--- a/src/town/environment.ts
++++ b/src/town/environment.ts
+@@ -14,6 +14,7 @@ import { landHeight, terrainGridCoordinate, terrainGridDivisions } from './topog
+ import { riverCenter, riverHalfWidth, riverSurfaceHeight } from './river-layout';
+ export { riverCenter, riverHalfWidth, riverSurfaceHeight } from './river-layout';
+ import { moatBedHeight, moatDistance, moatRouteParameter, MOAT_FEED_X } from './moat-layout';
++import { ATMOSPHERE } from './atmosphere';
+ 
+ const hash=(n:number)=>{let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;};
+ const rand=(seed:number)=>hash(seed)/0xffffffff;
+@@ -35,26 +36,120 @@ export function isWater(x:number,z:number,clearance=0):boolean{
+   return Math.abs(z-riverCenter(x))<riverHalfWidth(x)+clearance||PONDS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r+clearance);
+ }
+ 
+-function waterMaterial(time:{value:number},light:{value:number},pond=false):THREE.MeshBasicMaterial{
+-  const material=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide});
++/** Linear-space water palette (hex values are sRGB and converted by THREE.Color). */
++const WATER_DEEP=new THREE.Color(0x1f5a6b),WATER_SHALLOW=new THREE.Color(0x579c95),WATER_BED=new THREE.Color(0x6f6650);
++/** Bank vertex colours: damp earth at the waterline, grass-tinted at the top. */
++const BANK_WET=new THREE.Color(0x7a7056),BANK_TOP=new THREE.Color(0x86ad5f);
++/** Default world units per uv unit [across (uv.x is -1..1), along (uv.y)] for the main river ribbon. */
++const RIVER_FLOW_SCALE:readonly [number,number]=[4.4,1/.7];
++export type WaterMaterial=THREE.MeshStandardMaterial;
++/** Matte bank material driven by `pushBankColors` vertex colours. */
++export function createBankMaterial():THREE.MeshStandardMaterial{
++  return new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1,side:THREE.DoubleSide});
++}
++/**
++ * Vertex colours for one bank quad laid out as [inner0,outer0,inner1,outer1,outer1,inner1]
++ * (the order produced by pushing a,b,c,b,d,c with a/c at the water and b/d at the top).
++ */
++export function pushBankColors(target:number[],edge:number,wet:THREE.Color=BANK_WET,top:THREE.Color=BANK_TOP):void{
++  // Jitter per cross-section (edge, edge+1) so neighbouring quads share colours.
++  const shade=(e:number,outer:boolean)=>.95+rand(Math.floor(e)*977+(outer?31:7))*.1;
++  for(const [outer,next] of [[false,0],[true,0],[false,1],[true,0],[true,1],[false,1]] as const){
++    const c=outer?top:wet,s=shade(edge+next,outer);target.push(c.r*s,c.g*s,c.b*s);
++  }
++}
++
++// Lit, shadow-receiving stylised water shared by the river, ponds, moat and
++// channels. Ribbons carry uv.x=-1..1 across and uv.y along the flow; ponds use
++// a 0..1 disc uv and stay still. No extra passes or render targets.
++function waterMaterial(time:{value:number},pond=false,flowScale:readonly [number,number]=RIVER_FLOW_SCALE):WaterMaterial{
++  const material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.22,metalness:0,side:THREE.DoubleSide});
++  const scale=new THREE.Vector2(flowScale[0],flowScale[1]);
+   material.onBeforeCompile=shader=>{
+-    shader.uniforms.townWaterTime=time;shader.uniforms.townWaterLight=light;
+-    shader.vertexShader='varying vec2 vTownWaterUv;\n'+shader.vertexShader;
+-    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTownWaterUv=uv;');
+-    shader.fragmentShader='uniform float townWaterTime; uniform float townWaterLight; varying vec2 vTownWaterUv;\n'+shader.fragmentShader;
++    Object.assign(shader.uniforms,{townWaterTime:time,townFlowScale:{value:scale},
++      townWaterDeep:{value:WATER_DEEP},townWaterShallow:{value:WATER_SHALLOW},townWaterBed:{value:WATER_BED},
++      townSunDir:ATMOSPHERE.sunDirection,townSkyHorizon:ATMOSPHERE.skyHorizon,townSkyZenith:ATMOSPHERE.skyZenith,townNight:ATMOSPHERE.night});
++    shader.vertexShader='varying vec2 vTownWaterUv;\nvarying vec3 vTownWaterWorld;\n'+shader.vertexShader;
++    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTownWaterUv=uv;\nvTownWaterWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
++    shader.fragmentShader=`uniform float townWaterTime; uniform vec2 townFlowScale;
++uniform vec3 townWaterDeep; uniform vec3 townWaterShallow; uniform vec3 townWaterBed;
++uniform vec3 townSunDir; uniform vec3 townSkyHorizon; uniform vec3 townSkyZenith; uniform float townNight;
++varying vec2 vTownWaterUv; varying vec3 vTownWaterWorld;
++// Dave Hoskins hash12: no sin(), stable at large inputs and on mobile GPUs.
++float townWaterHash(vec2 p){vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
++// Value noise with analytic derivatives: x=value, yz=d/dp.
++vec3 townWaterNoise(vec2 p){
++  vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f),du=6.0*f*(1.0-f);
++  float a=townWaterHash(i),b=townWaterHash(i+vec2(1,0)),c=townWaterHash(i+vec2(0,1)),d=townWaterHash(i+vec2(1,1));
++  float k1=b-a,k2=c-a,k4=a-b-c+d;
++  return vec3(a+k1*u.x+k2*u.y+k4*u.x*u.y,du*vec2(k1+k4*u.y,k2+k4*u.x));
++}
++`+shader.fragmentShader;
+     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+-      float edge=${pond?'smoothstep(.63,.98,length((vTownWaterUv-.5)*2.0))':'smoothstep(.45,1.0,abs(vTownWaterUv.x))'};
+-      float flow=${pond?'length((vTownWaterUv-.5)*2.0)*16.0-townWaterTime*.8':'vTownWaterUv.y*.82-townWaterTime*.55'};
+-      float ripple=sin(flow+sin(vTownWaterUv.x*8.0+vTownWaterUv.y*.24)*.5);
+-      float broken=smoothstep(.1,.7,sin(vTownWaterUv.y*1.7+vTownWaterUv.x*13.0));
+-      float glint=smoothstep(.975,.999,ripple)*broken;
+-      float foam=smoothstep(.92,.99,edge)*(.25+.15*sin(flow*1.3));
+-      vec3 deep=vec3(.035,.31,.43),shallow=vec3(.16,.62,.65);
+-      diffuseColor.rgb=(mix(deep,shallow,edge)+ripple*.012)*(townWaterLight);
+-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.76,.94,.89)*townWaterLight,glint*.4+foam*.55);
++      float townT=townWaterTime;
++      ${pond?`
++      // Still water: two slow, low-amplitude noise layers in world space.
++      vec2 townW=vTownWaterWorld.xz;
++      float townAcross=length((vTownWaterUv-.5)*2.0);
++      vec3 townNa=townWaterNoise(townW*.34+vec2(townT*.035,townT*.022));
++      vec3 townNb=townWaterNoise(mat2(.8,-.6,.6,.8)*townW*.9-vec2(townT*.02,townT*.045));
++      vec2 townGrad=vec2(townNa.y*.34+townNb.y*.9*.5,townNa.z*.34+townNb.z*.9*.5)*.55;
++      float townSpark=townWaterNoise(townW*2.1+vec2(townT*.06,0.)).x;
++      `:`
++      // Flowing water: streaks stretched along the current plus a faster
++      // cross-rippled layer at another angle, both advected downstream.
++      vec2 townQ=vec2(vTownWaterUv.x*townFlowScale.x,vTownWaterUv.y*townFlowScale.y);
++      float townAcross=abs(vTownWaterUv.x);
++      vec3 townNa=townWaterNoise(vec2(townQ.x*.8+townQ.y*.1,townQ.y*.24-townT*.5));
++      vec2 townPb=mat2(.83,-.56,.56,.83)*vec2(townQ.x,townQ.y-townT*1.05);
++      vec3 townNb=townWaterNoise(townPb*.62+vec2(townT*.08,0.));
++      vec2 townGb=mat2(.83,.56,-.56,.83)*townNb.yz*.62;
++      vec2 townGrad=vec2(townNa.y*.8,townNa.y*.1+townNa.z*.24)*.9+townGb*.75;
++      float townSpark=townWaterNoise(vec2(townQ.x*2.3,townQ.y*1.6-townT*1.4)).x;
++      `}
++      float townH=townNa.x*.6+townNb.x*.4;
++      // Depth: dark in the middle, lighter towards the shore, then the bed shows through.
++      float townDepth=clamp(1.0-smoothstep(.12,.96,townAcross)+(townH-.5)*.3,0.0,1.0);
++      vec3 townCol=mix(townWaterShallow,townWaterDeep,townDepth);
++      float townBed=smoothstep(.8,1.0,townAcross+(townNb.x-.5)*.1);
++      townCol=mix(townCol,mix(townWaterBed,townWaterShallow,.3),townBed*.6);
++      townCol*=.84+.32*townH;
++      // Broken, soft foam hugging the waterline instead of a drawn outline.
++      float townFoam=smoothstep(.9,1.0,townAcross)*smoothstep(.5,.85,townSpark*.6+townNa.x*.4)*${pond?'.12':'.3'};
++      townCol=mix(townCol,vec3(.56,.64,.6),townFoam);
++      diffuseColor.rgb=townCol;
++    `);
++    // Replace the geometry normal with a world-up normal tilted by the noise
++    // gradient; this is independent of ribbon winding and breaks the sun
++    // highlight into sparkles.
++    shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`
++      vec3 townWn=normalize(vec3(-townGrad.y*${pond?'.12':'.32'},1.0,-townGrad.x*${pond?'.12':'.32'}));
++      normal=normalize((viewMatrix*vec4(townWn,0.0)).xyz);
+     `);
++    shader.fragmentShader=shader.fragmentShader.replace('#include <lights_fragment_begin>',`#include <lights_fragment_begin>
++      vec3 townSunLit=vec3(0.0);
++      #if NUM_DIR_LIGHTS > 0
++      townSunLit=directLight.color; // includes the sun's shadow term
++      #endif
++    `);
++    shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
++      {
++        // Fresnel from a calmer normal so the sky tint stays a soft gradient, not blotches.
++        vec3 townCalm=normalize(mix((viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,normal,.35));
++        float townNv=saturate(dot(townCalm,geometryViewDir)),townGraze=1.0-townNv;
++        vec3 townSky=mix(townSkyZenith,townSkyHorizon,townGraze*townGraze)*(1.0-.55*townNight);
++        townSky=mix(vec3(dot(townSky,vec3(.2126,.7152,.0722))),townSky,.7); // muted reflection
++        float townFres=.04+.32*townGraze*townGraze*townGraze*townGraze;
++        outgoingLight=mix(outgoingLight,townSky,townFres*(1.0-townFoam));
++        vec3 townSunV=normalize((viewMatrix*vec4(townSunDir,0.0)).xyz);
++        // Wide Blinn lobe gated by fine noise: sparse sun sparkles that also read from
++        // the high game camera, and vanish in shadow (townSunLit carries the shadow term).
++        float townGlint=pow(saturate(dot(normal,normalize(townSunV+geometryViewDir))),24.0);
++        outgoingLight+=townSunLit*townGlint*smoothstep(.74,.93,townSpark)*${pond?'.35':'.6'};
++      }
++      #include <opaque_fragment>`);
+   };
+-  material.customProgramCacheKey=()=>pond?'town-pond-v1':'town-river-v1';
++  material.customProgramCacheKey=()=>pond?'town-pond-v2':'town-river-v2';
+   return material;
+ }
+ 
+@@ -66,10 +161,9 @@ export class Environment {
+   private readonly mainWater=new THREE.Group();
+   private riverLevel=0;
+   private groveLevel=0;
+-  private readonly grassPaint=new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true});
++  private readonly grassPaint=new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,roughness:1,metalness:0});
+   private readonly wind={value:0};
+   private readonly waterTime={value:0};
+-  private readonly waterLight={value:1};
+   private readonly reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+   private currentSeason='';
+   private terrainGeometry:THREE.PlaneGeometry|null=null;
+@@ -120,8 +214,9 @@ export class Environment {
+     for(const {progress,vertices} of this.regionalCuts.values())for(const v of vertices){const p=v.geometry.getAttribute('position'),base=p.getY(v.index);p.setY(v.index,Math.min(base,THREE.MathUtils.lerp(base,v.target,channelFront(progress,v.t))));}
+     for(const geometry of this.regionalOriginal.keys()){geometry.getAttribute('position').needsUpdate=true;geometry.computeVertexNormals();}
+   }
+-  createRiverMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight);}
+-  createPondMaterial():THREE.MeshBasicMaterial{return waterMaterial(this.waterTime,this.waterLight,true);}
++  /** `flowScale`: world units per uv unit [across, along] of the caller's ribbon, so ripples keep one size everywhere. */
++  createRiverMaterial(flowScale?:readonly [number,number]):WaterMaterial{return waterMaterial(this.waterTime,false,flowScale);}
++  createPondMaterial():WaterMaterial{return waterMaterial(this.waterTime,true);}
+   setRoadCenterProgress(progress:number):void{
+     if(!this.gameMode||!this.townSquare)return;
+     const size=THREE.MathUtils.clamp(progress,0,1);
+@@ -173,7 +268,7 @@ export class Environment {
+     const g=new THREE.PlaneGeometry(700,700,divisions,divisions);g.rotateX(-Math.PI/2);
+     this.terrainGeometry=g;
+     const positions=g.getAttribute('position'),colors:number[]=[];
+-    const low=new THREE.Color(0x83bb65),high=new THREE.Color(0x72a66e),sand=new THREE.Color(0xa9c77a),shoreColor=new THREE.Color(0x8d9670);
++    const low=new THREE.Color(0x8ab763),high=new THREE.Color(0x7aa564),sand=new THREE.Color(0xaabd78),shoreColor=new THREE.Color(0x8e936f);
+     for(let i=0;i<positions.count;i++){
+       const x=terrainGridCoordinate(positions.getX(i)/350),z=terrainGridCoordinate(positions.getZ(i)/350),r=Math.hypot(x,z);
+       positions.setX(i,x);positions.setZ(i,z);
+@@ -190,7 +285,7 @@ export class Environment {
+     const square=new THREE.Mesh(new THREE.CylinderGeometry(INFRASTRUCTURE.squareRadius,INFRASTRUCTURE.squareRadius,.08,32),MAT.path);square.position.y=terrainHeight(0,0)+.07;square.receiveShadow=true;square.visible=!this.gameMode;this.townSquare=square;this.group.add(square);
+   }
+   private buildWater(){
+-    const water:number[]=[],waterUv:number[]=[],banks:number[]=[];
++    const water:number[]=[],waterUv:number[]=[],banks:number[]=[],bankColors:number[]=[];
+     const steps=140,first=-225,last=225,bankWidth=2.6;
+     const frame=(i:number,side:number,margin=0)=>{
+       const x=first+(last-first)*i/steps,z=riverCenter(x)+side*(riverHalfWidth(x)+margin);
+@@ -200,6 +295,8 @@ export class Environment {
+     const quad=(target:number[],a:[number,number,number],b:[number,number,number],c:[number,number,number],d:[number,number,number])=>{
+       for(const p of [a,b,c,b,d,c])target.push(...p);
+     };
++    // Bank quads are (inner0,outer0,inner1,outer1): wet earth at the water, grass at the top.
++    const bankShade=(target:number[],seed:number)=>pushBankColors(target,seed);
+     for(let i=0;i<steps;i++){
+       const x0=first+(last-first)*i/steps,x1=first+(last-first)*(i+1)/steps;
+       const a=frame(i,-1),b=frame(i,1),c=frame(i+1,-1),d=frame(i+1,1);
+@@ -213,27 +310,28 @@ export class Environment {
+         if(!streamMouth&&!moatMouth)for(let j=0;j<6;j++)this.openRiverBankIndices.push(banks.length/3+j);
+         quad(banks,[inner0.x,waterY(x0)-.025,inner0.z],[outer0.x,baseTerrainHeight(outer0.x,outer0.z)+.04,outer0.z],
+           [inner1.x,waterY(x1)-.025,inner1.z],[outer1.x,baseTerrainHeight(outer1.x,outer1.z)+.04,outer1.z]);
++        bankShade(bankColors,i+(side>0?1000:0));
+       }
+     }
+-    const bankGeometry=new THREE.BufferGeometry();bankGeometry.setAttribute('position',new THREE.Float32BufferAttribute(banks,3));bankGeometry.computeVertexNormals();
++    const bankGeometry=new THREE.BufferGeometry();bankGeometry.setAttribute('position',new THREE.Float32BufferAttribute(banks,3));bankGeometry.setAttribute('color',new THREE.Float32BufferAttribute(bankColors,3));bankGeometry.computeVertexNormals();
+     bankGeometry.setIndex(this.closedRiverBankIndices);
+     this.riverBankGeometry=bankGeometry;
+-    const bankMaterial=new THREE.MeshStandardMaterial({color:0xa69b78,roughness:1,side:THREE.DoubleSide});
++    const bankMaterial=createBankMaterial();
+     const riverBanks=new THREE.Mesh(bankGeometry,bankMaterial);riverBanks.receiveShadow=true;
+     const waterGeometry=new THREE.BufferGeometry();waterGeometry.setAttribute('position',new THREE.Float32BufferAttribute(water,3));waterGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(waterUv,2));waterGeometry.computeVertexNormals();
+-    const river=new THREE.Mesh(waterGeometry,waterMaterial(this.waterTime,this.waterLight));
++    const river=new THREE.Mesh(waterGeometry,waterMaterial(this.waterTime));river.receiveShadow=true;
+     this.mainWater.add(riverBanks,river);
+     for(const p of PONDS){
+-      const y=baseTerrainHeight(p.x,p.z)-.72,slope:number[]=[];
++      const y=baseTerrainHeight(p.x,p.z)-.72,slope:number[]=[],slopeColors:number[]=[];
+       for(let j=0;j<40;j++){
+         const a=j*Math.PI*2/40,b=(j+1)*Math.PI*2/40;
+         const inner=(t:number):[number,number,number]=>[p.x+Math.cos(t)*p.r,y-.025,p.z+Math.sin(t)*p.r];
+         const outer=(t:number):[number,number,number]=>{const x=p.x+Math.cos(t)*(p.r+2.2),z=p.z+Math.sin(t)*(p.r+2.2);return [x,baseTerrainHeight(x,z)+.04,z];};
+-        quad(slope,inner(a),outer(a),inner(b),outer(b));
++        quad(slope,inner(a),outer(a),inner(b),outer(b));bankShade(slopeColors,(j%40)+p.x*100);
+       }
+-      const shoreGeometry=new THREE.BufferGeometry();shoreGeometry.setAttribute('position',new THREE.Float32BufferAttribute(slope,3));shoreGeometry.computeVertexNormals();
++      const shoreGeometry=new THREE.BufferGeometry();shoreGeometry.setAttribute('position',new THREE.Float32BufferAttribute(slope,3));shoreGeometry.setAttribute('color',new THREE.Float32BufferAttribute(slopeColors,3));shoreGeometry.computeVertexNormals();
+       const shore=new THREE.Mesh(shoreGeometry,bankMaterial);shore.receiveShadow=true;
+-      const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,40),waterMaterial(this.waterTime,this.waterLight,true));pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y,p.z);
++      const pond=new THREE.Mesh(new THREE.CircleGeometry(p.r,40),waterMaterial(this.waterTime,true));pond.rotation.x=-Math.PI/2;pond.position.set(p.x,y,p.z);pond.receiveShadow=true;
+       this.mainWater.add(shore,pond);
+       for(let j=0;j<9;j++){const a=j*2.4,rr=p.r+2.1+(j%3)*.45,x=p.x+Math.cos(a)*rr,z=p.z+Math.sin(a)*rr;const reed=new THREE.Mesh(new THREE.ConeGeometry(.24,1.5,4),MAT.grassDark);reed.position.set(x,terrainHeight(x,z)+.75,z);this.mainWater.add(reed);}
+     }
+@@ -351,7 +449,7 @@ export class Environment {
+     // Each instance is a small tuft. Five tapered leaves share a root and
+     // sway at their tips, so grass reads as continuous ground cover up close.
+     const vertices:number[]=[],colors:number[]=[];
+-    const root=new THREE.Color(0x5e9c51),middle=new THREE.Color(0x83be5c),tip=new THREE.Color(0xb2d877);
++    const root=new THREE.Color(0x5b844a),middle=new THREE.Color(0x86b05a),tip=new THREE.Color(0xb4cf76);
+     const add=(x:number,y:number,z:number,c:THREE.Color)=>{vertices.push(x,y,z);colors.push(c.r,c.g,c.b);};
+     for(let blade=0;blade<5;blade++){
+       const a=blade*2.399,dx=Math.cos(a),dz=Math.sin(a),sideX=-dz,sideZ=dx;
+@@ -381,7 +479,7 @@ export class Environment {
+         #endif
+       `);
+     };
+-    this.grassPaint.customProgramCacheKey=()=> 'town-lit-wind-grass-v3';
++    this.grassPaint.customProgramCacheKey=()=> 'town-lit-wind-grass-v4';
+     const positions:{x:number;z:number;s:number;a:number;color:number}[]=[];
+     const attempts=this.mobile?6500:17000;
+     for(let i=0;i<attempts;i++){
+@@ -391,7 +489,7 @@ export class Environment {
+       positions.push({x,z,s:.68+rand(i*13)*.72,a:rand(i*27)*6.28,color:i%5});
+     }
+     const grass=new THREE.InstancedMesh(geometry,this.grassPaint,positions.length),d=new THREE.Object3D();
+-    positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.015,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0xe1f4c3,0xd5edb0,0xf0f5cb,0xc2e79e,0xe5f2b8][p.color]));});
++    positions.forEach((p,i)=>{d.position.set(p.x,terrainHeight(p.x,p.z)+.015,p.z);d.rotation.set(0,p.a,0);d.scale.setScalar(p.s);d.updateMatrix();grass.setMatrixAt(i,d.matrix);grass.setColorAt(i,new THREE.Color([0xf0f2dc,0xe6ecd0,0xfaf6de,0xdce6c4,0xf2f0d4][p.color]));});
+     grass.instanceMatrix.needsUpdate=true;if(grass.instanceColor)grass.instanceColor.needsUpdate=true;grass.frustumCulled=false;grass.receiveShadow=true;
+     this.group.add(grass);
+   }
+@@ -420,7 +518,7 @@ export class Environment {
+       if((this.gameMode&&(moatDistance(x,z)<7||(isDistrictSite(x,z)||isRegionalRiverCorridor(x,z))))||isLivingWorldSite(x,z)||isMountWorksite(x,z)||r>153||isWater(x,z,2.2)||millStreamDistance(x,z)<8||PLOTS.some(p=>Math.hypot(p.x-x,p.z-z)<(p.kind==='project'?8:6))||r<67&&(Math.abs(x)<4||Math.abs(z)<4||Math.abs(r-INFRASTRUCTURE.road.ringRadius)<3||Math.abs(r-INFRASTRUCTURE.road.outerRingRadius)<3||Math.abs(r-INFRASTRUCTURE.wall.outerRadius)<3))continue;
+       blooms.push({x,z,size:.75+rand(i*37+11)*.65,color:Math.floor(rand(i*67+19)*palette.length)});
+     }
+-    const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}),blooms.length);
++    const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,roughness:1,metalness:0}),blooms.length);
+     const transform=new THREE.Object3D();
+     blooms.forEach((flower,i)=>{
+       transform.position.set(flower.x,terrainHeight(flower.x,flower.z)+.45*flower.size,flower.z);
+@@ -437,7 +535,6 @@ export class Environment {
+   update(seconds:number,season:string,night:number){
+     this.wind.value=seconds;
+     this.waterTime.value=this.reducedMotion.matches?0:seconds;
+-    this.waterLight.value=1-night*.38;
+     if(season!==this.currentSeason)this.currentSeason=season;
+     this.grassPaint.color.set(season==='winter'?0xd5ddd0:season==='autumn'?0xd8c594:0xffffff);
+   }
+diff --git a/src/town/frontier-world.ts b/src/town/frontier-world.ts
+index 70215cd..2ffbdf9 100644
+--- a/src/town/frontier-world.ts
++++ b/src/town/frontier-world.ts
+@@ -7,7 +7,7 @@ import { placeProp } from './prop-placement';
+ import { MILESTONES } from './milestones';
+ import { FRONTIER_RIVERS,FRONTIER_ROADS,routeSample,routeNearest,regionalRiverWidth,isFrontierCorridor,type RegionPoint } from './frontier-layout';
+ import { RiverWorks } from './river-works';
+-import { naturalTerrainHeight,type Environment } from './environment';
++import { createBankMaterial,naturalTerrainHeight,pushBankColors,type Environment } from './environment';
+ import type { Idea,Levels } from './game';
+ 
+ interface Region { idea:Idea;level:number;group:THREE.Group;growth:number }
+@@ -140,16 +140,19 @@ export class FrontierWorld {
+     if(index===4)for(let i=1;i<heights.length;i++)heights[i]=Math.min(heights[i-1],heights[i]);
+     const surface=(t:number)=>{const k=Math.min(79,Math.floor(t*80)),f=t*80-k;return heights[k]+(heights[k+1]-heights[k])*f;};
+     this.environment.registerRegionalChannel?.(id,route,width,surface);
++    let routeLength=0;for(let i=0;i<80;i++){const a=sample(i/80),b=sample((i+1)/80);routeLength+=Math.hypot(b.x-a.x,b.z-a.z);}
+     const make=(bank:boolean,bed=false)=>{
+-      const positions:number[]=[],uv:number[]=[];
++      const positions:number[]=[],uv:number[]=[],colors:number[]=[];
+       const edge=(t:number,side:number,outer=false)=>{const p=sample(t),a=sample(Math.max(0,t-.002)),b=sample(Math.min(1,t+.002)),dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1,w=width(t)+(outer?3.5:0),x=p.x+dz/len*w*side,z=p.z-dx/len*w*side;return [x,outer?this.height(x,z)+.025:surface(t)-(bed?.85:0),z];};
+       for(let i=0;i<80;i++)for(const side of bank?[-1,1]:[0]){
+         const a=edge(i/80,side||-1),b=edge(i/80,side||1,bank),c=edge((i+1)/80,side||-1),d=edge((i+1)/80,side||1,bank);
+-        for(const p of [a,b,c,b,d,c])positions.push(...p);for(const [s,t] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])uv.push(s,t*1.5);
++        for(const p of [a,b,c,b,d,c])positions.push(...p);if(bank)pushBankColors(colors,i+(side>0?500:0)+level*1000);for(const [s,t] of [[-1,i],[1,i],[-1,i+1],[1,i],[1,i+1],[-1,i+1]])uv.push(s,t*1.5);
+       }
+-      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.computeVertexNormals();this.owned.add(geo);
+-      const mat=bank?new THREE.MeshStandardMaterial({color:0xbaa782,roughness:1,side:THREE.DoubleSide}):bed?new THREE.MeshStandardMaterial({color:0x876e50,roughness:1,side:THREE.DoubleSide}):this.environment.createRiverMaterial();this.paints.add(mat);
+-      const mesh=new THREE.Mesh(geo,mat);mesh.name=bank?'Regional_banks':bed?'Regional_bed':'Regional_flow';g.add(mesh);return mesh;
++      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));if(bank)geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeVertexNormals();this.owned.add(geo);
++      // Ribbon uv: x=-1..1 across the local half width, y=1.5 per 1/80 of the route.
++      const flowScale:[number,number]=[width(.5),routeLength/80/1.5];
++      const mat=bank?createBankMaterial():bed?new THREE.MeshStandardMaterial({color:0x5f5645,roughness:1,side:THREE.DoubleSide}):this.environment.createRiverMaterial(flowScale);this.paints.add(mat);
++      const mesh=new THREE.Mesh(geo,mat);mesh.receiveShadow=true;mesh.name=bank?'Regional_banks':bed?'Regional_bed':'Regional_flow';g.add(mesh);return mesh;
+     };
+     const water=make(false),bed=make(false,true),bank=make(true),works=new RiverWorks(g,this.mobile,sample,(x,z)=>this.height(x,z),surface,index===3?14:7,[.15,.85]);
+     this.waterways.push({works,group:g,water,bed,bank,level,id});g.visible=false;
+diff --git a/src/town/game-scenery.ts b/src/town/game-scenery.ts
+index 0c1bbce..a86c4fa 100644
+--- a/src/town/game-scenery.ts
++++ b/src/town/game-scenery.ts
+@@ -52,6 +52,12 @@ function streamEdge(t:number,side:number):[number,number,number]{
+   }
+   return [x,streamSurfaceHeight(t)+.012,z];
+ }
++/** World length of the mill stream; its ribbon uv.y runs 0..36 along it. */
++function streamLength(): number {
++  let length = 0;
++  for (let i = 0; i < 64; i++) { const a = millStreamPoint(i / 64), b = millStreamPoint((i + 1) / 64); length += Math.hypot(b.x - a.x, b.z - a.z); }
++  return length;
++}
+ function channelRibbon(): THREE.BufferGeometry {
+   const positions: number[] = [],uvs:number[]=[];
+   const steps = 72;
+@@ -116,9 +122,10 @@ export class GameScenery {
+     this.frontier = new FrontierWorld(this.group,mobile,environment,true);
+     this.districts = new DistrictScenery(this.group,mobile);
+     this.riverWorks = new RiverWorks(this.group,mobile,millStreamPoint,naturalTerrainHeight,streamSurfaceHeight,7.6,[.22,.8]);
+-    this.riverBed=new THREE.Mesh(channelRibbon().translate(0,-.75,0),new THREE.MeshStandardMaterial({color:0x8e7354,roughness:1,side:THREE.DoubleSide}));
++    this.riverBed=new THREE.Mesh(channelRibbon().translate(0,-.75,0),new THREE.MeshStandardMaterial({color:0x5f5645,roughness:1,side:THREE.DoubleSide}));
+     this.riverBed.geometry.setDrawRange(0,0);this.group.add(this.riverBed);
+-    this.water = new THREE.Mesh(channelRibbon(),environment.createRiverMaterial());
++    this.water = new THREE.Mesh(channelRibbon(),environment.createRiverMaterial([3.55,streamLength()/36]));
++    this.water.receiveShadow = true;
+     this.water.geometry.setDrawRange(0, 0);
+     this.group.add(this.water);
+     this.pool=riverAsset('pool',environment.createPondMaterial());
+@@ -174,7 +181,7 @@ export class GameScenery {
+ 
+     const treeTrunk = new THREE.CylinderGeometry(.24, .38, 2.2, 6);
+     const treeCrown = new THREE.IcosahedronGeometry(1, 1);
+-    const leaf = new THREE.MeshStandardMaterial({ color: 0x5b9d60, roughness: 1 });
++    const leaf = new THREE.MeshStandardMaterial({ color: 0x64844b, roughness: 1 });
+     for (const [x, z] of [[-42, 0], [-38, 24], [-20, 40], [2, 43], [28, 36], [43, 18], [43, -6], [-40, -22]]) {
+       const tree = new THREE.Group(); tree.position.set(x, terrainHeight(x, z), z);
+       const trunk = new THREE.Mesh(treeTrunk, wood); trunk.position.y = 1.1; tree.add(trunk);
+diff --git a/src/town/materials.ts b/src/town/materials.ts
+index 5dbb3d4..f95db94 100644
+--- a/src/town/materials.ts
++++ b/src/town/materials.ts
+@@ -4,7 +4,7 @@ import * as THREE from 'three';
+ // matte stone treatment in Drunk Dwarves. The marks use world coordinates, so
+ // batched and instanced geometry shares one continuous material.
+ export const C = {
+-  grass: 0x80b963, grassDark: 0x4f9257, earth: 0x9c805e, path: 0xd5bb84,
++  grass: 0x86b463, grassDark: 0x58784a, leaf: 0x64844b, earth: 0x9c805e, path: 0xd5bb84,
+   wood: 0x946345, woodLight: 0xb68458, woodDark: 0x704a37,
+   stone: 0xbab4a4, stoneDark: 0x858b84, plaster: 0xf0d7ac,
+   roof: 0xd76b4d, roofDark: 0x9e6345, roofBlue: 0x5e95ad,
+@@ -14,11 +14,29 @@ export const C = {
+ export type Mat = THREE.Material;
+ const make = (color:number, roughness=.9, metalness=0) => new THREE.MeshStandardMaterial({color,roughness,metalness});
+ 
++// Painted marks fade to their mean tone once a feature shrinks toward a
++// pixel, so distant walls and roofs stay calm instead of shimmering. The
++// sin-free hash keeps its precision at large world coordinates and on
++// mediump-leaning mobile GPUs.
++const PAINTED_CHUNK=`
++  float townHash(highp vec3 p){
++    p=fract(p*.1031);
++    p+=dot(p,p.zyx+31.32);
++    return fract((p.x+p.y)*p.z);
++  }
++  float townNoise(highp vec3 p){highp vec3 i=floor(p);vec3 f=fract(p);f=f*f*(3.0-2.0*f);
++    return mix(mix(mix(townHash(i),townHash(i+vec3(1,0,0)),f.x),
++                   mix(townHash(i+vec3(0,1,0)),townHash(i+vec3(1,1,0)),f.x),f.y),
++               mix(mix(townHash(i+vec3(0,0,1)),townHash(i+vec3(1,0,1)),f.x),
++                   mix(townHash(i+vec3(0,1,1)),townHash(i+vec3(1,1,1)),f.x),f.y),f.z);}
++  float townFade(highp vec3 p){return 1.0-smoothstep(.35,.9,length(fwidth(p)));}
++`;
++
+ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'roof'|'plaster'|'ground'){
+   const previous=material.onBeforeCompile;
+   material.onBeforeCompile=(shader,renderer)=>{
+     previous.call(material,shader,renderer);
+-    shader.vertexShader='varying vec3 vTownSurface;\n'+shader.vertexShader;
++    shader.vertexShader='varying highp vec3 vTownSurface;\n'+shader.vertexShader;
+     shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>',`#include <project_vertex>
+       vec4 surfacePosition=vec4(transformed,1.0);
+       #ifdef USE_INSTANCING
+@@ -26,35 +44,37 @@ function painted(material:THREE.MeshStandardMaterial, surface:'timber'|'stone'|'
+       #endif
+       vTownSurface=(modelMatrix*surfacePosition).xyz;
+     `);
+-    shader.fragmentShader=`varying vec3 vTownSurface;
+-      float townHash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+-      float townNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+-        return mix(mix(mix(townHash(i),townHash(i+vec3(1,0,0)),f.x),
+-                       mix(townHash(i+vec3(0,1,0)),townHash(i+vec3(1,1,0)),f.x),f.y),
+-                   mix(mix(townHash(i+vec3(0,0,1)),townHash(i+vec3(1,0,1)),f.x),
+-                       mix(townHash(i+vec3(0,1,1)),townHash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+-    `+shader.fragmentShader;
++    shader.fragmentShader='varying highp vec3 vTownSurface;\n'+PAINTED_CHUNK+shader.fragmentShader;
++    // Each factor mixes toward its mean (noise averages .5) as its lattice
++    // frequency approaches the pixel footprint.
+     const treatment={
+-      timber:`float grain=townNoise(vTownSurface*vec3(3.8,.18,3.8));
++      timber:`highp vec3 grainP=vTownSurface*vec3(3.8,.18,3.8);
++        float grain=townNoise(grainP);
+         float grainLine=smoothstep(.68,.82,grain);
+-        diffuseColor.rgb*=.79+grain*.31-grainLine*.055;`,
+-      stone:`vec3 stagger=vTownSurface+vec3(mod(floor(vTownSurface.y*1.25),2.0)*.36,0.0,0.0);
+-        float fleck=townNoise(floor(stagger*vec3(1.3,1.25,1.3))*.8);
+-        float joint=1.0-smoothstep(.025,.065,fract(vTownSurface.y*1.25));
+-        diffuseColor.rgb*=.81+fleck*.25-joint*.07;`,
+-      roof:`float clay=townNoise(vTownSurface*vec3(2.7,1.9,2.7));
+-        float speckle=townNoise(vTownSurface*vec3(8.0,5.0,8.0));
++        diffuseColor.rgb*=mix(.94,.79+grain*.31-grainLine*.055,townFade(grainP));`,
++      stone:`highp vec3 stagger=vTownSurface+vec3(mod(floor(vTownSurface.y*1.25),2.0)*.36,0.0,0.0);
++        highp vec3 fleckP=stagger*vec3(1.3,1.25,1.3);
++        float fleck=townNoise(floor(fleckP)*.8);
++        highp float course=vTownSurface.y*1.25;
++        float joint=1.0-smoothstep(.025,.065,fract(course));
++        float jointFade=1.0-smoothstep(.03,.12,fwidth(course));
++        diffuseColor.rgb*=mix(.935,.81+fleck*.25,townFade(fleckP))-mix(.0032,joint*.07,jointFade);`,
++      roof:`highp vec3 clayP=vTownSurface*vec3(2.7,1.9,2.7),speckleP=vTownSurface*vec3(8.0,5.0,8.0);
++        float clay=mix(.5,townNoise(clayP),townFade(clayP));
++        float speckle=mix(.5,townNoise(speckleP),townFade(speckleP));
+         diffuseColor.rgb*=.88+clay*.16+speckle*.045;`,
+-      plaster:`float wash=townNoise(vTownSurface*vec3(1.4,1.1,1.4));
++      plaster:`highp vec3 washP=vTownSurface*vec3(1.4,1.1,1.4);
++        float wash=mix(.5,townNoise(washP),townFade(washP));
+         diffuseColor.rgb*=.94+wash*.10;`,
+       ground:`float groundPatch=townNoise(vTownSurface*vec3(.075,.01,.075));
+-        float fleck=townNoise(vTownSurface*vec3(.46,.02,.46));
++        highp vec3 fleckP=vTownSurface*vec3(.46,.02,.46);
++        float fleck=mix(.5,townNoise(fleckP),townFade(fleckP));
+         float meadow=sin(vTownSurface.x*.045)*sin(vTownSurface.z*.059);
+         diffuseColor.rgb*=.94+groundPatch*.12+fleck*.035+meadow*.045;`,
+     }[surface];
+     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n${treatment}`);
+   };
+-  material.customProgramCacheKey=()=>`town-painted-${surface}-v3`;
++  material.customProgramCacheKey=()=>`town-painted-${surface}-v4`;
+   return material;
+ }
+ 
+@@ -65,11 +85,11 @@ export const MAT = {
+   plaster:painted(make(C.plaster,1),'plaster'),plasterIvory:painted(make(0xf3e3c3,1),'plaster'),plasterRose:painted(make(0xe8b9a8,1),'plaster'),plasterSage:painted(make(0xc5dbb6,1),'plaster'),
+   roof:painted(make(C.roof,.92),'roof'),roofDark:painted(make(C.roofDark,.92),'roof'),roofBlue:painted(make(C.roofBlue,.92),'roof'),
+   roofTiles:painted(new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.96,side:THREE.DoubleSide}),'roof'),
+-  gold:make(C.gold,.68,.1),window:make(C.window,.88),glass:new THREE.MeshStandardMaterial({color:0x8db3ab,roughness:.25,metalness:.12,emissive:0x193633,emissiveIntensity:.22}),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
+-  white:make(0xf5f0dd),leaf:make(0x5b995e,1),leafLight:make(0x84ba66,1),leafDark:make(0x3e7c57,1),foliage:make(0xffffff,1),pine:make(0xffffff,1),
++  gold:make(C.gold,.68,.1),window:make(C.window,.88),glass:new THREE.MeshStandardMaterial({color:0x3a4047,roughness:.35,metalness:0,emissive:0x6b4a2a,emissiveIntensity:.2}),lamp:new THREE.MeshBasicMaterial({color:C.lamp}),
++  white:make(0xf5f0dd),leaf:make(C.leaf,1),leafLight:make(0x90a75a,1),leafDark:make(0x4a6841,1),foliage:make(0xffffff,1),pine:make(0xffffff,1),
+   red:make(0xbe7062),purple:make(0x8d729e),blue:make(0x668db0),
+   iron:make(0x576a72,.7,.28),copper:make(0xb8775d,.76,.22),olive:make(0x748568,.95),sand:make(0xc6a97e,1),
+-  cyan:new THREE.MeshStandardMaterial({color:0x62c4cc,roughness:.3,metalness:.18,emissive:0x249aab,emissiveIntensity:.65}),
+-  magic:new THREE.MeshStandardMaterial({color:0x9bc5ed,roughness:.25,metalness:.08,emissive:0x5575de,emissiveIntensity:.62}),
++  cyan:new THREE.MeshStandardMaterial({color:0x62c4cc,roughness:.3,metalness:.18,emissive:0x249aab,emissiveIntensity:.52}),
++  magic:new THREE.MeshStandardMaterial({color:0x9bc5ed,roughness:.25,metalness:.08,emissive:0x5575de,emissiveIntensity:.5}),
+   violet:make(0x664b89,.83),ink:make(0x34384b,.95),emerald:make(0x5aab85,.87),
+ } as const;
+diff --git a/src/town/nature.ts b/src/town/nature.ts
+index 714c63e..2a89ed8 100644
+--- a/src/town/nature.ts
++++ b/src/town/nature.ts
+@@ -60,7 +60,7 @@ for (const part of data.parts) {
+   geometry.setIndex(part.indices);
+   if (part.colors?.length === part.positions.length) {
+     const colors = part.family.startsWith('Pine_') && part.role === 'canopy'
+-      ? part.colors.map((channel, index) => Math.min(1, channel * [.88, 1.22, 1.55][index % 3]))
++      ? part.colors.map((channel, index) => Math.min(1, channel * [.9, 1.14, 1.28][index % 3]))
+       : part.colors;
+     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+   }
+diff --git a/src/town/river-works.ts b/src/town/river-works.ts
+index 5670a20..7547bc0 100644
+--- a/src/town/river-works.ts
++++ b/src/town/river-works.ts
+@@ -16,7 +16,8 @@ export class RiverWorks {
+   readonly markers=new THREE.Group();
+   private readonly foam:THREE.InstancedMesh;
+   private readonly geometries=new Set<THREE.BufferGeometry>();
+-  private readonly foamPaint=new THREE.MeshBasicMaterial({color:0xd6f7eb,transparent:true,opacity:.85,depthWrite:false});
++  // Lit so the working foam dims with the scene instead of glowing at night.
++  private readonly foamPaint=new THREE.MeshStandardMaterial({color:0xdfe8e2,roughness:1,metalness:0,transparent:true,opacity:.7,depthWrite:false});
+   private readonly dummy=new THREE.Object3D();
+   private active=false;
+   private elapsed=0;
+diff --git a/src/town/scene.ts b/src/town/scene.ts
+index 4073eed..2b770ea 100644
+--- a/src/town/scene.ts
++++ b/src/town/scene.ts
+@@ -1,6 +1,5 @@
+ import * as THREE from 'three';
+ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+ import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
+ import { INFRASTRUCTURE, accessPathFor, millAccessDistance } from './town-plan';
+@@ -9,6 +8,7 @@ import { C, MAT, type Mat } from './materials';
+ import { Environment, terrainHeight, naturalTerrainHeight, isWater } from './environment';
+ import { ContactShadows, type ContactFootprint } from './contact-shadows';
+ import { TownSky } from './sky';
++import { ATMOSPHERE } from './atmosphere';
+ import { Rain } from './rain';
+ import { ConstructionEffects } from './construction-effects';
+ import { ParachuteArrival, isSandshipArrival, SANDSHIP_ARRIVAL_MS } from './parachute-arrival';
+@@ -35,9 +35,14 @@ const sphereGeometry = new THREE.IcosahedronGeometry(1,1);
+ const coneGeometry = new THREE.ConeGeometry(1,1,6);
+ const towerBodyGeometry=new THREE.CylinderGeometry(1.02,1.18,1,10);
+ const towerRingGeometry=new THREE.CylinderGeometry(1.3,1.22,.23,10);
+-const daylightSun=new THREE.Color(0xfff2d7),overcastSun=new THREE.Color(0xdce5f0),nightSun=new THREE.Color(0x9bb6e2);
+-const overcastFill=new THREE.Color(0xd0d7e4),nightFill=new THREE.Color(0x8198c4),nightGround=new THREE.Color(0x59657d);
+-const overcastFog=new THREE.Color(0xbac5ce),nightFog=new THREE.Color(0x52647c);
++// Warm key light, cool sky fill: lit planes read warm, shadow masses read blue.
++const lowSun=new THREE.Color(0xffc68c),daylightSun=new THREE.Color(0xffe0ad),overcastSun=new THREE.Color(0xdce5f0),nightSun=new THREE.Color(0x8aa6e0);
++const daylightFill=new THREE.Color(0xa9c1e8),daylightGround=new THREE.Color(0xa39f7c);
++const overcastFill=new THREE.Color(0xc4ccd8),overcastGround=new THREE.Color(0x959487),nightFill=new THREE.Color(0x6f88bf),nightGround=new THREE.Color(0x3c4658);
++/** Reference sun intensity: ATMOSPHERE.sunColor is the sun colour scaled by intensity/this. */
++const SUN_REFERENCE=3.4;
++const SHADOW_MIN_HALF=45,SHADOW_MAX_HALF=MOBILE?100:120,SHADOW_STEP=8;
++const shadowNdc:[number,number][]=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]];
+ function box(parent: THREE.Group, x:number,y:number,z:number,w:number,h:number,d:number,material:Mat, rotateY=0, rounded=true): THREE.Mesh {
+   const mesh = new THREE.Mesh(rounded&&!MOBILE ? boxGeometry : plainBoxGeometry, material);
+   mesh.position.set(x,y,z); mesh.scale.set(w,h,d); mesh.rotation.y=rotateY;
+@@ -264,9 +269,20 @@ export class TownScene {
+   private roadTransition:{started:number;firstRoad:boolean;draws:{geometry:THREE.BufferGeometry;count:number}[];instances:{mesh:THREE.InstancedMesh;count:number}[]}|null=null;
+   private lastPlots:PlotState[]=[];
+   private structureContacts:ContactFootprint[]=[];
+-  private readonly sun=new THREE.DirectionalLight(0xffdfad,3.05);
+-  private readonly fill=new THREE.HemisphereLight(0xb8c8eb,0x9d806a,.68);
+-  private readonly environmentMap:THREE.WebGLRenderTarget;
++  private readonly sun=new THREE.DirectionalLight(0xffe0ad,SUN_REFERENCE);
++  private readonly fill=new THREE.HemisphereLight(0xa9c1e8,0xa39f7c,.85);
++  private readonly pmrem:THREE.PMREMGenerator;
++  private environmentMap:THREE.WebGLRenderTarget|null=null;
++  private environmentKey='';
++  private readonly sunDirection=new THREE.Vector3(-.6,.6,.4).normalize();
++  private readonly lightBasis=new THREE.Matrix4();
++  private readonly lightAxisX=new THREE.Vector3();
++  private readonly lightAxisY=new THREE.Vector3();
++  private readonly lightAxisZ=new THREE.Vector3();
++  private readonly scratch=new THREE.Vector3();
++  private readonly ray=new THREE.Vector3();
++  private shadowHalf=0;
++  private shadowDepth=0;
+   private readonly materials=new Set<Mat>();
+   private structureSignature='';
+   private wallSignature='';
+@@ -277,23 +293,20 @@ export class TownScene {
+     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
+     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
+     this.renderer.toneMapping=THREE.NeutralToneMapping;
+-    this.renderer.toneMappingExposure=1.05;
++    this.renderer.toneMappingExposure=1.12;
+     this.renderer.shadowMap.enabled=true;
+     this.renderer.shadowMap.type=THREE.PCFShadowMap;
+     this.renderer.localClippingEnabled=true;
+-    const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(this.renderer);
+-    this.environmentMap=pmrem.fromScene(room,.02);
+-    this.scene.environment=this.environmentMap.texture;this.scene.environmentIntensity=.09;
+-    room.dispose();pmrem.dispose();
+-    this.scene.background=new THREE.Color(0xbad6dc);
+-    this.scene.fog=new THREE.Fog(0xd4e8d6,170,440);
++    // Reflections come from a PMREM of the sky dome, built on the first frame
++    // and again only when the sky palette changes (see updateEnvironment).
++    this.pmrem=new THREE.PMREMGenerator(this.renderer);
++    this.scene.environmentIntensity=.12;
++    this.scene.background=this.fogColor.set(0xc9ecf2);
++    this.scene.fog=new THREE.Fog(0xc9ecf2,170,440);
+     this.sun.position.set(-70,65,45);this.sun.castShadow=true;
+     this.sun.shadow.mapSize.setScalar(this.mobile?1024:4096);
+-    this.sun.shadow.camera.left=-88;this.sun.shadow.camera.right=88;this.sun.shadow.camera.top=88;this.sun.shadow.camera.bottom=-88;
+-    this.sun.shadow.camera.near=1;this.sun.shadow.camera.far=270;
+-    this.sun.shadow.bias=-.00008;
+-    this.sun.shadow.normalBias=.035;this.sun.shadow.radius=this.mobile?1.25:2.5;
+-    this.scene.add(this.sun,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.arrivalStructures,this.previousStructures,this.previousRoads,this.previousWalls);
++    this.sun.shadow.radius=this.mobile?1.25:2.5;
++    this.scene.add(this.sun,this.sun.target,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.arrivalStructures,this.previousStructures,this.previousRoads,this.previousWalls);
+     this.environment=new Environment(this.scene,this.mobile,this.gameMode);
+     this.sky=new TownSky(this.scene);
+     this.rain=new Rain(this.scene,this.mobile);
+@@ -814,25 +827,89 @@ export class TownScene {
+     this.currentNight=night;
+     const rainy=snapshot.weather==='rain',overcast=rainy?1:snapshot.weather==='cloudy'?.5:0;
+     this.rain.setWeather(rainy,this.reducedMotion.matches);
+-    this.scene.environmentIntensity=.14*(1-.2*night);
+     const daylight=Math.max(0,Math.sin(t*Math.PI*2));
+-    this.sun.color.set(0xffedcb).lerp(daylightSun,daylight*.45)
++    this.sun.color.copy(lowSun).lerp(daylightSun,Math.min(1,daylight*1.08))
+       .lerp(overcastSun,overcast*.85).lerp(nightSun,night);
+-    this.sun.intensity=(3.15-overcast*1.75)*(1-.82*night);
+-    this.fill.color.set(0xd4edfa).lerp(overcastFill,overcast*.6).lerp(nightFill,night*.7);
+-    this.fill.groundColor.set(0xb3a282).lerp(nightGround,night*.8);
+-    this.fill.intensity=(.88+overcast*.2)*(1-.12*night);
+-    // Keep a readable, raking sun throughout the cycle. Distance also keeps
+-    // tall roofs inside the shadow camera at dawn and dusk.
+-    this.sun.position.set(-70+Math.cos(t*Math.PI*2)*28,46+daylight*28,45);
++    this.sun.intensity=(SUN_REFERENCE-overcast*1.9)*(1-.8*night);
++    this.fill.color.copy(daylightFill).lerp(overcastFill,overcast*.7).lerp(nightFill,night*.8);
++    this.fill.groundColor.copy(daylightGround).lerp(overcastGround,overcast*.6).lerp(nightGround,night*.8);
++    // Low ambient keeps shadow masses readable. Overcast lifts it because the
++    // sun is weaker; night keeps enough cool fill for the moonlit town to read.
++    this.fill.intensity=(.85+overcast*.35)*(1+.1*night);
++    // A raking sun from the camera's left: ~33° at the game's fixed morning
++    // (dayFraction .19), lower at dawn/dusk, a ~30° moon at night.
++    const elevation=THREE.MathUtils.degToRad(THREE.MathUtils.lerp(14+20*daylight,30,night));
++    const hx=-58+Math.cos(t*Math.PI*2)*20,hz=81,horizontal=Math.hypot(hx,hz);
++    this.sunDirection.set(hx/horizontal*Math.cos(elevation),Math.sin(elevation),hz/horizontal*Math.cos(elevation));
+     this.sun.shadow.intensity=1-overcast*.28;
+-    this.fogColor.set(0xd4e8d6).lerp(overcastFog,overcast).lerp(nightFog,night*.78);
++    this.sky.update(snapshot,night,this.sunDirection,this.camera.position);
++    // Fog and background use the sky's horizon, so the land melts into the sky.
++    this.fogColor.copy(this.sky.horizonColor).lerp(this.sky.zenithColor,.05);
+     this.scene.background=this.fogColor;this.scene.fog?.color.copy(this.fogColor);
+-    MAT.grass.color.set(snapshot.season==='winter'?0xb9cabe:snapshot.season==='autumn'?0xb3a15e:snapshot.season==='spring'?0x79be66:C.grass);
+-    MAT.leaf.color.set(snapshot.season==='autumn'?0xc28b4b:snapshot.season==='winter'?0x829985:0x5b995e);
+-    this.renderer.toneMappingExposure=1.05-.08*night;
+-    this.sky.update(snapshot,night,this.sun.position,this.camera.position);
++    this.updateEnvironment(snapshot,night);
++    ATMOSPHERE.sunDirection.value.copy(this.sunDirection);
++    ATMOSPHERE.sunColor.value.copy(this.sun.color).multiplyScalar(this.sun.intensity/SUN_REFERENCE);
++    ATMOSPHERE.skyHorizon.value.copy(this.sky.horizonColor);
++    ATMOSPHERE.skyZenith.value.copy(this.sky.zenithColor);
++    ATMOSPHERE.night.value=night;
++    MAT.grass.color.set(snapshot.season==='winter'?0xb9c4b8:snapshot.season==='autumn'?0xb09e5e:snapshot.season==='spring'?0x82b163:C.grass);
++    MAT.leaf.color.set(snapshot.season==='autumn'?0xbc8a4b:snapshot.season==='winter'?0x84937f:C.leaf);
++    this.renderer.toneMappingExposure=1.12-.1*night;
+   }
+-  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
+-  dispose(){this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
++  /** Rebuilds the sky reflection PMREM only when the palette bucket changes. */
++  private updateEnvironment(snapshot:TownSnapshot,night:number){
++    const key=`${snapshot.weather}/${snapshot.season}/${Math.round(night*6)}`;
++    if(key===this.environmentKey&&this.environmentMap)return;
++    this.environmentKey=key;
++    const target=this.pmrem.fromScene(this.sky.environment(),0,.1,100,{size:this.mobile?64:128});
++    this.environmentMap?.dispose();this.environmentMap=target;
++    this.scene.environment=target.texture;
++  }
++  /**
++   * Fits the sun's orthographic shadow box to the ground the camera sees and
++   * snaps it to whole shadow texels in light space, so shadows follow the view
++   * into the outer districts without shimmering as the camera moves.
++   */
++  private updateShadowFrustum(){
++    const camera=this.camera,shadow=this.sun.shadow;
++    camera.updateMatrixWorld();
++    this.lightBasis.lookAt(this.sunDirection,this.scratch.set(0,0,0),THREE.Object3D.DEFAULT_UP);
++    this.lightBasis.extractBasis(this.lightAxisX,this.lightAxisY,this.lightAxisZ);
++    const origin=camera.position,maxReach=170;
++    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,nearX=0,nearY=0;
++    for(const [nx,ny] of shadowNdc){
++      this.ray.set(nx,ny,.5).unproject(camera).sub(origin).normalize();
++      // Where the view ray meets the ground (y≈0); rays near the horizon stop at maxReach.
++      const reach=this.ray.y<-1e-3?Math.min(maxReach,-origin.y/this.ray.y):maxReach;
++      this.scratch.copy(origin).addScaledVector(this.ray,reach);this.scratch.y=Math.max(0,Math.min(this.scratch.y,origin.y));
++      const lx=this.scratch.dot(this.lightAxisX),ly=this.scratch.dot(this.lightAxisY);
++      minX=Math.min(minX,lx);maxX=Math.max(maxX,lx);minY=Math.min(minY,ly);maxY=Math.max(maxY,ly);
++      if(nx===0&&ny===-1){nearX=lx;nearY=ly;}
++    }
++    const extent=Math.max(maxX-minX,maxY-minY)*.5+6;
++    const half=THREE.MathUtils.clamp(Math.ceil(extent/SHADOW_STEP)*SHADOW_STEP,SHADOW_MIN_HALF,SHADOW_MAX_HALF);
++    // If the view is larger than the box, keep the foreground covered.
++    const inset=Math.max(0,half-10);
++    let cx=THREE.MathUtils.clamp((minX+maxX)*.5,nearX-inset,nearX+inset);
++    let cy=THREE.MathUtils.clamp((minY+maxY)*.5,nearY-inset,nearY+inset);
++    const texel=2*half/shadow.mapSize.x;
++    cx=Math.round(cx/texel)*texel;cy=Math.round(cy/texel)*texel;
++    // Put the box centre on the ground plane: y = cx*X.y + cy*Y.y + cz*Z.y = 0.
++    const cz=-(cx*this.lightAxisX.y+cy*this.lightAxisY.y)/Math.max(.05,this.lightAxisZ.y);
++    const depth=half*this.lightAxisY.y/Math.max(.05,this.lightAxisZ.y)+48;
++    this.sun.target.position.set(0,0,0).addScaledVector(this.lightAxisX,cx).addScaledVector(this.lightAxisY,cy).addScaledVector(this.lightAxisZ,cz);
++    this.sun.position.copy(this.sun.target.position).addScaledVector(this.sunDirection,depth+12);
++    this.sun.target.updateMatrixWorld();
++    if(half!==this.shadowHalf||Math.abs(depth-this.shadowDepth)>.5){
++      this.shadowHalf=half;this.shadowDepth=depth;
++      const cam=shadow.camera;
++      cam.left=-half;cam.right=half;cam.top=half;cam.bottom=-half;
++      cam.near=1;cam.far=depth*2+12;
++      cam.updateProjectionMatrix();
++      shadow.bias=-.00006;
++      shadow.normalBias=THREE.MathUtils.clamp(texel*.75,.03,this.mobile?.12:.07);
++    }
++  }
++  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.updateShadowFrustum();this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
++  dispose(){this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap?.dispose();this.pmrem.dispose();this.sky.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
+ }
+diff --git a/src/town/sky.ts b/src/town/sky.ts
+index ff67f1d..45e762b 100644
+--- a/src/town/sky.ts
++++ b/src/town/sky.ts
+@@ -3,21 +3,27 @@ import type { TownSnapshot } from './model';
+ 
+ const winterZenith=new THREE.Color(0xb8ccd6),winterHorizon=new THREE.Color(0xdce1dc);
+ const nightZenith=new THREE.Color(0x16283c),nightHorizon=new THREE.Color(0x46546b);
++// Muted bounce below the horizon for reflections: olive meadow, never saturated.
++const dayGround=new THREE.Color(0x6f7556),nightGround=new THREE.Color(0x1f2630),winterGround=new THREE.Color(0x9aa29a);
++
++const skyVertex=`varying vec3 vSkyDirection;
++  void main(){vSkyDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`;
+ 
+ // One unlit dome supplies a soft horizon and sun glow without post processing.
+ export class TownSky {
+   private readonly zenith={value:new THREE.Color()};
+   private readonly horizon={value:new THREE.Color()};
++  private readonly ground={value:new THREE.Color()};
+   private readonly sunDirection={value:new THREE.Vector3()};
+   private readonly top=new THREE.Color();
+   private readonly low=new THREE.Color();
+   private readonly mesh:THREE.Mesh;
++  private environmentScene:THREE.Scene|null=null;
+   constructor(scene:THREE.Scene){
+     const material=new THREE.ShaderMaterial({
+       side:THREE.BackSide,depthWrite:false,fog:false,
+       uniforms:{zenith:this.zenith,horizon:this.horizon,sunDirection:this.sunDirection},
+-      vertexShader:`varying vec3 vSkyDirection;
+-        void main(){vSkyDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
++      vertexShader:skyVertex,
+       fragmentShader:`uniform vec3 zenith;uniform vec3 horizon;uniform vec3 sunDirection;
+         varying vec3 vSkyDirection;
+         void main(){
+@@ -33,15 +39,52 @@ export class TownSky {
+     this.mesh=new THREE.Mesh(new THREE.SphereGeometry(440,20,12),material);
+     this.mesh.renderOrder=-100;this.mesh.frustumCulled=false;scene.add(this.mesh);
+   }
++  /** Current linear horizon colour (after weather, season and night). */
++  get horizonColor():THREE.Color{return this.horizon.value;}
++  /** Current linear zenith colour (after weather, season and night). */
++  get zenithColor():THREE.Color{return this.zenith.value;}
+   update(snapshot:TownSnapshot,night:number,sun:THREE.Vector3,camera:THREE.Vector3){
+     const rainy=snapshot.weather==='rain',cloudy=snapshot.weather==='cloudy';
+     this.top.set(rainy?0x839aa9:cloudy?0x91adbb:0x5db6e8);
+     this.low.set(rainy?0xc1c1b7:cloudy?0xddd5c5:0xc9ecf2);
+-    if(snapshot.season==='winter'){this.top.lerp(winterZenith,.18);this.low.lerp(winterHorizon,.22);}
++    this.ground.value.copy(dayGround);
++    if(snapshot.season==='winter'){this.top.lerp(winterZenith,.18);this.low.lerp(winterHorizon,.22);this.ground.value.lerp(winterGround,.6);}
++    if(rainy||cloudy)this.ground.value.lerp(this.low,rainy?.3:.15);
+     this.zenith.value.copy(this.top).lerp(nightZenith,night*.83);
+     this.horizon.value.copy(this.low).lerp(nightHorizon,night*.72);
++    this.ground.value.lerp(nightGround,night*.85);
+     this.sunDirection.value.copy(sun).normalize();
+     this.mesh.position.copy(camera);
+   }
+   updatePosition(camera:THREE.Vector3){this.mesh.position.copy(camera);}
++  /**
++   * A tiny scene containing only the sky gradient over a muted ground, used to
++   * build the reflection environment with PMREMGenerator.fromScene. It shares
++   * the live colour uniforms, so regenerate after update() when they change.
++   */
++  environment():THREE.Scene{
++    if(this.environmentScene)return this.environmentScene;
++    const material=new THREE.ShaderMaterial({
++      side:THREE.BackSide,depthWrite:false,depthTest:false,fog:false,
++      uniforms:{zenith:this.zenith,horizon:this.horizon,ground:this.ground},
++      vertexShader:skyVertex,
++      fragmentShader:`uniform vec3 zenith;uniform vec3 horizon;uniform vec3 ground;
++        varying vec3 vSkyDirection;
++        void main(){
++          vec3 direction=normalize(vSkyDirection);
++          vec3 color=mix(horizon,zenith,smoothstep(-.02,.63,direction.y));
++          color=mix(color,ground,smoothstep(.0,.22,-direction.y));
++          gl_FragColor=vec4(color,1.0);
++          #include <colorspace_fragment>
++        }`,
++    });
++    const scene=new THREE.Scene();
++    scene.add(new THREE.Mesh(new THREE.SphereGeometry(40,24,12),material));
++    this.environmentScene=scene;
++    return scene;
++  }
++  dispose(){
++    this.mesh.geometry.dispose();(this.mesh.material as THREE.Material).dispose();
++    this.environmentScene?.traverse(object=>{if(object instanceof THREE.Mesh){object.geometry.dispose();(object.material as THREE.Material).dispose();}});
++  }
+ }
+diff --git a/tests/castle-moat.test.ts b/tests/castle-moat.test.ts
+index d8a3c95..1170c11 100644
+--- a/tests/castle-moat.test.ts
++++ b/tests/castle-moat.test.ts
+@@ -56,7 +56,8 @@ test('the mill stream passes through both moat banks without a sand wall',()=>{
+     moat.setLevels(full,true);
+     root.updateMatrixWorld(true);
+     const banks:THREE.Object3D[]=[];
+-    moat.group.traverse(object=>{if(object instanceof THREE.Mesh&&object.material===MAT.sand)banks.push(object);});
++    moat.group.traverse(object=>{if(object instanceof THREE.Mesh&&object.name==='Moat_bank')banks.push(object);});
++    assert.ok(banks.length>0,'moat banks are found');
+     for(const z of [-58.5,-46]){
+       const hits=new THREE.Raycaster(new THREE.Vector3(28.2,10,z),new THREE.Vector3(0,-1,0),0,20).intersectObjects(banks);
+       assert.equal(hits.length,0,`raised moat bank crosses the mill stream at z=${z}, mobile=${mobile}`);
