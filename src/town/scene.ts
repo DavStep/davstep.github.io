@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { PlanetProjection } from './planet-scene';
+import { PlanetLandscape } from './planet-landscape';
+import { PLANET_RADIUS, planetSourceGroundHeight } from './planet-layout';
+import { PLANET_CAMERA_NEAR, planetBuildingYaw, planetSunDirection } from './planet-placement';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
@@ -202,17 +206,20 @@ function flag(parent:THREE.Group,x:number,y:number,z:number,material:Mat) {
   box(parent,x,y+.75,z,.09,1.5,.09,MAT.woodDark);
   box(parent,x+.42,y+1.25,z,.8,.42,.06,material);
 }
-function building(plot:PlotState,gameMode=false): THREE.Group {
+function building(plot:PlotState,gameMode=false,planetMode=false): THREE.Group {
   if(plot.stage<=0){const empty=new THREE.Group();empty.position.set(plot.x,0,plot.z);return empty;}
   const group=plot.kind==='home'?(gameMode?gameCottageBuilding(plot,MOBILE):cottageBuilding(plot,MOBILE))
     :plot.kind==='castle'?castleBuilding(plot,MOBILE)
     :plot.kind==='project'?authoredLandmarkBuilding(plot,MOBILE):civicBuilding(plot,MOBILE,gameMode);
   group.position.y+=terrainHeight(plot.x,plot.z)-.48;
+  if(planetMode)group.rotation.y+=planetBuildingYaw(plot);
   return group;
 }
-function projectPickBox(plot:PlotState):THREE.Box3{
+function projectPickBox(plot:PlotState,planetMode=false):THREE.Box3{
   const y=terrainHeight(plot.x,plot.z);
-  return new THREE.Box3(new THREE.Vector3(plot.x-5.3,y-.5,plot.z-5),new THREE.Vector3(plot.x+5.3,y+20,plot.z+5));
+  const yaw=planetMode?planetBuildingYaw(plot):0,c=Math.abs(Math.cos(yaw)),s=Math.abs(Math.sin(yaw));
+  const width=5.3*c+5*s,depth=5*c+5.3*s;
+  return new THREE.Box3(new THREE.Vector3(plot.x-width,y-.5,plot.z-depth),new THREE.Vector3(plot.x+width,y+20,plot.z+depth));
 }
 function hash(n:number){let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;}
 function wallSectorGeometry(radius:number):THREE.BufferGeometry{
@@ -238,6 +245,7 @@ export class TownScene {
   private readonly allTreeObstacles:{x:number;z:number;r:number;tier:number}[]=[];
   private readonly treeLayers:THREE.Group[]=[];
   private groveLevel=-1;
+  private readonly planetDressing:THREE.Object3D[]=[];
   private readonly land=new THREE.Group();
   readonly environment:Environment;
   private readonly sky:TownSky;
@@ -297,13 +305,15 @@ export class TownScene {
   private roadSignature='';
   private roadLevelSignature='';
   readonly mobile=MOBILE;
-  constructor(canvas:HTMLCanvasElement,private readonly gameMode=false){
-    this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:this.mobile?'low-power':'high-performance'});
+  private planet:PlanetProjection|null=null;
+  private planetLandscape:PlanetLandscape|null=null;
+  constructor(canvas:HTMLCanvasElement,private readonly gameMode=false,private readonly planetMode=false){
+    this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:this.planetMode,powerPreference:this.mobile?'low-power':'high-performance'});
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.NeutralToneMapping;
     this.renderer.toneMappingExposure=1.12;
     this.renderer.shadowMap.enabled=true;
-    this.renderer.shadowMap.type=THREE.PCFShadowMap;
+    this.renderer.shadowMap.type=this.planetMode?THREE.PCFSoftShadowMap:THREE.PCFShadowMap;
     this.renderer.localClippingEnabled=true;
     // Reflections come from a PMREM of the sky dome, built on the first frame
     // and again only when the sky palette changes (see updateEnvironment).
@@ -315,12 +325,19 @@ export class TownScene {
     this.sun.shadow.mapSize.setScalar(this.mobile?1024:4096);
     this.sun.shadow.radius=this.mobile?1.25:2.5;
     this.scene.add(this.sun,this.sun.target,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.arrivalStructures,this.previousStructures,this.previousRoads,this.previousWalls);
-    this.environment=new Environment(this.scene,this.mobile,this.gameMode);
+    this.environment=new Environment(this.scene,this.mobile,this.gameMode,this.planetMode);
     this.sky=new TownSky(this.scene);
     this.rain=new Rain(this.scene,this.mobile);
-    this.contactShadows=new ContactShadows(this.scene,terrainHeight);
+    this.contactShadows=new ContactShadows(this.scene,this.planetMode?(x,z)=>planetSourceGroundHeight(x,z)+.06:terrainHeight);
     this.camera.position.set(95,106,108);this.camera.lookAt(0,0,0);
-    this.createDecor();this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);this.resize();
+    this.createDecor();
+    if(this.planetMode){
+      this.planet=new PlanetProjection(this.scene);this.planetLandscape=new PlanetLandscape(this.scene,this.mobile);
+      this.environment.group.visible=false;this.land.visible=false;this.sky.setVisible(false);
+      this.renderer.setClearColor(0x000000,0);this.scene.fog=null;this.scene.background=null;
+      this.camera.near=PLANET_CAMERA_NEAR;this.camera.far=1800;this.camera.updateProjectionMatrix();
+    }
+    this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);this.resize();
   }
   resize(){const w=innerWidth,h=innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
   setPixelRatio(r:number){this.renderer.setPixelRatio(r);this.resize();}
@@ -357,6 +374,7 @@ export class TownScene {
       layer.visible=!this.gameMode;this.land.add(layer);this.treeLayers.push(layer);
     }
     if(!this.gameMode)this.treeObstacles.push(...this.allTreeObstacles);
+    const dressingStart=this.land.children.length;
     const stones:{x:number;z:number;s:number}[]=[],shrubs:{x:number;z:number;s:number}[]=[];
     for(let i=0;i<(this.gameMode?(this.mobile?45:85):(this.mobile?250:480));i++){
       const angle=(hash(i*293)%6283)/1000,r=8+(hash(i*719+3)%570)/10,x=Math.cos(angle)*r,z=Math.sin(angle)*r;
@@ -378,12 +396,16 @@ export class TownScene {
       return {x,y:terrainHeight(x,z),z};
     });
     if(!this.gameMode)placeLanterns(this.land,lamps,this.mobile);
+    if(this.planetMode)for(const child of this.land.children.slice(dressingStart)){
+      this.planetDressing.push(child);child.visible=false;
+    }
   }
 
   private setGroveLevel(level:number){
     if(!this.gameMode||this.groveLevel===level)return;
     this.groveLevel=level;
     this.environment.setGroveLevel(level);
+    this.planetDressing.forEach(object=>object.visible=level>0);
     this.treeLayers.forEach((layer,index)=>layer.visible=level>index);
     this.treeObstacles.splice(0,this.treeObstacles.length,...this.allTreeObstacles.filter(tree=>tree.tier<level));
     this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);
@@ -408,7 +430,7 @@ export class TownScene {
     };
     for(const p of plots){
       if(p.stage===0)continue;
-      const g=building(p,this.gameMode);
+      const g=building(p,this.gameMode,this.planetMode);
       // Small household clusters use the existing occupied footprint and keep
       // the central entrance clear. They share the same batched material pool.
       if(p.kind==='home'&&p.stage>=4){
@@ -420,7 +442,7 @@ export class TownScene {
       const bounds=new THREE.Box3().setFromObject(g),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
       contacts.push({x:center.x,z:center.z,width:size.x+2,depth:size.z+2});
       collect(g);
-      if(p.project)this.pickBoxes.set(p.project,projectPickBox(p));
+      if(p.project)this.pickBoxes.set(p.project,projectPickBox(p,this.planetMode));
     }
     const complexes=new Map<string,PlotState[]>();
     for(const p of plots)if(p.complexId){const group=complexes.get(p.complexId)??[];group.push(p);complexes.set(p.complexId,group);}
@@ -470,9 +492,16 @@ export class TownScene {
     const roadSurface=new TerrainSurface(this.mobile,streamOpen?terrainHeight:naturalTerrainHeight);
     let ribbonLayer=0;
     // Terrain-aligned ribbons share exactly the same plane at junctions.
-    // A millimetre between layers avoids flickering overlapping road faces.
-    const ribbon=(points:Parameters<typeof pathRibbon>[0],width:number)=>
-      pathRibbon(points,width,this.mobile,roadSurface).translate(0,ribbonLayer++*.001,0);
+    // Planet views need wider layer separation because roads are viewed from much farther away.
+    const ribbon=(points:Parameters<typeof pathRibbon>[0],width:number)=>{
+      const geometry=pathRibbon(points,width,this.mobile,roadSurface),layer=ribbonLayer++;
+      if(this.planetMode){
+        const position=geometry.getAttribute('position');
+        for(let i=0;i<position.count;i++)position.setY(i,planetSourceGroundHeight(position.getX(i),position.getZ(i))+.16+layer*.003);
+        geometry.computeVertexNormals();
+      }else geometry.translate(0,layer*.001,0);
+      return geometry;
+    };
     const sealed=this.gameMode&&snapshot.innerWood>0&&snapshot.wallGates===0;
     const reach=roadTier===1?INFRASTRUCTURE.road.ringRadius:sealed?INFRASTRUCTURE.wall.innerRadius-1.4:INFRASTRUCTURE.road.spokeLength;
     for(const [x,z] of [[-reach,0],[reach,0],[0,-reach],[0,reach]])
@@ -515,7 +544,7 @@ export class TownScene {
     const stone=(x:number,z:number,seed:number,width:number)=>{
       const variation=hash(seed),size=width*(.83+(variation%29)/100);
       const ground=roadSurface.sample(x,z);
-      paving.push({family:'Rock_Path',groundNormal:{x:-ground.dx,y:1,z:-ground.dz},x,y:ground.height+.075,z,sx:size,sy:.065+(variation%4)*.008,sz:size*(.76+((variation>>>5)%19)/100),rotation:((variation>>>8)%628)/100});
+      paving.push({family:'Rock_Path',groundNormal:{x:-ground.dx,y:1,z:-ground.dz},x,y:this.planetMode?planetSourceGroundHeight(x,z)+.28:ground.height+.075,z,sx:size,sy:.065+(variation%4)*.008,sz:size*(.76+((variation>>>5)%19)/100),rotation:((variation>>>8)%628)/100});
     };
     // Pale irregular slabs collect into loose courses, with visible earth joints.
     for(let axis=0;axis<2;axis++)for(const sign of [-1,1])for(let j=8;j<reach;j+=this.mobile?1.7:1.16){
@@ -742,6 +771,7 @@ export class TownScene {
     this.lastTransitionFrame=frameNow;
   }
   update(snapshot:TownSnapshot,animate=false){
+    this.planetLandscape?.update(snapshot,animate);
     if(this.gameMode){this.environment.setRiverLevel(snapshot.riverLevel??0);this.setGroveLevel(snapshot.groveLevel??0);}
     if(!animate)this.finishTransitions();
     if(!this.roadTransition)this.environment.setRoadCenterProgress(snapshot.roads>0?1:0);
@@ -768,9 +798,9 @@ export class TownScene {
             const old=previous.get(plot.id)!;
             const bounds=new THREE.Box3();
             let oldGroup:THREE.Group|undefined,newGroup:THREE.Group|undefined;
-            if(old.stage>0){oldGroup=building(old,this.gameMode);this.previousStructures.add(oldGroup);bounds.expandByObject(oldGroup);}
+            if(old.stage>0){oldGroup=building(old,this.gameMode,this.planetMode);this.previousStructures.add(oldGroup);bounds.expandByObject(oldGroup);}
             if(plot.stage>0){
-              newGroup=building(plot,this.gameMode);bounds.expandByObject(newGroup);
+              newGroup=building(plot,this.gameMode,this.planetMode);bounds.expandByObject(newGroup);
               if(isSandshipArrival(old,plot)&&!this.reducedMotion.matches){
                 this.arrivalStructures.add(newGroup);
                 this.parachuteArrival=new ParachuteArrival(newGroup,this.mobile);
@@ -786,7 +816,7 @@ export class TownScene {
               const size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
               transitionContacts.push({x:center.x,z:center.z,width:size.x+2,depth:size.z+2});
             }
-            if(plot.project)this.pickBoxes.set(plot.project,projectPickBox(plot));
+            if(plot.project)this.pickBoxes.set(plot.project,projectPickBox(plot,this.planetMode));
           }
           this.contactShadows.setBuildings([...this.structureContacts,...transitionContacts]);
           const base=transitionBounds.isEmpty()?.48:transitionBounds.min.y-.25;
@@ -868,6 +898,10 @@ export class TownScene {
     const elevation=THREE.MathUtils.degToRad(THREE.MathUtils.lerp(14+20*daylight,30,night));
     const hx=-58+Math.cos(t*Math.PI*2)*20,hz=81,horizontal=Math.hypot(hx,hz);
     this.sunDirection.set(hx/horizontal*Math.cos(elevation),Math.sin(elevation),hz/horizontal*Math.cos(elevation));
+    if(this.planetMode){
+      planetSunDirection(this.camera.quaternion,this.sunDirection);
+      this.fill.position.set(0,1,0).applyQuaternion(this.camera.quaternion);
+    }
     this.sun.shadow.intensity=1-overcast*.28;
     this.sky.update(snapshot,night,this.sunDirection,this.camera.position);
     // Fog and background use the sky's horizon, so the land melts into the sky.
@@ -900,6 +934,12 @@ export class TownScene {
    * into the outer districts without shimmering as the camera moves.
    */
   private updateShadowFrustum(){
+    if(this.planetMode){
+      const reach=PLANET_RADIUS+40,cam=this.sun.shadow.camera;
+      this.sun.target.position.set(0,0,0);this.sun.position.copy(this.sunDirection).multiplyScalar(400);
+      this.sun.target.updateMatrixWorld();cam.left=cam.bottom=-reach;cam.right=cam.top=reach;cam.near=240;cam.far=560;cam.updateProjectionMatrix();
+      this.sun.shadow.normalBias=this.mobile?.45:.25;this.sun.shadow.bias=-.0003;return;
+    }
     const camera=this.camera,shadow=this.sun.shadow;
     camera.updateMatrixWorld();
     this.lightBasis.lookAt(this.sunDirection,this.scratch.set(0,0,0),THREE.Object3D.DEFAULT_UP);
@@ -939,6 +979,8 @@ export class TownScene {
       shadow.normalBias=THREE.MathUtils.clamp(texel*.75,.03,this.mobile?.12:.07);
     }
   }
-  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.updateShadowFrustum();this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.renderer.render(this.scene,this.camera);}
-  dispose(){this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap?.dispose();this.pmrem.dispose();this.sky.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
+  render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.updateShadowFrustum();this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.planet?.sync(this.scene);
+    if(this.planetMode){this.scene.background=null;this.fill.intensity=1.5;this.sun.intensity=3.2;this.planetLandscape?.render(now);}
+    this.renderer.render(this.scene,this.camera);}
+  dispose(){this.planetLandscape?.dispose();this.planet?.dispose();this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap?.dispose();this.pmrem.dispose();this.sky.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
 }

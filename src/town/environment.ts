@@ -173,6 +173,7 @@ export class Environment {
   private readonly forestLayers:THREE.Group[]=[];
   private readonly mainWater=new THREE.Group();
   private riverLevel=0;
+  private readonly planetDressing:THREE.Object3D[]=[];
   private groveLevel=0;
   private readonly grassPaint=new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,roughness:1,metalness:0});
   private readonly wind={value:0};
@@ -193,9 +194,15 @@ export class Environment {
   private riverBankGeometry:THREE.BufferGeometry|null=null;
   private closedRiverBankIndices:number[]=[];
   private openRiverBankIndices:number[]=[];
-  constructor(scene:THREE.Scene,private mobile:boolean,private gameMode=false){
+  constructor(scene:THREE.Scene,private mobile:boolean,private gameMode=false,private barePlanet=false){
     this.mainWater.name='Main_river_and_ponds';
-    this.buildTerrain();this.buildWater();this.buildMountains();this.buildForest();this.buildGrass();this.buildFlowers();
+    this.buildTerrain();this.buildWater();this.buildMountains();
+    const landscape=new Set(this.group.children);
+    this.buildForest();this.buildGrass();this.buildFlowers();
+    if(this.barePlanet)for(const child of this.group.children){
+      if(landscape.has(child)||this.forestLayers.includes(child as THREE.Group))continue;
+      this.planetDressing.push(child);child.visible=false;
+    }
     scene.add(this.group);
   }
   landscapeHeight(x:number,z:number):number{
@@ -247,6 +254,7 @@ export class Environment {
     if(!this.gameMode||level===this.groveLevel)return;
     this.groveLevel=level;
     this.forestLayers.forEach((layer,index)=>layer.visible=level>index);
+    this.planetDressing.forEach(object=>object.visible=level>0);
     this.activeTrees.splice(0,this.activeTrees.length,...this.trees.filter((_,index)=>index%8<level));
   }
   setStreamProgress(progress:number):void{

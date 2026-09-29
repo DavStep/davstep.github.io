@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { TownScene } from './scene';
+import { PLANET_RADIUS, PLANET_SAVE_KEY, planetNormal, planetPoint, planetToTown } from './planet-layout';
 import { ChoiceWorker } from './choice-worker';
 import { terrainHeight } from './environment';
 import type { TownSnapshot } from './model';
 import { PROJECTS, PROJECT_BY_KEY, type ProjectKey } from './projects';
-import { GAME_SAVE_KEY, IDEAS, IDEA_INFO, ideaIcon, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, type Idea, type Levels } from './game';
+import { IDEAS, IDEA_INFO, ideaIcon, chooseIdea, evaluate, newGameSave, parseGameSave, restartGame, type Idea, type Levels } from './game';
 import { JOINT_PROJECTS } from './action-rules';
 import { snapshotForGame } from './game-snapshot';
 import { MAX_LEVEL } from './milestones';
@@ -16,7 +17,6 @@ import { GameScenery } from './game-scenery';
 import { buildColliders, isBlocked } from './collision';
 import { landscapeColliders } from './landscape-state';
 import { IDEA_COLORS } from './idea-colors';
-import { boundedOrbitDistance, orbitFieldOfView } from './camera-bounds';
 import { upgradeFocus } from './upgrade-focus';
 import { Juice } from './juice';
 import { Sfx } from './sfx';
@@ -31,6 +31,7 @@ import './glass.css';
 import './panel-rail.css';
 import './story-flow.css';
 import './motion.css';
+import './planet-background.css';
 import { EASE, burst, confetti, installMotionTokens, magnetic, play, pointerLight, reducedMotion, retrigger, rise, stagger, tweenText } from './ui-motion';
 
 const $ = <T extends HTMLElement>(selector:string) => document.querySelector(selector) as T;
@@ -59,7 +60,7 @@ if(profile&&'PerformanceObserver'in window){
     }catch{}
   }
 }
-const storageKey=GAME_SAVE_KEY+(import.meta.env.DEV&&new URLSearchParams(location.search).has('playtest')?'.playtest':'');
+const storageKey=PLANET_SAVE_KEY+(import.meta.env.DEV&&new URLSearchParams(location.search).has('playtest')?'.playtest':'');
 const gameSave=(()=>{try{return parseGameSave(localStorage.getItem(storageKey));}catch{return newGameSave();}})();
 let gameState=evaluate(gameSave.order);
 let shownLevels:Levels={...gameState.levels};
@@ -70,9 +71,9 @@ let snapshot:TownSnapshot=snapshotForGame(shownLevels,0,shownProjects.has('road-
 let town:TownScene|null=null,worker:ChoiceWorker|null=null,scenery:GameScenery|null=null,reactions:ReactionEffects|null=null,juice:Juice|null=null;
 const sfx=new Sfx();
 let target=new THREE.Vector3(0,terrainHeight(0,0)*.55,0),desiredTarget=target.clone();
-// Start close so the first buildings read; pull back as the valley fills.
-const townOverviewDistance=(levels:Levels)=>112+Math.min(48,Object.values(levels).filter(level=>level>0).length*4.8);
-let azimuth=.72,elevation=Math.max(...Object.values(shownLevels))>3?.38:1.05,distance=townOverviewDistance(shownLevels),desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
+// Frame the complete globe above the existing decision dock.
+const townOverviewDistance=(_levels:Levels)=>Math.max(185,125/(innerWidth/innerHeight));
+let azimuth=.72,elevation=.9,distance=townOverviewDistance(shownLevels),desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
 let manualOrbit=false,manualZoom=false;
 const pointers=new Map<number,{x:number;y:number}>();
 let pointerStart:{x:number;y:number}|null=null,lastPointer:{x:number;y:number}|null=null,pinchDistance=0,dragged=false;
@@ -117,7 +118,7 @@ function openPanel(id:string,updateHistory=true){
   document.body.classList.add('panel-open');
   if(valid.startsWith('project-')){
     const p=snapshot.plots.find(q=>q.project===valid.slice(8));
-    if(p&&town){desiredTarget.set(p.x,terrainHeight(p.x,p.z),p.z);desiredDistance=Math.min(desiredDistance,88);setIntroHidden(true);}
+    if(p&&town){desiredTarget.set(p.x,terrainHeight(p.x,p.z),p.z);desiredDistance=townOverviewDistance(shownLevels)*.92;setIntroHidden(true);}
   }
   if(updateHistory)history.pushState({panel:valid},'',`#${valid}`);
   panelBody.querySelectorAll<HTMLButtonElement>('[data-project-link]').forEach(button=>button.addEventListener('click',()=>openPanel(`project-${button.dataset.projectLink}`)));
@@ -176,7 +177,7 @@ function updateFloats(now:number){
   for(let i=floats.length-1;i>=0;i--){
     const f=floats[i];
     if(now-f.born>1900){f.el.remove();floats.splice(i,1);continue;}
-    projected.copy(f.pos).project(town.camera);
+    projected.copy(planetPoint(f.pos.x,f.pos.y,f.pos.z)).project(town.camera);
     const visible=projected.z<1;
     f.el.style.transform=`translate(${((projected.x+1)/2*innerWidth).toFixed(1)}px,${((1-projected.y)/2*innerHeight).toFixed(1)}px)`;
     f.el.style.visibility=visible?'visible':'hidden';
@@ -206,9 +207,9 @@ function recenter(resetControls=true){
   desiredTarget.set(0,terrainHeight(0,0)*.55,0);
   if(resetControls){manualOrbit=false;manualZoom=false;}
   if(!manualZoom)desiredDistance=townOverviewDistance(shownLevels);
-  if(!manualOrbit){desiredAzimuth=.72;desiredElevation=Math.max(...Object.values(shownLevels))>3?.38:1.05;}
+  if(!manualOrbit){desiredAzimuth=.72;desiredElevation=.9;}
 }
-function zoom(delta:number){manualZoom=true;desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,38,220);}
+function zoom(delta:number){manualZoom=true;desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,38,420);}
 const gameHud=$<HTMLElement>('#game-hud');
 const gameCards=$<HTMLDivElement>('#game-cards');
 const gameProgress=$<HTMLDivElement>('#game-progress');
@@ -404,8 +405,8 @@ async function playChoice(idea:Idea){
       const sandship=event.idea==='workshop'&&arrival;
       if(town){
         desiredTarget.set(focus.x,town.environment.landscapeHeight(focus.x,focus.z)+(sandship?8:3),focus.z);
-        if(!manualZoom)desiredDistance=event.idea==='river'?108:event.idea==='walls'||event.idea==='grove'?102:event.idea==='roads'||event.idea==='settlers'?94:event.level>=4?68:76;
-        if(!manualOrbit){desiredElevation=.92;desiredAzimuth=Math.atan2(-focus.z,-focus.x)+.4;}
+        if(!manualZoom)desiredDistance=townOverviewDistance(shownLevels)*.92;
+        if(!manualOrbit){desiredElevation=.25;desiredAzimuth=Math.atan2(-focus.z,-focus.x)+.4;}
       }
       const project=JOINT_PROJECTS.find(item=>item.id===event.project);
       eventMessage=project?`${IDEA_INFO[event.idea].name} · ${project.name}`:eventTitle(event);
@@ -489,7 +490,7 @@ gameSkip.addEventListener('click',skipAnimation);
 function orbit(dx:number,dy=0){
   manualOrbit=true;
   desiredAzimuth+=dx;
-  desiredElevation=THREE.MathUtils.clamp(desiredElevation+dy,.38,1.42);
+  desiredElevation=THREE.MathUtils.clamp(desiredElevation+dy,.06,Math.PI-.06);
 }
 $('#camera-left').addEventListener('click',()=>orbit(-.32));
 $('#camera-right').addEventListener('click',()=>orbit(.32));
@@ -529,10 +530,17 @@ function endPointer(event:PointerEvent){
     if(event.type==='pointerup'&&!dragged&&town&&!activePanel){
       const ndc=new THREE.Vector2(event.clientX/innerWidth*2-1,1-event.clientY/innerHeight*2);
       const ray=new THREE.Raycaster();ray.setFromCamera(ndc,town.camera);
-      let picked:ProjectKey|null=null,near=Infinity;
-      for(const [key,box] of town.pickBoxes){
-        const hit=ray.ray.intersectBox(box,new THREE.Vector3());
-        if(hit){const d=hit.distanceTo(town.camera.position);if(d<near){picked=key;near=d;}}
+      let picked:ProjectKey|null=null;
+      // March through the curved surface in world space, then test the original
+      // project bounds in their unchanged town coordinates. Rear landmarks are
+      // rejected by the globe's surface before they can be selected.
+      const point=new THREE.Vector3();
+      for(let distance=town.camera.near;distance<town.camera.far;distance+=.6){
+        ray.ray.at(distance,point);
+        const flat=planetToTown(point);
+        if(flat.y<terrainHeight(flat.x,flat.z)-.2)break;
+        for(const [key,box] of town.pickBoxes)if(box.containsPoint(flat)){picked=key;break;}
+        if(picked)break;
       }
       if(picked)openPanel(`project-${picked}`);
     }
@@ -563,17 +571,17 @@ function stepCamera(dt:number){
   const view=town.camera.view;
   if(!view||Math.abs(view.offsetY-uiOffset)>.2||view.fullWidth!==innerWidth||view.fullHeight!==innerHeight)
     town.camera.setViewOffset(innerWidth,innerHeight,0,uiOffset,innerWidth,innerHeight);
-  const cameraDistance=boundedOrbitDistance(target.x,target.z,azimuth,elevation,distance);
-  const fov=orbitFieldOfView(distance,cameraDistance);
-  if(Math.abs(town.camera.fov-fov)>.001){town.camera.fov=fov;town.camera.updateProjectionMatrix();}
-  const horizontal=Math.sin(elevation)*cameraDistance;
-  town.camera.position.set(target.x+Math.cos(azimuth)*horizontal,target.y+Math.cos(elevation)*cameraDistance,target.z+Math.sin(azimuth)*horizontal);
+  const cameraDistance=PLANET_RADIUS+distance*2;
+  const horizontal=Math.sin(elevation);
+  const orientation=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),planetNormal(target.x,target.z));
+  town.camera.position.set(Math.cos(azimuth)*horizontal,Math.cos(elevation),Math.sin(azimuth)*horizontal).applyQuaternion(orientation).multiplyScalar(cameraDistance);
+  const look=planetPoint(target.x,target.y,target.z).multiplyScalar(.15);
   if(profile){document.body.dataset.cameraAzimuth=azimuth.toFixed(3);document.body.dataset.cameraDistance=distance.toFixed(1);document.body.dataset.cameraTarget=`${target.x.toFixed(1)},${target.z.toFixed(1)}`;}
   if(juice&&juice.shake>0&&!reduced.matches){
     juice.shakeOffset(performance.now()/1000,shakeOffset);
     town.camera.position.add(shakeOffset);
-    town.camera.lookAt(shakeLook.copy(target).addScaledVector(shakeOffset,.4));
-  }else town.camera.lookAt(target);
+    town.camera.lookAt(shakeLook.copy(look).addScaledVector(shakeOffset,.4));
+  }else town.camera.lookAt(look);
 }
 function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!town)return;const cap=town.mobile?30:60;if(now-lastFrame<1000/cap-1)return;const elapsed=lastFrame?now-lastFrame:1000/cap;lastFrame=now;
   snapshot.elapsed=now-sessionStart;
@@ -583,12 +591,12 @@ function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!tow
 }
 try{
   if(import.meta.env.DEV&&new URLSearchParams(location.search).has('fallback'))throw new Error('Development WebGL fallback preview');
-  town=new TownScene(canvas,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1:1.5);town.setPixelRatio(pixelRatio);worker=new ChoiceWorker(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment);juice=new Juice(town.scene,town.mobile);reactions=new ReactionEffects(town.scene,juice);
+  town=new TownScene(canvas,true,true);pixelRatio=Math.min(devicePixelRatio,town.mobile?1.5:2);town.setPixelRatio(pixelRatio);worker=new ChoiceWorker(town.scene);scenery=new GameScenery(town.scene,town.mobile,town.environment,true);juice=new Juice(town.scene,town.mobile);reactions=new ReactionEffects(town.scene,juice);
   town.onBuildImpact=onBuildImpact;town.onBuildPuff=(x,y,z,size)=>juice?.puff(x,y,z,size,10);
   worker.hooks={strike:(x,y,z)=>{juice?.strike(x,y,z);sfx.tok();},pop:(x,y,z,appearing)=>{juice?.puff(x,y-.8,z,.9,7);sfx.pop(appearing?1.15:.8);},cheer:()=>sfx.cheer()};
   reactions.onArrive=()=>sfx.pop(1.6);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
   if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,gameSave,gameState:()=>gameState,snapshot:()=>snapshot}});
-  window.addEventListener('resize',()=>{town?.resize();});
+  window.addEventListener('resize',()=>{town?.resize();if(!manualZoom)desiredDistance=townOverviewDistance(shownLevels);});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();fallback.hidden=false;document.body.classList.add('no-webgl');});
 canvas.addEventListener('webglcontextrestored',()=>location.reload());

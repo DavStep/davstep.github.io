@@ -39,6 +39,7 @@ export class TownSky {
     this.mesh=new THREE.Mesh(new THREE.SphereGeometry(440,20,12),material);
     this.mesh.renderOrder=-100;this.mesh.frustumCulled=false;scene.add(this.mesh);
   }
+  setVisible(visible:boolean){this.mesh.visible=visible;}
   /** Current linear horizon colour (after weather, season and night). */
   get horizonColor():THREE.Color{return this.horizon.value;}
   /** Current linear zenith colour (after weather, season and night). */

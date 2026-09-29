@@ -24,7 +24,7 @@ export const IDEA_INFO: Record<Idea, { name: string; icon: string; place: string
   market: { name: 'Market', icon: ideaIcon('market', 8), place: 'Idle Outpost market', hint: 'Trade grows with residents, roads, walls, the mill, archive and tower.' },
   windmill: { name: 'Windmill', icon: ideaIcon('windmill', 8), place: 'River Mill', hint: 'The mill needs partners for timber, gears, trade, water and seasons.' },
   archive: { name: 'Archive', icon: ideaIcon('archive', 8), place: 'Grand Archive', hint: 'Records connect residents, messengers, trade, waterways and stars.' },
-  river: { name: 'River', icon: ideaIcon('river', 8), place: 'Waterworks', hint: 'Water can help homes, gardens, machinery, roads, the mill and maps.' },
+  river: { name: 'Water', icon: ideaIcon('river', 8), place: 'Waterworks', hint: 'Fill the dry basins with water. Water helps homes, gardens, machinery, roads, the mill and maps.' },
   observatory: { name: 'Observatory', icon: ideaIcon('observatory', 8), place: 'Star Tower', hint: 'The tower grows with instruments, walls, trade, seasons, plans and waterways.' },
 };
 

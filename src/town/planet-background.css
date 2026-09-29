@@ -1,0 +1,9 @@
+/* Only the world backdrop changes; all existing UI styles stay intact. */
+.app{background:radial-gradient(ellipse at 52% 42%,#8065a5 0%,#634885 40%,#39264f 78%,#281d3c 100%)}
+.world-poster{background:transparent}
+.world-poster .poster-hill,.world-poster .poster-castle{display:none}
+.app::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.14;background-image:radial-gradient(#eddbff .7px,transparent .7px);background-size:7px 7px;mask-image:linear-gradient(transparent,#000)}
+
+/* Retain the original light UI surfaces against the darker world backdrop. */
+.brand,.chrome nav,.game-hud-head{background-color:rgba(250,248,239,.83)}
+.game-card{background-color:rgba(247,247,237,.42)}

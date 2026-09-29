@@ -116,7 +116,7 @@ export class GameScenery {
   private beat: { started: number; failed: boolean; kind: 'arrival' | 'upgrade' | 'max'; x: number; y: number; z: number } | null = null;
   private reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-  constructor(scene: THREE.Scene, mobile: boolean,private readonly environment:Environment) {
+  constructor(scene: THREE.Scene, mobile: boolean,private readonly environment:Environment,private readonly planetMode=false) {
     this.hillside = new Hillside(this.group, mobile);
     this.moat = new CastleMoat(this.group,mobile,environment);
     this.frontier = new FrontierWorld(this.group,mobile,environment,true);
@@ -285,6 +285,10 @@ export class GameScenery {
 
   endBeat(): void { this.beat = null; this.celebration.visible = false; }
 
+  private hideOldLandscape(){
+    if(!this.planetMode)return;
+    for(const object of [this.hillside.group,this.moat.group,this.frontier.group,this.riverWorks.group,this.riverWorks.markers,this.water,this.riverBed,this.pool,this.bridges,this.grove,this.blossoms])object.visible=false;
+  }
   update(seconds: number, dt: number): void {
     const immediate = this.reduced.matches;
     this.moat.update(dt,immediate);
@@ -369,7 +373,8 @@ export class GameScenery {
       bird.rotation.set(Math.PI / 2, 0, -angle);
       bird.scale.setScalar(Math.max(.001,this.birdGrowth));
     }
-  }
+    this.hideOldLandscape();
+}
 
   dispose(): void {
     this.hillside.dispose();
