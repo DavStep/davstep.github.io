@@ -10,10 +10,10 @@ import { CARDINAL_GATE_MASK } from '../src/town/wall-layout';
 import { MAT } from '../src/town/materials';
 import { INFRASTRUCTURE, PLOTS } from '../src/town/town-plan';
 
-test('choosing Market first builds Idle Outpost inside the castle walls without requiring another choice',()=>{
+test('choosing Market first builds Idle Outpost in its separate district without requiring another choice',()=>{
   const state=evaluate(['market']),snapshot=snapshotForGame(state.levels,0,state.gateMask);
   const hero=snapshot.plots.find(p=>p.id==='project-outpost')!;
-  assert.equal(state.levels.market,1);assert.ok(hero.stage>=3);assert.ok(Math.hypot(hero.x,hero.z)<INFRASTRUCTURE.wall.innerRadius);
+  assert.equal(state.levels.market,1);assert.ok(hero.stage>=3);assert.deepEqual([hero.x,hero.z],[IDEA_DISTRICTS.market.x,IDEA_DISTRICTS.market.z]);
   assert.ok(snapshot.plots.filter(p=>p.stage>0).every(p=>districtForPlot(p.id)==='market'));
   for(const mobile of [false,true])assert.ok(new THREE.Box3().setFromObject(authoredLandmarkBuilding(hero,mobile)).getSize(new THREE.Vector3()).y>3);
   assert.deepEqual(snapshot.districtConnections,[]);
@@ -41,14 +41,14 @@ test('every district grows around its fixed original site and connects only when
   assert.equal(districtConnections({...full,roads:1},CARDINAL_GATE_MASK).length,0);
 });
 
-test('all five clickable project landmarks remain separated inside the castle walls',()=>{
+test('all five clickable project landmarks occupy separate sites across the planet',()=>{
   const snapshot=snapshotForGame(evaluate(IDEAS).levels);
   const projects=snapshot.plots.filter(p=>p.kind==='project');
   assert.equal(projects.length,5);
   for(const project of projects){
-    assert.ok(Math.hypot(project.x,project.z)+6<INFRASTRUCTURE.wall.innerRadius,project.id);
+    assert.ok(Math.hypot(project.x,project.z)>60,project.id);
     for(const other of projects)if(other.id!==project.id)
-      assert.ok(Math.hypot(project.x-other.x,project.z-other.z)>12,`${project.id} overlaps ${other.id}`);
+      assert.ok(Math.hypot(project.x-other.x,project.z-other.z)>55,`${project.id} overlaps ${other.id}`);
   }
 });
 
@@ -63,4 +63,12 @@ test('district courtyards and upgrade details restore and reset without disposin
     let disposed=false;const listener=()=>{disposed=true;};MAT.stone.addEventListener('dispose',listener);
     districts.dispose();MAT.stone.removeEventListener('dispose',listener);assert.equal(disposed,false);assert.equal(parent.children.length,0);
   }
+});
+
+test('planet districts do not draw standalone road rings or arches across building approaches',()=>{
+  const districts=new DistrictScenery(new THREE.Group(),true,true),names:string[]=[];
+  districts.group.traverse(o=>names.push(o.name));
+  assert.ok(!names.includes('Local_courtyard'));
+  assert.ok(!names.includes('Grand_entrance_arch'));
+  districts.dispose();
 });

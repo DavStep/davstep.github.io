@@ -212,7 +212,17 @@ function building(plot:PlotState,gameMode=false,planetMode=false): THREE.Group {
     :plot.kind==='castle'?castleBuilding(plot,MOBILE)
     :plot.kind==='project'?authoredLandmarkBuilding(plot,MOBILE):civicBuilding(plot,MOBILE,gameMode);
   group.position.y+=terrainHeight(plot.x,plot.z)-.48;
-  if(planetMode)group.rotation.y+=planetBuildingYaw(plot);
+  if(planetMode){
+    group.rotation.y+=planetBuildingYaw(plot);
+    // Authored buildings share one foundation height; do not subtract a
+    // different legacy hillside height from each corner of the same model.
+    group.traverse(o=>{if(o instanceof THREE.Mesh){
+      o.geometry=o.geometry.clone();
+      const count=o.geometry.getAttribute('position').count,anchor=new Float32Array(count*2);
+      for(let i=0;i<count;i++){anchor[i*2]=group.position.y;anchor[i*2+1]=1;}
+      o.geometry.setAttribute('planetAnchor',new THREE.BufferAttribute(anchor,2));
+    }});
+  }
   return group;
 }
 function projectPickBox(plot:PlotState,planetMode=false):THREE.Box3{
@@ -339,6 +349,8 @@ export class TownScene {
     }
     this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);this.resize();
   }
+  get planetCropClearance(){return this.planetLandscape?.cropClearance;}
+  get planetRoadClearance(){return this.planetLandscape?.roadClearance;}
   resize(){const w=innerWidth,h=innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
   setPixelRatio(r:number){this.renderer.setPixelRatio(r);this.resize();}
   private createLand(){
@@ -422,7 +434,8 @@ export class TownScene {
       g.traverse(o=>{if(!(o instanceof THREE.Mesh))return;
         let geometry=o.geometry.clone();
         if(geometry.index){const plain=geometry.toNonIndexed();geometry.dispose();geometry=plain;}
-        for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal'&&!(name==='color'&&o.material===MAT.roofTiles))geometry.deleteAttribute(name);
+        for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal'&&name!=='planetAnchor'&&!(name==='color'&&o.material===MAT.roofTiles))geometry.deleteAttribute(name);
+        if(this.planetMode&&!geometry.hasAttribute('planetAnchor'))geometry.setAttribute('planetAnchor',new THREE.BufferAttribute(new Float32Array(geometry.getAttribute('position').count*2),2));
         geometry.applyMatrix4(o.matrixWorld);
         const bucket=buckets.get(o.material as Mat)??[];bucket.push(geometry);buckets.set(o.material as Mat,bucket);
         if(!reusableGeometries.has(o.geometry))o.geometry.dispose();
@@ -485,6 +498,7 @@ export class TownScene {
   }
   private buildRoads(snapshot:TownSnapshot){
     this.clear(this.roads);
+    if(this.planetMode)return;
     const roadTier=this.gameMode?snapshot.roads===0?0:snapshot.roads<20?1:snapshot.roads<INFRASTRUCTURE.road.ringSegments?2:3:3;
     if(roadTier===0)return;
     const dirt:THREE.BufferGeometry[]=[];
@@ -579,6 +593,7 @@ export class TownScene {
   }
   private buildWalls(snapshot:TownSnapshot){
     this.clear(this.walls);
+    if(this.planetMode)return;
     const streamOpen=this.gameMode&&(snapshot.riverLevel??0)>=2;
     const flooded=(x:number,z:number)=>isWater(x,z,1.4)||(streamOpen&&(millStreamDistance(x,z)<4.1||Math.hypot(x-MILL_POOL.x,z-MILL_POOL.z)<MILL_POOL.radius+.6));
     const lists:{radius:number;wood:number;stone:number}[]=[{radius:INFRASTRUCTURE.wall.innerRadius,wood:snapshot.innerWood,stone:snapshot.innerStone},{radius:INFRASTRUCTURE.wall.outerRadius,wood:snapshot.outerWood,stone:0}];
@@ -721,7 +736,8 @@ export class TownScene {
     if(!this.wallTransition)return;
     const snapshot=this.wallTransition.snapshot;
     this.wallEffects?.dispose();this.wallEffects=null;
-    this.clear(this.walls);this.wallMaterials.forEach(material=>material.dispose());this.wallMaterials=[];
+    this.clear(this.walls);
+    if(this.planetMode)return;this.wallMaterials.forEach(material=>material.dispose());this.wallMaterials=[];
     this.previousWallMaterials.forEach(material=>material.dispose());this.previousWallMaterials=[];
     this.clear(this.previousWalls);this.wallTransition=null;this.buildWalls(snapshot);
   }

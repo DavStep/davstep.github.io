@@ -28,7 +28,7 @@ export function pathRibbon(points: PathPoint[], width: number, mobile=false, sur
       for(let ix=minX;ix<=maxX;ix++)for(let iz=minZ;iz<=maxZ;iz++)for(const ground of surface.triangles(ix,iz)){
         const polygon=clipToGroundTriangle(triangle,ground);
         for(let j=1;j<polygon.length-1;j++){
-          const tri=[polygon[0],polygon[j],polygon[j+1]];
+          const tri=[polygon[0],polygon[j],polygon[j+1]].map(p=>({x:Math.fround(p.x),z:Math.fround(p.z)}));
           const [a,b,c]=tri;
           const area=(b.z-a.z)*(c.x-a.x)-(b.x-a.x)*(c.z-a.z);
           if(area<1e-9)continue;

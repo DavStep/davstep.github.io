@@ -26,7 +26,7 @@ for(const lod of [0,1])for(const family of ['bird','deer','sheep','boat']){
 }
 export const LIVING_WORLD_SHARED_GEOMETRIES=new Set([...source.values()].flatMap(parts=>parts.map(p=>p.geometry)));
 export const LIVING_WORLD_SHARED_MATERIALS=new Set(Object.values(paints));
-function animal(family:Family,mobile:boolean):Animal {
+export function createLivingAnimal(family:Family,mobile:boolean):Animal {
   const root=new THREE.Group(),parts=new Map<string,THREE.Group>();root.name=family;root.visible=false;
   for(const part of source.get(`${family}:${mobile?1:0}`)!){
     let group=parts.get(part.role);
@@ -70,7 +70,7 @@ export class LivingWorld {
   constructor(parent:THREE.Group,mobile:boolean){
     this.mobile=mobile;this.group.name='Living_world';this.ownedGeometries.add(this.boxGeometry);
     for(const [family,list,count] of [['bird',this.birds,mobile?6:10],['deer',this.deer,mobile?2:4],['sheep',this.sheep,mobile?4:7],['boat',this.ships,2]] as const){
-      for(let i=0;i<count;i++){const model=animal(family,mobile);model.root.name=`${family}_${i}`;this.group.add(model.root);list.push(model);}
+      for(let i=0;i<count;i++){const model=createLivingAnimal(family,mobile);model.root.name=`${family}_${i}`;this.group.add(model.root);list.push(model);}
     }
     for(const [group,name] of [[this.landing,'port_landing'],[this.cargo,'port_cargo'],[this.crane,'port_crane'],[this.loading,'port_loading']] as const){group.name=name;group.visible=false;this.group.add(group);}
     const z=this.riverZ+2.85,y=this.dockY;

@@ -3,6 +3,9 @@ import { PLANET_RADIUS, PLANET_GROUND_SIZE, planetSourceGroundData } from './pla
 import { createPlanetHeightTexture } from './planet-geography';
 
 const projectionGLSL=`
+#ifdef PLANET_VERTEX
+attribute vec2 planetAnchor;
+#endif
 uniform sampler2D planetHeights;
 uniform sampler2D planetGround;
 float globeHeight(vec3 n){
@@ -18,6 +21,9 @@ vec3 planetPosition(vec3 p) {
   float scale=1.0/(1.0+dot(p.xz,p.xz)/${(4*PLANET_RADIUS*PLANET_RADIUS).toFixed(1)});
   vec3 n=planetNormal(p.xz);
   float ground=texture2D(planetGround,p.xz/512.0+.5).r;
+  #ifdef PLANET_VERTEX
+    ground=mix(ground,planetAnchor.x,planetAnchor.y);
+  #endif
   return n*(${PLANET_RADIUS.toFixed(1)}+globeHeight(n)+(p.y-ground)*scale);
 }
 mat3 planetBasis(vec2 p) {
@@ -52,7 +58,7 @@ export class PlanetProjection {
     material.onBeforeCompile=(shader,renderer)=>{
       compile.call(material,shader,renderer);
       shader.uniforms.planetHeights={value:this.heights};shader.uniforms.planetGround={value:this.ground};
-      shader.vertexShader=projectionGLSL+'\nvarying vec3 vPlanetSource;\n'+shader.vertexShader;
+      shader.vertexShader='#define PLANET_VERTEX\n'+projectionGLSL+'\nvarying vec3 vPlanetSource;\n'+shader.vertexShader;
       // Compute the flat world position after the existing instance animation.
       shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>',`
         vec4 planetSource=vec4(transformed,1.0);

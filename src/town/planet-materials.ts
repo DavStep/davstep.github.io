@@ -13,14 +13,14 @@ vec3 planetLinear(vec3 c){return pow(c,vec3(2.2));}
 
 export function createPlanetTerrainMaterial(){
   const material=new THREE.MeshStandardMaterial({roughness:.94});
-  const water={value:0},lush={value:0};
-  material.userData.water=water;material.userData.lush=lush;
+  const water={value:0},lush={value:0},groveOrigin={value:new THREE.Vector3(0,1,0)},groveReach={value:0};
+  material.userData.water=water;material.userData.lush=lush;material.userData.groveOrigin=groveOrigin;material.userData.groveReach=groveReach;
   material.onBeforeCompile=shader=>{
-    shader.uniforms.terrainWater=water;shader.uniforms.terrainLush=lush;
+    shader.uniforms.terrainWater=water;shader.uniforms.terrainLush=lush;shader.uniforms.groveOrigin=groveOrigin;shader.uniforms.groveReach=groveReach;
     shader.vertexShader='varying vec3 terrainPosition; varying vec3 terrainNormal;\n'+shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
       terrainPosition=position;terrainNormal=normal;
     `);
-    shader.fragmentShader=detailGLSL+'varying vec3 terrainPosition; varying vec3 terrainNormal; uniform float terrainWater; uniform float terrainLush;\n'+shader.fragmentShader;
+    shader.fragmentShader=detailGLSL+'varying vec3 terrainPosition; varying vec3 terrainNormal; uniform float terrainWater; uniform float terrainLush; uniform vec3 groveOrigin; uniform float groveReach;\n'+shader.fragmentShader;
     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
       vec3 radial=normalize(terrainPosition);
       float altitude=length(terrainPosition)-85.;
@@ -32,7 +32,9 @@ export function createPlanetTerrainMaterial(){
       vec3 grass=mix(vec3(.29,.51,.29),vec3(.43,.62,.35),smoothstep(.18,.82,broad));
       grass=mix(grass,vec3(.50,.65,.33),smoothstep(.62,.82,patches)*.16);
       grass*=.985+grain*.03;
-      grass=mix(grass*.92,grass,terrainLush);
+      float groveDistance=acos(clamp(dot(radial,groveOrigin),-1.,1.))*85.;
+      float fertility=terrainLush*(1.-smoothstep(groveReach*.8,groveReach+3.,groveDistance));
+      grass=mix(grass*.92,grass,fertility);
       float stone=smoothstep(.09,.3,slope)*smoothstep(.6,2.,altitude);
       stone=max(stone,smoothstep(5.,10.,altitude)*.78);
       // Warm exposed strata and cool recesses make cliffs legible at globe scale.

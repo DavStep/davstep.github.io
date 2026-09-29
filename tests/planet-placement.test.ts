@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { planetBuildingYaw, planetSunDirection, planetRoadRadius, PLANET_CAMERA_NEAR } from '../src/town/planet-placement';
+import { planetBuildingYaw, planetSunDirection, PLANET_CAMERA_NEAR } from '../src/town/planet-placement';
 import { snapshotForGame } from '../src/town/game-snapshot';
 import { evaluate } from '../src/town/game';
 import { accessPathFor } from '../src/town/town-plan';
@@ -28,14 +28,8 @@ test('turning the globe moves light over its surface while keeping the sun fixed
   assert.ok(a.applyQuaternion(first.clone().invert()).distanceTo(b.applyQuaternion(second.clone().invert()))<1e-10);
 });
 
-test('road surfaces and crossings remain separated beyond the worst-case depth precision',()=>{
+test('the planet camera retains enough depth precision for separated terrain details',()=>{
   const far=1800,distance=1020;
   const depthStep=distance*distance*(far-PLANET_CAMERA_NEAR)/(far*PLANET_CAMERA_NEAR*(2**24-1));
   assert.ok(depthStep<.007);
-  for(const height of [-8,0,3,18]){
-    const roads=[0,1,2].map(ring=>planetRoadRadius(85,height,ring));
-    assert.ok(roads[0]-(85+height)>.25);
-    assert.ok(roads[1]-roads[0]>depthStep*20);
-    assert.ok(roads[2]-roads[1]>depthStep*20);
-  }
 });

@@ -11,7 +11,7 @@ export class DistrictScenery {
   readonly group=new THREE.Group();
   private sites:{idea:DistrictIdea;level:number;group:THREE.Group;growth:number}[]=[];
   private owned=new Set<THREE.BufferGeometry>();
-  constructor(parent:THREE.Group,mobile:boolean){
+  constructor(parent:THREE.Group,mobile:boolean,planetMode=false){
     this.group.name='Persistent_idea_districts';parent.add(this.group);
     const surface=new TerrainSurface(mobile,naturalTerrainHeight);
     const box=new THREE.BoxGeometry(1,1,1);this.owned.add(box);
@@ -22,7 +22,18 @@ export class DistrictScenery {
         const block=(name:string,x:number,z:number,w:number,h:number,d:number,mat:THREE.Material,lift=0)=>{
           const m=new THREE.Mesh(box,mat);m.name=name;m.position.set(x,surface.sample(x,z).height+h/2+lift,z);m.scale.set(w,h,d);m.castShadow=true;m.receiveShadow=true;g.add(m);
         };
-        if(level===1){
+        if(planetMode){
+          // Keep furnishings in two side strips, leaving the facade approach open.
+          if(level===2)for(const side of [-1,1]){
+            block('Entrance_signpost',site.x+side*6.2,site.z,.25,3,.25,MAT.woodDark);
+            block('District_banner',site.x+side*6.2,site.z,1.2,1.1,.1,idea==='market'?MAT.gold:MAT.blue,1.6);
+          }
+          if(level===3)for(const side of [-1,1])for(const z of [-3.5,3.5]){
+            block('Street_lamp',site.x+side*6.2,site.z+z,.18,3.5,.18,MAT.woodDark);
+            block('Lamp_light',site.x+side*6.2,site.z+z,.5,.65,.5,MAT.gold,3.1);
+          }
+          if(level>=4){const i=level-4;block(idea==='market'?'Trade_crates':'Supply_stores',site.x+(i%2?6.2:-6.2),site.z-2.4+Math.floor(i/2)*1.2,1,.9,1,MAT.woodLight);}
+        }else if(level===1){
           const points=ringPoints(8.8,28).map(p=>({x:p.x+site.x,z:p.z+site.z}));
           const geometry=pathRibbon(points,2.3,mobile,surface);this.owned.add(geometry);
           const path=new THREE.Mesh(geometry,MAT.path);path.name='Local_courtyard';path.receiveShadow=true;g.add(path);

@@ -33,7 +33,3 @@ export function planetSunDirection(cameraRotation:THREE.Quaternion,target=new TH
 }
 
 export const PLANET_CAMERA_NEAR=10;
-export function planetRoadRadius(radius:number,elevation:number,ring:number){
-  // Roads have real clearance; successive rings pass above each other at crossings.
-  return radius+Math.max(.7,elevation)+.28+ring*.22;
-}

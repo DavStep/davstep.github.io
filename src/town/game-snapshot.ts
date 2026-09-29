@@ -38,6 +38,7 @@ export function snapshotForGame(levels: Levels, elapsed = 0, gateMask = levels.w
   return {
     elapsed,
     riverLevel: levels.river,
+    roadLevel: levels.roads,
     groveLevel: levels.grove,
     wallLevel: levels.walls,
     districtConnections: districtConnections(levels,gateMask),

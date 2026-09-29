@@ -13,6 +13,13 @@ export function globeDirection(lat:number,lon:number){return new THREE.Vector3(M
 const levels=Object.fromEntries(IDEAS.map(idea=>[idea,8])) as Levels;
 const plots=snapshotForGame(levels).plots.filter(plot=>plot.stage>0);
 export const TOWN_SITES=plots.map(p=>surfaceNormal(p.x,p.z));
+export const MINING_SITE={x:-94,z:56};
+export const SITE_PLATFORMS=plots.map(p=>({
+  normal:surfaceNormal(p.x,p.z),
+  radius:(p.kind==='castle'?14:p.kind==='project'?9:p.kind==='home'?4.2:6)/(1+(p.x*p.x+p.z*p.z)/(4*PLANET_RADIUS*PLANET_RADIUS)),
+  height:3.4,
+}));
+SITE_PLATFORMS.push({normal:surfaceNormal(MINING_SITE.x,MINING_SITE.z),radius:4.5,height:3.4});
 export const MOUNTAIN_SITES=[[-.1,-1.6],[.45,2.6],[-.65,.2],[-.55,2.2],[.7,-2.3],[.35,.85],[-1.15,-1.6]].map(([lat,lon])=>globeDirection(lat,lon));
 // Connected ranges: overlapping asymmetric peaks share foothills and saddles.
 // Tangent coordinates avoid the pinched latitude/longitude look at the poles.
@@ -51,7 +58,18 @@ export function rawPlanetHeight(n:THREE.Vector3):number {
       +noise.noise(n.x*95+2,n.y*95,n.z*95)*.15;
     if(ridge>0)h=THREE.MathUtils.lerp(h,Math.max(h,ridge+erosion-.6),THREE.MathUtils.smoothstep(ridge,0,2));
   }
-  return h;
+  // Reserve complete footprints after mountain generation, not just centres.
+  // A continuous town shelf supports the castle and inner defenses.
+  const townDistance=Math.sqrt(Math.max(0,2*(1-n.y)))*PLANET_RADIUS;
+  h=THREE.MathUtils.lerp(h,3.4,1-THREE.MathUtils.smoothstep(townDistance,35,43));
+  let strongest=0;
+  for(const site of SITE_PLATFORMS){
+    const dot=n.dot(site.normal),outer=site.radius+5;
+    if(dot<1-outer*outer/(2*PLANET_RADIUS*PLANET_RADIUS))continue;
+    const distance=Math.sqrt(Math.max(0,2*(1-dot)))*PLANET_RADIUS;
+    strongest=Math.max(strongest,1-THREE.MathUtils.smoothstep(distance,site.radius,outer));
+  }
+  return THREE.MathUtils.lerp(h,3.4,strongest);
 }
 // Shared by rendering, construction, water and picking: no mismatched shorelines.
 const WIDTH=1536,HEIGHT=768;

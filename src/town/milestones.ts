@@ -10,8 +10,14 @@ export const MILESTONES:Record<Idea,Milestone[]>={
     ['Western hamlet','A new hamlet settles the western fields.',-128,49],['Eastern village','A village grows beside the eastern trade route.',128,8],['Southern township','A new township spreads across the southern plain.',-46,141],['Foothill settlement','Settlers build a village on the western foothills.',-128,110],['Highland citadel','A fortified highland settlement rises above the valley.',100,145],
   ]),
   grove:steps([
-    ['Saplings','Gardeners plant the first saplings.',-18,20],['Town gardens','Gardens spread and provide timber for the workshop.',-18,20],['Irrigated grove','River water brings the gardens into bloom.',-18,20],
-    ['Western forest','A broad new forest takes root west of town.',-145,10],['Eastern woodland','Pine groves spread across the eastern plain.',143,-24],['Southern orchards','Fruit trees cover the southern countryside.',5,145],['Foothill reforestation','Tree planting turns the western foothills green.',-157,65],['Mountain forest','A new forest climbs the eastern mountain slopes.',157,110],
+    ['Castle saplings','Gardeners plant three saplings beside the castle.',-10,24],
+    ['Growing grove','The original saplings grow taller and a small grove takes root.',-10,24],
+    ['Wildflower gardens','Shrubs and wildflowers bloom around the growing castle grove.',-10,24],
+    ['Woodland birds','Woodland spreads beyond town and birds settle among the trees.',-10,24],
+    ['Living forest','Forests reach nearby shores and deer find sheltered clearings.',-10,24],
+    ['Island habitats','Trees, flowers and grazing animals spread across the islands.',-10,24],
+    ['Wild continents','Dense woods and flowering meadows reach the far continents.',-10,24],
+    ['Living planet','Forests, wildflowers and wildlife flourish across the planet.',-10,24],
   ]),
   workshop:steps([
     ['First forge','A forge opens and Sandship descends into its dock.',-20,-12],['Bridge gears','Smiths supply the road builders with forged gears.',-20,-12],['Machine yard','The forge and Machine Yard begin working together.',-20,-12],
@@ -30,7 +36,7 @@ export const MILESTONES:Record<Idea,Milestone[]>={
     ['Western market','A new market square opens beside the western hamlet.',-132,73],['Eastern bazaar','A covered bazaar serves the eastern village.',136,23],['Caravan fair','A large fairground and caravan yard fill the southern plain.',43,145],['Mountain exchange','Merchants open a trading post near the mountain mine.',156,-44],['Grand harvest fair','Pavilions and packed stalls celebrate the valley harvest.',-80,142],
   ]),
   windmill:steps([
-    ['Mill foundations','A mill rises beside the dry fields.',37,-25],['Working mill','The sails turn beside the flowing channel.',37,-25],['Golden harvest','Golden wheat spreads beside the mill.',37,-25],
+    ['Mill foundations','A mill rises beside fields ready for irrigation.',37,-25],['Working mill','The sails turn beside the flowing channel.',37,-25],['Golden harvest','Golden wheat spreads beside the mill.',37,-25],
     ['Eastern wind farm','New windmills and fields expand the eastern harvest.',95,66],['Western wind farm','A second wind farm supplies the western countryside.',-135,-22],['Granary district','Tall grain stores and threshing yards fill the southern plain.',72,148],['Terraced agriculture','Stone farming terraces step up the western foothills.',-149,48],['Highland wind farm','Windmills crown the eastern mountain slopes.',178,66],
   ]),
   archive:steps([
@@ -38,7 +44,7 @@ export const MILESTONES:Record<Idea,Milestone[]>={
     ['Village school','A school and reading garden open in the western hamlet.',-113,48],['Water survey office','Surveyors establish a canal planning office in the east.',103,47],['Valley academy','An academy courtyard brings learning to the southern plain.',-19,145],['Mountain survey camp','Surveyors map a route through the western mountain.',-172,2],['Highland library','A landmark library and its courts rise on the high slopes.',122,146],
   ]),
   river:steps([
-    ['Water survey','Stakes mark the route for a new river channel.',29,-51],['Flowing channel','Workers dig the channel, then release water toward the mill.',29,-51],['Castle waterway','Workers extend the river around the castle.',-24,-55],
+    ['Fishing dock and river','The crew opens a coastal dock and a freshwater channel; settlers fish from the pier.',47,-20],['Fishing boats','Fishing boats leave the harbor while river irrigation supplies the mill fields.',47,-20],['Island shipping','A second island harbor opens and sailing ships connect the two shores.',-24,-55],
     ['Eastern river','A new river branch brings water into the eastern countryside.',113,-10],['Western river','Workers carve a second river through the western countryside.',-119,-10],['Southern waterway','A long canal carries river water across the southern plain.',40,117],['Valley reservoir','A broad reservoir fills at the foot of the eastern mountain.',122,62],['Mountain cascade','A new mountain watercourse descends in cascades toward the reservoir.',160,51],
   ]),
   observatory:steps([

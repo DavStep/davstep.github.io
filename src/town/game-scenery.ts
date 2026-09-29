@@ -15,6 +15,9 @@ import { FrontierWorld } from './frontier-world';
 import { CastleMoat } from './castle-moat';
 import wheatTile from './generated/wheat-tile.json';
 import { MOAT_WATER_Y } from './moat-layout';
+import { PlanetRivers, planetCropSite, planetCropDry, planetCropGrowth, planetCropContains, PLANET_CROP_CANDIDATES } from './planet-rivers';
+import { PlanetWheatField } from './planet-wheat-field';
+import { planetSourceGroundHeight } from './planet-layout';
 
 const hash = (n: number) => {
   let x = n | 0; x ^= x >>> 16; x = Math.imul(x, 0x7feb352d);
@@ -77,7 +80,8 @@ function channelRibbon(): THREE.BufferGeometry {
 
 interface WheatPlant { x: number; y: number; z: number; scale: number; turn: number; delay: number }
 const seedlingColor = new THREE.Color(0x82b66e);
-const harvestColor = new THREE.Color(0xe7bd5b);
+const harvestColor = new THREE.Color(0xffdf38);
+const youngPlanetWheatColor = new THREE.Color(0xe5cf58);
 
 export class GameScenery {
   readonly group = new THREE.Group();
@@ -86,8 +90,10 @@ export class GameScenery {
   private readonly frontier: FrontierWorld;
   private readonly districts: DistrictScenery;
   private readonly riverWorks: RiverWorks;
+  private readonly planetRivers?:PlanetRivers;
   private readonly water: THREE.Mesh;
   private readonly riverBed: THREE.Mesh;
+  private readonly wheatField?:PlanetWheatField;
   private readonly wheat: THREE.InstancedMesh;
   private readonly plants: WheatPlant[] = [];
   private readonly rotor: THREE.Group;
@@ -120,8 +126,9 @@ export class GameScenery {
     this.hillside = new Hillside(this.group, mobile);
     this.moat = new CastleMoat(this.group,mobile,environment);
     this.frontier = new FrontierWorld(this.group,mobile,environment,true);
-    this.districts = new DistrictScenery(this.group,mobile);
+    this.districts = new DistrictScenery(this.group,mobile,planetMode);
     this.riverWorks = new RiverWorks(this.group,mobile,millStreamPoint,naturalTerrainHeight,streamSurfaceHeight,7.6,[.22,.8]);
+    if(planetMode)this.planetRivers=new PlanetRivers(this.group,mobile);
     this.riverBed=new THREE.Mesh(channelRibbon().translate(0,-.75,0),new THREE.MeshStandardMaterial({color:0x5f5645,roughness:1,side:THREE.DoubleSide}));
     this.riverBed.geometry.setDrawRange(0,0);this.group.add(this.riverBed);
     this.water = new THREE.Mesh(channelRibbon(),environment.createRiverMaterial([3.55,streamLength()/36]));
@@ -136,14 +143,16 @@ export class GameScenery {
     combined.setAttribute('position', new THREE.Float32BufferAttribute(wheatTile.positions, 3));
     combined.setAttribute('normal', new THREE.Float32BufferAttribute(wheatTile.normals, 3));
     combined.setAttribute('color', new THREE.Float32BufferAttribute(wheatTile.colors, 3));
-    this.wheat = new THREE.InstancedMesh(combined, new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: .9 }), mobile ? 350 : 880);
+    this.wheat = new THREE.InstancedMesh(combined, new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: .9 }), planetMode?0:mobile ? 350 : 880);
+    this.wheat.name='Irrigated mill crops';
     this.wheat.frustumCulled = false;
     this.wheat.castShadow = !mobile;
     let attempt = 0;
-    while (this.plants.length < this.wheat.count && attempt < 50000) {
+    while (this.plants.length < this.wheat.count && attempt < (planetMode?PLANET_CROP_CANDIDATES:50000)) {
       const index = this.plants.length;
       let x:number,z:number;
-      if(attempt%3===2){
+      if(planetMode){({x,z}=planetCropSite(attempt));}
+      else if(attempt%3===2){
         const t=.7+random(attempt*41+7)*.29;
         const p=millStreamPoint(t),a=millStreamPoint(t-.002),b=millStreamPoint(t+.002);
         const dx=b.x-a.x,dz=b.z-a.z,length=Math.hypot(dx,dz)||1;
@@ -155,14 +164,15 @@ export class GameScenery {
         z=-42+random(attempt*31+13)*17;
       }
       attempt++;
-      if (!wheatSiteClear(x,z)) continue;
-      const y = terrainHeight(x, z);
-      this.plants.push({ x, y, z, scale: .73 + random(index * 67 + 17) * .58, turn: random(index * 23 + 19) * Math.PI * 2, delay: Math.min(.38, millStreamDistance(x, z) * .012) });
+      if (planetMode?(!planetCropContains(x,z)||!planetCropDry(x,z)):!wheatSiteClear(x,z)) continue;
+      const y = planetMode?planetSourceGroundHeight(x,z):terrainHeight(x, z);
+      this.plants.push({ x, y, z, scale: planetMode?.84:.73 + random(index * 67 + 17) * .58, turn: random(index * 23 + 19) * Math.PI * 2, delay: planetMode?(index%18)*.005:Math.min(.38, millStreamDistance(x, z) * .012) });
       this.wheat.setColorAt(index, new THREE.Color(0xb6bf6b));
     }
     this.wheat.count=this.plants.length;
     this.wheat.visible = false;
     this.group.add(this.wheat);
+    if(planetMode)this.wheatField=new PlanetWheatField(this.group);
 
     const wood = new THREE.MeshStandardMaterial({ color: 0x6c4932, roughness: .9 });
     this.rotor = millRotor(mobile);
@@ -223,6 +233,14 @@ export class GameScenery {
     scene.add(this.group);
   }
 
+  clearRoadApproaches(blocked:(point:{x:number;z:number},radius:number)=>boolean,cropClearance?: (point:{x:number;z:number},radius:number)=>boolean){
+    if(!this.planetMode)return;
+    if(cropClearance)this.wheatField?.setClearance(cropClearance);
+    this.districts.group.traverse(o=>{
+      if(o instanceof THREE.Mesh)o.visible=!blocked({x:o.position.x,z:o.position.z},Math.max(o.scale.x,o.scale.z)/2);
+    });
+  }
+
   setLevels(levels: Levels, secret = false, instant = false): void {
     this.levels = levels;
     this.hillside.setLevels(levels);
@@ -230,9 +248,10 @@ export class GameScenery {
     this.frontier.setLevels(levels,instant||this.reduced.matches);
     this.districts.setLevels(levels,instant||this.reduced.matches);
     this.waterTarget = levels.river >= 2 ? 1 : 0;
+    this.planetRivers?.setLevel(levels.river,instant||this.reduced.matches);
     this.riverWorks.setActive(levels.river>=2,instant||this.reduced.matches);
     this.riverWorks.markers.visible=levels.river===1;
-    this.wheatTarget = levels.windmill > 0 ? Math.min(1,Math.max(.08,(levels.windmill-1)/7)) : 0;
+    this.wheatTarget = this.planetMode?planetCropGrowth(levels.river,levels.windmill):levels.windmill > 0 ? Math.min(1,Math.max(.08,(levels.windmill-1)/7)) : 0;
     this.rotor.visible = levels.windmill >= 2;
     this.bridges.visible = levels.river >= 2 && levels.roads >= 2;
     this.grove.visible = levels.grove > 0;
@@ -297,8 +316,9 @@ export class GameScenery {
     this.districts.update(dt,immediate);
     const approach = (value: number, target: number, rate: number) => immediate ? target : value < target ? Math.min(target, value + dt * rate) : Math.max(target, value - dt * rate);
     this.riverWorks.update(dt,immediate);
+    this.planetRivers?.update(dt,immediate,seconds);
     this.waterFill = this.riverWorks.flowProgress;
-    const wheatReady = this.waterTarget === 0 || this.waterFill > .72;
+    const wheatReady = this.planetRivers?this.wheatTarget===0||this.planetRivers.works.flowProgress>.72:this.waterTarget === 0 || this.waterFill > .72;
     if (wheatReady) this.wheatGrowth = approach(this.wheatGrowth, this.wheatTarget, .34);
     const groveLevel=this.levels?.grove??0;
     const groveTarget = groveLevel === 1 ? .6 : groveLevel === 2 ? .85 : groveLevel >= 3 ? 1 : 0;
@@ -319,7 +339,8 @@ export class GameScenery {
     this.riverBed.visible=this.waterFill<.95;
     this.water.geometry.setDrawRange(0, waterTriangles * 6);
     this.environment.setStreamProgress(this.riverWorks.digProgress);
-    this.wheat.visible = this.wheatGrowth > .01;
+    this.wheatField?.setGrowth(this.wheatGrowth);
+    this.wheat.visible = !this.planetMode&&this.wheatGrowth > .01;
     if (this.wheat.visible) {
       for (let i = 0; i < this.plants.length; i++) {
         const plant = this.plants[i];
@@ -329,12 +350,12 @@ export class GameScenery {
         this.dummy.scale.set(plant.scale, Math.max(.01, plant.scale * wave), plant.scale);
         this.dummy.updateMatrix(); this.wheat.setMatrixAt(i, this.dummy.matrix);
         const gold = THREE.MathUtils.clamp((wave - .55) * 2.25, 0, 1);
-        this.wheat.setColorAt(i, this.plantColor.copy(seedlingColor).lerp(harvestColor, gold));
+        this.wheat.setColorAt(i, this.plantColor.copy(this.planetMode?youngPlanetWheatColor:seedlingColor).lerp(harvestColor, gold));
       }
       this.wheat.instanceMatrix.needsUpdate = true;
       if (this.wheat.instanceColor) this.wheat.instanceColor.needsUpdate = true;
     }
-    if (this.rotor.visible && !immediate && this.rotorGrowth > .9 && this.waterFill > .6) this.rotor.rotation.z -= dt * .58;
+    if (this.rotor.visible && !immediate && this.rotorGrowth > .9 && (this.planetRivers?.works.flowProgress??this.waterFill) > .6) this.rotor.rotation.z -= dt * .58;
     if (this.archivePages.visible) this.archivePages.children.forEach((page, i) => { page.position.z = -8 + (((immediate?0:seconds * 1.5) + i * 4) % 16);page.position.y = terrainHeight(page.position.x+this.archivePages.position.x,page.position.z+this.archivePages.position.z)+3 + i % 3 * .28 + (immediate?0:Math.sin(seconds * 2 + i) * .17); if(!immediate)page.rotation.set(Math.sin(seconds + i) * .14, seconds * .4 + i, .1); });
     if (this.beacon.visible) {
       this.beacon.children[0].scale.setScalar(Math.max(.001,this.beaconGrowth*(immediate?1:1+Math.sin(seconds*2)*.07)));
@@ -382,6 +403,7 @@ export class GameScenery {
     this.frontier.dispose();
     this.districts.dispose();
     this.riverWorks.dispose();
+    this.planetRivers?.dispose();
     this.group.removeFromParent();
     this.group.traverse(object => {
       if (object instanceof THREE.Mesh) {

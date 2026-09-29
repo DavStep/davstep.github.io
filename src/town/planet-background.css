@@ -7,3 +7,17 @@
 /* Retain the original light UI surfaces against the darker world backdrop. */
 .brand,.chrome nav,.game-hud-head{background-color:rgba(250,248,239,.83)}
 .game-card{background-color:rgba(247,247,237,.42)}
+
+/* Restore the original project banners, including readable names on phones. */
+.world-labels{pointer-events:none}
+.world-label[hidden]{display:none}
+.world-label{transform-origin:50% 100%;transition:background .2s,scale .45s var(--ease-spring-soft)}
+.world-label[data-state="leaving"]{pointer-events:none}
+.world-label:active{scale:.97;transition-duration:.12s}
+@media(prefers-reduced-motion:reduce){
+  .world-label{transition:background .2s}
+  .world-label:hover,.world-label:focus-visible,.world-label:active{scale:1}
+}
+@media(max-width:700px){
+  .world-label{font-size:9px;padding:4px 8px 4px 4px;border-radius:12px}
+}

@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { TownScene } from './scene';
 import { PLANET_RADIUS, PLANET_SAVE_KEY, planetNormal, planetPoint, planetToTown } from './planet-layout';
+import { planetRiverPoint } from './planet-rivers';
+import { planetTransportLayout,mixPoint } from './planet-transport-layout';
+import { PlanetCameraMove,planetEventView } from './planet-camera';
+import { planetElevation } from './planet-geography';
 import { ChoiceWorker } from './choice-worker';
 import { terrainHeight } from './environment';
 import type { TownSnapshot } from './model';
@@ -9,7 +13,7 @@ import { IDEAS, IDEA_INFO, ideaIcon, chooseIdea, evaluate, newGameSave, parseGam
 import { JOINT_PROJECTS } from './action-rules';
 import { snapshotForGame } from './game-snapshot';
 import { MAX_LEVEL } from './milestones';
-import { eventTitle, eventWaves } from './action-story';
+import { eventTitle, choiceSequence } from './action-story';
 import { ReactionEffects, eventFocus } from './reaction-effects';
 import { moatColliders } from './moat-layout';
 import { SANDSHIP_ARRIVAL_MS } from './parachute-arrival';
@@ -33,6 +37,7 @@ import './story-flow.css';
 import './motion.css';
 import './planet-background.css';
 import { EASE, burst, confetti, installMotionTokens, magnetic, play, pointerLight, reducedMotion, retrigger, rise, stagger, tweenText } from './ui-motion';
+import { ProjectLabelMotion } from './project-label-motion';
 
 const $ = <T extends HTMLElement>(selector:string) => document.querySelector(selector) as T;
 const canvas=$<HTMLCanvasElement>('#town-canvas');
@@ -75,6 +80,35 @@ let target=new THREE.Vector3(0,terrainHeight(0,0)*.55,0),desiredTarget=target.cl
 const townOverviewDistance=(_levels:Levels)=>Math.max(185,125/(innerWidth/innerHeight));
 let azimuth=.72,elevation=.9,distance=townOverviewDistance(shownLevels),desiredAzimuth=azimuth,desiredElevation=elevation,desiredDistance=distance;
 let manualOrbit=false,manualZoom=false;
+let lookScale=.15,desiredLookScale=.15;
+const cameraLook=new THREE.Vector3();
+let cameraFlight:{move:PlanetCameraMove;elapsed:number;finish:(completed:boolean)=>void}|null=null;
+function cancelCameraFlight(){const flight=cameraFlight;cameraFlight=null;flight?.finish(false);if(profile)document.body.dataset.cameraFlight='idle';}
+async function frameBuildSite(focus:{x:number;z:number},height:number,view:'planet'|'site'='site'){
+  if(!town)return;
+  cancelCameraFlight();manualOrbit=false;manualZoom=false;
+  const wide=view==='planet';
+  const destination=wide?new THREE.Vector3():planetPoint(focus.x,terrainHeight(focus.x,focus.z)+height,focus.z);
+  const normal=wide?new THREE.Vector3(0,1,0):planetNormal(focus.x,focus.z);
+  const nextDistance=wide?townOverviewDistance(shownLevels):Math.max(48,28/(innerWidth/innerHeight));
+  // Pull back along the current viewing direction instead of orbiting to one tree.
+  const direction=town.camera.position.clone().normalize();
+  const nextAzimuth=wide?Math.atan2(direction.z,direction.x):Math.atan2(-focus.z,-focus.x)+.4;
+  const nextElevation=wide?Math.acos(THREE.MathUtils.clamp(direction.y,-1,1)):.28;
+  const orientation=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),normal);
+  const end=new THREE.Vector3(Math.cos(nextAzimuth)*Math.sin(nextElevation),Math.cos(nextElevation),Math.sin(nextAzimuth)*Math.sin(nextElevation))
+    .applyQuaternion(orientation).multiplyScalar(PLANET_RADIUS+nextDistance*2);
+  const arrive=()=>{
+    target.copy(wide?desiredTarget.set(0,0,0):desiredTarget.set(focus.x,terrainHeight(focus.x,focus.z)+height,focus.z));
+    distance=desiredDistance=nextDistance;azimuth=desiredAzimuth=nextAzimuth;elevation=desiredElevation=nextElevation;
+    lookScale=desiredLookScale=wide?0:1;
+  };
+  if(reduced.matches){arrive();stepCamera(0);return;}
+  const move=new PlanetCameraMove(town.camera.position.clone(),end,cameraLook.clone(),destination);
+  const completed=await new Promise<boolean>(resolve=>{cameraFlight={move,elapsed:0,finish:resolve};});
+  // A cancelled flight must not restore its old target over a restart/skip.
+  if(completed&&animating)arrive();
+}
 const pointers=new Map<number,{x:number;y:number}>();
 let pointerStart:{x:number;y:number}|null=null,lastPointer:{x:number;y:number}|null=null,pinchDistance=0,dragged=false;
 let lastFrame=0,lastModel=0,frameSamples:number[]=[],pixelRatio=1;
@@ -204,12 +238,13 @@ function onBuildImpact(impact:BuildImpact){
 }
 
 function recenter(resetControls=true){
+  cancelCameraFlight();desiredLookScale=.15;
   desiredTarget.set(0,terrainHeight(0,0)*.55,0);
   if(resetControls){manualOrbit=false;manualZoom=false;}
   if(!manualZoom)desiredDistance=townOverviewDistance(shownLevels);
   if(!manualOrbit){desiredAzimuth=.72;desiredElevation=.9;}
 }
-function zoom(delta:number){manualZoom=true;desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,38,420);}
+function zoom(delta:number){if(cameraFlight)return;manualZoom=true;desiredDistance=THREE.MathUtils.clamp(desiredDistance+delta,38,420);}
 const gameHud=$<HTMLElement>('#game-hud');
 const gameCards=$<HTMLDivElement>('#game-cards');
 const gameProgress=$<HTMLDivElement>('#game-progress');
@@ -334,6 +369,7 @@ function refreshGameWorld(instant=false){
   snapshot=snapshotForGame(shownLevels,performance.now()-sessionStart,shownProjects.has('road-gates')?gameState.gateMask:0);
   town?.update(snapshot,!instant&&animating&&!reduced.matches);
   scenery?.setLevels(shownLevels,gameState.secret&&gameState.finished&&!animating,instant);
+  if(town?.planetRoadClearance)scenery?.clearRoadApproaches(town.planetRoadClearance,town.planetCropClearance);
   worker?.update();
 }
 function startGame(){
@@ -382,53 +418,51 @@ async function playChoice(idea:Idea){
   gameState=chooseIdea(gameSave,idea);persist();
   if(gameState.finished)for(const item of IDEAS)new Image().src=ideaIcon(item,gameState.levels[item]);
   animating=true;const token=++animationToken;
-  const waves=eventWaves(gameState);
+  const sequence=choiceSequence(gameState);
   const calm=reduced.matches||!town;
   renderGameHud();gameSkip.focus({preventScroll:true});
   try{
-    if(town){
-      const focus=eventFocus({idea,level:1});
-      const future=snapshotForGame({...shownLevels,[idea]:1},performance.now()-sessionStart,shownProjects.has('road-gates')?gameState.gateMask:0);
-      const obstacles=[...town.environment.activeTrees,...town.treeObstacles];
-      const colliders=[...buildColliders(future,obstacles),...landscapeColliders(shownLevels),...moatColliders(shownLevels)];
-      const crew=gameState.events.some(event=>event.project)?4:3;
-      worker?.startCue(idea,focus,(x,z)=>!isBlocked(x,z,colliders,1.15),reduced.matches,performance.now()/1000,crew);
-    }
     let beat=0;
-    for(const wave of waves)for(const [eventIndex,event] of wave.entries()){
+    for(const {event,arrival,projects} of sequence){
       if(token!==animationToken)return;
       const plannedLevels={...shownLevels,[event.idea]:event.level};
       const plannedProjects=new Set(shownProjects);
-      if(event.project)plannedProjects.add(event.project);
+      for(const project of projects)plannedProjects.add(project);
       const planned=snapshotForGame(plannedLevels,performance.now()-sessionStart,plannedProjects.has('road-gates')?gameState.gateMask:0);
-      const focus=upgradeFocus(event,snapshot,planned),arrival=event.level===1;
+      const crossings=event.idea==='roads'?planetTransportLayout().bridges.filter(b=>[b.level,b.level+2].some(level=>level>(snapshot.roadLevel??0)&&level<=event.level)):[];
+      const crossing=crossings.length===1?crossings[0]:undefined;
+      const focus=event.idea==='river'?(planetTransportLayout().harbors[0]?.land??planetRiverPoint(.45)):crossing?mixPoint(crossing.a,crossing.b,.5):arrival?eventFocus({idea:event.idea,level:1}):upgradeFocus(event,snapshot,planned);
       const sandship=event.idea==='workshop'&&arrival;
-      if(town){
-        desiredTarget.set(focus.x,town.environment.landscapeHeight(focus.x,focus.z)+(sandship?8:3),focus.z);
-        if(!manualZoom)desiredDistance=townOverviewDistance(shownLevels)*.92;
-        if(!manualOrbit){desiredElevation=.25;desiredAzimuth=Math.atan2(-focus.z,-focus.x)+.4;}
-      }
       const project=JOINT_PROJECTS.find(item=>item.id===event.project);
       eventMessage=project?`${IDEA_INFO[event.idea].name} · ${project.name}`:eventTitle(event);
       gameEvent.classList.toggle('collab',Boolean(project));
+      renderGameHud();
+      await frameBuildSite(focus,sandship?8:3,planetEventView(event.idea,event.level,Boolean(crossing)));
+      if(token!==animationToken)return;
+      if(town&&beat===0){
+        const obstacles=[...town.environment.activeTrees,...town.treeObstacles];
+        const colliders=[...buildColliders(planned,obstacles),...landscapeColliders(shownLevels),...moatColliders(shownLevels)];
+        const crew=gameState.events.some(event=>event.project)?4:3;
+        worker?.startCue(idea,focus,(x,z)=>planetElevation(planetNormal(x,z))>.9&&!isBlocked(x,z,colliders,1.15),reduced.matches,performance.now()/1000,crew);
+      }
       if(!calm){
         reactions?.begin(event,idea,focus);
         if(reactions?.travelTime)sfx.whoosh(.8);
       }
       renderGameHud();
-      // Each upgraded site gets its own camera beat and building reveal.
+      // Reveal only after the camera has framed the site or the whole planet.
       const travel=(reactions?.travelTime??0)*1000;
       const anticipation=calm?250:Math.max(beat===0&&arrival?1350:beat===0?1000:700,travel+120);
       await waitForScene(anticipation,token);
       if(token!==animationToken)return;
       waveImpacts=0;
       shownLevels[event.idea]=event.level;
-      if(event.project)shownProjects.add(event.project);
+      for(const project of projects)shownProjects.add(project);
       refreshGameWorld(calm);
       if(!calm){
         reactions?.reveal();
         juice?.addShake(project?.45:.2);
-        if(project&&eventIndex===0)sfx.collab();else sfx.levelUp(event.level);
+        if(project)sfx.collab();else sfx.levelUp(event.level);
         // Ideas without buildings (grove, river, roads) still get a crew cheer.
         window.setTimeout(()=>{
           if(token!==animationToken||waveImpacts>0)return;
@@ -445,7 +479,7 @@ async function playChoice(idea:Idea){
       }
       eventMessage=project?`${IDEA_INFO[event.idea].name} · ${eventTitle(event)}`:eventTitle(event);
       renderGameHud();
-      const duration=sandship?SANDSHIP_ARRIVAL_MS+150:event.idea==='river'&&event.level===2?7500:event.idea==='river'&&event.level===3?7500:event.idea==='windmill'&&event.level===3?2900:project?2200:1900;
+      const duration=sandship?SANDSHIP_ARRIVAL_MS+150:event.idea==='river'&&(arrival||event.level<=3)?7500:event.idea==='windmill'&&event.level===3?2900:project?2200:1900;
       await waitForScene(calm?450:duration,token);
       if(token!==animationToken)return;
       reactions?.clear();
@@ -488,6 +522,7 @@ restartButton.addEventListener('click',()=>{
 });
 gameSkip.addEventListener('click',skipAnimation);
 function orbit(dx:number,dy=0){
+  if(cameraFlight)return;
   manualOrbit=true;
   desiredAzimuth+=dx;
   desiredElevation=THREE.MathUtils.clamp(desiredElevation+dy,.06,Math.PI-.06);
@@ -562,20 +597,76 @@ document.addEventListener('keydown',event=>{
   else if(event.key==='Home'){event.preventDefault();recenter();}
 });
 const shakeOffset=new THREE.Vector3(),shakeLook=new THREE.Vector3();
+const projectLabels=new Map<ProjectKey,ProjectLabelMotion>();
+for(const project of PROJECTS){
+  const button=document.createElement('button');
+  button.className='world-label';button.type='button';button.hidden=true;
+  button.dataset.project=project.key;
+  button.innerHTML=`<span class="label-spark" aria-hidden="true">✦</span><span>${project.title}</span>`;
+  button.setAttribute('aria-label',`Explore ${project.title}`);
+  button.addEventListener('click',()=>openPanel(`project-${project.key}`));
+  $('#world-labels').appendChild(button);projectLabels.set(project.key,new ProjectLabelMotion(button));
+}
+const labelProjection=new THREE.Vector3(),labelView=new THREE.Vector3();
+const labelOffsets=Array.from({length:121},(_,i)=>({x:(i%11-5)*20,y:(Math.floor(i/11)-5)*16}))
+  .sort((a,b)=>(a.x*a.x+a.y*a.y)-(b.x*b.x+b.y*b.y));
+function positionProjectLabels(dt:number){
+  if(!town)return;
+  const introRect=intro.classList.contains('dismissed')?null:intro.getBoundingClientRect();
+  const placed:{left:number;right:number;top:number;bottom:number}[]=[];
+  let reveals=0;
+  for(const plot of snapshot.plots){
+    if(!plot.project)continue;
+    const motion=projectLabels.get(plot.project)!,button=motion.button;
+    const ground=planetPoint(plot.x,terrainHeight(plot.x,plot.z),plot.z);
+    // Use the building's ground normal so rear-side banners disappear with
+    // their buildings, even when their raised anchors clear the horizon.
+    const facing=labelView.copy(town.camera.position).sub(ground).dot(planetNormal(plot.x,plot.z))>(motion.visible?-2:2);
+    labelProjection.copy(planetPoint(plot.x,terrainHeight(plot.x,plot.z)+Math.max(3.5,2.6+plot.stage*.62),plot.z)).project(town.camera);
+    const x=(labelProjection.x*.5+.5)*innerWidth,y=(.5-labelProjection.y*.5)*innerHeight;
+    const behindIntro=introRect&&x>introRect.left-80&&x<introRect.right+80&&y>introRect.top-32&&y<introRect.bottom+32;
+    // A small margin keeps labels from flickering at the viewport / horizon.
+    const margin=motion.visible?8:0;
+    const visible=plot.stage>0&&!activePanel&&facing&&!behindIntro&&labelProjection.z>=-1&&labelProjection.z<=1&&x>=40-margin&&x<=innerWidth-40+margin&&y>=65-margin&&y<=innerHeight-70+margin;
+    const fresh=button.hidden;
+    if(motion.setVisible(visible,reveals*65))reveals++;
+    if(!button.hidden){
+      const width=button.offsetWidth,height=button.offsetHeight;
+      const offset=labelOffsets.find(offset=>{
+        const left=x+offset.x-width/2,top=y+offset.y-height*1.2;
+        return left>8&&left+width<innerWidth-8&&top>(innerWidth<=700?116:82)&&
+          placed.every(rect=>left>rect.right+4||left+width<rect.left-4||top>rect.bottom+4||top+height<rect.top-4);
+      })??{x:0,y:0};
+      const left=x+offset.x-width/2,top=y+offset.y-height*1.2;
+      if(visible)placed.push({left,right:left+width,top,bottom:top+height});
+      motion.position(x,y,offset,dt,fresh);
+    }
+  }
+}
 function stepCamera(dt:number){
   if(!town)return;
   const k=reduced.matches?1:1-Math.exp(-dt*8);
-  azimuth+=(desiredAzimuth-azimuth)*k;elevation+=(desiredElevation-elevation)*k;
-  target.lerp(desiredTarget,k);distance+=(desiredDistance-distance)*k;
   uiOffset+=(desiredUiOffset-uiOffset)*k;
   const view=town.camera.view;
   if(!view||Math.abs(view.offsetY-uiOffset)>.2||view.fullWidth!==innerWidth||view.fullHeight!==innerHeight)
     town.camera.setViewOffset(innerWidth,innerHeight,0,uiOffset,innerWidth,innerHeight);
+  if(cameraFlight){
+    const flight=cameraFlight;
+    if(!activePanel)flight.elapsed+=Math.min(dt,.1);
+    const done=flight.move.sample(reduced.matches?flight.move.duration:flight.elapsed,town.camera.position,cameraLook);
+    town.camera.lookAt(cameraLook);
+    if(profile)document.body.dataset.cameraFlight=done?'arrived':'moving';
+    if(done){cameraFlight=null;flight.finish(true);}
+    return;
+  }
+  azimuth+=(desiredAzimuth-azimuth)*k;elevation+=(desiredElevation-elevation)*k;
+  target.lerp(desiredTarget,k);distance+=(desiredDistance-distance)*k;
+  lookScale+=(desiredLookScale-lookScale)*k;
   const cameraDistance=PLANET_RADIUS+distance*2;
   const horizontal=Math.sin(elevation);
   const orientation=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),planetNormal(target.x,target.z));
   town.camera.position.set(Math.cos(azimuth)*horizontal,Math.cos(elevation),Math.sin(azimuth)*horizontal).applyQuaternion(orientation).multiplyScalar(cameraDistance);
-  const look=planetPoint(target.x,target.y,target.z).multiplyScalar(.15);
+  const look=cameraLook.copy(planetPoint(target.x,target.y,target.z)).multiplyScalar(lookScale);
   if(profile){document.body.dataset.cameraAzimuth=azimuth.toFixed(3);document.body.dataset.cameraDistance=distance.toFixed(1);document.body.dataset.cameraTarget=`${target.x.toFixed(1)},${target.z.toFixed(1)}`;}
   if(juice&&juice.shake>0&&!reduced.matches){
     juice.shakeOffset(performance.now()/1000,shakeOffset);
@@ -586,6 +677,7 @@ function stepCamera(dt:number){
 function frame(now:number){requestAnimationFrame(frame);if(document.hidden||!town)return;const cap=town.mobile?30:60;if(now-lastFrame<1000/cap-1)return;const elapsed=lastFrame?now-lastFrame:1000/cap;lastFrame=now;
   snapshot.elapsed=now-sessionStart;
   stepCamera(elapsed/1000);reactions?.update(elapsed/1000);juice?.update(elapsed/1000);updateFloats(now);worker?.update();scenery?.update(now/1000,elapsed/1000);town.render(snapshot,false);
+  positionProjectLabels(elapsed/1000);
   if(profile&&Math.floor(now/2000)!==Math.floor((now-elapsed)/2000)){document.body.dataset.drawCalls=String(town.renderer.info.render.calls);document.body.dataset.triangles=String(town.renderer.info.render.triangles);document.body.dataset.geometries=String(town.renderer.info.memory.geometries);document.body.dataset.textures=String(town.renderer.info.memory.textures);}
   if(profile){frameSamples.push(elapsed);if(frameSamples.length>=90){const sorted=[...frameSamples].sort((a,b)=>a-b);frameSamples=[];document.body.dataset.frameP50=sorted[Math.floor(sorted.length*.5)].toFixed(1);document.body.dataset.frameP90=sorted[Math.floor(sorted.length*.9)].toFixed(1);document.body.dataset.frameP99=sorted[Math.floor(sorted.length*.99)].toFixed(1);document.body.dataset.pixelRatio=pixelRatio.toFixed(2);}}
 }
@@ -595,7 +687,7 @@ try{
   town.onBuildImpact=onBuildImpact;town.onBuildPuff=(x,y,z,size)=>juice?.puff(x,y,z,size,10);
   worker.hooks={strike:(x,y,z)=>{juice?.strike(x,y,z);sfx.tok();},pop:(x,y,z,appearing)=>{juice?.puff(x,y-.8,z,.9,7);sfx.pop(appearing?1.15:.8);},cheer:()=>sfx.cheer()};
   reactions.onArrive=()=>sfx.pop(1.6);refreshGameWorld(true);document.body.classList.add('town-ready');requestAnimationFrame(frame);
-  if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,gameSave,gameState:()=>gameState,snapshot:()=>snapshot}});
+  if(import.meta.env.DEV)Object.assign(window,{__townDebug:{town,scenery,gameSave,gameState:()=>gameState,snapshot:()=>snapshot}});
   window.addEventListener('resize',()=>{town?.resize();if(!manualZoom)desiredDistance=townOverviewDistance(shownLevels);});
 }catch(error){console.error('Town renderer unavailable',error);canvas.hidden=true;fallback.hidden=false;document.body.classList.add('no-webgl');}
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();fallback.hidden=false;document.body.classList.add('no-webgl');});

@@ -17,14 +17,14 @@ export const ideaIcon = (idea: string, level: number) => `/assets/idea-icons/3d/
 
 export const IDEA_INFO: Record<Idea, { name: string; icon: string; place: string; hint: string }> = {
   settlers: { name: 'Settlers', icon: ideaIcon('settlers', 8), place: 'Homes', hint: 'Their crew can help the grove, forge, streets, market, archive and river.' },
-  grove: { name: 'Grove', icon: ideaIcon('grove', 8), place: 'Gardens', hint: 'Gardens can grow with settlers, the forge, mill and river.' },
+  grove: { name: 'Grove', icon: ideaIcon('grove', 8), place: 'Gardens', hint: 'Three castle saplings can grow into a living planet, with flowers and wildlife.' },
   workshop: { name: 'Workshop', icon: ideaIcon('workshop', 8), place: 'Forge', hint: 'The forge makes fittings, gears, sluices and instruments with its partners.' },
-  roads: { name: 'Roads', icon: ideaIcon('roads', 8), place: 'Bridge', hint: 'Crossings connect homes, workshops, gates, caravans, messengers and canals.' },
+  roads: { name: 'Roads', icon: ideaIcon('roads', 8), place: 'Bridge', hint: 'Timber bridges connect islands. Road upgrades add stone paving and rebuild older crossings with stone arches.' },
   walls: { name: 'Walls', icon: ideaIcon('walls', 8), place: 'Town Wall', hint: 'The walls can gain forge fittings, mapped gates, deliveries and a lookout.' },
   market: { name: 'Market', icon: ideaIcon('market', 8), place: 'Idle Outpost market', hint: 'Trade grows with residents, roads, walls, the mill, archive and tower.' },
   windmill: { name: 'Windmill', icon: ideaIcon('windmill', 8), place: 'River Mill', hint: 'The mill needs partners for timber, gears, trade, water and seasons.' },
   archive: { name: 'Archive', icon: ideaIcon('archive', 8), place: 'Grand Archive', hint: 'Records connect residents, messengers, trade, waterways and stars.' },
-  river: { name: 'Water', icon: ideaIcon('river', 8), place: 'Waterworks', hint: 'Fill the dry basins with water. Water helps homes, gardens, machinery, roads, the mill and maps.' },
+  river: { name: 'Rivers', icon: ideaIcon('river', 8), place: 'Riverworks', hint: 'Build rivers and a fishing dock. Settlers staff the pier; upgrades launch boats and island trade. Irrigate the mill fields too.' },
   observatory: { name: 'Observatory', icon: ideaIcon('observatory', 8), place: 'Star Tower', hint: 'The tower grows with instruments, walls, trade, seasons, plans and waterways.' },
 };
 
@@ -60,7 +60,7 @@ export interface GameSave {
 export interface GameState {
   order: readonly Idea[];
   route: Route;
-  /** Events for the last decision. Each wave consumes the levels from the previous wave. */
+  /** Internal stage grants for the last decision; playback combines them into one beat per site. */
   events: TownEvent[];
   projects: readonly string[];
   levels: Levels;

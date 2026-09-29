@@ -23,3 +23,37 @@ export function eventWaves(state: GameState): TownEvent[][] {
   for (const event of state.events) (waves[event.wave] ??= []).push(event);
   return waves;
 }
+
+export interface ChoiceBeat {
+  event: TownEvent;
+  arrival: boolean;
+  projects: string[];
+}
+
+/** One choice, one visit per site. Stage grants are rewards, not new triggers. */
+export function choiceSequence(state: GameState): ChoiceBeat[] {
+  const selected=state.order.at(-1);
+  if(!selected)return [];
+  const sites=new Map<Idea,ChoiceBeat>();
+  for(const grant of state.events){
+    let beat=sites.get(grant.idea);
+    if(!beat){
+      beat={event:{...grant,sources:[]},arrival:grant.idea===selected,projects:[]};
+      sites.set(grant.idea,beat);
+    }
+    beat.event.level=grant.level;
+    if(grant.project&&!beat.projects.includes(grant.project))beat.projects.push(grant.project);
+  }
+  return [...sites.values()].map((beat,index)=>{
+    beat.event.wave=index;
+    if(beat.arrival){
+      // The new idea arrives once with all benefits of the existing town.
+      // Do not send reciprocal reaction trails back to this site later.
+      delete beat.event.project;
+    }else{
+      beat.event.project=beat.projects[0];
+      beat.event.sources=[{idea:selected,level:state.levels[selected],purpose:'New choice'}];
+    }
+    return beat;
+  });
+}

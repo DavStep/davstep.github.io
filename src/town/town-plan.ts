@@ -5,12 +5,12 @@ const MINUTE = 60_000;
 
 // The settlement is a designed map with fixed sites and construction times.
 const projectPlots: Plot[] = [
-  { id: 'project-outpost', kind: 'project', project: 'outpost', x: -22, z: 7, start: 0, step: 4 * MINUTE, variant: 0 },
-  { id: 'project-sandship', kind: 'project', project: 'sandship', x: 22, z: 9, start: 0, step: 4.2 * MINUTE, variant: 1 },
-  { id: 'project-battle', kind: 'project', project: 'battle', x: 8, z: -23, start: 0, step: 4.4 * MINUTE, variant: 2 },
-  { id: 'project-wizard', kind: 'project', project: 'wizard', x: -8, z: 23, start: 0, step: 4 * MINUTE, variant: 3 },
+  { id: 'project-outpost', kind: 'project', project: 'outpost', x: -88, z: -54, start: 0, step: 4 * MINUTE, variant: 0 },
+  { id: 'project-sandship', kind: 'project', project: 'sandship', x: 87, z: -56, start: 0, step: 4.2 * MINUTE, variant: 1 },
+  { id: 'project-battle', kind: 'project', project: 'battle', x: 65, z: 35, start: 0, step: 4.4 * MINUTE, variant: 2 },
+  { id: 'project-wizard', kind: 'project', project: 'wizard', x: -45, z: 120, start: 0, step: 4 * MINUTE, variant: 3 },
   { id: 'home-east-square', kind: 'home', x: 22, z: -13, start: 0, step: 4.3 * MINUTE, variant: 4 },
-  { id: 'project-dwarves', kind: 'project', project: 'dwarves', x: -23, z: -15, start: 0, step: 4.5 * MINUTE, variant: 5 },
+  { id: 'project-dwarves', kind: 'project', project: 'dwarves', x: -88, z: 66, start: 0, step: 4.5 * MINUTE, variant: 5 },
 ];
 
 const civicPlots: Plot[] = [
