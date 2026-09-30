@@ -1,0 +1,269 @@
+/* Shared colors keep the portfolio and in-game reading surfaces in the same theme. */
+:root {
+  color-scheme: dark;
+  --theme-page: #171e1b;
+  --theme-content: #202822;
+  --page-gutter: max(40px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --theme-ink: #e5ebe3;
+  --theme-secondary: #bcc9b6;
+  --theme-muted: #9eae98;
+  --theme-accent: #a3bd90;
+  --theme-link: #bad2a7;
+  --theme-border: #354238;
+  --theme-surface: #222c25;
+  --theme-hover: #303e31;
+  --theme-active: #364832;
+  --theme-button: #344b2c;
+  --theme-button-hover: #405c35;
+  --theme-button-ink: #d6e9c6;
+  --theme-focus: #b5d398;
+  --theme-world-glow: #243c28;
+  --theme-notice: #d9b991;
+  --theme-page-rgb: 23, 30, 27;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --theme-page: #faf9f5;
+  --theme-content: #f0f2ec;
+  --theme-ink: #30443a;
+  --theme-secondary: #53634f;
+  --theme-muted: #606f60;
+  --theme-accent: #66805b;
+  --theme-link: #3d613e;
+  --theme-border: #e2e6dc;
+  --theme-surface: #f2f3ed;
+  --theme-hover: #e8eedf;
+  --theme-active: #e4eadf;
+  --theme-button: #e3ecd9;
+  --theme-button-hover: #d7e4c9;
+  --theme-button-ink: #355437;
+  --theme-focus: #57765b;
+  --theme-world-glow: #e8eee1;
+  --theme-notice: #815d43;
+  --theme-page-rgb: 250, 249, 245;
+}
+/* A readable portfolio with a living world beside its introduction. */
+:root { font-family: 'DM Sans', sans-serif; color: var(--theme-ink); background: var(--theme-page); font-synthesis: none; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; min-height: 100%; height: auto; overflow: visible; }
+html { scroll-behavior: smooth; scroll-padding-top: 28px; }
+body.portfolio-mode { background: var(--theme-page); color: var(--theme-ink); }
+html.portfolio-mode, body.portfolio-mode { min-height: 100%; height: auto; overflow: visible; }
+body.portfolio-mode #app { width: 100%; height: auto; min-height: 100svh; overflow: visible; background: var(--theme-page); }
+body.portfolio-mode #app::before { display: none; }
+button, a { font: inherit; }
+button { cursor: pointer; }
+.portfolio-page :is(a, button, select) { touch-action: manipulation; -webkit-tap-highlight-color: rgba(115, 151, 107, .18); }
+.portfolio-page a { color: inherit; text-decoration: none; }
+.portfolio-page :is(a, button):focus-visible { outline: 2px solid var(--theme-focus); outline-offset: 5px; }
+/* The opening and the reading surface form two distinct parts of the page. */
+.portfolio-page { width: 100%; }
+.portfolio-header, .portfolio-hero, .opening-footer, .portfolio-content, .portfolio-footer { width: min(1160px, calc(100% - 2 * var(--page-gutter))); margin-inline: auto; }
+.portfolio-opening { background: var(--theme-page); }
+.portfolio-content-surface { position: relative; background: var(--theme-content); border-top: 1px solid var(--theme-border); border-radius: 32px 32px 0 0; }
+.portfolio-content:focus-visible { outline: 2px solid var(--theme-focus); outline-offset: 6px; }
+.portfolio-page .skip-link { position: fixed; z-index: 30; left: var(--page-gutter); top: 14px; padding: 12px 18px; border-radius: 7px; background: var(--theme-button); color: var(--theme-button-ink); transform: translateY(-160%); opacity: 0; pointer-events: none; }
+.skip-link:focus { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.opening-footer { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 4px 0 20px; }
+.portfolio-page .opening-scroll { margin-left: auto; display: inline-flex; align-items: center; gap: 18px; min-height: 44px; color: var(--theme-muted); font-size: 12px; }
+.opening-scroll:hover { color: var(--theme-link); }
+.opening-scroll span { font-size: 20px; }
+.portfolio-page :is(h1, h2, h3) { text-wrap: balance; }
+.portfolio-page p { text-wrap: pretty; }
+.portfolio-page[hidden], #town-experience[hidden] { display: none !important; }
+.portfolio-header { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 30px 0; border-bottom: 1px solid var(--theme-border); }
+.portfolio-name { display: grid; gap: 3px; font-size: 16px; font-weight: 600; letter-spacing: -.025em; }
+.portfolio-name span { color: var(--theme-muted); font-size: 12px; font-weight: 400; letter-spacing: 0; }
+.portfolio-header-actions { display: flex; align-items: center; gap: 22px; }
+.theme-control { position: relative; display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--theme-muted); }
+.theme-control select { padding: 10px 4px; border: 0; border-radius: 6px; background: var(--theme-page); color: var(--theme-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.theme-control:focus-within { outline: 2px solid var(--theme-focus); outline-offset: 3px; border-radius: 6px; }
+.theme-control select:focus-visible { outline: none; }
+.portfolio-header nav { display: flex; gap: 28px; align-items: center; }
+.portfolio-header nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; color: var(--theme-secondary); padding: 10px 0; }
+.portfolio-header nav a:hover { color: var(--theme-link); text-decoration: underline; text-underline-offset: 6px; }
+.portfolio-header nav button { display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 9px 15px; border: 1px solid var(--theme-border); border-radius: 7px; background: var(--theme-surface); color: var(--theme-button-ink); font-size: 13px; }
+.portfolio-header nav button:hover { background: var(--theme-hover); }
+.portfolio-hero { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 24px; align-items: center; min-height: clamp(590px, calc(100svh - 170px), 800px); padding: 24px 0 20px; }
+.hero-copy { position: relative; z-index: 2; min-width: 0; width: 100%; }
+.hero-copy a { pointer-events: auto; }
+.portfolio-eyebrow { margin: 0 0 14px; color: var(--theme-muted); font-size: 13px; line-height: 1.6; }
+.hero-copy h1 { margin: 0 0 26px; font: 500 clamp(44px, 4.5vw, 64px)/1.08 'Space Grotesk', sans-serif; letter-spacing: -.055em; color: var(--theme-ink); }
+.hero-introduction { max-width: 46ch; margin: 0 0 18px; color: var(--theme-secondary); font-size: 17px; line-height: 1.8; }
+.hero-current { margin: 0 0 30px; color: var(--theme-muted); font-size: 13px; line-height: 1.6; }
+.portfolio-page .portfolio-primary { display: inline-flex; align-items: center; justify-content: space-between; gap: 26px; min-height: 48px; padding: 13px 19px; border: 1px solid var(--theme-border); border-radius: 7px; background: var(--theme-button); color: var(--theme-button-ink); font-size: 14px; font-weight: 500; transition: background .2s ease; }
+.portfolio-page .portfolio-primary:hover { background: var(--theme-button-hover); }
+.hero-world-view { position: relative; z-index: 1; align-self: stretch; min-width: 0; overflow: hidden; background: radial-gradient(ellipse at 60% 47%, var(--theme-world-glow), transparent 66%); }
+.hero-world-view::after { content: ''; position: absolute; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(90deg, var(--theme-page), transparent 18%); }
+.hero-world-poster { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; transition: opacity .4s ease; }
+.hero-world-view[data-live="true"] .hero-world-poster { opacity: 0; }
+#hero-world-view #town-canvas { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; pointer-events: auto; touch-action: pan-y; cursor: grab; }
+#hero-world-view[data-dragging="true"] #town-canvas { cursor: grabbing; }
+body.hero-world-interacting, body.hero-world-interacting * { user-select: none; -webkit-user-select: none; }
+.hero-world-view:focus-visible { outline: none; }
+.hero-world-view:focus-visible .hero-world-controls { outline: 2px solid var(--theme-focus); outline-offset: 4px; }
+.hero-world-controls { position: absolute; z-index: 3; bottom: 76px; right: 16px; display: flex; align-items: center; gap: 0; padding: 2px 4px; border: 1px solid var(--theme-border); border-radius: 999px; background: rgba(var(--theme-page-rgb), .92); color: var(--theme-muted); }
+.hero-world-controls[hidden], .hero-world-controls [hidden] { display: none; }
+.hero-world-controls span { margin: 0 8px; font-size: 11px; pointer-events: none; }
+.hero-world-controls button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--theme-secondary); font-size: 18px; }
+.hero-world-controls button:hover { background: rgba(var(--theme-page-rgb), .88); color: var(--theme-link); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.hero-world-entry { position: absolute; z-index: 3; bottom: 22px; right: 16px; display: flex; align-items: center; gap: 18px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--theme-border); border-radius: 999px; background: rgba(var(--theme-page-rgb), .88); color: var(--theme-secondary); font-size: 12px; }
+.hero-world-entry:hover { background: var(--theme-hover); }
+.portfolio-section { padding: 76px 0 84px; border-top: 1px solid var(--theme-border); }
+#work { border-top: 0; padding-top: 84px; }
+.section-introduction { max-width: 650px; margin-bottom: 34px; }
+.portfolio-page h2 { margin: 0 0 18px; font: 500 clamp(29px, 3vw, 38px)/1.18 'Space Grotesk', sans-serif; letter-spacing: -.04em; color: var(--theme-ink); }
+.section-introduction > p:last-child { margin: 0; max-width: 60ch; font-size: 16px; line-height: 1.8; color: var(--theme-secondary); }
+.portfolio-projects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.portfolio-project { min-width: 0; display: flex; flex-direction: column; scroll-margin-top: 28px; }
+.project-image-link { display: block; overflow: hidden; border-radius: 10px; background: var(--theme-surface); aspect-ratio: 1.45; }
+.project-image-link img { width: 100%; height: 100%; display: block; object-fit: cover; transition: filter .2s ease; }
+.project-image-link:hover img { filter: brightness(1.06); }
+.portfolio-project-copy { display: flex; flex-direction: column; align-items: flex-start; flex: 1; padding: 22px 0 0; }
+.project-context { margin: 0 0 9px; color: var(--theme-muted); font-size: 12px; line-height: 1.6; }
+.portfolio-project-copy h3 { margin: 0 0 14px; color: var(--theme-ink); font: 500 26px/1.2 'Space Grotesk', sans-serif; letter-spacing: -.035em; }
+.portfolio-project-copy > p:not(.project-context):not(.project-role) { margin: 0 0 24px; color: var(--theme-secondary); font-size: 15px; line-height: 1.8; }
+.portfolio-project-copy .project-role { width: 100%; min-height: 96px; margin: auto 0 18px; padding-top: 16px; border-top: 1px solid var(--theme-border); color: var(--theme-secondary); font-size: 13px; line-height: 1.75; }
+.project-role span { display: block; margin-bottom: 5px; color: var(--theme-muted); font-size: 11px; }
+.portfolio-page .portfolio-text-link { display: inline-flex; align-items: center; gap: 14px; min-height: 44px; color: var(--theme-link); font-size: 14px; font-weight: 500; }
+.portfolio-text-link:hover { text-decoration: underline; text-underline-offset: 5px; }
+.independent-projects { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; }
+.independent-projects .project-image-link { aspect-ratio: 1.9; }
+.independent-projects .portfolio-text-link { margin-top: auto; }
+.town-load-status { color: var(--theme-notice); font-size: 13px; line-height: 1.7; }
+[data-play-town][aria-busy="true"] { cursor: progress; opacity: .7; }
+.portfolio-about { display: grid; grid-template-columns: .9fr 1.1fr; gap: 100px; padding-top: 68px; }
+.portfolio-facts { display: grid; gap: 14px; max-width: 350px; margin: 30px 0 0; font-size: 13px; }
+.portfolio-facts div { display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px; }
+.portfolio-facts dt { color: var(--theme-muted); }
+.portfolio-facts dd { margin: 0; color: var(--theme-secondary); }
+.about-writing { padding-top: 30px; }
+.about-writing p { margin: 0 0 22px; color: var(--theme-secondary); font-size: 16px; line-height: 1.9; }
+.about-writing .about-signoff { color: var(--theme-accent); font-size: 15px; }
+.portfolio-contact { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 76px; padding: 62px 0; border-top: 1px solid var(--theme-border); }
+.portfolio-contact > div > p:not(.portfolio-eyebrow) { max-width: 40ch; margin: 0; color: var(--theme-secondary); font-size: 15px; line-height: 1.8; }
+.portfolio-page .portfolio-email { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--theme-border); color: var(--theme-link); font-size: clamp(15px, 1.6vw, 20px); letter-spacing: -.025em; }
+.portfolio-email:hover { text-decoration: underline; text-underline-offset: 5px; }
+.portfolio-socials { display: flex; flex-wrap: wrap; align-items: center; gap: 0 24px; padding-top: 14px; }
+.portfolio-socials a, .portfolio-socials button { padding: 12px 0; border: 0; background: none; color: var(--theme-muted); font-size: 13px; min-height: 44px; }
+.portfolio-socials a:hover, .portfolio-socials button:hover { text-decoration: underline; text-underline-offset: 5px; }
+.portfolio-contact-details #contact-status { min-height: 20px; margin: 6px 0 0; color: var(--theme-muted); font-size: 12px; }
+.portfolio-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 26px 0 34px; border-top: 1px solid var(--theme-border); color: var(--theme-muted); font-size: 12px; line-height: 1.6; }
+.portfolio-footer a { padding: 8px 0; }
+
+/* The game has its own full-screen space and never captures keys or scroll on the page. */
+html.game-playing, body.game-playing { height: 100%; overflow: hidden; }
+body.game-playing #app { height: 100%; }
+.town-experience { position: fixed; inset: 0; overflow: hidden; background: radial-gradient(ellipse at 52% 42%, #8065a5 0%, #634885 40%, #39264f 78%, #281d3c 100%); }
+.town-experience .chrome { align-items: center; padding: 18px 24px; }
+.town-experience .brand, .town-experience .chrome nav { padding: 0; border: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.town-experience .brand { min-height: 44px; padding: 8px 12px; color: #f5f1e9; font-size: 14px; font-weight: 500; }
+.town-experience .brand::after, .town-experience .chrome nav::after { display: none; }
+.town-experience .chrome nav button { min-height: 44px; color: #f5f1e9; font-weight: 500; background: rgba(255, 255, 255, .08); }
+.town-experience .chrome nav button:hover { background: rgba(255, 255, 255, .16); transform: none; translate: none; }
+.town-experience .game-hud { padding: 18px; bottom: 20px; border-radius: 16px; background: var(--theme-page); box-shadow: 0 12px 36px rgba(16, 29, 32, .2); }
+.town-experience .game-hud-head { padding: 0 0 10px; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.town-experience .game-hud-kicker { display: none; }
+.town-experience #game-summary { color: var(--theme-ink); font-size: 18px; font-weight: 500; text-shadow: none; }
+.game-guidance { margin: 5px 0 0; color: var(--theme-muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
+.town-experience .game-hud-head button, .town-experience #game-turn { border: 0; background: var(--theme-surface); color: var(--theme-button-ink); font-weight: 500; box-shadow: none; }
+.town-experience #game-turn { background: transparent; font-size: 12px; }
+.town-experience .game-progress { margin-top: 0; }
+.town-experience .game-progress span { background: var(--theme-surface); box-shadow: none; }
+.town-experience .game-card { border: 1px solid var(--theme-border); background: var(--theme-surface); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.town-experience .game-card::before, .town-experience .game-card::after, .town-experience .game-card-sheen { display: none; }
+.town-experience .game-card:not(:disabled):hover { border-color: var(--theme-border); background: var(--theme-hover); transform: translateY(-2px); box-shadow: none; }
+.town-experience .game-card-icon { border: 0; background: none; box-shadow: none; }
+.town-experience .game-card-label { color: var(--theme-secondary); background: none; font-weight: 500; text-shadow: none; }
+.town-experience .game-card-key { color: var(--theme-muted); background: none; border: 0; box-shadow: none; }
+.town-experience .game-event { color: var(--theme-secondary); background: transparent; border: 0; box-shadow: none; text-shadow: none; backdrop-filter: none; }
+.town-experience .camera-controls { top: 88px; grid-template-columns: repeat(5, 34px); gap: 4px; transform: none; }
+.town-experience .camera-controls button { width: 34px; height: 34px; border: 0; background: rgba(var(--theme-page-rgb), .14); color: #f5f1e9; box-shadow: none; backdrop-filter: none; font-weight: 400; }
+.town-experience .camera-controls span { display: none; }
+.town-experience .fallback { top: 22%; }
+.town-experience .fallback button { margin: 8px 4px 0; }
+.portfolio-mode .float-layer { display: none; }
+
+@media (max-width: 1000px) {
+  :root { --page-gutter: max(28px, env(safe-area-inset-left), env(safe-area-inset-right)); }
+  .portfolio-hero { min-height: clamp(570px, calc(100svh - 170px), 780px); }
+  .hero-world-entry, .hero-world-controls { right: 8px; }
+  .hero-world-controls span { position: absolute; right: 0; bottom: 100%; margin: 0; white-space: nowrap; }
+  .portfolio-projects { gap: 22px; }
+  .portfolio-about { gap: 56px; }
+  .portfolio-contact { gap: 44px; }
+}
+@media (max-width: 760px) {
+  :root { --page-gutter: max(20px, env(safe-area-inset-left), env(safe-area-inset-right)); }
+  .portfolio-header { gap: 8px; padding: 22px 0; }
+  .portfolio-header-actions { gap: 9px; }
+  .theme-control { width: 44px; justify-content: center; }
+  .theme-control select { position: absolute; inset: 0; width: 100%; opacity: 0; }
+  .portfolio-header nav { gap: 16px; }
+  .portfolio-header nav button { display: none; }
+  .portfolio-hero { display: block; min-height: 0; padding: 40px 0 0; }
+  .hero-copy { width: 100%; }
+  .hero-copy h1 { font-size: clamp(40px, 9vw, 56px); max-width: 550px; }
+  .hero-introduction { font-size: 16px; max-width: 54ch; }
+  .hero-current { font-size: 12px; margin-bottom: 24px; }
+  .hero-world-view { position: relative; inset: auto; width: 100%; height: clamp(360px, 110vw, 480px); margin: 24px 0 0; }
+  .hero-world-view::after { background: linear-gradient(0deg, var(--theme-page), transparent 34%); }
+  .hero-world-poster { object-fit: contain; }
+  .portfolio-content-surface { border-radius: 20px 20px 0 0; }
+  .opening-footer { min-height: 64px; padding-bottom: 16px; }
+  .opening-scroll { font-size: 11px; }
+  .opening-footer:has(.town-load-status:not([hidden])) { align-items: start; flex-direction: column; gap: 0; }
+  .hero-world-entry { bottom: 22px; right: 8px; white-space: nowrap; }
+  .hero-world-controls { right: 8px; }
+  .hero-world-controls span { position: absolute; right: 0; bottom: 100%; margin: 0; white-space: nowrap; }
+  .portfolio-section { padding: 48px 0 54px; }
+  #work { padding-top: 48px; }
+  .section-introduction { margin-bottom: 26px; }
+  .section-introduction > p:last-child { font-size: 15px; }
+  .portfolio-projects, .independent-projects { grid-template-columns: 1fr; gap: 36px; }
+  .project-image-link, .independent-projects .project-image-link { aspect-ratio: 1.7; }
+  .portfolio-project-copy { padding-top: 20px; }
+  .portfolio-project-copy .project-role { min-height: 0; margin-top: 0; margin-bottom: 12px; }
+  .portfolio-about { grid-template-columns: 1fr; gap: 28px; }
+  .portfolio-about h2 br { display: none; }
+  .about-writing { padding-top: 0; }
+  .about-writing p { font-size: 15px; }
+  .portfolio-contact { grid-template-columns: 1fr; gap: 24px; padding: 44px 0; }
+  .portfolio-page .portfolio-email { font-size: 16px; }
+  .portfolio-footer { align-items: start; font-size: 11px; gap: 16px; }
+  .town-experience .chrome { padding: 10px 12px; }
+  .town-experience .brand { font-size: 13px; }
+  .town-experience .camera-controls { top: 68px; right: 12px; }
+  .town-experience .game-hud { padding: 12px; bottom: 10px; width: calc(100vw - 20px); max-height: calc(100svh - 138px); }
+  .town-experience .game-hud-head { flex-wrap: wrap; gap: 8px; }
+  .town-experience #game-summary { font-size: 16px; }
+  .town-experience .game-hud-actions { margin-left: auto; }
+  .town-experience .game-card-label { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 25px; padding: 0 2px; font-size: 10px; line-height: 1.25; white-space: normal; text-align: center; }
+}
+@media (max-width: 380px) {
+  :root { --page-gutter: max(16px, env(safe-area-inset-left), env(safe-area-inset-right)); }
+  .portfolio-header-actions { gap: 2px; }
+  .portfolio-header nav { gap: 10px; }
+  .portfolio-header nav a { font-size: 12px; }
+  .portfolio-name { font-size: 14px; }
+  .portfolio-name span { font-size: 11px; }
+  .hero-copy h1 { font-size: 38px; }
+  .portfolio-page .portfolio-email { font-size: 14px; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .portfolio-page * { transition: none; }
+}
+
+/* Supporting game surfaces use the same readable palette. */
+.town-experience :is(.world-journal, .world-artifacts) { color: var(--theme-secondary); }
+.town-experience .world-artifacts span { border-color: var(--theme-border); background: var(--theme-surface); }
+.town-experience .world-artifacts .collected { color: var(--theme-link); border-color: var(--theme-accent); background: var(--theme-button); }
+.town-experience .world-artifacts .lost, .town-experience .world-notice { color: var(--theme-notice); }
+.town-experience :is(.fallback, .toast) { color: var(--theme-ink); background: var(--theme-page); border: 1px solid var(--theme-border); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.town-experience .fallback::after { display: none; }
+.town-experience .fallback h2 { color: var(--theme-ink); }
+.town-experience .fallback p { color: var(--theme-secondary); }
+.town-experience .fallback button { color: var(--theme-button-ink); background: var(--theme-button); border: 1px solid var(--theme-border); box-shadow: none; }
+.town-experience .fallback button:hover { color: var(--theme-button-ink); background: var(--theme-button-hover); }

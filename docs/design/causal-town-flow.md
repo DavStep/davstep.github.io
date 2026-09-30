@@ -1,11 +1,11 @@
-# Ten-button order puzzle
+# Ten-choice living world
 
-The interaction contract is: **click an unused idea → watch the collaboration → click another**.
+The interaction is: **choose a place → watch its supplies and world consequences → choose again**.
 
-All ten ideas are available from the start. One click commits the choice immediately; each idea can be used once per run. Used buttons remain visible and show their current level. Earlier buildings can grow again when a later partner arrives. A completed collaboration names the joint project and shows its payoff. A reversed pair shows the missed project's name and the order to try on the next run. The chosen pair loses only that project's stages; it has no global level cap.
+All ten cards are available from the start and each is selected once. Missing supplies remain pending. Later buildings can activate earlier functions, and a final building uses supplies already in town. Named capability rules replace the former reciprocal pair-order graph.
 
-The first choice establishes either the valley route or the Archive-first Storybook Night route. Each has an 80/80 solution. The dock shows completed collaborations and total levels. At the end, the result lists all missed collaborations and offers a replay. The detailed rule graph and both routes are in [current-progression.md](current-progression.md).
+The world has persistent discoveries and hazards: a visible island chest, shrine lens, volcanic mountain and crystal seam. Ship and caravan expeditions retrieve those items. Treasure attracts a dragon; dwarf engineering changes the eruption’s outcome. Events leave creatures, artifacts, altered ground and access changes. Warnings give a preparation opportunity. Repairs restore functions while preserving history.
 
-The simulation emits one arrival followed by causal project waves. Source partners exist before their effects, and both participants advance in the same wave. The camera follows those reactions while the decision dock stays visible. The town has no exploration controls; portfolio entries remain in the Work menu. Ambient LivingWorld actors are not part of the puzzle scene.
+See [current progression](current-progression.md) for timing and examples, [event specification](world-event-progression.md) for visual intent, and [integration contract](world-event-integration.md) for runtime interfaces.
 
-A choice saves before playback. Skip applies its final state immediately. Restart invalidates the active animation token and clears crews and effects. Reload reconstructs the town from the saved order. Reduced motion and WebGL fallback retain event captions. Hidden tabs and open portfolio panels pause playback. `?playtest=1` in development isolates manual QA from the normal save.
+A choice saves before playback. Skip applies the final snapshot; restart cancels active choreography; reload reconstructs history without re-emitting events. Reduced motion and WebGL fallback retain captions and outcomes. Open portfolio panels and hidden tabs pause cinematic progress. Development playtests use a separate save key.

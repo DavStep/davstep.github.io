@@ -23,12 +23,14 @@ export class PlanetTransport{
   private transientMaterials=new Set<THREE.Material>();
   private paints:Record<string,THREE.MeshStandardMaterial>={};
   private signature='';
+  private expeditionActive=false;
+  setExpeditionActive(active:boolean){this.expeditionActive=active;for(const boat of this.boats)if(!boat.float)boat.model.root.visible=!active;}
   private growth=1;
   private lastTime:number|null=null;
   private time=0;
   private batches:{mesh:THREE.InstancedMesh;count:number}[]=[];
   private fishers:{root:THREE.Group;arm:THREE.Group;line:THREE.Line;float:THREE.Mesh;base:THREE.Vector3;up:THREE.Vector3}[]=[];
-  private boats:{model:PlanetShip;route:Point[];lengths:number[];length:number;speed:number;phase:number;scale:number}[]=[];
+  private boats:{model:PlanetShip;route:Point[];lengths:number[];length:number;speed:number;phase:number;scale:number;float?:THREE.Mesh;line?:THREE.Line}[]=[];
   private navigation:Point[];
   private fishingNavigation:Point[]=[];
   constructor(parent:THREE.Group,private mobile:boolean){
@@ -178,7 +180,14 @@ export class PlanetTransport{
     const model=createPlanetShip(this.mobile,Boolean(index));
     model.root.name=index?'Island trading ship':'Fishing boat';model.root.visible=true;
     const lengths=[0];for(let i=1;i<route.length;i++)lengths.push(lengths[i-1]+surface(route[i],0).distanceTo(surface(route[i-1],0)));
-    this.boats.push({model,route,lengths,length:lengths[lengths.length-1],speed:index?1.3:.65,phase:index?.6:.1,scale:index?1:.85});this.group.add(model.root);
+    let float:THREE.Mesh|undefined,line:THREE.Line|undefined;
+    if(!index){
+      const geometry=new THREE.SphereGeometry(.14,6,4);this.transientGeometries.add(geometry);
+      float=new THREE.Mesh(geometry,this.paints.roof);float.name='Fishing bobber';float.position.set(.8,.04,-2.8);model.root.add(float);
+      const lineGeometry=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(.8,1.7,-1),float.position]);this.transientGeometries.add(lineGeometry);
+      const paint=new THREE.LineBasicMaterial({color:0xe9dbaf});this.transientMaterials.add(paint);line=new THREE.Line(lineGeometry,paint);model.root.add(line);
+    }
+    this.boats.push({model,route,lengths,length:lengths[lengths.length-1],speed:index?1.3:.65,phase:index?.6:.1,scale:index?1:.85,float,line});this.group.add(model.root);
   }
   update(snapshot:TownSnapshot,animate:boolean){
     const state=planetTransportState(snapshot),river=snapshot.riverLevel??0;
@@ -215,7 +224,18 @@ export class PlanetTransport{
     this.growth=reduced?1:Math.min(1,this.growth+dt/1.8);for(const b of this.batches)b.mesh.count=Math.floor(b.count*this.growth);
     for(const fisher of this.fishers){fisher.root.visible=this.growth>.9;fisher.arm.rotation.x=-.8+(reduced?0:Math.sin(this.time*.8)*.08);fisher.float.position.copy(fisher.base);fisher.float.position.y+=reduced?0:Math.sin(this.time*2)*.06;}
     for(const boat of this.boats){
-      boat.model.root.visible=this.growth>.9;const cycle=((this.time*boat.speed/boat.length+boat.phase)%2+2)%2,t=cycle<=1?cycle:2-cycle,distance=t*boat.length;
+      boat.model.root.visible=this.growth>.9&&(!this.expeditionActive||!!boat.float);
+      // The cutter spends most of its day anchored over a fishing shoal.
+      const fishing=!!boat.float,day=this.time%48,anchored=fishing&&day<36;
+      const travel=fishing?(Math.floor(this.time/48)*12+Math.max(0,day-36)):this.time;
+      const cycle=((travel*boat.speed/boat.length+boat.phase)%2+2)%2,t=cycle<=1?cycle:2-cycle,distance=t*boat.length;
+      boat.model.root.userData.activity=fishing?(anchored?'fishing':'relocating'):'trading';
+      if(boat.float&&boat.line){
+        boat.float.visible=boat.line.visible=anchored;
+        boat.float.position.y=.04+(reduced?0:Math.sin(this.time*2.1)*.05);
+        const points=boat.line.geometry.getAttribute('position') as THREE.BufferAttribute;points.setXYZ(1,boat.float.position.x,boat.float.position.y,boat.float.position.z);points.needsUpdate=true;
+      }
+      boat.model.sails.visible=!anchored;
       let i=1;while(i<boat.lengths.length-1&&boat.lengths[i]<distance)i++;
       const part=(distance-boat.lengths[i-1])/(boat.lengths[i]-boat.lengths[i-1]),p=mixPoint(boat.route[i-1],boat.route[i],part),n=surfaceNormal(p.x,p.z);
       const forward=surface(boat.route[i],0).sub(surface(boat.route[i-1],0)).multiplyScalar(cycle<=1?1:-1);forward.addScaledVector(n,-forward.dot(n)).normalize();

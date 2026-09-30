@@ -7,6 +7,8 @@ import { districtForPlot, IDEA_DISTRICTS } from './idea-districts';
 export function planetBuildingYaw(plot:Plot):number {
   // The mill has a separately animated rotor, race and farm; the castle anchors the square.
   if(plot.kind==='mill'||plot.kind==='castle')return 0;
+  // The enlarged Battle landmark opens toward the island bridge landing.
+  if(plot.project==='battle')return -Math.PI/2;
   let destination:{x:number;z:number}|undefined;
   const district=districtForPlot(plot.id);
   if(district&&Math.hypot(plot.x,plot.z)>55){

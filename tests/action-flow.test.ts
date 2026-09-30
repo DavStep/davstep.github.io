@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { evaluate, IDEAS, chooseIdea, newGameSave, parseGameSave, type Idea } from '../src/town/game';
-import { JOINT_PROJECTS, projectStages } from '../src/town/action-rules';
+import { DEVELOPMENT_RULES } from '../src/town/action-rules';
 import { eventWaves } from '../src/town/action-story';
 import { ReactionEffects, eventFocus } from '../src/town/reaction-effects';
 import { IDEA_COLORS } from '../src/town/idea-colors';
@@ -24,14 +24,14 @@ test('every rendered reaction names a placed partner from an earlier wave', () =
         for (const event of wave) {
           assert.equal(event.level, shown[event.idea] + 1);
           for (const source of event.sources) assert.ok(shown[source.idea] >= source.level, `${event.idea} happened before ${source.idea}`);
-          if (event.project) assert.ok(JOINT_PROJECTS.some(project => project.id === event.project && project.ideas.includes(event.idea)));
+          if (event.project) assert.ok(DEVELOPMENT_RULES.some(project => project.id === event.project && project.idea === event.idea));
         }
         for (const event of wave) shown[event.idea] = event.level;
       }
       assert.deepEqual(shown, after.levels, 'skipping and normal playback converge');
       before = after;
     }
-    assert.equal(before.perfect, before.faults.length === 0, 'all collaborations are required for MAX');
+    assert.equal(before.perfect, IDEAS.every(idea=>before.levels[idea]===8));
     assert.equal(before.score, Object.values(before.levels).reduce((sum, level) => sum + level, 0));
   }
 });
@@ -48,17 +48,13 @@ test('each direct choice commits once and survives reload', () => {
   }
 });
 
-test('each project rewards both partners and a missed project cannot be rebuilt', () => {
-  for (const idea of IDEAS) {
-    const rewards = JOINT_PROJECTS.filter(project => project.ideas.includes(idea))
-      .reduce((sum, project) => sum + projectStages(project, idea), 0);
-    assert.equal(rewards, 7, `${idea} should have seven upgrades after arrival`);
+test('development stages describe capabilities and have unique identities',()=>{
+  assert.equal(new Set(DEVELOPMENT_RULES.map(rule=>rule.id)).size,DEVELOPMENT_RULES.length);
+  for(const idea of IDEAS){
+    const rules=DEVELOPMENT_RULES.filter(rule=>rule.idea===idea);
+    assert.equal(rules.at(-1)?.level,8);
+    assert.ok(rules.every(rule=>rule.requires.length>0&&rule.provides.length>0&&rule.description.length>20));
   }
-  const missed = evaluate(['roads', 'settlers', ...IDEAS.filter(i => i !== 'roads' && i !== 'settlers')]);
-  assert.ok(missed.faults.some(fault => fault.project === 'street-plan'));
-  assert.ok(!missed.projects.includes('street-plan'));
-  assert.ok(missed.levels.roads < 8);
-  assert.ok(missed.levels.settlers < 8);
 });
 
 test('causal effects support every action and release resources on interruption', () => {

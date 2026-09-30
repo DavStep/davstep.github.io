@@ -1,0 +1,208 @@
+[
+  {
+    "mobile": false,
+    "readyMs": 2263,
+    "errors": [],
+    "data": {
+      "title": "Selected work.",
+      "debugExposed": false,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "185.0",
+        "cameraTarget": "0.0,0.0",
+        "drawCalls": "71",
+        "triangles": "729964",
+        "geometries": "48",
+        "textures": "6",
+        "lcpMs": "2228",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "250.0",
+        "pixelRatio": "1.00"
+      },
+      "resources": [
+        {
+          "url": "/css2",
+          "bytes": 682
+        },
+        {
+          "url": "/assets/index-BFm9xhCN.css",
+          "bytes": 18800
+        },
+        {
+          "url": "/assets/index-X4OPeO-A.js",
+          "bytes": 1891172
+        },
+        {
+          "url": "/assets/idea-icons/3d/windmill-8.webp",
+          "bytes": 11216
+        },
+        {
+          "url": "/assets/idea-icons/3d/archive-8.webp",
+          "bytes": 11690
+        },
+        {
+          "url": "/assets/idea-icons/3d/market-8.webp",
+          "bytes": 10248
+        },
+        {
+          "url": "/assets/idea-icons/3d/settlers-8.webp",
+          "bytes": 12908
+        },
+        {
+          "url": "/assets/idea-icons/3d/observatory-8.webp",
+          "bytes": 8786
+        },
+        {
+          "url": "/assets/idea-icons/3d/grove-8.webp",
+          "bytes": 10642
+        },
+        {
+          "url": "/assets/idea-icons/3d/walls-8.webp",
+          "bytes": 7550
+        },
+        {
+          "url": "/assets/idea-icons/3d/roads-8.webp",
+          "bytes": 8138
+        },
+        {
+          "url": "/assets/idea-icons/3d/river-8.webp",
+          "bytes": 7308
+        },
+        {
+          "url": "/assets/idea-icons/3d/workshop-8.webp",
+          "bytes": 9672
+        },
+        {
+          "url": "/assets/favicon-BeXxF4hZ.svg",
+          "bytes": 281
+        },
+        {
+          "url": "/assets/games/idle-outpost.webp",
+          "bytes": 45468
+        },
+        {
+          "url": "/assets/games/battle-cards.webp",
+          "bytes": 65200
+        },
+        {
+          "url": "/assets/games/idle-wizard.webp",
+          "bytes": 28798
+        },
+        {
+          "url": "/assets/games/sandship.webp",
+          "bytes": 99120
+        },
+        {
+          "url": "/assets/games/drunk-dwarves.webp",
+          "bytes": 15380
+        },
+        {
+          "url": "/assets/favicon-BeXxF4hZ.svg",
+          "bytes": 281
+        }
+      ]
+    }
+  },
+  {
+    "mobile": true,
+    "readyMs": 2014,
+    "errors": [],
+    "data": {
+      "title": "Selected work.",
+      "debugExposed": false,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "270.5",
+        "cameraTarget": "0.0,0.0",
+        "lcpMs": "1988",
+        "drawCalls": "57",
+        "triangles": "310708",
+        "geometries": "47",
+        "textures": "6"
+      },
+      "resources": [
+        {
+          "url": "/css2",
+          "bytes": 682
+        },
+        {
+          "url": "/assets/index-X4OPeO-A.js",
+          "bytes": 1891172
+        },
+        {
+          "url": "/assets/index-BFm9xhCN.css",
+          "bytes": 18800
+        },
+        {
+          "url": "/assets/idea-icons/3d/windmill-8.webp",
+          "bytes": 11216
+        },
+        {
+          "url": "/assets/idea-icons/3d/archive-8.webp",
+          "bytes": 11690
+        },
+        {
+          "url": "/assets/idea-icons/3d/market-8.webp",
+          "bytes": 10248
+        },
+        {
+          "url": "/assets/idea-icons/3d/settlers-8.webp",
+          "bytes": 12908
+        },
+        {
+          "url": "/assets/idea-icons/3d/observatory-8.webp",
+          "bytes": 8786
+        },
+        {
+          "url": "/assets/idea-icons/3d/walls-8.webp",
+          "bytes": 7550
+        },
+        {
+          "url": "/assets/idea-icons/3d/roads-8.webp",
+          "bytes": 8138
+        },
+        {
+          "url": "/assets/idea-icons/3d/grove-8.webp",
+          "bytes": 10642
+        },
+        {
+          "url": "/assets/idea-icons/3d/river-8.webp",
+          "bytes": 7308
+        },
+        {
+          "url": "/assets/idea-icons/3d/workshop-8.webp",
+          "bytes": 9672
+        },
+        {
+          "url": "/assets/favicon-BeXxF4hZ.svg",
+          "bytes": 281
+        },
+        {
+          "url": "/assets/games/idle-outpost.webp",
+          "bytes": 45468
+        },
+        {
+          "url": "/assets/games/sandship.webp",
+          "bytes": 99120
+        },
+        {
+          "url": "/assets/games/battle-cards.webp",
+          "bytes": 65200
+        },
+        {
+          "url": "/assets/favicon-BeXxF4hZ.svg",
+          "bytes": 281
+        },
+        {
+          "url": "/assets/games/idle-wizard.webp",
+          "bytes": 28798
+        },
+        {
+          "url": "/assets/games/drunk-dwarves.webp",
+          "bytes": 15380
+        }
+      ]
+    }
+  }
+]

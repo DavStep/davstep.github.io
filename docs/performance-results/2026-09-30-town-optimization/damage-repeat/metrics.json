@@ -1,0 +1,257 @@
+{
+  "aggregation": "Median of three per-window AB statistics; adjacent AA windows retained separately in raw evidence. No pooled device statistics.",
+  "comparisons": [
+    {
+      "layout": "desktop",
+      "fixture": "damage",
+      "metrics": {
+        "frameCPU_mean": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              3.446921796995074,
+              2.757404326152881,
+              2.782000000178814
+            ],
+            "after": [
+              3.0331666664779187,
+              2.5486666669448215,
+              2.548833333849907
+            ]
+          },
+          "before": 2.782000000178814,
+          "after": 2.548833333849907,
+          "changePercent": -8.381260471384621
+        },
+        "frameCPU_p95": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              3.7999999821186066,
+              3.0999999940395355,
+              3.0999999940395355
+            ],
+            "after": [
+              3.4000000059604645,
+              2.800000011920929,
+              2.800000011920929
+            ]
+          },
+          "before": 3.0999999940395355,
+          "after": 2.800000011920929,
+          "changePercent": -9.677418796626636
+        },
+        "frameCPU_p99": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              4,
+              3.2000000178813934,
+              3.2000000178813934
+            ],
+            "after": [
+              3.5999999940395355,
+              2.9000000059604645,
+              3
+            ]
+          },
+          "before": 3.2000000178813934,
+          "after": 3,
+          "changePercent": -6.250000523868948
+        },
+        "projection_mean": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              0.3467554078621793,
+              0.29783693823758856,
+              0.299999999354283
+            ],
+            "after": [
+              0.05299999992052714,
+              0.05233333299557368,
+              0.04966666618982951
+            ]
+          },
+          "before": 0.299999999354283,
+          "after": 0.05233333299557368,
+          "changePercent": -82.55555563059485
+        },
+        "projection_p95": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              0.4000000059604645,
+              0.4000000059604645,
+              0.4000000059604645
+            ],
+            "after": [
+              0.10000002384185791,
+              0.10000002384185791,
+              0.10000002384185791
+            ]
+          },
+          "before": 0.4000000059604645,
+          "after": 0.10000002384185791,
+          "changePercent": -74.99999441206464
+        },
+        "projection_p99": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "after": [
+              0.20000001788139343,
+              0.20000001788139343,
+              0.20000001788139343
+            ]
+          },
+          "before": 0.5,
+          "after": 0.20000001788139343,
+          "changePercent": -59.99999642372131
+        },
+        "renderIntervals_mean": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              16.66600000000001,
+              16.665999999999986,
+              16.66594323873121
+            ],
+            "after": [
+              16.6661101836394,
+              16.66594323873122,
+              16.665943238731234
+            ]
+          },
+          "before": 16.665999999999986,
+          "after": 16.665943238731234,
+          "changePercent": -0.0003405812357581972
+        },
+        "renderIntervals_p95": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              16.799999999995634,
+              16.70000000001164,
+              16.79999999998836
+            ],
+            "after": [
+              16.700000000004366,
+              16.799999999995634,
+              16.79999999998836
+            ]
+          },
+          "before": 16.79999999998836,
+          "after": 16.79999999998836,
+          "changePercent": 0.0
+        },
+        "renderIntervals_p99": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              16.80000000000291,
+              16.80000000000291,
+              16.80000000000291
+            ],
+            "after": [
+              16.80000000000291,
+              16.80000000000291,
+              16.80000000000291
+            ]
+          },
+          "before": 16.80000000000291,
+          "after": 16.80000000000291,
+          "changePercent": 0.0
+        },
+        "submission_mean": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              2.8386023306410246,
+              2.2520798672356346,
+              2.2861666666467984
+            ],
+            "after": [
+              2.7071666673819226,
+              2.2718333332737286,
+              2.282166667630275
+            ]
+          },
+          "before": 2.2861666666467984,
+          "after": 2.282166667630275,
+          "changePercent": -0.17496532841982937
+        },
+        "submission_p95": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              3.100000023841858,
+              2.5,
+              2.5
+            ],
+            "after": [
+              3.0999999940395355,
+              2.5,
+              2.5
+            ]
+          },
+          "before": 2.5,
+          "after": 2.5,
+          "changePercent": 0.0
+        },
+        "submission_p99": {
+          "units": "ms",
+          "sessions": {
+            "before": [
+              3.2999999821186066,
+              2.5999999940395355,
+              2.699999988079071
+            ],
+            "after": [
+              3.2000000178813934,
+              2.699999988079071,
+              2.699999988079071
+            ]
+          },
+          "before": 2.699999988079071,
+          "after": 2.699999988079071,
+          "changePercent": 0.0
+        }
+      },
+      "errors": []
+    }
+  ],
+  "visual": [
+    {
+      "fixture": "desktop-damage",
+      "size": [
+        1440,
+        900
+      ],
+      "changedPixels": 0,
+      "totalPixels": 1296000,
+      "beforeSHA256": "3269e057c0ed639ab94f72bbd12369dc44d5f7419ae054c9fb893942c91000b0",
+      "afterSHA256": "3269e057c0ed639ab94f72bbd12369dc44d5f7419ae054c9fb893942c91000b0",
+      "artifact": "evidence/desktop-damage-after.png"
+    }
+  ],
+  "sessionCount": 8,
+  "missing": {
+    "presentedFrames": {
+      "value": null,
+      "reason": "rAF cadence is not GPU presentation timing"
+    },
+    "physicalPhone": {
+      "value": null,
+      "reason": "Desktop Chrome with a mobile viewport uses Apple M3 Max hardware"
+    },
+    "productionLoad": {
+      "value": null,
+      "reason": "Timing pass uses development modules and existing debug access"
+    }
+  }
+}

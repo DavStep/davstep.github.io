@@ -6,6 +6,8 @@ export class ProjectLabelMotion {
   private animations: Animation[] = [];
   private offsetX = 0;
   private offsetY = 0;
+  private left = '';
+  private top = '';
 
   constructor(readonly button: HTMLButtonElement) {
     button.hidden = true;
@@ -62,7 +64,9 @@ export class ProjectLabelMotion {
     const blend = fresh || reducedMotion() ? 1 : 1 - Math.exp(-Math.min(dt, .1) * 14);
     this.offsetX += (offset.x - this.offsetX) * blend;
     this.offsetY += (offset.y - this.offsetY) * blend;
-    this.button.style.left = `${(x + this.offsetX).toFixed(1)}px`;
-    this.button.style.top = `${(y + this.offsetY).toFixed(1)}px`;
+    const left = `${(x + this.offsetX).toFixed(1)}px`, top = `${(y + this.offsetY).toFixed(1)}px`;
+    // Stable camera frames leave layout clean for the next label's size read.
+    if (left !== this.left) this.button.style.left = this.left = left;
+    if (top !== this.top) this.button.style.top = this.top = top;
   }
 }

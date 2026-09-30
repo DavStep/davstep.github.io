@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { TownSnapshot } from './model';
 import { PLANET_RADIUS,planetElevation,surfaceNormal,MINING_SITE } from './planet-geography';
+import { PlanetMine } from './planet-mine';
 import { wallIsGate } from './wall-layout';
 import { INFRASTRUCTURE } from './town-plan';
 
@@ -14,6 +15,7 @@ export { MINING_SITE } from './planet-geography';
 export class PlanetSettlements{
   readonly group=new THREE.Group();
   private signature='';
+  private mine:PlanetMine|null=null;
   private geometry=new THREE.BoxGeometry(1,1,1);
   private paints={stone:new THREE.MeshStandardMaterial({color:0xb6ac93,roughness:1}),wood:new THREE.MeshStandardMaterial({color:0x876744,roughness:1}),dark:new THREE.MeshStandardMaterial({color:0x28272a,roughness:1}),ore:new THREE.MeshStandardMaterial({color:0x92b5ba,roughness:.7})};
   constructor(parent:THREE.Group){this.group.name='Terrain-safe defenses and mountain mine';parent.add(this.group);}
@@ -23,6 +25,7 @@ export class PlanetSettlements{
     const mine=snapshot.roadLevel??0;
     const signature=`${snapshot.innerWood}/${snapshot.innerStone}/${snapshot.outerWood}/${snapshot.wallGates}/${mine}`;
     if(signature===this.signature)return;this.signature=signature;
+    this.mine?.dispose();this.mine=null;
     this.group.traverse(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});this.group.clear();
     for(const [radius,wood,stone] of [[INFRASTRUCTURE.wall.innerRadius,snapshot.innerWood,snapshot.innerStone],[INFRASTRUCTURE.wall.outerRadius,snapshot.outerWood,0]]){
       const count=Math.ceil(radius*Math.PI*2/2);
@@ -81,13 +84,12 @@ export class PlanetSettlements{
       this.block(camp,0,1.9,0,3.2,3.8,.5,'dark');
       for(const x of [-1.8,1.8])this.block(camp,x,2,.35,.5,4,.7,'wood');
       this.block(camp,0,4,.35,4.2,.65,.8,'wood');
-      for(const x of [-.65,.65])this.block(camp,x,.15,3,.12,.14,5,'dark');
-      for(let i=0;i<7;i++)this.block(camp,0,.09,1+i*.65,1.8,.12,.2,'wood');
-      if(mine>=3){this.block(camp,0,.7,2.8,1.5,1.1,1.8,'wood');for(const x of [-.6,.6])for(const z of [2.2,3.4])this.block(camp,x,.22,z,.3,.4,.4,'dark');this.block(camp,0,1.3,2.8,1.2,.5,1.3,'ore');}
+      this.mine=new PlanetMine(camp,mine);
       if(mine>=5)for(let i=0;i<3;i++)this.block(camp,3+i*.65,.4+i*.12,2.5,1,.8,1,'ore');
       if(mine>=7){for(const x of [4,6])this.block(camp,x,3,-1,.45,6,.45,'wood');this.block(camp,5,6,-1,3,.45,.65,'wood');this.block(camp,5,3,-1,.09,5,.09,'dark');this.block(camp,5,.8,-1,1.2,1,1.2,'wood');}
     }
     this.group.traverse(o=>o.userData.planetNative=true);
   }
-  dispose(){this.group.traverse(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});this.geometry.dispose();Object.values(this.paints).forEach(p=>p.dispose());this.group.removeFromParent();}
+  render(now:number,reduced:boolean){this.mine?.render(now,reduced);}
+  dispose(){this.mine?.dispose();this.group.traverse(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});this.geometry.dispose();Object.values(this.paints).forEach(p=>p.dispose());this.group.removeFromParent();}
 }

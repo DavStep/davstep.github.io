@@ -1,5 +1,6 @@
 import type { PlotState } from './model';
 import { planetBuildingYaw } from './planet-placement';
+import { PLANET_LANDMARK_SCALE } from './planet-landmarks';
 import cottages from './generated/cottages.json';
 import civic from './generated/civic.json';
 import identity from './generated/civic-identity.json';
@@ -33,6 +34,7 @@ function footprint(plot:PlotState):Bounds{
     ?{minX:-4,maxX:4,minZ:-3.3,maxZ:3.3}:{minX:-2.3,maxX:2.3,minZ:-2,maxZ:2.9});
   // Household fences and log stores are added by the scene beside the authored shell.
   if(plot.kind==='home'&&plot.stage>=5)bounds.maxX=Math.max(bounds.maxX,3.35);
+  if(plot.project)for(const key of ['minX','maxX','minZ','maxZ'] as const)bounds[key]*=PLANET_LANDMARK_SCALE.footprint;
   cache.set(key,bounds);return bounds;
 }
 export function planetBuildingAccess(plot:PlotState){

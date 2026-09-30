@@ -248,11 +248,11 @@ export class GameScenery {
     this.frontier.setLevels(levels,instant||this.reduced.matches);
     this.districts.setLevels(levels,instant||this.reduced.matches);
     this.waterTarget = levels.river >= 2 ? 1 : 0;
-    this.planetRivers?.setLevel(levels.river,instant||this.reduced.matches);
+    this.planetRivers?.setLevel(levels.river>=3?levels.river:0,instant||this.reduced.matches);
     this.riverWorks.setActive(levels.river>=2,instant||this.reduced.matches);
     this.riverWorks.markers.visible=levels.river===1;
     this.wheatTarget = this.planetMode?planetCropGrowth(levels.river,levels.windmill):levels.windmill > 0 ? Math.min(1,Math.max(.08,(levels.windmill-1)/7)) : 0;
-    this.rotor.visible = levels.windmill >= 2;
+    this.rotor.visible = levels.windmill >= 3;
     this.bridges.visible = levels.river >= 2 && levels.roads >= 2;
     this.grove.visible = levels.grove > 0;
     this.blossoms.visible = levels.grove >= 3;
@@ -264,7 +264,7 @@ export class GameScenery {
       this.waterFill = this.waterTarget;
       this.wheatGrowth = this.wheatTarget;
       this.groveGrowth = levels.grove === 1 ? .6 : levels.grove === 2 ? .85 : levels.grove >= 3 ? 1 : 0;
-      this.rotorGrowth = levels.windmill >= 2 ? 1 : 0;
+      this.rotorGrowth = levels.windmill >= 3 ? 1 : 0;
       this.bridgeGrowth = this.bridges.visible ? 1 : 0;
       this.archiveGrowth = this.archivePages.visible ? 1 : 0;
       this.beaconGrowth = this.beacon.visible ? 1 : 0;
@@ -306,7 +306,7 @@ export class GameScenery {
 
   private hideOldLandscape(){
     if(!this.planetMode)return;
-    for(const object of [this.hillside.group,this.moat.group,this.frontier.group,this.riverWorks.group,this.riverWorks.markers,this.water,this.riverBed,this.pool,this.bridges,this.grove,this.blossoms])object.visible=false;
+    for(const object of [this.hillside.group,this.moat.group,this.frontier.group,this.riverWorks.group,this.riverWorks.markers,this.water,this.riverBed,this.pool,this.bridges,this.grove,this.blossoms,this.beacon,this.birds])object.visible=false;
   }
   update(seconds: number, dt: number): void {
     const immediate = this.reduced.matches;
@@ -355,7 +355,7 @@ export class GameScenery {
       this.wheat.instanceMatrix.needsUpdate = true;
       if (this.wheat.instanceColor) this.wheat.instanceColor.needsUpdate = true;
     }
-    if (this.rotor.visible && !immediate && this.rotorGrowth > .9 && (this.planetRivers?.works.flowProgress??this.waterFill) > .6) this.rotor.rotation.z -= dt * .58;
+    if (this.rotor.visible && !immediate && this.rotorGrowth > .9) this.rotor.rotation.z -= dt * .58;
     if (this.archivePages.visible) this.archivePages.children.forEach((page, i) => { page.position.z = -8 + (((immediate?0:seconds * 1.5) + i * 4) % 16);page.position.y = terrainHeight(page.position.x+this.archivePages.position.x,page.position.z+this.archivePages.position.z)+3 + i % 3 * .28 + (immediate?0:Math.sin(seconds * 2 + i) * .17); if(!immediate)page.rotation.set(Math.sin(seconds + i) * .14, seconds * .4 + i, .1); });
     if (this.beacon.visible) {
       this.beacon.children[0].scale.setScalar(Math.max(.001,this.beaconGrowth*(immediate?1:1+Math.sin(seconds*2)*.07)));

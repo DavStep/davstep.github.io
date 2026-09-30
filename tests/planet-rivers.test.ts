@@ -6,7 +6,8 @@ import { planetElevation,surfaceNormal } from '../src/town/planet-geography';
 
 test('planet crops require both freshwater and a mill and stay on dry land',()=>{
   assert.equal(planetCropGrowth(0,8),0);assert.equal(planetCropGrowth(8,0),0);
-  assert.ok(planetCropGrowth(1,1)>0);assert.ok(planetCropGrowth(8,8)>planetCropGrowth(1,1));
+  assert.equal(planetCropGrowth(1,1),0);assert.equal(planetCropGrowth(3,3),0);
+  assert.ok(planetCropGrowth(3,5)>0);assert.ok(planetCropGrowth(8,8)>planetCropGrowth(3,5));
   const sites=Array.from({length:216},(_,i)=>planetCropSite(i)).filter(p=>planetCropDry(p.x,p.z));
   assert.ok(sites.length>180);
   assert.equal(new Set(sites.map(p=>`${p.x}/${p.z}`)).size,sites.length);

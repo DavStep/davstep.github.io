@@ -44,6 +44,10 @@ mat3 planetBasis(vec2 p) {
 export class PlanetProjection {
   private patched=new WeakSet<THREE.Material>();
   private depths=new Map<THREE.Mesh,THREE.MeshDepthMaterial>();
+  private watched=new Set<THREE.Object3D>();
+  private drawables:(THREE.Mesh|THREE.Line|THREE.Points)[]=[];
+  private topologyDirty=true;
+  private markTopologyDirty=()=>{this.topologyDirty=true;};
   private heights=createPlanetHeightTexture();
   private ground:THREE.DataTexture;
   constructor(_scene:THREE.Scene){
@@ -70,7 +74,8 @@ export class PlanetProjection {
         #endif
         planetSource=modelMatrix*planetSource;
         vPlanetSource=planetSource.xyz;
-        vec4 mvPosition=viewMatrix*vec4(planetPosition(planetSource.xyz),1.0);
+        vec3 planetProjectedPosition=planetPosition(planetSource.xyz);
+        vec4 mvPosition=viewMatrix*vec4(planetProjectedPosition,1.0);
         gl_Position=projectionMatrix*mvPosition;
       `);
       // Preserve each model's normal detail, then turn its up direction outwards.
@@ -85,7 +90,7 @@ export class PlanetProjection {
       `);
       shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>',`#include <worldpos_vertex>
         #if defined(USE_ENVMAP) || defined(DISTANCE) || defined(USE_SHADOWMAP) || defined(USE_TRANSMISSION) || NUM_SPOT_LIGHT_COORDS > 0
-          worldPosition=vec4(planetPosition(planetSource.xyz),1.0);
+          worldPosition=vec4(planetProjectedPosition,1.0);
         #endif
       `);
       // Construction clipping planes still operate in the original simulation coordinates.
@@ -100,26 +105,57 @@ export class PlanetProjection {
         .replace('viewMatrix*vec4(townWn,0.0)','viewMatrix*vec4(planetBasis(vPlanetSource.xz)*townWn,0.0)')
         .replaceAll('viewMatrix*vec4(0.0,1.0,0.0,0.0)','viewMatrix*vec4(planetNormal(vPlanetSource.xz),0.0)');
     };
-    material.customProgramCacheKey=()=>`${cacheKey}-planet-projection-v1`;
+    material.customProgramCacheKey=()=>`${cacheKey}-planet-projection-v2`;
     material.needsUpdate=true;
   }
   sync(scene:THREE.Scene){
-    const present=new Set<THREE.Mesh>();
-    scene.traverse(object=>{
-      if(!(object instanceof THREE.Mesh||object instanceof THREE.Line||object instanceof THREE.Points)||object.userData.planetNative)return;
+    if(this.topologyDirty){
+      const present=new Set<THREE.Object3D>();
+      this.drawables.length=0;
+      scene.traverse(object=>{
+        present.add(object);
+        if(!this.watched.has(object)){
+          object.addEventListener('childadded',this.markTopologyDirty);
+          object.addEventListener('childremoved',this.markTopologyDirty);
+          this.watched.add(object);
+        }
+        if((object instanceof THREE.Mesh||object instanceof THREE.Line||object instanceof THREE.Points)&&!object.userData.planetNative)this.drawables.push(object);
+      });
+      for(const object of this.watched)if(!present.has(object)){
+        object.removeEventListener('childadded',this.markTopologyDirty);
+        object.removeEventListener('childremoved',this.markTopologyDirty);
+        this.watched.delete(object);
+      }
+      for(const [mesh,depth] of this.depths)if(!present.has(mesh)){
+        depth.dispose();if(mesh.customDepthMaterial===depth)mesh.customDepthMaterial=undefined;
+        this.depths.delete(mesh);
+      }
+      this.topologyDirty=false;
+    }
+    // Materials can be replaced (or an array edited) without changing topology.
+    // Keep that cheap check on the projected drawables, not the whole scene.
+    for(const object of this.drawables){
       // The original sky is already a camera-centred sphere, not ground geometry.
-      const materials=Array.isArray(object.material)?object.material:[object.material];
-      if(materials.some(m=>m instanceof THREE.ShaderMaterial))return;
-      materials.forEach(m=>this.patch(m));
+      const material=object.material;
+      if(Array.isArray(material)){
+        if(material.some(m=>m instanceof THREE.ShaderMaterial))continue;
+        for(const m of material)this.patch(m);
+      }else{
+        if(material instanceof THREE.ShaderMaterial)continue;
+        this.patch(material);
+      }
       object.frustumCulled=false;
-      if(!(object instanceof THREE.Mesh))return;
-      present.add(object);
-      if(this.depths.has(object))return;
+      if(!(object instanceof THREE.Mesh)||this.depths.has(object))continue;
+      const first=Array.isArray(material)?material[0]:material;
       const depth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});
-      depth.clippingPlanes=materials[0].clippingPlanes;depth.clipShadows=materials[0].clipShadows;
+      depth.clippingPlanes=first.clippingPlanes;depth.clipShadows=first.clipShadows;
       this.patch(depth);object.customDepthMaterial=depth;this.depths.set(object,depth);
-    });
-    for(const [mesh,depth] of this.depths)if(!present.has(mesh)){depth.dispose();this.depths.delete(mesh);}
+    }
   }
-  dispose(){this.depths.forEach(m=>m.dispose());this.depths.clear();this.heights.dispose();this.ground.dispose();}
+  dispose(){
+    for(const object of this.watched){object.removeEventListener('childadded',this.markTopologyDirty);object.removeEventListener('childremoved',this.markTopologyDirty);}
+    this.watched.clear();this.drawables.length=0;
+    for(const [mesh,depth] of this.depths){depth.dispose();if(mesh.customDepthMaterial===depth)mesh.customDepthMaterial=undefined;}
+    this.depths.clear();this.heights.dispose();this.ground.dispose();
+  }
 }

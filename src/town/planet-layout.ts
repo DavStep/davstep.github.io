@@ -3,7 +3,7 @@ import { terrainHeight } from './environment';
 import { PLANET_RADIUS, planetElevation } from './planet-geography';
 export { PLANET_RADIUS } from './planet-geography';
 
-export const PLANET_SAVE_KEY = 'davstep.choice-planet.v1';
+export const PLANET_SAVE_KEY = 'davstep.choice-planet.v3';
 
 /** Stereographic projection: the original town coordinates remain the source of truth. */
 export function planetNormal(x:number,z:number):THREE.Vector3 {

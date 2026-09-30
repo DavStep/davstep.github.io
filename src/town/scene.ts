@@ -1,8 +1,11 @@
+import type { WorldEventState } from './world-event-types';
 import * as THREE from 'three';
 import { PlanetProjection } from './planet-scene';
+import { PLANET_LANDMARK_SCALE,planetLandmarkHeight } from './planet-landmarks';
 import { PlanetLandscape } from './planet-landscape';
 import { PLANET_RADIUS, planetSourceGroundHeight } from './planet-layout';
 import { PLANET_CAMERA_NEAR, planetBuildingYaw, planetSunDirection } from './planet-placement';
+import { applyPlanetLighting, configurePlanetShadows, PLANET_LIGHT_DISTANCE } from './planet-lighting';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLOTS, WALL_SEGMENTS, type PlotState, type TownSnapshot } from './model';
@@ -213,6 +216,11 @@ function building(plot:PlotState,gameMode=false,planetMode=false): THREE.Group {
     :plot.kind==='project'?authoredLandmarkBuilding(plot,MOBILE):civicBuilding(plot,MOBILE,gameMode);
   group.position.y+=terrainHeight(plot.x,plot.z)-.48;
   if(planetMode){
+    if(plot.project){
+      const hero=new THREE.Group();hero.name='Planet project landmark scale';
+      hero.scale.set(PLANET_LANDMARK_SCALE.footprint,PLANET_LANDMARK_SCALE.height,PLANET_LANDMARK_SCALE.footprint);
+      for(const child of [...group.children])hero.add(child);group.add(hero);
+    }
     group.rotation.y+=planetBuildingYaw(plot);
     // Authored buildings share one foundation height; do not subtract a
     // different legacy hillside height from each corner of the same model.
@@ -228,8 +236,10 @@ function building(plot:PlotState,gameMode=false,planetMode=false): THREE.Group {
 function projectPickBox(plot:PlotState,planetMode=false):THREE.Box3{
   const y=terrainHeight(plot.x,plot.z);
   const yaw=planetMode?planetBuildingYaw(plot):0,c=Math.abs(Math.cos(yaw)),s=Math.abs(Math.sin(yaw));
-  const width=5.3*c+5*s,depth=5*c+5.3*s;
-  return new THREE.Box3(new THREE.Vector3(plot.x-width,y-.5,plot.z-depth),new THREE.Vector3(plot.x+width,y+20,plot.z+depth));
+  const size=planetMode?PLANET_LANDMARK_SCALE.footprint:1;
+  const width=(5.3*c+5*s)*size,depth=(5*c+5.3*s)*size;
+  const top=planetMode&&plot.project?planetLandmarkHeight(plot.project,plot.stage)+1:20;
+  return new THREE.Box3(new THREE.Vector3(plot.x-width,y-.5,plot.z-depth),new THREE.Vector3(plot.x+width,y+top,plot.z+depth));
 }
 function hash(n:number){let x=n|0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;return (x^x>>>16)>>>0;}
 function wallSectorGeometry(radius:number):THREE.BufferGeometry{
@@ -334,6 +344,7 @@ export class TownScene {
     this.sun.position.set(-70,65,45);this.sun.castShadow=true;
     this.sun.shadow.mapSize.setScalar(this.mobile?1024:4096);
     this.sun.shadow.radius=this.mobile?1.25:2.5;
+    if(this.planetMode)configurePlanetShadows(this.sun,this.mobile,PLANET_RADIUS);
     this.scene.add(this.sun,this.sun.target,this.fill,this.land,this.structures,this.roads,this.walls,this.structureReveal,this.arrivalStructures,this.previousStructures,this.previousRoads,this.previousWalls);
     this.environment=new Environment(this.scene,this.mobile,this.gameMode,this.planetMode);
     this.sky=new TownSky(this.scene);
@@ -344,14 +355,19 @@ export class TownScene {
     if(this.planetMode){
       this.planet=new PlanetProjection(this.scene);this.planetLandscape=new PlanetLandscape(this.scene,this.mobile);
       this.environment.group.visible=false;this.land.visible=false;this.sky.setVisible(false);
+      // These flat-world branches are permanently hidden in planet mode. Keep
+      // their simulation/placement data, but avoid renderer matrix traversal.
+      this.environment.group.removeFromParent();this.land.removeFromParent();
       this.renderer.setClearColor(0x000000,0);this.scene.fog=null;this.scene.background=null;
       this.camera.near=PLANET_CAMERA_NEAR;this.camera.far=1800;this.camera.updateProjectionMatrix();
     }
     this.contactShadows.setTrees([...this.environment.activeTrees,...this.treeObstacles]);this.resize();
   }
+  setWorldEventState(world:WorldEventState){this.planetLandscape?.setWorldEventState(world);}
+  setExpeditionActive(active:boolean){this.planetLandscape?.setExpeditionActive(active);}
   get planetCropClearance(){return this.planetLandscape?.cropClearance;}
   get planetRoadClearance(){return this.planetLandscape?.roadClearance;}
-  resize(){const w=innerWidth,h=innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
+  resize(){const canvas=this.renderer.domElement,w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);}
   setPixelRatio(r:number){this.renderer.setPixelRatio(r);this.resize();}
   private createLand(){
     const earth=new THREE.Mesh(new THREE.CylinderGeometry(70,73,3.8,72),MAT.earth);earth.position.y=-2;earth.receiveShadow=true;this.land.add(earth);
@@ -919,6 +935,9 @@ export class TownScene {
       this.fill.position.set(0,1,0).applyQuaternion(this.camera.quaternion);
     }
     this.sun.shadow.intensity=1-overcast*.28;
+    // Set the final intensities before writing atmosphere uniforms so the globe,
+    // its water and atmospheric scattering agree about the current sunlight.
+    this.renderer.toneMappingExposure=this.planetMode?applyPlanetLighting(this.sun,this.fill,night,overcast):1.12-.1*night;
     this.sky.update(snapshot,night,this.sunDirection,this.camera.position);
     // Fog and background use the sky's horizon, so the land melts into the sky.
     this.fogColor.copy(this.sky.horizonColor).lerp(this.sky.zenithColor,.05);
@@ -933,7 +952,6 @@ export class TownScene {
     MAT.leaf.color.set(snapshot.season==='autumn'?0xbc8a4b:snapshot.season==='winter'?0x84937f:C.leaf);
     // Moonlight: pull vegetation albedo toward a cool grey so night reads blue, not saturated green.
     const moon=night*.7;MAT.leaf.color.lerp(NIGHT_TINT,moon);for(const m of [MAT.terrain,MAT.foliage,MAT.pine])m.color.set(0xffffff).lerp(NIGHT_TINT,moon);
-    this.renderer.toneMappingExposure=1.12-.1*night;
   }
   /** Rebuilds the sky reflection PMREM only when the palette bucket changes. */
   private updateEnvironment(snapshot:TownSnapshot,night:number){
@@ -951,10 +969,8 @@ export class TownScene {
    */
   private updateShadowFrustum(){
     if(this.planetMode){
-      const reach=PLANET_RADIUS+40,cam=this.sun.shadow.camera;
-      this.sun.target.position.set(0,0,0);this.sun.position.copy(this.sunDirection).multiplyScalar(400);
-      this.sun.target.updateMatrixWorld();cam.left=cam.bottom=-reach;cam.right=cam.top=reach;cam.near=240;cam.far=560;cam.updateProjectionMatrix();
-      this.sun.shadow.normalBias=this.mobile?.45:.25;this.sun.shadow.bias=-.0003;return;
+      this.sun.target.position.set(0,0,0);this.sun.position.copy(this.sunDirection).multiplyScalar(PLANET_LIGHT_DISTANCE);
+      this.sun.target.updateMatrixWorld();return;
     }
     const camera=this.camera,shadow=this.sun.shadow;
     camera.updateMatrixWorld();
@@ -996,7 +1012,7 @@ export class TownScene {
     }
   }
   render(snapshot:TownSnapshot,roaming:boolean){const now=performance.now();this.updateTransitions(now);this.updateAtmosphere(snapshot);this.updateShadowFrustum();this.environment.update(now/1000,this.currentSeason,this.currentNight);this.rain.update(this.camera,now,roaming);this.planet?.sync(this.scene);
-    if(this.planetMode){this.scene.background=null;this.fill.intensity=1.5;this.sun.intensity=3.2;this.planetLandscape?.render(now);}
+    if(this.planetMode){this.scene.background=null;this.planetLandscape?.render(now);}
     this.renderer.render(this.scene,this.camera);}
   dispose(){this.planetLandscape?.dispose();this.planet?.dispose();this.finishTransitions();this.clear(this.structures);this.clear(this.roads);this.clear(this.walls);this.rain.dispose();this.contactShadows.dispose();this.environmentMap?.dispose();this.pmrem.dispose();this.sky.dispose();this.sun.shadow.dispose();this.renderer.dispose();}
 }

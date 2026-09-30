@@ -7,6 +7,7 @@ import { planetElevation,surfaceNormal,MOUNTAIN_SITES,PLANET_RADIUS } from '../s
 import { PlanetSettlements,wallFootprintSafe } from '../src/town/planet-settlements';
 import { authoredLandmarkBuilding } from '../src/town/authored-landmarks';
 import { planetBuildingYaw } from '../src/town/planet-placement';
+import { PLANET_LANDMARK_SCALE } from '../src/town/planet-landmarks';
 
 test('stone and timber gates frame all four road openings, including the wrapped sector pair',()=>{
  const snapshot=snapshotForGame(evaluate(IDEAS).levels);
@@ -40,7 +41,7 @@ test('stone and timber gates frame all four road openings, including the wrapped
 test('all mature project footprints are dry and level, and dwarves have a mountain site',()=>{
  const snapshot=snapshotForGame(evaluate(IDEAS).levels),point=new THREE.Vector3();
  for(const plot of snapshot.plots.filter(p=>p.kind==='project')){
-  const model=authoredLandmarkBuilding(plot,false);model.rotation.y=planetBuildingYaw(plot);model.updateMatrixWorld(true);
+  const model=authoredLandmarkBuilding(plot,false);model.scale.set(PLANET_LANDMARK_SCALE.footprint,PLANET_LANDMARK_SCALE.height,PLANET_LANDMARK_SCALE.footprint);model.rotation.y=planetBuildingYaw(plot);model.updateMatrixWorld(true);
   model.traverse(o=>{if(!(o instanceof THREE.Mesh))return;const position=o.geometry.getAttribute('position');for(let i=0;i<position.count;i+=3){point.fromBufferAttribute(position,i).applyMatrix4(o.matrixWorld);const h=planetElevation(surfaceNormal(point.x,point.z));assert.ok(h>2.8,`${plot.id} footprint below safe ground: ${h}`);assert.ok(Math.abs(h-3.4)<.3,`${plot.id} unlevel foundation: ${h}`);}});
  }
  const dwarves=snapshot.plots.find(p=>p.project==='dwarves')!;
@@ -52,7 +53,9 @@ test('all occupied sites reserve dry ground and walls omit unsafe coastline sect
  const parent=new THREE.Group(),settlements=new PlanetSettlements(parent);settlements.update(snapshot);
  assert.ok(settlements.group.children.some(g=>g.name==='Dwarven mountain mine'));
  const mine=settlements.group.children.find(g=>g.name==='Dwarven mountain mine')!;mine.updateMatrixWorld(true);
- mine.traverse(o=>{if(!(o instanceof THREE.Mesh)||o.position.y-o.scale.y/2>.03)return;
+ // Original camp foundations are unit boxes; articulated/batched railway meshes
+ // have their own rail and terrain checks in planet-mine.test.ts.
+ mine.traverse(o=>{if(!(o instanceof THREE.Mesh)||o.parent!==mine||o.position.y-o.scale.y/2>.03)return;
   for(const x of [-.5,.5])for(const z of [-.5,.5]){
    const foot=new THREE.Vector3(x,-.5,z).applyMatrix4(o.matrixWorld),normal=foot.clone().normalize();
    const clearance=foot.length()-PLANET_RADIUS-planetElevation(normal);

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { snapshotForGame } from './game-snapshot';
 import { IDEAS, type Levels } from './game';
+import { PLANET_LANDMARK_SCALE } from './planet-landmarks';
 
 export const PLANET_RADIUS=85;
 const noise=new ImprovedNoise();
@@ -16,7 +17,7 @@ export const TOWN_SITES=plots.map(p=>surfaceNormal(p.x,p.z));
 export const MINING_SITE={x:-94,z:56};
 export const SITE_PLATFORMS=plots.map(p=>({
   normal:surfaceNormal(p.x,p.z),
-  radius:(p.kind==='castle'?14:p.kind==='project'?9:p.kind==='home'?4.2:6)/(1+(p.x*p.x+p.z*p.z)/(4*PLANET_RADIUS*PLANET_RADIUS)),
+  radius:(p.kind==='castle'?14:p.kind==='project'?Math.ceil(7*PLANET_LANDMARK_SCALE.footprint):p.kind==='home'?4.2:6)/(1+(p.x*p.x+p.z*p.z)/(4*PLANET_RADIUS*PLANET_RADIUS)),
   height:3.4,
 }));
 SITE_PLATFORMS.push({normal:surfaceNormal(MINING_SITE.x,MINING_SITE.z),radius:4.5,height:3.4});

@@ -1,5 +1,6 @@
 import type { GameState, Idea, TownEvent } from './game';
 import { MILESTONES } from './milestones';
+import type { WorldEvent, WorldEventState } from './world-event-types';
 
 export type ActionStyle = 'settle' | 'fortify' | 'grow' | 'forge' | 'connect' | 'trade' | 'water' | 'harvest' | 'knowledge' | 'stars';
 export const ACTION_STYLES: Record<Idea, ActionStyle> = {
@@ -13,6 +14,7 @@ const LOCAL_GROWTH_TITLES: Partial<Record<Idea, readonly string[]>> = {
   windmill: ['New field rows', 'Wider harvest', 'Full granary', 'Golden fields', 'Harvest complete'],
 };
 export function eventTitle(event: TownEvent): string {
+  if(event.title)return event.title;
   const local=LOCAL_GROWTH_TITLES[event.idea]?.[event.level-4];
   if(local)return local;
   const milestone = MILESTONES[event.idea][event.level - 1];
@@ -28,32 +30,27 @@ export interface ChoiceBeat {
   event: TownEvent;
   arrival: boolean;
   projects: string[];
+  world: WorldEventState;
+}
+export type DecisionBeat = {kind:'development';beat:ChoiceBeat} | {kind:'world';event:WorldEvent};
+
+/** Coalesce adjacent stages only. Deliveries must precede the buildings they enable. */
+export function decisionSequence(state: GameState): DecisionBeat[] {
+  const sequence:DecisionBeat[]=[];
+  for(const step of state.timeline){
+    if(step.kind==='world'){sequence.push(step);continue;}
+    const grant=step.event,last=sequence.at(-1);
+    if(last?.kind==='development'&&last.beat.event.idea===grant.idea){
+      const beat=last.beat;
+      beat.event={...grant,sources:[...beat.event.sources]};
+      for(const source of grant.sources)if(!beat.event.sources.some(s=>s.idea===source.idea))beat.event.sources.push(source);
+      if(grant.project&&!beat.projects.includes(grant.project))beat.projects.push(grant.project);
+      beat.world=step.world;
+    }else sequence.push({kind:'development',beat:{event:{...grant,sources:[...grant.sources]},arrival:grant.level===1,projects:grant.project?[grant.project]:[],world:step.world}});
+  }
+  return sequence;
 }
 
-/** One choice, one visit per site. Stage grants are rewards, not new triggers. */
 export function choiceSequence(state: GameState): ChoiceBeat[] {
-  const selected=state.order.at(-1);
-  if(!selected)return [];
-  const sites=new Map<Idea,ChoiceBeat>();
-  for(const grant of state.events){
-    let beat=sites.get(grant.idea);
-    if(!beat){
-      beat={event:{...grant,sources:[]},arrival:grant.idea===selected,projects:[]};
-      sites.set(grant.idea,beat);
-    }
-    beat.event.level=grant.level;
-    if(grant.project&&!beat.projects.includes(grant.project))beat.projects.push(grant.project);
-  }
-  return [...sites.values()].map((beat,index)=>{
-    beat.event.wave=index;
-    if(beat.arrival){
-      // The new idea arrives once with all benefits of the existing town.
-      // Do not send reciprocal reaction trails back to this site later.
-      delete beat.event.project;
-    }else{
-      beat.event.project=beat.projects[0];
-      beat.event.sources=[{idea:selected,level:state.levels[selected],purpose:'New choice'}];
-    }
-    return beat;
-  });
+  return decisionSequence(state).flatMap(step=>step.kind==='development'?[step.beat]:[]);
 }

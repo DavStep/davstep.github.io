@@ -11,6 +11,8 @@ export interface TownSave { version: 3; createdAt: number; lastSeenAt: number; e
 export interface TownSnapshot {
   districtConnections?: string[];
   riverLevel?: number;
+  marketLevel?: number;
+  observatoryLevel?: number;
   roadLevel?: number;
   groveLevel?: number;
   wallLevel?: number;

@@ -1,19 +1,90 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="portfolio-mode">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#14252a" />
-  <meta name="description" content="An order puzzle on a 3D planet. Choose ten ideas, learn their dependencies, and find the sequence that grows every idea to MAX." />
-  <title>Dav Stepanyan — A Town of Consequences</title>
-  <script>try{if(JSON.parse(localStorage.getItem('davstep.choice-planet.v1')||'{}').started)document.documentElement.classList.add('returning')}catch(e){}</script>
+  <meta name="theme-color" content="#171e1b" />
+  <script>
+    // Resolve appearance before the first paint, including when storage is unavailable.
+    (() => {
+      let preference = 'system';
+      try { const saved = localStorage.getItem('davstep.appearance'); if (saved === 'light' || saved === 'dark') preference = saved; } catch {}
+      const theme = preference === 'system' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : preference;
+      document.documentElement.dataset.themePreference = preference;
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+      document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#faf9f5' : '#171e1b';
+    })();
+  </script>
+  <meta name="description" content="Dav Stepanyan, game developer in Yerevan. Games at Rockbite, independent browser adventures, and a little world you can play with." />
+  <title>Dav Stepanyan — Games & Little Worlds</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/portfolio.css" />
 </head>
-<body>
+<body class="portfolio-mode">
   <div id="app" class="app">
+    <div id="portfolio" class="portfolio-page">
+      <a class="skip-link" href="#portfolio-content">Skip to my work</a>
+      <div class="portfolio-opening">
+      <header class="portfolio-header">
+        <a class="portfolio-name" href="#home">Dav Stepanyan<span>Game developer</span></a>
+        <div class="portfolio-header-actions">
+          <nav aria-label="Main navigation"><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
+          <label class="theme-control" title="Appearance">
+            <svg class="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none"/></svg>
+            <select id="theme-select" name="appearance" aria-label="Appearance"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+          </label>
+        </div>
+      </header>
+        <section id="home" class="portfolio-hero" aria-labelledby="home-title">
+          <div class="hero-copy"><p class="portfolio-eyebrow">Hi, I'm Dav. Nice to meet you.</p><h1 id="home-title">I build games<br>that feel alive.</h1><p class="hero-introduction">I'm a game developer in Yerevan, Armenia. I love turning code, curious ideas, and small details into worlds people want to spend time in.</p><p class="hero-current">At Rockbite Games. Still experimenting after hours.</p><a class="portfolio-primary" href="#work">Explore my work <span aria-hidden="true">↓</span></a></div>
+          <div id="hero-world-view" class="hero-world-view" role="group" aria-label="A living little world">
+            <img class="hero-world-poster" src="/assets/games/world-hero.webp" alt="A little planet with villages, forests, and rivers" width="797" height="560" fetchpriority="high" />
+            <div class="hero-world-controls" hidden>
+              <span id="hero-world-hint">Drag · Scroll to zoom</span>
+              <button type="button" data-hero-rotate="left" aria-label="Rotate planet left" title="Rotate left">←</button>
+              <button type="button" data-hero-rotate="right" aria-label="Rotate planet right" title="Rotate right">→</button>
+              <button type="button" data-hero-zoom="in" aria-label="Zoom in on planet" title="Zoom in">+</button>
+              <button type="button" data-hero-zoom="out" aria-label="Zoom out from planet" title="Zoom out">−</button>
+              <button type="button" data-hero-rotate="reset" aria-label="Reset planet view" title="Reset view">↺</button>
+              <button type="button" data-hero-motion aria-label="Pause planet animation" title="Pause animation" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path data-pause-icon d="M8 5v14M16 5v14"/><path data-play-icon d="m9 5 10 7-10 7Z" hidden/></svg></button>
+            </div>
+            <span id="hero-world-keyboard-help" class="visually-hidden">Drag to rotate, scroll or pinch to zoom. Use the arrow keys to rotate and plus or minus to zoom. Press Home to reset the view.</span>
+            <button class="hero-world-entry" type="button" data-play-town><span>Play with the town</span><span aria-hidden="true">↗</span></button>
+          </div>
+        </section>
+      <div class="opening-footer"><p id="town-load-status" class="town-load-status" role="status" hidden></p><a class="opening-scroll" href="#work">Scroll to see the work <span aria-hidden="true">↓</span></a></div>
+      </div>
+      <div class="portfolio-content-surface">
+      <main id="portfolio-content" class="portfolio-content" tabindex="-1">
+        <section id="work" class="portfolio-section" aria-labelledby="work-title">
+          <div class="section-introduction"><p class="portfolio-eyebrow">At Rockbite Games</p><h2 id="work-title">Games I've worked on.</h2><p>From the first prototype to the systems that keep a game growing. These are some of the worlds I've been part of.</p></div>
+          <div class="portfolio-projects">
+            <article id="project-outpost" class="portfolio-project"><a class="project-image-link" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer" aria-label="Explore Idle Outpost"><img src="/assets/games/idle-outpost.webp" alt="Idle Outpost game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games · Current</p><h3>Idle Outpost</h3><p>A business at the end of the world. Trade with survivors, recruit heroes, and build something worth defending.</p><p class="project-role"><span>My part</span>Systems, economy, progression · involved since the first prototype</p><a class="portfolio-text-link" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-sandship" class="portfolio-project"><a class="project-image-link" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer" aria-label="Explore Sandship"><img src="/assets/games/sandship.webp" alt="Sandship game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games · Shipped</p><h3>Sandship</h3><p>A moving factory in a strange desert, built around crafting and automation.</p><p class="project-role"><span>My part</span>Crafting, automation, live operations</p><a class="portfolio-text-link" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-battle" class="portfolio-project"><a class="project-image-link" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer" aria-label="Explore Battle Cards"><img src="/assets/games/battle-cards.webp" alt="Battle Cards game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games · Shipped</p><h3>Battle Cards</h3><p>A fast PvP card battler starring heroic ducks. It grew from a game jam prototype into a full release.</p><p class="project-role"><span>My part</span>PvP, strategy, deck building · from prototype to launch</p><a class="portfolio-text-link" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
+          </div>
+        </section>
+        <section class="portfolio-section personal-work" aria-labelledby="personal-title">
+          <div class="section-introduction"><p class="portfolio-eyebrow">After hours</p><h2 id="personal-title">My own little worlds.</h2><p>I keep building when the workday ends. Browser games, curious experiments, and prototypes you can actually play.</p></div>
+          <div class="portfolio-projects independent-projects">
+            <article id="project-wizard" class="portfolio-project"><a class="project-image-link" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer" aria-label="Play Idle Wizard"><img src="/assets/games/idle-wizard.webp" alt="Idle Wizard’s purple workshop with a witch, cat, bubbling cauldron, and potions" loading="lazy" width="1024" height="500" /></a><div class="portfolio-project-copy"><p class="project-context">Independent game · In active development</p><h3>Idle Wizard</h3><p>A magical idle adventure I'm building now. Meet Elara Starbrew and see where the story goes.</p><a class="portfolio-text-link" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer">Play in your browser <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-dwarves" class="portfolio-project"><a class="project-image-link" href="https://davstep.github.io/drunk-dwarves/" target="_blank" rel="noopener noreferrer" aria-label="Play the Drunk Dwarves prototype"><img src="/assets/games/drunk-dwarves.webp" alt="Dwarves working in a lantern-lit cave with timber supports, rails, and a minecart" loading="lazy" width="1440" height="758" /></a><div class="portfolio-project-copy"><p class="project-context">Independent game · Playable prototype</p><h3>Drunk Dwarves</h3><p>Rocky tunnels, strange finds, minecarts, and questionable coworkers. A single-player mining sandbox, with co-op still in development.</p><a class="portfolio-text-link" href="https://davstep.github.io/drunk-dwarves/" target="_blank" rel="noopener noreferrer">Play the prototype <span aria-hidden="true">↗</span></a></div></article>
+          </div>
+        </section>
+        <section id="about" class="portfolio-about portfolio-section" aria-labelledby="about-title">
+          <div><p class="portfolio-eyebrow">The person behind the code</p><h2 id="about-title">Always making<br>something.</h2><dl class="portfolio-facts"><div><dt>Role</dt><dd>Lead Code Wizard</dd></div><div><dt>Home</dt><dd>Yerevan, Armenia</dd></div><div><dt>Currently building</dt><dd>Drunk Dwarves</dd></div></dl></div>
+          <div class="about-writing"><p>I enjoy both writing the code and watching what players actually do with it. At Rockbite Games, I've worked across gameplay, economies, progression, and the small details that make systems feel alive.</p><p>After hours, I keep following ideas: browser games, creative tools, and a co-op mining adventure. Some become games. Some stay experiments. I like having room for both.</p><p class="about-signoff">There's usually something new taking shape.</p></div>
+        </section>
+        <section id="contact" class="portfolio-contact" aria-labelledby="contact-title"><div><p class="portfolio-eyebrow">Say hello</p><h2 id="contact-title">Good ideas start<br>with a conversation.</h2><p>Have a game idea, a system to untangle, or just want to compare notes?</p></div><div class="portfolio-contact-details"><a class="portfolio-email" href="mailto:davitstepanyan99@gmail.com">davitstepanyan99@gmail.com <span aria-hidden="true">↗</span></a><div class="portfolio-socials"><a href="https://github.com/DavStep" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://anilist.co/user/DevStep" target="_blank" rel="noopener noreferrer">AniList ↗</a><a href="https://steamcommunity.com/id/stepdev/" target="_blank" rel="noopener noreferrer">Steam ↗</a><button type="button" data-copy-discord>Discord: step_dev</button></div><p id="contact-status" role="status"></p></div></section>
+      </main>
+      <footer class="portfolio-footer"><span>Dav Stepanyan · Yerevan, Armenia</span><a href="#home">Back to the top ↑</a></footer>
+      </div>
+    </div>
+    <div id="town-experience" class="town-experience" hidden>
     <div class="world-poster" aria-hidden="true"><div class="poster-hill back"></div><div class="poster-hill front"></div><div class="poster-castle">♜</div></div>
     <canvas id="town-canvas" aria-hidden="true"></canvas>
     <div class="camera-controls" aria-label="Town camera controls">
@@ -24,32 +95,33 @@
       <button id="camera-overview" type="button" aria-label="Show town overview" title="Town overview">⌂</button>
       <span>Drag to rotate · scroll or pinch to zoom</span>
     </div>
-    <header class="chrome">
-      <button id="brand" class="brand" type="button" aria-label="Return to town overview"><span class="brand-icon" aria-hidden="true">D<span>S</span></span><span class="brand-name">DAV STEPANYAN<small>GAME DEVELOPER · WORLD BUILDER</small></span></button>
-      <nav aria-label="Main navigation"><button data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav>
-    </header>
-    <main class="town-ui">
+    <header class="chrome"><button id="brand" class="brand" type="button" aria-label="Back to portfolio">← Back to portfolio</button><nav aria-label="Portfolio while playing"><button data-panel="work" type="button">My work</button></nav></header>
+    <div class="town-ui">
       <div id="world-labels" class="world-labels" aria-label="Project buildings"></div>
-      <section class="intro" id="intro" aria-labelledby="intro-title"><div class="intro-kicker"><span class="pulse"></span> A TOWN OF CONSEQUENCES <span class="intro-index">01 / 10</span></div><h1 id="intro-title"><span class="mask-line"><span>Choose the order.</span></span><span class="mask-line"><span><em>Grow every idea.</em></span></span></h1><p class="intro-lead">Ten ideas, one planet. Place them one at a time and watch the town answer.</p><ol class="intro-steps"><li><span><b>Pick</b> any idea. It arrives right away.</span></li><li><span><b>Pair up.</b> Ideas already in town collaborate with it and grow.</span></li><li><span><b>Mind the order.</b> A reversed pair misses its chance. Get all ten to MAX.</span></li></ol><div class="intro-actions"><button id="intro-start" type="button">Start puzzle <span>✦</span></button><button id="intro-work" type="button">Explore my work <span>↗</span></button></div><div class="intro-foot">TEN IDEAS · ONE SEQUENCE AT A TIME</div></section>
+      <section class="intro" id="intro" aria-labelledby="intro-title"><h1 id="intro-title">A small world, ten ideas.</h1><p>Pick an idea and watch the town grow. The order changes what happens.</p><div class="intro-actions"><button id="intro-start" type="button">Play with the town</button><button id="intro-work" type="button">See my work</button></div></section>
       <section id="game-hud" class="game-hud" aria-label="Town choice game" hidden>
         <div class="game-hud-head">
-          <div class="game-hud-title"><span class="game-hud-kicker">✦ &nbsp; THE ORDER PUZZLE</span><strong id="game-summary">Get every idea to MAX.</strong></div>
+          <div class="game-hud-title"><span class="game-hud-kicker">✦ &nbsp; A WORLD OF CONSEQUENCES</span><strong id="game-summary">Pick your first idea</strong><p class="game-guidance">Pick an idea below. Watch what it brings to the town.</p></div>
           <div class="game-hud-actions"><span id="game-turn">0 / 10</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-sound" type="button" aria-pressed="true" title="Sound on">♪</button><button id="game-restart" type="button"><b aria-hidden="true">↻</b> <span>Restart</span></button></div>
         </div>
         <div id="game-progress" class="game-progress" aria-hidden="true"></div>
         <div id="game-cards" class="game-cards" role="group" aria-label="Choose the next idea"></div>
+        <div id="world-artifacts" class="world-artifacts" aria-label="Collected artifacts" hidden></div>
+        <p id="world-notice" class="world-notice" role="status" hidden></p>
+        <details id="world-journal" class="world-journal" hidden><summary>Your town’s story</summary><div></div></details>
         <p id="game-event" class="game-event" role="status" aria-live="polite"></p>
       </section>
-      <button id="open-work-mobile" class="mobile-work" type="button">Explore work <span>↗</span></button>
-    </main>
+
+    </div>
     <div class="panel-backdrop" id="panel-backdrop" hidden></div>
     <section id="content-panel" class="content-panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
-      <aside class="panel-rail" aria-label="Panel controls"><button id="panel-close" type="button" aria-label="Close panel">×</button><nav aria-label="Panel sections"><button class="panel-tab" data-panel="work" type="button"><span aria-hidden="true">✦</span> Work</button><button class="panel-tab" data-panel="about" type="button"><span aria-hidden="true">◈</span> About</button><button class="panel-tab" data-panel="contact" type="button"><span aria-hidden="true">✉</span> Contact</button></nav><span class="panel-rail-mark" aria-hidden="true">DS</span></aside>
+      <aside class="panel-rail" aria-label="Panel controls"><button id="panel-close" type="button" aria-label="Close panel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button><nav aria-label="Panel sections"><button class="panel-tab" data-panel="work" type="button">Work</button><button class="panel-tab" data-panel="about" type="button">About</button><button class="panel-tab" data-panel="contact" type="button">Contact</button></nav><span class="panel-rail-mark" aria-hidden="true">DS</span></aside>
       <div id="panel-body"></div>
     </section>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-      <div id="fallback" class="fallback" hidden><h2>The 3D town is resting.</h2><p>You can still solve the order puzzle and explore every project.</p><button id="fallback-start" type="button">Start puzzle ✦</button><button type="button" data-panel="work">Explore work ↗</button></div>
+      <div id="fallback" class="fallback" hidden><h2>The 3D town is resting.</h2><p>You can still play the town’s story and explore every project.</p><button id="fallback-start" type="button">Play with the town</button><button type="button" data-panel="work">Explore work ↗</button></div>
+    </div>
   </div>
-  <script type="module" src="/src/town/main.ts"></script>
+  <script type="module" src="/src/portfolio.ts"></script>
 </body>
 </html>

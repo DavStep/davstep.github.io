@@ -1,0 +1,70 @@
+[
+  {
+    "mobile": false,
+    "river": {
+      "visible": true,
+      "vertices": 2304
+    },
+    "stableLabelWrites": 0,
+    "panels": [
+      "Selected work.",
+      "Hi, I'm Dav.",
+      "Let's make something alive."
+    ],
+    "lighting": [
+      {
+        "sun": 3.1,
+        "fill": 0.88,
+        "shadow": 1,
+        "exposure": 1.08
+      },
+      {
+        "sun": 2.5250000000000004,
+        "fill": 1.01,
+        "shadow": 0.84,
+        "exposure": 1.08
+      },
+      {
+        "sun": 0.8370000000000001,
+        "fill": 0.7128000000000001,
+        "shadow": 1,
+        "exposure": 1.0450000000000002
+      }
+    ],
+    "errors": []
+  },
+  {
+    "mobile": true,
+    "river": {
+      "visible": true,
+      "vertices": 2304
+    },
+    "stableLabelWrites": 0,
+    "panels": [
+      "Selected work.",
+      "Hi, I'm Dav.",
+      "Let's make something alive."
+    ],
+    "lighting": [
+      {
+        "sun": 3.1,
+        "fill": 0.88,
+        "shadow": 1,
+        "exposure": 1.08
+      },
+      {
+        "sun": 2.5250000000000004,
+        "fill": 1.01,
+        "shadow": 0.84,
+        "exposure": 1.08
+      },
+      {
+        "sun": 0.8370000000000001,
+        "fill": 0.7128000000000001,
+        "shadow": 1,
+        "exposure": 1.0450000000000002
+      }
+    ],
+    "errors": []
+  }
+]

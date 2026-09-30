@@ -1,0 +1,13 @@
+.world-artifacts{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#a5aab6}
+.world-artifacts span{padding:4px 9px;border:1px solid #ffffff18;border-radius:20px;background:#171e2a65}
+.world-artifacts .collected{color:#ffe2a0;border-color:#dfb56866;background:#77572c30}
+.world-artifacts .lost{color:#efaa9a;border-color:#cb766744}
+.world-notice{margin:9px auto 0;text-align:center;max-width:650px;color:#ffd69b;font-size:12px;line-height:1.5}
+.world-journal{margin-top:9px;font-size:12px;color:#d4dbe5}
+.world-journal summary{cursor:pointer;text-align:center;padding:5px}
+.world-journal>div{max-height:170px;overflow:auto;padding:0 12px}
+.world-journal p{line-height:1.5;margin:8px 0}
+.world-artifacts[hidden],.world-notice[hidden],.world-journal[hidden]{display:none}
+@media(max-width:600px){.world-artifacts{gap:4px;font-size:10px;margin-top:6px}.world-notice{font-size:11px}.world-artifacts span{padding:3px 6px}}
+
+.game-event.collab::before{content:'✦ DISCOVERY'}

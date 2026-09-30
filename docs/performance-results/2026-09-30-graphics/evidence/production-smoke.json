@@ -1,0 +1,51 @@
+[
+  {
+    "mobile": false,
+    "readyMs": 5701,
+    "state": {
+      "debug": false,
+      "canvasVisible": true,
+      "fallbackHidden": true,
+      "summary": "Dragon’s Beacon · Complete",
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "185.0",
+        "cameraTarget": "0.0,0.0",
+        "drawCalls": "493",
+        "triangles": "2702813",
+        "geometries": "274",
+        "textures": "7",
+        "cls": "0.001",
+        "lcpMs": "4372",
+        "frameP50": "16.7",
+        "frameP90": "16.8",
+        "frameP99": "2833.2",
+        "pixelRatio": "1.00"
+      },
+      "panel": "Selected work."
+    },
+    "errors": []
+  },
+  {
+    "mobile": true,
+    "readyMs": 5395,
+    "state": {
+      "debug": false,
+      "canvasVisible": true,
+      "fallbackHidden": true,
+      "summary": "Dragon’s Beacon · Complete",
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "270.5",
+        "cameraTarget": "0.0,0.0",
+        "drawCalls": "439",
+        "triangles": "1319893",
+        "geometries": "264",
+        "textures": "7",
+        "lcpMs": "4128"
+      },
+      "panel": "Selected work."
+    },
+    "errors": []
+  }
+]

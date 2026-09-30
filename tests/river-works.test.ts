@@ -9,26 +9,21 @@ import { streamSurfaceHeight } from '../src/town/game-scenery';
 import { moatRoutePoint,moatRouteParameter } from '../src/town/moat-layout';
 import { MAT } from '../src/town/materials';
 
-test('River builds a mill race with an earlier mill and can advance other sites later',()=>{
+test('mill and river wait for timber, crew and tools before producing an irrigated harvest',()=>{
   const first=evaluate(['windmill','river']);
-  assert.ok(first.projects.includes('mill-race'));
-  assert.equal(first.levels.river,2);
-  assert.equal(first.levels.windmill,2);
+  assert.equal(first.levels.river,1);assert.equal(first.levels.windmill,1);
   const later=evaluate(['windmill','river','settlers','grove','workshop','roads','market']);
-  assert.ok(later.levels.river>=first.levels.river);
-  assert.ok(later.levels.grove>0);
-  assert.ok(later.faults.some(fault=>fault.project==='grove-irrigation'));
-  assert.equal(evaluate(IDEAS).perfect,true);
+  assert.ok(later.projects.includes('working-harbor'));assert.ok(later.projects.includes('irrigated-harvest'));
+  assert.ok(later.world.capabilities.includes('flour'));assert.equal(evaluate(IDEAS).perfect,true);
 });
 
-test('version two nine-choice saves retain their route and can choose River',()=>{
+test('version three nine-choice saves can launch a last-turn River expedition',()=>{
   const order=IDEAS.filter(idea=>idea!=='river');
-  const save=parseGameSave(JSON.stringify({version:2,started:true,order,bestMax:9}));
+  const save=parseGameSave(JSON.stringify({version:3,started:true,order,bestMax:9}));
   assert.deepEqual(save.order,order);
   const state=chooseIdea(save,'river');
-  assert.equal(state.finished,true);
-  assert.equal(state.perfect,false);
-  assert.ok(state.faults.some(fault=>fault.project==='waterway-map'));
+  assert.equal(state.finished,true);assert.equal(state.perfect,true);
+  assert.equal(state.world.dragon,'tamed');assert.equal(state.world.beacon,true);
 });
 
 test('excavation finishes before the fluid front advances',()=>{

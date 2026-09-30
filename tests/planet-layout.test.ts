@@ -31,7 +31,7 @@ test('curving the scene preserves authored buffers, materials, colors and object
   assert.deepEqual(Array.from(geometry.attributes.normal.array),normals);
   assert.deepEqual(Array.from(geometry.attributes.color.array),colors);
   assert.ok(mesh.matrix.equals(matrix));assert.deepEqual(mesh.scale.toArray(),[1,1,1]);
-  assert.equal(material.customProgramCacheKey(),'authored-material-planet-projection-v1');
+  assert.equal(material.customProgramCacheKey(),'authored-material-planet-projection-v2');
   const shader={vertexShader:THREE.ShaderLib.standard.vertexShader,fragmentShader:THREE.ShaderLib.standard.fragmentShader,uniforms:{}};
   material.onBeforeCompile(shader as THREE.WebGLProgramParametersWithUniforms,{} as THREE.WebGLRenderer);
   assert.ok(originalHookRan);assert.equal((shader.uniforms as any).authored.value,7);

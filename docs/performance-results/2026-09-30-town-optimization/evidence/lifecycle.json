@@ -1,0 +1,3037 @@
+{
+  "started": "2026-09-29T21:21:03.686Z",
+  "cycles": [
+    {
+      "cycle": 0,
+      "heap": {
+        "usedSize": 61429492,
+        "totalSize": 64585728,
+        "embedderHeapUsedSize": 5039640,
+        "backingStorageSize": 104360659
+      },
+      "counts": {
+        "nodes": 1754,
+        "geometries": 295,
+        "textures": 7,
+        "projectionObjects": 1754,
+        "depths": 631
+      }
+    },
+    {
+      "cycle": 1,
+      "heap": {
+        "usedSize": 61648252,
+        "totalSize": 64847872,
+        "embedderHeapUsedSize": 4999704,
+        "backingStorageSize": 104360672
+      },
+      "counts": {
+        "nodes": 1754,
+        "geometries": 295,
+        "textures": 7,
+        "projectionObjects": 1754,
+        "depths": 631
+      }
+    },
+    {
+      "cycle": 2,
+      "heap": {
+        "usedSize": 61920204,
+        "totalSize": 64847872,
+        "embedderHeapUsedSize": 5050712,
+        "backingStorageSize": 104360672
+      },
+      "counts": {
+        "nodes": 1754,
+        "geometries": 295,
+        "textures": 7,
+        "projectionObjects": 1754,
+        "depths": 631
+      }
+    },
+    {
+      "cycle": 3,
+      "heap": {
+        "usedSize": 62200904,
+        "totalSize": 63799296,
+        "embedderHeapUsedSize": 5122912,
+        "backingStorageSize": 104360672
+      },
+      "counts": {
+        "nodes": 1754,
+        "geometries": 295,
+        "textures": 7,
+        "projectionObjects": 1754,
+        "depths": 631
+      }
+    },
+    {
+      "cycle": 4,
+      "heap": {
+        "usedSize": 62353448,
+        "totalSize": 64061440,
+        "embedderHeapUsedSize": 5186192,
+        "backingStorageSize": 104360672
+      },
+      "counts": {
+        "nodes": 1754,
+        "geometries": 295,
+        "textures": 7,
+        "projectionObjects": 1754,
+        "depths": 631
+      }
+    },
+    {
+      "cycle": 5,
+      "heap": {
+        "usedSize": 62446008,
+        "totalSize": 64323584,
+        "embedderHeapUsedSize": 5261888,
+        "backingStorageSize": 104360672
+      },
+      "counts": {
+        "nodes": 1754,
+        "geometries": 295,
+        "textures": 7,
+        "projectionObjects": 1754,
+        "depths": 631
+      }
+    }
+  ],
+  "panels": [
+    {
+      "panel": "work",
+      "repeat": 0,
+      "automationCompletionMs": 24.591874999998254,
+      "visible": {
+        "view": "work",
+        "title": "Selected work."
+      }
+    },
+    {
+      "panel": "about",
+      "repeat": 0,
+      "automationCompletionMs": 18.097125000000233,
+      "visible": {
+        "view": "about",
+        "title": "Hi, I'm Dav."
+      }
+    },
+    {
+      "panel": "contact",
+      "repeat": 0,
+      "automationCompletionMs": 94.33537500000239,
+      "visible": {
+        "view": "contact",
+        "title": "Let's make something alive."
+      }
+    },
+    {
+      "panel": "project-wizard",
+      "repeat": 0,
+      "automationCompletionMs": 1510.6735829999961,
+      "visible": {
+        "view": "project",
+        "title": "Idle Wizard"
+      }
+    },
+    {
+      "panel": "work",
+      "repeat": 1,
+      "automationCompletionMs": 24.532291999996232,
+      "visible": {
+        "view": "work",
+        "title": "Selected work."
+      }
+    },
+    {
+      "panel": "about",
+      "repeat": 1,
+      "automationCompletionMs": 17.882125000003725,
+      "visible": {
+        "view": "about",
+        "title": "Hi, I'm Dav."
+      }
+    },
+    {
+      "panel": "contact",
+      "repeat": 1,
+      "automationCompletionMs": 22.271333999997296,
+      "visible": {
+        "view": "contact",
+        "title": "Let's make something alive."
+      }
+    },
+    {
+      "panel": "project-wizard",
+      "repeat": 1,
+      "automationCompletionMs": 2036.2796250000029,
+      "visible": {
+        "view": "project",
+        "title": "Idle Wizard"
+      }
+    },
+    {
+      "panel": "work",
+      "repeat": 2,
+      "automationCompletionMs": 22.73691699999472,
+      "visible": {
+        "view": "work",
+        "title": "Selected work."
+      }
+    },
+    {
+      "panel": "about",
+      "repeat": 2,
+      "automationCompletionMs": 20.523541000002297,
+      "visible": {
+        "view": "about",
+        "title": "Hi, I'm Dav."
+      }
+    },
+    {
+      "panel": "contact",
+      "repeat": 2,
+      "automationCompletionMs": 19.67566700000316,
+      "visible": {
+        "view": "contact",
+        "title": "Let's make something alive."
+      }
+    },
+    {
+      "panel": "project-wizard",
+      "repeat": 2,
+      "automationCompletionMs": 2034.5484580000048,
+      "visible": {
+        "view": "project",
+        "title": "Idle Wizard"
+      }
+    }
+  ],
+  "soak": [
+    {
+      "time": 29937.09999999404,
+      "heap": 447042016,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "504",
+        "triangles": "2711377",
+        "geometries": "277",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 277,
+        "textures": 7
+      }
+    },
+    {
+      "time": 39943.09999999404,
+      "heap": 434432535,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "496",
+        "triangles": "2701585",
+        "geometries": "277",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 49946.19999998808,
+      "heap": 449620154,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "502",
+        "triangles": "2706705",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 59952.69999998808,
+      "heap": 436684170,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "509",
+        "triangles": "2711477",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 69958.29999998212,
+      "heap": 450628668,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "503",
+        "triangles": "2706597",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 79962.59999999404,
+      "heap": 463891066,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "509",
+        "triangles": "2711477",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 89972,
+      "heap": 450746897,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "492",
+        "triangles": "2706389",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 99975.89999997616,
+      "heap": 464021948,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "508",
+        "triangles": "2711585",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 109980,
+      "heap": 167111543,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "492",
+        "triangles": "2706241",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 119984.89999997616,
+      "heap": 169486403,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "507",
+        "triangles": "2701913",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 129989.29999998212,
+      "heap": 167693585,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "503",
+        "triangles": "2706621",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    },
+    {
+      "time": 139992.79999998212,
+      "heap": 174622011,
+      "profile": {
+        "cameraAzimuth": "0.720",
+        "cameraDistance": "170.2",
+        "cameraTarget": "-45.0,120.0",
+        "lcpMs": "2964",
+        "cls": "0.006",
+        "interactionMs": "280",
+        "drawCalls": "496",
+        "triangles": "2701889",
+        "geometries": "278",
+        "textures": "7",
+        "frameP50": "16.7",
+        "frameP90": "16.7",
+        "frameP99": "16.8",
+        "pixelRatio": "1.00"
+      },
+      "memory": {
+        "geometries": 278,
+        "textures": 7
+      }
+    }
+  ],
+  "errors": [],
+  "reload": {
+    "order": [
+      "settlers",
+      "grove",
+      "workshop",
+      "roads",
+      "archive",
+      "river",
+      "observatory",
+      "market",
+      "windmill",
+      "walls"
+    ],
+    "beacon": true
+  },
+  "background": {
+    "hidden": false,
+    "framesBefore": 858,
+    "framesAfter": 978,
+    "stopped": false,
+    "reason": "Headless browser did not expose document.hidden; background verdict unverified"
+  },
+  "finalHeap": {
+    "usedSize": 61675984,
+    "totalSize": 63078400,
+    "embedderHeapUsedSize": 4768648,
+    "backingStorageSize": 104169841
+  },
+  "finalState": {
+    "levels": {
+      "settlers": 8,
+      "grove": 8,
+      "workshop": 8,
+      "roads": 8,
+      "walls": 8,
+      "market": 8,
+      "windmill": 8,
+      "archive": 8,
+      "river": 8,
+      "observatory": 8
+    },
+    "projects": [
+      "managed-grove",
+      "timber-homes",
+      "working-forge",
+      "wagon-crossings",
+      "survey-office",
+      "surveyed-mine",
+      "working-harbor",
+      "supplied-neighborhood",
+      "stone-town",
+      "irrigated-orchard",
+      "woodland-sanctuary",
+      "precision-yard",
+      "industrial-foundry",
+      "mountain-network",
+      "water-atlas",
+      "sluice-network",
+      "reservoir-system",
+      "caravan-market",
+      "working-telescope",
+      "season-calendar",
+      "lens-socket",
+      "living-chronicle",
+      "core-socket",
+      "summit-beacon",
+      "working-mill",
+      "irrigated-harvest",
+      "seasonal-granaries",
+      "harvest-exchange",
+      "night-fair",
+      "road-gates",
+      "stone-defenses",
+      "beacon-watch"
+    ],
+    "events": [
+      {
+        "idea": "walls",
+        "level": 1,
+        "wave": 0,
+        "sources": []
+      },
+      {
+        "idea": "walls",
+        "level": 2,
+        "wave": 1,
+        "sources": [
+          {
+            "idea": "roads",
+            "level": 8,
+            "purpose": "Wagon gates"
+          },
+          {
+            "idea": "workshop",
+            "level": 8,
+            "purpose": "Wagon gates"
+          }
+        ],
+        "project": "road-gates",
+        "title": "Wagon gates",
+        "description": "Road builders fit wide gates where the wagon routes cross the enclosure."
+      },
+      {
+        "idea": "walls",
+        "level": 3,
+        "wave": 2,
+        "sources": [
+          {
+            "idea": "roads",
+            "level": 8,
+            "purpose": "Wagon gates"
+          },
+          {
+            "idea": "workshop",
+            "level": 8,
+            "purpose": "Wagon gates"
+          }
+        ],
+        "project": "road-gates",
+        "title": "Wagon gates",
+        "description": "Road builders fit wide gates where the wagon routes cross the enclosure."
+      },
+      {
+        "idea": "walls",
+        "level": 4,
+        "wave": 3,
+        "sources": [
+          {
+            "idea": "roads",
+            "level": 8,
+            "purpose": "Stone defenses"
+          },
+          {
+            "idea": "archive",
+            "level": 8,
+            "purpose": "Stone defenses"
+          }
+        ],
+        "project": "stone-defenses",
+        "title": "Stone defenses",
+        "description": "Dwarf stone and surveyed foundations strengthen the walls."
+      },
+      {
+        "idea": "walls",
+        "level": 5,
+        "wave": 4,
+        "sources": [
+          {
+            "idea": "roads",
+            "level": 8,
+            "purpose": "Stone defenses"
+          },
+          {
+            "idea": "archive",
+            "level": 8,
+            "purpose": "Stone defenses"
+          }
+        ],
+        "project": "stone-defenses",
+        "title": "Stone defenses",
+        "description": "Dwarf stone and surveyed foundations strengthen the walls."
+      },
+      {
+        "idea": "walls",
+        "level": 6,
+        "wave": 5,
+        "sources": [
+          {
+            "idea": "observatory",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "grove",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "river",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "windmill",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "market",
+            "level": 8,
+            "purpose": "Beacon watch"
+          }
+        ],
+        "project": "beacon-watch",
+        "title": "Beacon watch",
+        "description": "The Wizard’s signals link the watchtowers above the supplied town."
+      },
+      {
+        "idea": "walls",
+        "level": 7,
+        "wave": 6,
+        "sources": [
+          {
+            "idea": "observatory",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "grove",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "river",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "windmill",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "market",
+            "level": 8,
+            "purpose": "Beacon watch"
+          }
+        ],
+        "project": "beacon-watch",
+        "title": "Beacon watch",
+        "description": "The Wizard’s signals link the watchtowers above the supplied town."
+      },
+      {
+        "idea": "walls",
+        "level": 8,
+        "wave": 7,
+        "sources": [
+          {
+            "idea": "observatory",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "grove",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "river",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "windmill",
+            "level": 8,
+            "purpose": "Beacon watch"
+          },
+          {
+            "idea": "market",
+            "level": 8,
+            "purpose": "Beacon watch"
+          }
+        ],
+        "project": "beacon-watch",
+        "title": "Beacon watch",
+        "description": "The Wizard’s signals link the watchtowers above the supplied town."
+      }
+    ],
+    "world": {
+      "turn": 10,
+      "capabilities": [
+        "atlas",
+        "beacon",
+        "calendar",
+        "chronicle",
+        "core-installed",
+        "creature-calming",
+        "defenses",
+        "diversion-works",
+        "exchange",
+        "expedition-records",
+        "fair",
+        "fish",
+        "flour",
+        "focused-beam",
+        "food",
+        "freight",
+        "gates",
+        "glass",
+        "gold-installed",
+        "grain-reserve",
+        "heavy-tools",
+        "homes",
+        "imported-food",
+        "irrigation",
+        "lens-installed",
+        "machinery",
+        "milling",
+        "mine",
+        "neighborhood",
+        "orchard-food",
+        "orchard-planted",
+        "ore",
+        "pass-open",
+        "powered-tower",
+        "records",
+        "reservoir",
+        "sanctuary",
+        "ship",
+        "signals",
+        "sluices",
+        "stone",
+        "summit-beacon",
+        "surveys",
+        "timber",
+        "tools",
+        "town",
+        "trade",
+        "wagons",
+        "watch",
+        "workers"
+      ],
+      "artifacts": {
+        "lens": "installed",
+        "gold": "friendly-dragon",
+        "core": "installed"
+      },
+      "installed": [
+        "lens",
+        "gold",
+        "core"
+      ],
+      "expedition": "returned",
+      "dragon": "tamed",
+      "dragonDueTurn": null,
+      "volcano": "contained",
+      "minePrepared": true,
+      "mountainPass": "open",
+      "caravan": "delivered",
+      "orchard": "healthy",
+      "eruptionTurn": 8,
+      "burnedTurn": null,
+      "beacon": true
+    },
+    "worldEvents": [],
+    "history": [
+      {
+        "id": "4:lens-delivery:lens",
+        "kind": "lens-delivery",
+        "turn": 4,
+        "title": "The shrine’s Sky Lens arrives",
+        "description": "A caravan crosses the completed route, retrieves the lens from its old shrine and delivers it to town.",
+        "artifact": "lens",
+        "before": {
+          "turn": 4,
+          "capabilities": [
+            "homes",
+            "mine",
+            "ore",
+            "pass-open",
+            "stone",
+            "timber",
+            "tools",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "shrine",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "quiet",
+          "minePrepared": false,
+          "mountainPass": "open",
+          "caravan": "unavailable",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 4,
+          "capabilities": [
+            "homes",
+            "mine",
+            "ore",
+            "pass-open",
+            "stone",
+            "timber",
+            "tools",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "quiet",
+          "minePrepared": false,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "5:mine-prepared",
+        "kind": "mine-prepared",
+        "turn": 5,
+        "title": "Dwarves prepare the mountain",
+        "description": "Miners reinforce diversion channels and excavate a safe lava basin.",
+        "before": {
+          "turn": 5,
+          "capabilities": [
+            "diversion-works",
+            "homes",
+            "mine",
+            "ore",
+            "pass-open",
+            "records",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "quiet",
+          "minePrepared": false,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 5,
+          "capabilities": [
+            "diversion-works",
+            "homes",
+            "mine",
+            "ore",
+            "pass-open",
+            "records",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "quiet",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "6:volcano-warning",
+        "kind": "volcano-warning",
+        "turn": 6,
+        "title": "The mountain is stirring",
+        "description": "Smoke thickens and the ground trembles. The eruption comes after choice eight; dwarven channels can protect the pass.",
+        "before": {
+          "turn": 6,
+          "capabilities": [
+            "atlas",
+            "diversion-works",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "quiet",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 6,
+          "capabilities": [
+            "atlas",
+            "diversion-works",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "6:expedition:gold",
+        "kind": "expedition",
+        "turn": 6,
+        "title": "The island treasure returns",
+        "description": "The crew sails to the island, lifts its waiting chest aboard and brings the gold home.",
+        "artifact": "gold",
+        "before": {
+          "turn": 6,
+          "capabilities": [
+            "atlas",
+            "diversion-works",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "island",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "unavailable",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 6,
+          "capabilities": [
+            "atlas",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "town",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "returned",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "6:dragon-warning",
+        "kind": "dragon-warning",
+        "turn": 6,
+        "title": "Something saw the gold",
+        "description": "A dragon turns toward the harbor. It will arrive after your next choice; a Wizard can calm it.",
+        "before": {
+          "turn": 6,
+          "capabilities": [
+            "atlas",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "town",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "returned",
+          "dragon": "unaware",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 6,
+          "capabilities": [
+            "atlas",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "town",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "returned",
+          "dragon": "approaching",
+          "dragonDueTurn": 7,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "7:dragon-tamed",
+        "kind": "dragon-tamed",
+        "turn": 7,
+        "title": "A dragon makes itself at home",
+        "description": "The Wizard calms the dragon. It carries the hoard to the tower and settles beside it.",
+        "before": {
+          "turn": 7,
+          "capabilities": [
+            "atlas",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "town",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "returned",
+          "dragon": "approaching",
+          "dragonDueTurn": 7,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 7,
+          "capabilities": [
+            "atlas",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "7:artifact-installed:lens",
+        "kind": "artifact-installed",
+        "turn": 7,
+        "title": "Sky Lens installed",
+        "description": "The Wizard fits the Sky Lens into its waiting socket.",
+        "artifact": "lens",
+        "before": {
+          "turn": 7,
+          "capabilities": [
+            "atlas",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "town",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 7,
+          "capabilities": [
+            "atlas",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [
+            "lens"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "7:artifact-installed:gold",
+        "kind": "artifact-installed",
+        "turn": 7,
+        "title": "Gold rune rings installed",
+        "description": "The friendly dragon shares gold for the tower’s rune circuit.",
+        "artifact": "gold",
+        "before": {
+          "turn": 7,
+          "capabilities": [
+            "atlas",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [
+            "lens"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 7,
+          "capabilities": [
+            "atlas",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "food",
+            "freight",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [
+            "lens",
+            "gold"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "8:eruption-safe",
+        "kind": "eruption-safe",
+        "turn": 8,
+        "title": "Lava follows the dwarf channels",
+        "description": "The mountain erupts into the reinforced channels, leaving the wagon pass open.",
+        "before": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [
+            "lens",
+            "gold"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "warning",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": null,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [
+            "lens",
+            "gold"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "8:core-recovered:core",
+        "kind": "core-recovered",
+        "turn": 8,
+        "title": "The Ember Core emerges",
+        "description": "A dwarf cart retrieves the glowing core from the safe collection basin.",
+        "artifact": "core",
+        "before": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "mountain"
+          },
+          "installed": [
+            "lens",
+            "gold"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "town"
+          },
+          "installed": [
+            "lens",
+            "gold"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "8:artifact-installed:core",
+        "kind": "artifact-installed",
+        "turn": 8,
+        "title": "Ember Core installed",
+        "description": "The Wizard fits the Ember Core into its waiting socket.",
+        "artifact": "core",
+        "before": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "town"
+          },
+          "installed": [
+            "lens",
+            "gold"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": false
+        }
+      },
+      {
+        "id": "8:beacon-lit",
+        "kind": "beacon-lit",
+        "turn": 8,
+        "title": "The summit beacon awakens",
+        "description": "The Ember Core sends power through the gold rings and Sky Lens; the dragon curls beside the shining tower.",
+        "before": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": false
+        },
+        "after": {
+          "turn": 8,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "diversion-works",
+            "expedition-records",
+            "fish",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      }
+    ],
+    "timeline": [
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 1,
+          "wave": 0,
+          "sources": []
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 2,
+          "wave": 1,
+          "sources": [
+            {
+              "idea": "roads",
+              "level": 8,
+              "purpose": "Wagon gates"
+            },
+            {
+              "idea": "workshop",
+              "level": 8,
+              "purpose": "Wagon gates"
+            }
+          ],
+          "project": "road-gates",
+          "title": "Wagon gates",
+          "description": "Road builders fit wide gates where the wagon routes cross the enclosure."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 3,
+          "wave": 2,
+          "sources": [
+            {
+              "idea": "roads",
+              "level": 8,
+              "purpose": "Wagon gates"
+            },
+            {
+              "idea": "workshop",
+              "level": 8,
+              "purpose": "Wagon gates"
+            }
+          ],
+          "project": "road-gates",
+          "title": "Wagon gates",
+          "description": "Road builders fit wide gates where the wagon routes cross the enclosure."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 4,
+          "wave": 3,
+          "sources": [
+            {
+              "idea": "roads",
+              "level": 8,
+              "purpose": "Stone defenses"
+            },
+            {
+              "idea": "archive",
+              "level": 8,
+              "purpose": "Stone defenses"
+            }
+          ],
+          "project": "stone-defenses",
+          "title": "Stone defenses",
+          "description": "Dwarf stone and surveyed foundations strengthen the walls."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "defenses",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 5,
+          "wave": 4,
+          "sources": [
+            {
+              "idea": "roads",
+              "level": 8,
+              "purpose": "Stone defenses"
+            },
+            {
+              "idea": "archive",
+              "level": 8,
+              "purpose": "Stone defenses"
+            }
+          ],
+          "project": "stone-defenses",
+          "title": "Stone defenses",
+          "description": "Dwarf stone and surveyed foundations strengthen the walls."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "defenses",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 6,
+          "wave": 5,
+          "sources": [
+            {
+              "idea": "observatory",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "grove",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "river",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "windmill",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "market",
+              "level": 8,
+              "purpose": "Beacon watch"
+            }
+          ],
+          "project": "beacon-watch",
+          "title": "Beacon watch",
+          "description": "The Wizard’s signals link the watchtowers above the supplied town."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "defenses",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "watch",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 7,
+          "wave": 6,
+          "sources": [
+            {
+              "idea": "observatory",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "grove",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "river",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "windmill",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "market",
+              "level": 8,
+              "purpose": "Beacon watch"
+            }
+          ],
+          "project": "beacon-watch",
+          "title": "Beacon watch",
+          "description": "The Wizard’s signals link the watchtowers above the supplied town."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "defenses",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "watch",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      },
+      {
+        "kind": "development",
+        "event": {
+          "idea": "walls",
+          "level": 8,
+          "wave": 7,
+          "sources": [
+            {
+              "idea": "observatory",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "grove",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "river",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "windmill",
+              "level": 8,
+              "purpose": "Beacon watch"
+            },
+            {
+              "idea": "market",
+              "level": 8,
+              "purpose": "Beacon watch"
+            }
+          ],
+          "project": "beacon-watch",
+          "title": "Beacon watch",
+          "description": "The Wizard’s signals link the watchtowers above the supplied town."
+        },
+        "world": {
+          "turn": 10,
+          "capabilities": [
+            "atlas",
+            "beacon",
+            "calendar",
+            "chronicle",
+            "core-installed",
+            "creature-calming",
+            "defenses",
+            "diversion-works",
+            "exchange",
+            "expedition-records",
+            "fair",
+            "fish",
+            "flour",
+            "focused-beam",
+            "food",
+            "freight",
+            "gates",
+            "glass",
+            "gold-installed",
+            "grain-reserve",
+            "heavy-tools",
+            "homes",
+            "imported-food",
+            "irrigation",
+            "lens-installed",
+            "machinery",
+            "milling",
+            "mine",
+            "neighborhood",
+            "orchard-food",
+            "orchard-planted",
+            "ore",
+            "pass-open",
+            "powered-tower",
+            "records",
+            "reservoir",
+            "sanctuary",
+            "ship",
+            "signals",
+            "sluices",
+            "stone",
+            "summit-beacon",
+            "surveys",
+            "timber",
+            "tools",
+            "town",
+            "trade",
+            "wagons",
+            "watch",
+            "workers"
+          ],
+          "artifacts": {
+            "lens": "installed",
+            "gold": "friendly-dragon",
+            "core": "installed"
+          },
+          "installed": [
+            "lens",
+            "gold",
+            "core"
+          ],
+          "expedition": "returned",
+          "dragon": "tamed",
+          "dragonDueTurn": null,
+          "volcano": "contained",
+          "minePrepared": true,
+          "mountainPass": "open",
+          "caravan": "delivered",
+          "orchard": "healthy",
+          "eruptionTurn": 8,
+          "burnedTurn": null,
+          "beacon": true
+        }
+      }
+    ],
+    "pending": [],
+    "order": [
+      "settlers",
+      "grove",
+      "workshop",
+      "roads",
+      "archive",
+      "river",
+      "observatory",
+      "market",
+      "windmill",
+      "walls"
+    ],
+    "route": "living-world",
+    "gateMask": -2122219135,
+    "isolatedMill": false,
+    "faults": [],
+    "missed": [],
+    "maxCount": 10,
+    "score": 80,
+    "finished": true,
+    "perfect": true,
+    "secret": true
+  },
+  "ended": "2026-09-29T21:24:08.209Z"
+}

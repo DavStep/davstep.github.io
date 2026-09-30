@@ -143,6 +143,20 @@ export class Sfx {
     for (let i = 0; i < 3; i++) this.tone(700 + i * 160 + Math.random() * 60, t + i * .07, .09, 'sine', .08, 1100 + i * 200);
   }
 
+  /** Short cinematic accents; triggered once by playback, never by saved state. */
+  worldEvent(kind: string): void {
+    const ctx=this.ready();if(!ctx)return;const t=ctx.currentTime;
+    if(kind.startsWith('eruption')||kind==='volcano-warning'){
+      this.tone(75,t,.65,'sine',.4,28,.03);this.burst(t,.8,.25,'lowpass',420,90,.8);
+    }else if(kind.startsWith('dragon')){
+      this.tone(170,t,.5,'sawtooth',.07,65,.04);this.burst(t,.55,.12,'bandpass',500,180,2);
+      if(kind==='dragon-tamed')this.collab();
+    }else if(kind==='beacon-lit')this.fanfare();
+    else if(kind==='artifact-installed'||kind==='core-recovered'||kind==='lens-delivery')this.levelUp(5);
+    else if(kind==='expedition')this.whoosh(.8);
+    else this.thud(.7);
+  }
+
   /** Big finish. */
   fanfare(): void {
     const ctx = this.ready(); if (!ctx) return; const t = ctx.currentTime;

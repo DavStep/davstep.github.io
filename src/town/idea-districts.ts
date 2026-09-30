@@ -19,13 +19,15 @@ const moved:Record<string,{idea:DistrictIdea;dx:number;dz:number}>={
   guild:{idea:'roads',dx:11,dz:-8},
   post:{idea:'archive',dx:0,dz:0},
 };
+// Give the larger project landmarks a clear ring of streets and supporting buildings.
+const districtSpacing=(idea:DistrictIdea)=>idea==='archive'?1:1.2;
 const castleProjects:Record<string,DistrictIdea>={
   'project-outpost':'market','project-sandship':'workshop',
   'project-dwarves':'roads','project-wizard':'observatory',
 };
 export function relocateGamePlot<T extends Plot>(plot:T):T{
   const site=moved[plot.id];if(!site)return plot;
-  const center=IDEA_DISTRICTS[site.idea];return {...plot,x:center.x+site.dx,z:center.z+site.dz};
+  const center=IDEA_DISTRICTS[site.idea];return {...plot,x:center.x+site.dx*districtSpacing(site.idea),z:center.z+site.dz*districtSpacing(site.idea)};
 }
 export function districtForPlot(id:string):DistrictIdea|undefined{
   return castleProjects[id]??moved[id]?.idea??DISTRICT_IDEAS.find(key=>id.startsWith(`district-${key}-`));
@@ -39,7 +41,7 @@ const EXPANSIONS:Record<DistrictIdea,readonly [Plot['kind'],number,number,string
 };
 export function districtExpansionPlots(levels:Levels):PlotState[]{
   return DISTRICT_IDEAS.flatMap(idea=>EXPANSIONS[idea].map(([kind,dx,dz,name],i)=>({
-    id:`district-${idea}-${name}`,kind,x:IDEA_DISTRICTS[idea].x+dx,z:IDEA_DISTRICTS[idea].z+dz,
+    id:`district-${idea}-${name}`,kind,x:IDEA_DISTRICTS[idea].x+dx*districtSpacing(idea),z:IDEA_DISTRICTS[idea].z+dz*districtSpacing(idea),
     start:0,step:1,variant:i%3,stage:levels[idea]<i+4?0:isRegularBuilding({id:`district-${idea}-${name}`,kind})?Math.min(8,3+(levels[idea]-i-4)*2):6,renovation:0,
   })));
 }

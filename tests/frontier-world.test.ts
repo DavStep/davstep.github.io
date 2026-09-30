@@ -17,7 +17,7 @@ test('all eighty milestones have distinct named events and a valid world destina
   assert.ok(snapshotForGame(full.levels).plots.every(p=>Number.isFinite(p.stage)&&p.stage<=(isRegularBuilding(p)?REGULAR_BUILDING_STAGES:6)),'authored building tiers remain bounded');
   const before=evaluate(IDEAS.slice(0,-1)),beats=choiceBeats(before.levels,full.levels,'observatory');
   assert.ok(beats.filter(b=>b.kind==='max').every(b=>b.level===8));assert.equal(beats.filter(b=>b.kind==='max').length,IDEAS.filter(idea=>before.levels[idea]<8).length);
-  assert.deepEqual(evaluate(parseGameSave(JSON.stringify({version:2,order:IDEAS})).order).levels,full.levels);
+  assert.deepEqual(evaluate(parseGameSave(JSON.stringify({version:3,order:IDEAS})).order).levels,full.levels);
 });
 
 test('every advanced level reveals its own geometry and all regions reset in desktop and mobile',()=>{
