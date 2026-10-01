@@ -32,8 +32,8 @@ try {
       await page.waitForTimeout(500); // Let the initial poster fade finish before comparing frames.
       const copy=await page.locator('.hero-copy').boundingBox();
       const world=await page.locator('#hero-world-view').boundingBox();
-      if(width>760)assert.ok(world.x>=copy.x+copy.width,`${name}: planet overlaps the text`);
-      else assert.ok(world.y>=copy.y+copy.height,`${name}: planet must be below the text`);
+      assert.ok(copy.y>=world.y+world.height,`${name}: introduction overlaps the planet`);
+      assert.ok(Math.abs(world.x+world.width/2-width/2)<2,`${name}: planet is not centered`);
       await page.locator('#hero-world-view').scrollIntoViewIfNeeded();
       const canvas=page.locator('#town-canvas');
       const bounds=await canvas.boundingBox();
@@ -57,12 +57,13 @@ try {
       assert.ok(changed(beforeDrag,await canvas.screenshot()),`${name}: dragging does not rotate`);
       assert.equal(await page.evaluate(()=>localStorage.getItem('davstep.choice-planet.v3')),saved,'Hero changed saved progress');
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal overflow');
-      // Browser resizing must restore the desktop column after a phone layout.
+      // Browser resizing must retain the centered world above the introduction.
       if(name==='desktop') {
         await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
         await page.setViewportSize({width,height});await page.waitForTimeout(150);
         const resizedCopy=await page.locator('.hero-copy').boundingBox(),resizedWorld=await page.locator('#hero-world-view').boundingBox();
-        assert.ok(resizedWorld.x>=resizedCopy.x+resizedCopy.width,'Resize lost the right column');
+        assert.ok(resizedCopy.y>=resizedWorld.y+resizedWorld.height,'Resize overlapped the planet and introduction');
+        assert.ok(Math.abs(resizedWorld.x+resizedWorld.width/2-width/2)<2,'Resize lost the centered planet');
       }
       await page.screenshot({path:`${output}/${name}-${theme}.png`});
       await page.emulateMedia({reducedMotion:'no-preference'});
