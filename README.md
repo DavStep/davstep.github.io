@@ -2,7 +2,7 @@
 
 Project UI/UX skills are installed in `.agents/skills` and referenced by `AGENTS.md`. See [the design direction](docs/design/portfolio-ui.md) and [skill sources](.agents/skills/README.md).
 
-The homepage is a readable, scrolling portfolio: an introduction, three Rockbite games with contributions, two independent playable projects, and about/contact sections. Project artwork and links are available without JavaScript. The interactive planet is centered above a short introduction on desktop and phones. Quiet inline camera controls sit beneath the planet, followed by one Play invitation and a work link. The opening uses neutral light-gray surfaces with near-black text, or charcoal surfaces with off-white text, with a restrained violet play button. Work, personal projects, About, and Contact occupy a separate reading surface below. The duplicate town invitation has been removed. It shares one renderer with the optional game opened from Play. The world loads after the readable page appears, pauses when the hero scrolls out of view or the tab is hidden, and holds still for reduced motion. Saved progress resumes when they play again.
+The homepage is a readable, scrolling portfolio: an introduction, three Rockbite games with contributions, two independent playable projects, and about/contact sections. Project artwork and links are available without JavaScript. The introduction opens with bold headings above a centered interactive planet on desktop and phones. Quiet inline camera controls sit beneath the planet, followed by a handwritten note, one Play invitation, and a work link. The notebook style uses warm paper in light mode and neutral charcoal in dark mode, with ink borders, pastel file tabs, and folder connectors for project entries. DM Sans carries headings and prose, IBM Plex Mono carries file labels and compact controls, and Caveat adds handwritten notes. Work, personal projects, About, and Contact occupy a separate reading surface below. The duplicate town invitation has been removed. It shares one renderer with the optional game opened from Play. The world loads after the readable page appears, pauses when the hero scrolls out of view or the tab is hidden, and holds still for reduced motion. Saved progress resumes when they play again.
 
 Appearance defaults to the browser's light/dark preference, with dark as the fallback when neither preference is available. The header's System / Light / Dark control remembers manual choices and can return to following the browser. The theme is applied before first paint and shared by the portfolio, game HUD, and project panels.
 
@@ -34,7 +34,7 @@ Run `node scripts/theme-smoke.mjs` to check both appearances, browser preference
 
 Run `node scripts/hero-interaction-smoke.mjs` against a dev server to check globe dragging, keyboard controls, reduced motion, game transitions, and touch/page scrolling.
 
-Run `node scripts/hero-production-smoke.mjs` against the preview server (or set `TOWN_URL` for the deployed site) to verify the centered planet above the introduction, unobstructed drag area, visible rotation, and animation/pause/resume in both themes without development-only hooks.
+Run `node scripts/hero-production-smoke.mjs` against the preview server (or set `TOWN_URL` for the deployed site) to verify the centered planet between the introduction and invitation, unobstructed drag area, visible rotation, and animation/pause/resume in both themes without development-only hooks.
 
 ## Town systems
 

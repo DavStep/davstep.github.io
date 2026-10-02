@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#181818" />
+  <meta name="theme-color" content="#202020" />
   <script>
     // Resolve appearance before the first paint, including when storage is unavailable.
     (() => {
@@ -13,7 +13,7 @@
       document.documentElement.dataset.themePreference = preference;
       document.documentElement.dataset.theme = theme;
       document.documentElement.style.colorScheme = theme;
-      document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#f5f5f5' : '#181818';
+      document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#eee8da' : '#202020';
     })();
   </script>
   <meta name="description" content="Dav Stepanyan, game developer in Yerevan. Games at Rockbite, independent browser adventures, and a little world you can play with." />
@@ -21,7 +21,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;550;600;650;700;750;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/portfolio.css" />
 </head>
 <body class="portfolio-mode">
@@ -30,7 +30,7 @@
       <a class="skip-link" href="#portfolio-content">Skip to my work</a>
       <div class="portfolio-opening">
       <header class="portfolio-header">
-        <a class="portfolio-name" href="#home">Dav Stepanyan</a>
+        <a class="portfolio-name" href="#home"><svg class="folder-icon" width="24" height="21" viewBox="0 0 24 21" fill="none" aria-hidden="true"><path d="M2 6V3h7l3 3h10v13H2V6Z" fill="var(--tab-blue)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 7h20" stroke="currentColor" stroke-width="1.6"/></svg><span>Dav Stepanyan<span class="name-note">game developer</span></span></a>
         <div class="portfolio-header-actions">
           <nav aria-label="Main navigation"><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
           <label class="theme-control" title="Appearance">
@@ -40,10 +40,14 @@
         </div>
       </header>
         <section id="home" class="portfolio-hero" aria-labelledby="home-title">
+          <div class="hero-copy">
+            <h1 id="home-title">I build games<br />that feel alive.</h1>
+            <p class="hero-introduction">I’m Dav, a game developer in Yerevan.<br class="desktop-break" /> Building at Rockbite Games. Still experimenting after hours.</p>
+          </div>
           <div id="hero-world-view" class="hero-world-view" role="group" aria-label="A living little world">
             <img class="hero-world-poster" src="/assets/games/world-hero.webp" alt="A little planet with villages, forests, and rivers" width="797" height="560" fetchpriority="high" />
             <div class="hero-world-controls" hidden>
-              <span id="hero-world-hint">Drag · Scroll to zoom</span>
+              <span id="hero-world-hint">Drag to rotate · Scroll to zoom</span>
               <button type="button" data-hero-rotate="left" aria-label="Rotate planet left" title="Rotate left">←</button>
               <button type="button" data-hero-rotate="right" aria-label="Rotate planet right" title="Rotate right">→</button>
               <button type="button" data-hero-zoom="in" aria-label="Zoom in on planet" title="Zoom in">+</button>
@@ -53,10 +57,9 @@
             </div>
             <span id="hero-world-keyboard-help" class="visually-hidden">Drag to rotate, scroll or pinch to zoom. Use the arrow keys to rotate and plus or minus to zoom. Press Home to reset the view.</span>
           </div>
-          <div class="hero-copy">
-            <h1 id="home-title">I build games that feel alive.</h1>
-            <p class="hero-introduction">I’m Dav, a game developer in Yerevan. I build at Rockbite Games and keep experimenting after hours.</p>
-            <div class="hero-actions"><button class="hero-world-entry portfolio-primary" type="button" data-play-town><span>Play with the town</span><span aria-hidden="true">↗</span></button><a class="hero-work-link" href="#work">See my work <span aria-hidden="true">↓</span></a></div>
+          <div class="hero-bottom">
+            <p class="world-note">A little world. A lot of possibilities.</p>
+            <div class="hero-actions"><button class="hero-world-entry portfolio-primary" type="button" data-play-town><span>Play with the town</span><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m6 3 6 6-6 6"/></svg></button><a class="hero-work-link" href="#work">Browse my work <span aria-hidden="true">↓</span></a></div>
           </div>
         </section>
       <div class="opening-footer"><p id="town-load-status" class="town-load-status" role="status" hidden></p></div>
@@ -64,27 +67,27 @@
       <div class="portfolio-content-surface">
       <main id="portfolio-content" class="portfolio-content" tabindex="-1">
         <section id="work" class="portfolio-section" aria-labelledby="work-title">
-          <div class="section-introduction"><p class="portfolio-eyebrow">At Rockbite Games</p><h2 id="work-title">Selected work.</h2><p>Games I’ve helped build at Rockbite, from early prototypes to the systems that keep them growing.</p></div>
+          <div class="section-introduction"><div class="section-heading"><p class="portfolio-eyebrow">At Rockbite Games</p><h2 id="work-title"><svg class="folder-icon" width="24" height="21" viewBox="0 0 24 21" fill="none" aria-hidden="true"><path d="M2 6V3h7l3 3h10v13H2V6Z" fill="var(--tab-blue)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 7h20" stroke="currentColor" stroke-width="1.6"/></svg>Selected work</h2></div><p>Games I’ve helped build at Rockbite, from early prototypes to the systems that keep them growing.</p></div>
           <div class="portfolio-projects">
-            <article id="project-outpost" class="portfolio-project"><a class="project-image-link" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer" aria-label="Explore Idle Outpost"><img src="/assets/games/idle-outpost.webp" alt="Idle Outpost game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games / Current</p><h3>Idle Outpost</h3><p>A business at the end of the world. Trade with survivors, recruit heroes, and build something worth defending.</p><p class="project-role"><span>My part</span>Systems, economy, progression · involved since the first prototype</p><a class="portfolio-text-link" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
-            <article id="project-sandship" class="portfolio-project"><a class="project-image-link" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer" aria-label="Explore Sandship"><img src="/assets/games/sandship.webp" alt="Sandship game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games / Shipped</p><h3>Sandship</h3><p>A moving factory in a strange desert, built around crafting and automation.</p><p class="project-role"><span>My part</span>Crafting, automation, live operations</p><a class="portfolio-text-link" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
-            <article id="project-battle" class="portfolio-project"><a class="project-image-link" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer" aria-label="Explore Battle Cards"><img src="/assets/games/battle-cards.webp" alt="Battle Cards game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games / Shipped</p><h3>Battle Cards</h3><p>A fast PvP card battler starring heroic ducks. It grew from a game jam prototype into a full release.</p><p class="project-role"><span>My part</span>PvP, strategy, deck building · from prototype to launch</p><a class="portfolio-text-link" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-outpost" class="portfolio-project"><a class="project-image-link" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer" aria-label="Explore Idle Outpost"><img src="/assets/games/idle-outpost.webp" alt="Idle Outpost game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games / Current</p><h3><svg class="file-icon" width="19" height="22" viewBox="0 0 19 22" fill="none" aria-hidden="true"><path d="M2 1h9l6 6v14H2V1Z" fill="var(--theme-page)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 1v6h6M5 11h9M5 15h7" stroke="currentColor" stroke-width="1.2"/></svg><span class="project-title-tab">Idle Outpost</span></h3><p>A business at the end of the world. Trade with survivors, recruit heroes, and build something worth defending.</p><p class="project-role"><span>My part</span>Systems, economy, progression · involved since the first prototype</p><a class="portfolio-text-link" href="https://rockbitegames.com/games/idleoutpost" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-sandship" class="portfolio-project"><a class="project-image-link" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer" aria-label="Explore Sandship"><img src="/assets/games/sandship.webp" alt="Sandship game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games / Shipped</p><h3><svg class="file-icon" width="19" height="22" viewBox="0 0 19 22" fill="none" aria-hidden="true"><path d="M2 1h9l6 6v14H2V1Z" fill="var(--theme-page)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 1v6h6M5 11h9M5 15h7" stroke="currentColor" stroke-width="1.2"/></svg><span class="project-title-tab">Sandship</span></h3><p>A moving factory in a strange desert, built around crafting and automation.</p><p class="project-role"><span>My part</span>Crafting, automation, live operations</p><a class="portfolio-text-link" href="https://rockbitegames.com/games/sandship" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-battle" class="portfolio-project"><a class="project-image-link" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer" aria-label="Explore Battle Cards"><img src="/assets/games/battle-cards.webp" alt="Battle Cards game artwork" loading="lazy" width="720" height="480" /></a><div class="portfolio-project-copy"><p class="project-context">Rockbite Games / Shipped</p><h3><svg class="file-icon" width="19" height="22" viewBox="0 0 19 22" fill="none" aria-hidden="true"><path d="M2 1h9l6 6v14H2V1Z" fill="var(--theme-page)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 1v6h6M5 11h9M5 15h7" stroke="currentColor" stroke-width="1.2"/></svg><span class="project-title-tab">Battle Cards</span></h3><p>A fast PvP card battler starring heroic ducks. It grew from a game jam prototype into a full release.</p><p class="project-role"><span>My part</span>PvP, strategy, deck building · from prototype to launch</p><a class="portfolio-text-link" href="https://apps.apple.com/app/id1600226027" target="_blank" rel="noopener noreferrer">Explore the game <span aria-hidden="true">↗</span></a></div></article>
           </div>
         </section>
         <section class="portfolio-section personal-work" aria-labelledby="personal-title">
-          <div class="section-introduction"><h2 id="personal-title">After hours, still building.</h2><p>Independent browser games and curious experiments. A few of the ideas I keep coming back to.</p></div>
+          <div class="section-introduction"><div class="section-heading"><p class="portfolio-eyebrow">Independent games & experiments</p><h2 id="personal-title"><svg class="folder-icon" width="24" height="21" viewBox="0 0 24 21" fill="none" aria-hidden="true"><path d="M2 6V3h7l3 3h10v13H2V6Z" fill="var(--tab-blue)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 7h20" stroke="currentColor" stroke-width="1.6"/></svg>After hours</h2></div><p>Independent browser games and curious experiments. A few of the ideas I keep coming back to.</p></div>
           <div class="portfolio-projects independent-projects">
-            <article id="project-wizard" class="portfolio-project"><a class="project-image-link" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer" aria-label="Play Idle Wizard"><img src="/assets/games/idle-wizard.webp" alt="Idle Wizard’s purple workshop with a witch, cat, bubbling cauldron, and potions" loading="lazy" width="1024" height="500" /></a><div class="portfolio-project-copy"><p class="project-context">Independent / In active development</p><h3>Idle Wizard</h3><p>A magical idle adventure I'm building now. Meet Elara Starbrew and see where the story goes.</p><a class="portfolio-text-link" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer">Play in your browser <span aria-hidden="true">↗</span></a></div></article>
-            <article id="project-dwarves" class="portfolio-project"><a class="project-image-link" href="https://davstep.github.io/drunk-dwarves/" target="_blank" rel="noopener noreferrer" aria-label="Play the Drunk Dwarves prototype"><img src="/assets/games/drunk-dwarves.webp" alt="Dwarves working in a lantern-lit cave with timber supports, rails, and a minecart" loading="lazy" width="1440" height="758" /></a><div class="portfolio-project-copy"><p class="project-context">Independent / Playable prototype</p><h3>Drunk Dwarves</h3><p>Rocky tunnels, strange finds, minecarts, and questionable coworkers. A single-player mining sandbox, with co-op still in development.</p><a class="portfolio-text-link" href="https://davstep.github.io/drunk-dwarves/" target="_blank" rel="noopener noreferrer">Play the prototype <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-wizard" class="portfolio-project"><a class="project-image-link" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer" aria-label="Play Idle Wizard"><img src="/assets/games/idle-wizard.webp" alt="Idle Wizard’s purple workshop with a witch, cat, bubbling cauldron, and potions" loading="lazy" width="1024" height="500" /></a><div class="portfolio-project-copy"><p class="project-context">Independent / In active development</p><h3><svg class="file-icon" width="19" height="22" viewBox="0 0 19 22" fill="none" aria-hidden="true"><path d="M2 1h9l6 6v14H2V1Z" fill="var(--theme-page)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 1v6h6M5 11h9M5 15h7" stroke="currentColor" stroke-width="1.2"/></svg><span class="project-title-tab">Idle Wizard</span></h3><p>A magical idle adventure I'm building now. Meet Elara Starbrew and see where the story goes.</p><a class="portfolio-text-link" href="https://idlewizard.pages.dev/" target="_blank" rel="noopener noreferrer">Play in your browser <span aria-hidden="true">↗</span></a></div></article>
+            <article id="project-dwarves" class="portfolio-project"><a class="project-image-link" href="https://davstep.github.io/drunk-dwarves/" target="_blank" rel="noopener noreferrer" aria-label="Play the Drunk Dwarves prototype"><img src="/assets/games/drunk-dwarves.webp" alt="Dwarves working in a lantern-lit cave with timber supports, rails, and a minecart" loading="lazy" width="1440" height="758" /></a><div class="portfolio-project-copy"><p class="project-context">Independent / Playable prototype</p><h3><svg class="file-icon" width="19" height="22" viewBox="0 0 19 22" fill="none" aria-hidden="true"><path d="M2 1h9l6 6v14H2V1Z" fill="var(--theme-page)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 1v6h6M5 11h9M5 15h7" stroke="currentColor" stroke-width="1.2"/></svg><span class="project-title-tab">Drunk Dwarves</span></h3><p>Rocky tunnels, strange finds, minecarts, and questionable coworkers. A single-player mining sandbox, with co-op still in development.</p><a class="portfolio-text-link" href="https://davstep.github.io/drunk-dwarves/" target="_blank" rel="noopener noreferrer">Play the prototype <span aria-hidden="true">↗</span></a></div></article>
           </div>
         </section>
         <section id="about" class="portfolio-about portfolio-section" aria-labelledby="about-title">
-          <div><h2 id="about-title">A little about me.</h2><dl class="portfolio-facts"><div><dt>Role</dt><dd>Lead Code Wizard</dd></div><div><dt>Home</dt><dd>Yerevan, Armenia</dd></div><div><dt>Currently building</dt><dd>Drunk Dwarves</dd></div></dl></div>
-          <div class="about-writing"><p>I enjoy both writing the code and watching what players actually do with it. At Rockbite Games, I've worked across gameplay, economies, progression, and the small details that make systems feel alive.</p><p>After hours, I keep following ideas: browser games, creative tools, and a co-op mining adventure. Some become games. Some stay experiments. I like having room for both.</p><p class="about-signoff">There's usually something new taking shape.</p></div>
+          <div><h2 id="about-title"><svg class="folder-icon" width="24" height="21" viewBox="0 0 24 21" fill="none" aria-hidden="true"><path d="M2 6V3h7l3 3h10v13H2V6Z" fill="var(--tab-blue)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 7h20" stroke="currentColor" stroke-width="1.6"/></svg>About me</h2><dl class="portfolio-facts"><div><dt>Role</dt><dd>Lead Code Wizard</dd></div><div><dt>Home</dt><dd>Yerevan, Armenia</dd></div><div><dt>Currently building</dt><dd>Idle Wizard & Drunk Dwarves</dd></div></dl></div>
+          <div class="about-writing"><p>I enjoy both writing the code and watching what players actually do with it. At Rockbite Games, I've worked across gameplay, economies, progression, and the small details that make systems feel alive.</p><p>After hours, I keep following ideas: browser games, creative tools, and a co-op mining adventure. Some become games. Some stay experiments. I like having room for both.</p><p class="about-signoff">There’s usually something new taking shape.</p></div>
         </section>
         <section id="contact" class="portfolio-contact" aria-labelledby="contact-title"><div><h2 id="contact-title">Let’s talk games.</h2><p>Have a game idea, a system to untangle, or just want to compare notes?</p></div><div class="portfolio-contact-details"><a class="portfolio-email" href="mailto:davitstepanyan99@gmail.com">davitstepanyan99@gmail.com <span aria-hidden="true">↗</span></a><div class="portfolio-socials"><a href="https://github.com/DavStep" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://anilist.co/user/DevStep" target="_blank" rel="noopener noreferrer">AniList ↗</a><a href="https://steamcommunity.com/id/stepdev/" target="_blank" rel="noopener noreferrer">Steam ↗</a><button type="button" data-copy-discord>Discord: step_dev</button></div><p id="contact-status" role="status"></p></div></section>
       </main>
-      <footer class="portfolio-footer"><span>Dav Stepanyan · Yerevan, Armenia</span><a href="#home">Back to the top ↑</a></footer>
+      <footer class="portfolio-footer"><span>Made by Dav, in Yerevan.</span><a href="#home">Back to the top ↑</a></footer>
       </div>
     </div>
     <div id="town-experience" class="town-experience" hidden>
@@ -105,7 +108,7 @@
       <section id="game-hud" class="game-hud" aria-label="Town choice game" hidden>
         <div class="game-hud-head">
           <div class="game-hud-title"><span class="game-hud-kicker">✦ &nbsp; A WORLD OF CONSEQUENCES</span><strong id="game-summary">Pick your first idea</strong><p class="game-guidance">Pick an idea below. Watch what it brings to the town.</p></div>
-          <div class="game-hud-actions"><span id="game-turn">0 / 10</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-sound" type="button" aria-pressed="true" title="Sound on">♪</button><button id="game-restart" type="button"><b aria-hidden="true">↻</b> <span>Restart</span></button></div>
+          <div class="game-hud-actions"><span id="game-turn">0 / 10</span><button id="game-skip" type="button" hidden>Skip animation</button><button id="game-sound" type="button" aria-pressed="true" title="Sound on">♪</button><button id="game-restart" type="button" aria-label="Restart town" title="Restart town"><b aria-hidden="true">↻</b> <span>Restart</span></button></div>
         </div>
         <div id="game-progress" class="game-progress" aria-hidden="true"></div>
         <div id="game-cards" class="game-cards" role="group" aria-label="Choose the next idea"></div>

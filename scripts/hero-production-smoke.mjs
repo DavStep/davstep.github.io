@@ -32,7 +32,9 @@ try {
       await page.waitForTimeout(500); // Let the initial poster fade finish before comparing frames.
       const copy=await page.locator('.hero-copy').boundingBox();
       const world=await page.locator('#hero-world-view').boundingBox();
-      assert.ok(copy.y>=world.y+world.height,`${name}: introduction overlaps the planet`);
+      assert.ok(copy.y+copy.height<=world.y,`${name}: introduction overlaps the planet`);
+      const invitation=await page.locator('.hero-bottom').boundingBox();
+      assert.ok(invitation.y>=world.y+world.height,`${name}: invitation overlaps the planet`);
       assert.ok(Math.abs(world.x+world.width/2-width/2)<2,`${name}: planet is not centered`);
       await page.locator('#hero-world-view').scrollIntoViewIfNeeded();
       const canvas=page.locator('#town-canvas');
@@ -57,12 +59,14 @@ try {
       assert.ok(changed(beforeDrag,await canvas.screenshot()),`${name}: dragging does not rotate`);
       assert.equal(await page.evaluate(()=>localStorage.getItem('davstep.choice-planet.v3')),saved,'Hero changed saved progress');
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal overflow');
-      // Browser resizing must retain the centered world above the introduction.
+      // Browser resizing must retain the centered world between the introduction and invitation.
       if(name==='desktop') {
         await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
         await page.setViewportSize({width,height});await page.waitForTimeout(150);
         const resizedCopy=await page.locator('.hero-copy').boundingBox(),resizedWorld=await page.locator('#hero-world-view').boundingBox();
-        assert.ok(resizedCopy.y>=resizedWorld.y+resizedWorld.height,'Resize overlapped the planet and introduction');
+        assert.ok(resizedCopy.y+resizedCopy.height<=resizedWorld.y,'Resize overlapped the planet and introduction');
+        const resizedInvitation=await page.locator('.hero-bottom').boundingBox();
+        assert.ok(resizedInvitation.y>=resizedWorld.y+resizedWorld.height,'Resize overlapped the planet and invitation');
         assert.ok(Math.abs(resizedWorld.x+resizedWorld.width/2-width/2)<2,'Resize lost the centered planet');
       }
       await page.screenshot({path:`${output}/${name}-${theme}.png`});

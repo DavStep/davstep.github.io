@@ -8,7 +8,7 @@ const base=process.env.TOWN_URL||'http://127.0.0.1:5173';
 const output=process.argv[2]||'/tmp/theme-review';
 await mkdir(output,{recursive:true});
 const browser=await chromium.launch({headless:true,channel:'chrome'});
-const backgrounds={light:'rgb(245, 245, 245)',dark:'rgb(24, 24, 24)'};
+const backgrounds={light:'rgb(238, 232, 218)',dark:'rgb(32, 32, 32)'};
 async function expectTheme(page,theme){
   await page.waitForFunction(theme=>document.documentElement.dataset.theme===theme,theme);
   assert.equal(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor),backgrounds[theme]);

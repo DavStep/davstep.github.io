@@ -13,7 +13,7 @@ function applyAppearance() {
   root.style.colorScheme = theme;
   control.value = preference;
   control.parentElement!.title = `Appearance: ${preference === 'system' ? `System (${theme})` : theme}`;
-  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content = theme === 'light' ? '#f5f5f5' : '#181818';
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content = theme === 'light' ? '#eee8da' : '#202020';
 }
 
 control.addEventListener('change', () => {

@@ -4,36 +4,39 @@ The page introduces Dav as a game developer, shows actual work and contributions
 
 ## Design plan
 
-Keep the planet as the memorable visual element and make the reading experience quiet. Separate the opening from the work with a full-width change of surface and a generous boundary, rather than another promotional card.
+Use the supplied reference’s notebook style while keeping the planet as the main visual feature. The introduction and live globe occupy the opening; actual projects, About, and Contact share a separate reading surface below.
 
-- Color: light paper `#faf9f5`, light reading surface `#f0f2ec`, forest ink `#30443a`, dark ground `#171e1b`, dark reading surface `#202822`, soft sage `#a3bd90`.
-- Type: Space Grotesk for clear, rounded headings; DM Sans for prose and controls. Keep body text at 15–17px, comfortable line height, and short line lengths. Remove the isolated colored word in the headline so the live planet carries the visual emphasis.
-- Layout: left-aligned introduction and live globe in separate grid columns on larger screens, so the text never intercepts planet gestures; readable introduction followed by a fully visible interactive globe on phones. The work, personal projects, About, and Contact share a separate reading surface below.
+- Color: warm paper `#eee8da`, light reading surface `#f3eddf`, ink `#292720`, neutral charcoal `#202020`, dark reading surface `#252525`, dark ink `#efe9dc`. Pastel blue, green, lavender, peach, and yellow tabs distinguish project entries. Dark surfaces use equal RGB channels to avoid a green tint.
+- Type: DM Sans for bold headings and readable prose, IBM Plex Mono for project tabs and compact controls, and Caveat for short handwritten notes. Keep paragraphs short and the surrounding controls quiet.
+- Layout: centered introduction above the live planet, camera controls and one Play invitation below. Folder icons and connector lines group the project entries. Images and descriptions sit beside each other on desktop and stack on phones. About stays readable, and Contact is framed like a small notebook entry.
 
 ```text
-Desktop                     Phone
-Name       Navigation       Name   Navigation
-Intro       Live planet     Intro
-            Controls        Live planet
-       Scroll cue           Controls / Scroll cue
-======================      ======================
-Games and contributions     Games and contributions
-Personal projects           Personal projects
-About / Contact             About / Contact
+Desktop                      Phone
+Name       Navigation        Name / Navigation
+       Introduction          Introduction
+        Live planet          Live planet
+          Controls           Controls
+       Note / Play / Work     Note / Play / Work
+=======================      ======================
+Folder: selected work        Folder: selected work
+  ├ Image / File tab + copy    ├ Image / File tab / copy
+  └ Image / File tab + copy    └ Image / File tab / copy
+Folder: after hours          Folder: after hours
+About / Contact              About / Contact
 ```
 
-The existing forest palette and type families fit the user's approved calm direction. Retain those choices rather than adding an unrelated visual identity. Avoid redundant town invitations, decorative labels, entrance animations, and extra card chrome.
+The reference’s paper, bold headings, folder hierarchy, colored tabs, handwritten notes, and ink borders carry through to the game HUD and project panels. Light mode retains warm paper; dark mode uses neutral charcoal after the user’s correction. Preserve saved appearance preferences and all existing project URLs and game interactions.
 
 ## Applied review
 
-The installed frontend-design skill informed hierarchy, intentional restraint, typography, and visual critique. Vercel's web-design-guidelines informed the skip link, semantic navigation, focus visibility, touch alternatives, modal scroll containment, theme support, and a pause control for ongoing ambient motion. Review scope: `index.html`, `src/portfolio.css`, `src/portfolio.ts`, `src/theme.ts`, the hero interactions in `src/town/main.ts`, and `src/town/panel-rail.css`.
+The installed frontend-design skill informed the reference-based notebook direction, hierarchy, typography, and visual critique. Vercel's web-design-guidelines informed the skip link, semantic navigation, focus visibility, touch alternatives, modal scroll containment, theme support, and a pause control for ongoing ambient motion. Review scope: `index.html`, `src/portfolio.css`, `src/portfolio.ts`, `src/theme.ts`, the hero interactions in `src/town/main.ts`, and `src/town/panel-rail.css`.
 
 Preserve working project links, deep links, saved progress, mouse/keyboard/touch rotation, offscreen rendering pause, and reduced motion. Loading and failure messages live in the opening, next to the game entry, rather than depending on the removed section.
 
 ## Review results
 
 - `index.html`: duplicate invitation removed; skip navigation and semantic content target added; game entry has a clear action label; ambient motion has an accessible pause button.
-- `src/portfolio.css`: the opening and reading area have distinct surfaces; the phone globe is visible below the copy; small light-theme text was strengthened to exceed 4.5:1 contrast on both surfaces; focus, safe-area spacing, and touch targets are retained.
+- `src/portfolio.css`: the opening and reading area have distinct surfaces; the phone globe is visible below the copy; reading text has strong contrast against both palettes; focus, safe-area spacing, and touch targets are retained.
 - `src/town/main.ts`: globe framing fits narrow containers; pause stops drawing while rotation/zoom remain available; viewport dimensions are cached outside the render loop.
 - `src/town/panel-rail.css`: panel scrolling stays inside the dialog.
 
