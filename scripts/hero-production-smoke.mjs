@@ -21,8 +21,24 @@ const base=process.env.TOWN_URL||'http://127.0.0.1:4173';
 const output=process.argv[2]||'/tmp/hero-production-review';
 await mkdir(output,{recursive:true});
 const browser=await chromium.launch({headless:true,channel:'chrome'});
+async function assertHeroLayout(page,name) {
+  const copy=await page.locator('.hero-copy').boundingBox();
+  const world=await page.locator('#hero-world-view').boundingBox();
+  const invitation=await page.locator('.hero-bottom').boundingBox();
+  const {width,height}=page.viewportSize();
+  if(width>=640&&width>height) {
+    assert.ok(copy.x+copy.width<=world.x,`${name}: introduction overlaps the planet`);
+    assert.ok(invitation.x+invitation.width<=world.x,`${name}: invitation overlaps the planet`);
+    assert.ok(world.x+world.width/2>width/2,`${name}: planet is not on the right`);
+    assert.ok(copy.y+copy.height<=invitation.y,`${name}: introduction overlaps its actions`);
+  } else {
+    assert.ok(copy.y+copy.height<=world.y,`${name}: introduction overlaps the planet`);
+    assert.ok(invitation.y>=world.y+world.height,`${name}: invitation overlaps the planet`);
+    assert.ok(Math.abs(world.x+world.width/2-width/2)<2,`${name}: portrait planet is not centered`);
+  }
+}
 try {
-  for(const [name,width,height] of [['desktop',1440,900],['tablet',820,1000],['phone',390,844],['small',320,700]]) {
+  for(const [name,width,height] of [['desktop',1440,900],['tablet',820,1000],['phone',390,844],['phone-landscape',844,390],['small-landscape',667,375],['small',320,700]]) {
     for(const theme of ['light','dark']) {
       const page=await browser.newPage({viewport:{width,height},colorScheme:theme,reducedMotion:'reduce'});
       const errors=[];page.on('pageerror',error=>errors.push(String(error)));
@@ -30,12 +46,8 @@ try {
       await page.waitForFunction(()=>document.querySelector('#hero-world-view').dataset.live==='true',null,{timeout:90000});
       await page.evaluate(()=>document.fonts.ready);
       await page.waitForTimeout(500); // Let the initial poster fade finish before comparing frames.
-      const copy=await page.locator('.hero-copy').boundingBox();
-      const world=await page.locator('#hero-world-view').boundingBox();
-      assert.ok(copy.y+copy.height<=world.y,`${name}: introduction overlaps the planet`);
-      const invitation=await page.locator('.hero-bottom').boundingBox();
-      assert.ok(invitation.y>=world.y+world.height,`${name}: invitation overlaps the planet`);
-      assert.ok(Math.abs(world.x+world.width/2-width/2)<2,`${name}: planet is not centered`);
+      await assertHeroLayout(page,name);
+      await page.screenshot({path:`${output}/${name}-${theme}.png`});
       await page.locator('#hero-world-view').scrollIntoViewIfNeeded();
       const canvas=page.locator('#town-canvas');
       const bounds=await canvas.boundingBox();
@@ -59,17 +71,15 @@ try {
       assert.ok(changed(beforeDrag,await canvas.screenshot()),`${name}: dragging does not rotate`);
       assert.equal(await page.evaluate(()=>localStorage.getItem('davstep.choice-planet.v3')),saved,'Hero changed saved progress');
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal overflow');
-      // Browser resizing must retain the centered world between the introduction and invitation.
+      // Resize through portrait and landscape without blocking planet interactions.
       if(name==='desktop') {
         await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
+        await assertHeroLayout(page,'resized portrait');
+        await page.setViewportSize({width:844,height:390});await page.waitForTimeout(150);
+        await assertHeroLayout(page,'resized phone landscape');
         await page.setViewportSize({width,height});await page.waitForTimeout(150);
-        const resizedCopy=await page.locator('.hero-copy').boundingBox(),resizedWorld=await page.locator('#hero-world-view').boundingBox();
-        assert.ok(resizedCopy.y+resizedCopy.height<=resizedWorld.y,'Resize overlapped the planet and introduction');
-        const resizedInvitation=await page.locator('.hero-bottom').boundingBox();
-        assert.ok(resizedInvitation.y>=resizedWorld.y+resizedWorld.height,'Resize overlapped the planet and invitation');
-        assert.ok(Math.abs(resizedWorld.x+resizedWorld.width/2-width/2)<2,'Resize lost the centered planet');
+        await assertHeroLayout(page,'resized desktop');
       }
-      await page.screenshot({path:`${output}/${name}-${theme}.png`});
       await page.emulateMedia({reducedMotion:'no-preference'});
       const motion=page.locator('[data-hero-motion]');await motion.waitFor();
       const spinning=await canvas.screenshot();await page.waitForTimeout(600);
